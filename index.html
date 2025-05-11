@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login | V Style</title>
+    <style>
+        /* === Gaya DeepSeek Futuristik === */
+        :root {
+            --deepseek-blue: #00a8ff;
+            --deepseek-dark: #0d1b2a;
+            --neon-glow: 0 0 10px var(--deepseek-blue);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--deepseek-dark);
+            font-family: 'Courier New', monospace;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #visit-counter {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: var(--deepseek-blue);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    text-shadow: 0 0 5px var(--deepseek-blue);
+    background: rgba(13, 27, 42, 0.5);
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px dashed var(--deepseek-blue);
+    animation: glitch 2s infinite;
+}
+/* Gaya Jam Digital */
+#digital-clock {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--deepseek-blue);
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    text-shadow: 0 0 5px var(--deepseek-blue);
+    background: rgba(13, 27, 42, 0.5);
+    padding: 8px 15px;
+    border-radius: 3px;
+    border: 1px dashed var(--deepseek-blue);
+    z-index: 100;
+}
+
+/* Animasi angka bergulir */
+.roll-out {
+    animation: rollOut 0.3s ease-out;
+    display: inline-block;
+}
+
+@keyframes rollOut {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-20px); opacity: 0; }
+}
+
+/* Style khusus detik */
+#seconds {
+    display: inline-block;
+    min-width: 20px;
+    text-align: center;
+}
+
+
+        /* Efek partikel background */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .login-container {
+            background: rgba(13, 27, 42, 0.8);
+            border: 1px solid var(--deepseek-blue);
+            border-radius: 5px;
+            padding: 30px;
+            width: 300px;
+            box-shadow: var(--neon-glow);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 10px var(--deepseek-blue); }
+            50% { box-shadow: 0 0 20px var(--deepseek-blue); }
+            100% { box-shadow: 0 0 10px var(--deepseek-blue); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .login-header h1 {
+            color: var(--deepseek-blue);
+            text-shadow: var(--neon-glow);
+            font-size: 24px;
+        }
+
+        .input-group {
+    margin-bottom: 30px;
+    position: relative;
+    }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--deepseek-blue);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            box-shadow: var(--neon-glow);
+        }
+
+        /* Tombol Lihat Password */
+        .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 35px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+        /* Animasi Mata */
+        .eye {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+        }
+        .eye::before, .eye::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .eye::before {
+            left: 0;
+            width: 20px;
+            height: 10px;
+            background: var(--deepseek-blue);
+            border-radius: 50% 50% 0 0;
+            animation: blink 3s infinite;
+        }
+        .eye::after {
+            left: 8px;
+            width: 4px;
+            height: 4px;
+            background: #000;
+            border-radius: 50%;
+            animation: look 5s infinite;
+        }
+        @keyframes blink {
+            0%, 96%, 100% { height: 10px; }
+            98% { height: 2px; }
+        }
+        @keyframes look {
+            0%, 100% { left: 8px; }
+            25% { left: 2px; }
+            75% { left: 14px; }
+        }
+
+        .login-btn {
+            width: 50%;
+            padding: 5px;
+            background: transparent;
+            border: 1px solid var(--deepseek-blue);
+            color: var(--deepseek-blue);
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .login-btn:hover {
+            background: var(--deepseek-blue);
+            color: var(--deepseek-dark);
+            box-shadow: var(--neon-glow);
+        }
+
+        .error-message {
+            color: #ff5555;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 15px;
+            text-shadow: 0 0 5px #ff5555;
+        }
+
+        /* Footer Hacker */
+        .hacker-footer {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 15px;
+            color: var(--deepseek-blue);
+            text-shadow: 0 0 5px var(--deepseek-blue);
+            animation: glitch 2s infinite;
+        }
+        @keyframes glitch {
+            0% { text-shadow: 0 0 5px var(--deepseek-blue); }
+            25% { text-shadow: -2px 0 5px #ff00ff, 2px 0 5px #00ffff; }
+            50% { text-shadow: 0 0 5px var(--deepseek-blue); }
+            75% { text-shadow: 2px 0 5px #ff00ff, -2px 0 5px #00ffff; }
+            100% { text-shadow: 0 0 5px var(--deepseek-blue); }
+        }
+    </style>
+    
+    <script>
+    // Fungsi counter visit
+    function updateVisitCounter() {
+        let visitData = localStorage.getItem('visitData');
+        let now = new Date();
+        
+        // Jika belum ada data atau sudah lewat 24 jam
+        if (!visitData || (now - new Date(JSON.parse(visitData).date)) >= 86400000) {
+            localStorage.setItem('visitData', JSON.stringify({
+                date: now,
+                count: 1
+            }));
+            return 1;
+        } else {
+            let data = JSON.parse(visitData);
+            data.count++;
+            localStorage.setItem('visitData', JSON.stringify(data));
+            return data.count;
+        }
+    }
+
+    // Tampilkan counter
+    document.addEventListener('DOMContentLoaded', function() {
+        const visitCount = updateVisitCounter();
+        const counterElement = document.createElement('div');
+        counterElement.id = 'visit-counter';
+        document.body.appendChild(counterElement);
+        document.getElementById('visit-counter').textContent = `Visit = ${visitCount}`;
+    });
+</script>
+<script>
+    // Fungsi jam dengan animasi bergulir
+    function updateClock() {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        
+        const now = new Date();
+        const dayName = days[now.getDay()];
+        const date = now.getDate();
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        
+        // Format: "Senin, 23 Sep 2024 | 14:05:30"
+        const timeString = `${dayName}, ${date} ${month} ${year} | ${hours}:${minutes}:${seconds}`;
+        
+        document.getElementById('digital-clock').textContent = timeString;
+        
+        // Animasi bergulir (hanya untuk detik)
+        if (document.getElementById('seconds')) {
+            document.getElementById('seconds').classList.add('roll-out');
+            setTimeout(() => {
+                document.getElementById('seconds').textContent = seconds;
+                document.getElementById('seconds').classList.remove('roll-out');
+            }, 300);
+        }
+    }
+
+    // Jalankan jam dan update setiap detik
+    document.addEventListener('DOMContentLoaded', function() {
+        // Buat element jam
+        const clockElement = document.createElement('div');
+        clockElement.id = 'digital-clock';
+        document.body.prepend(clockElement);
+        
+        // Tampilkan jam awal
+        updateClock();
+        
+        // Update setiap detik
+        setInterval(updateClock, 1000);
+    });
+</script>
+
+</head>
+<body>
+    <!-- Efek Partikel Background -->
+    <div id="particles-js"></div>
+
+    <!-- Container Login -->
+    <div class="login-container">
+        <div class="login-header">
+            <h1><span class="deepseek-text">ezraVelvi</span> Login</h1>
+        </div>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">USERNAME</label>
+                <input type="text" id="username" placeholder="Enter your ID" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">PASSWORD</label>
+                <input type="password" id="password" placeholder="" required>
+                <span class="toggle-password" onclick="togglePassword()">
+                    <span class="eye"></span>
+                </span>
+            </div>
+            
+            <button type="submit" class="login-btn">ACCESS SYSTEM</button>
+            <div class="error-message" id="errorMsg"></div>
+        </form>
+    </div>
+
+    <!-- Footer Hacker -->
+    <div class="hacker-footer">
+        >_ Dibuat oleh ezvvel
+    </div>
+
+    <!-- Script Partikel JS -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Inisialisasi partikel background
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#00a8ff" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 3, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#00a8ff", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 2, "direction": "none", "random": true, "straight": false, "out_mode": "out" }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": { "enable": true, "mode": "repulse" },
+                    "onclick": { "enable": true, "mode": "push" }
+                }
+            }
+        });
+
+        // Fungsi toggle password
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            const eye = document.querySelector(".eye");
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eye.style.animation = "none";
+                eye.innerHTML = "👁️"; // Ganti dengan emoji mata terbuka
+            } else {
+                passwordInput.type = "password";
+                eye.style.animation = "blink 3s infinite, look 5s infinite";
+                eye.innerHTML = "";
+            }
+        }
+
+        // Sistem Login
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            // Daftar user & password
+            const users = {
+                "ezra": { password: "v", redirect: "ezra.html" },  // Akun kamu
+                "elvi": { password: "sayangku", redirect: "index.html" }     // Akun Elvi
+            };
+            
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            // Cek kredensial
+            if (users[username] && users[username].password === password) {
+                // Animasi sebelum redirect
+                document.querySelector(".login-container").style.animation = "pulse-border 0.5s infinite";
+                setTimeout(() => {
+                    window.location.href = users[username].redirect;
+                }, 1000);
+            } else {
+                document.getElementById("errorMsg").textContent = "ACCESS DENIED! Invalid credentials.";
+            }
+        });
+        
+        // Sistem Login (di dalam <script> yang sudah ada)
+let attempt = 0; // Counter percobaan login
+const maxAttempt = 3; // Batas maksimal
+
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    
+    const users = {
+        "ezra": { password: "v", redirect: "ezra.html" },
+        "elvi": { password: "sayangku", redirect: "login.html" }
+    };
+    
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    
+    if (users[username] && users[username].password === password) {
+        window.location.href = users[username].redirect;
+    } else {
+        attempt++;
+        document.getElementById("errorMsg").textContent = 
+            `ACCESS DENIED! (Attempt ${attempt}/${maxAttempt})`;
+        
+        if (attempt >= maxAttempt) {
+            setTimeout(() => {
+                window.location.href = "whoareyou.html";
+            }, 1000);
+        }
+    }
+});
+    </script>
+</body>
+</html>
