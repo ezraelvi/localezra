@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Required</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        #matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .verification-box {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #0f0;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 20px #0f0;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #0f0;
+        }
+        
+        input {
+            background: transparent;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            width: 80%;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            background: transparent;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        button:hover {
+            background: #0f0;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <!-- Efek Matrix -->
+    <canvas id="matrix"></canvas>
+    
+    <div class="verification-box">
+        <h1> IDENTITAS TAK DIKENAL </h1>
+        <p>1. SIAPA KAMU?</p>
+        <input type="text" id="answer" placeholder="Ketik jawaban...">
+        <button onclick="verifyIdentity()">SUBMIT</button>
+    </div>
+
+    <script>
+        // Efek Matrix
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+        
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 33);
+        
+        // Validasi Jawaban
+        function verifyIdentity() {
+            const answer = document.getElementById("answer").value.toLowerCase();
+            const validAnswers = ["ezra", "elvi"];
+            
+            if (validAnswers.includes(answer)) {
+                window.location.href = "login.html";
+            } else {
+                window.location.href = "https://wa.me/6281434046148"; // Ganti dengan link WA-mu
+            }
+        }
+    </script>
+</body>
+</html>
