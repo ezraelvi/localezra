@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Login | V Style</title>
     <style>
-        /* === Gaya DeepSeek Futuristik === */
+        
         :root {
             --deepseek-blue: #00a8ff;
             --deepseek-dark: #0d1b2a;
@@ -38,7 +38,7 @@
     border: 1px dashed var(--deepseek-blue);
     animation: glitch 2s infinite;
 }
-/* Gaya Jam Digital */
+
 #digital-clock {
     position: fixed;
     top: 10px;
@@ -55,7 +55,7 @@
     z-index: 100;
 }
 
-/* Animasi angka bergulir */
+
 .roll-out {
     animation: rollOut 0.3s ease-out;
     display: inline-block;
@@ -66,7 +66,7 @@
     100% { transform: translateY(-20px); opacity: 0; }
 }
 
-/* Style khusus detik */
+
 #seconds {
     display: inline-block;
     min-width: 20px;
@@ -74,7 +74,7 @@
 }
 
 
-        /* Efek partikel background */
+        
         #particles-js {
             position: absolute;
             width: 100%;
@@ -125,7 +125,7 @@
             box-shadow: var(--neon-glow);
         }
 
-        /* Tombol Lihat Password */
+        
         .toggle-password {
     position: absolute;
     right: 10px;
@@ -140,7 +140,7 @@
     justify-content: center;
     }
 
-        /* Animasi Mata */
+        
         .eye {
             position: relative;
             display: inline-block;
@@ -206,7 +206,7 @@
             text-shadow: 0 0 5px #ff5555;
         }
 
-        /* Footer Hacker */
+        
         .hacker-footer {
             position: fixed;
             bottom: 10px;
@@ -228,12 +228,12 @@
     </style>
     
     <script>
-    // Fungsi counter visit
+    
     function updateVisitCounter() {
         let visitData = localStorage.getItem('visitData');
         let now = new Date();
         
-        // Jika belum ada data atau sudah lewat 24 jam
+        
         if (!visitData || (now - new Date(JSON.parse(visitData).date)) >= 86400000) {
             localStorage.setItem('visitData', JSON.stringify({
                 date: now,
@@ -248,7 +248,7 @@
         }
     }
 
-    // Tampilkan counter
+    
     document.addEventListener('DOMContentLoaded', function() {
         const visitCount = updateVisitCounter();
         const counterElement = document.createElement('div');
@@ -258,7 +258,7 @@
     });
 </script>
 <script>
-    // Fungsi jam dengan animasi bergulir
+    
     function updateClock() {
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -272,12 +272,12 @@
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const seconds = now.getSeconds().toString().padStart(2, '0');
         
-        // Format: "Senin, 23 Sep 2024 | 14:05:30"
+        
         const timeString = `${dayName}, ${date} ${month} ${year} | ${hours}:${minutes}:${seconds}`;
         
         document.getElementById('digital-clock').textContent = timeString;
         
-        // Animasi bergulir (hanya untuk detik)
+        
         if (document.getElementById('seconds')) {
             document.getElementById('seconds').classList.add('roll-out');
             setTimeout(() => {
@@ -287,27 +287,27 @@
         }
     }
 
-    // Jalankan jam dan update setiap detik
+    
     document.addEventListener('DOMContentLoaded', function() {
-        // Buat element jam
+        
         const clockElement = document.createElement('div');
         clockElement.id = 'digital-clock';
         document.body.prepend(clockElement);
         
-        // Tampilkan jam awal
+        
         updateClock();
         
-        // Update setiap detik
+        
         setInterval(updateClock, 1000);
     });
 </script>
 
 </head>
 <body>
-    <!-- Efek Partikel Background -->
+    
     <div id="particles-js"></div>
 
-    <!-- Container Login -->
+    
     <div class="login-container">
         <div class="login-header">
             <h1><span class="deepseek-text">ezraVelvi</span> Login</h1>
@@ -332,15 +332,15 @@
         </form>
     </div>
 
-    <!-- Footer Hacker -->
+    
     <div class="hacker-footer">
         >_ Dibuat oleh ezvvel
     </div>
 
-    <!-- Script Partikel JS -->
+    
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // Inisialisasi partikel background
+        
         particlesJS("particles-js", {
             "particles": {
                 "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
@@ -360,14 +360,14 @@
             }
         });
 
-        // Fungsi toggle password
+        
         function togglePassword() {
             const passwordInput = document.getElementById("password");
             const eye = document.querySelector(".eye");
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
                 eye.style.animation = "none";
-                eye.innerHTML = "👁️"; // Ganti dengan emoji mata terbuka
+                eye.innerHTML = "👁️";
             } else {
                 passwordInput.type = "password";
                 eye.style.animation = "blink 3s infinite, look 5s infinite";
@@ -375,11 +375,11 @@
             }
         }
 
-        // Sistem Login
+        
         document.getElementById("loginForm").addEventListener("submit", function(e) {
             e.preventDefault();
             
-            // Daftar user & password
+            
             const users = {
                 "ezra": { password: "v", redirect: "ezra.html" },  // Akun kamu
                 "elvi": { password: "sayangku", redirect: "index.html" }     // Akun Elvi
@@ -388,9 +388,9 @@
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             
-            // Cek kredensial
+            
             if (users[username] && users[username].password === password) {
-                // Animasi sebelum redirect
+                
                 document.querySelector(".login-container").style.animation = "pulse-border 0.5s infinite";
                 setTimeout(() => {
                     window.location.href = users[username].redirect;
@@ -400,16 +400,16 @@
             }
         });
         
-        // Sistem Login (di dalam <script> yang sudah ada)
-let attempt = 0; // Counter percobaan login
-const maxAttempt = 3; // Batas maksimal
+        
+let attempt = 0; 
+const maxAttempt = 3; 
 
 document.getElementById("loginForm").addEventListener("submit", function(e) {
     e.preventDefault();
     
     const users = {
         "ezra": { password: "v", redirect: "ezra.html" },
-        "elvi": { password: "sayangku", redirect: "login.html" }
+        "elvi": { password: "sayangku", redirect: "elvi.html" }
     };
     
     const username = document.getElementById("username").value;
