@@ -177,13 +177,22 @@
     </audio>
 
     <script>
-        // Loading screen simulasi
         window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.querySelector('.verification-box').style.display = 'block';
-            }, 2500); // 2.5 detik loading
-        };
+    // Sembunyikan loading screen setelah 2.5 detik tanpa tunggu audio
+    setTimeout(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.querySelector('.verification-box').style.display = 'block';
+    }, 2500);
+
+    // Coba mainkan audio, tapi jangan blokir loading
+    const audio = document.getElementById('ambient-audio');
+    audio.volume = 0.2;
+    audio.play().catch(() => {
+        // Kalau autoplay gagal, tetap tampilkan ikon mute
+        const audioControl = document.getElementById('audio-control');
+        audioControl.textContent = '🔊';
+    });
+};
 
         // Efek Matrix
         const canvas = document.getElementById('matrix');
