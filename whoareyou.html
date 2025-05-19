@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Verification Required</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
+        /* Reset & dasar */
+        body, html {
+            margin: 0; padding: 0; height: 100%;
             background-color: black;
             color: #0f0;
             font-family: 'Courier New', monospace;
@@ -15,16 +15,52 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            flex-direction: column;
         }
-        
+
+        /* Canvas Matrix */
         #matrix {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: -1;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
         }
-        
+
+        /* Loading screen */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            color: #0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+            z-index: 100000;
+            flex-direction: column;
+        }
+
+        /* Animasi titik loading */
+        #loading-dots span {
+            animation: blink 1.4s infinite;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 0 2px;
+        }
+        #loading-dots span:nth-child(1) { animation-delay: 0s; }
+        #loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        #loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0%, 20% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Kotak verifikasi */
         .verification-box {
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid #0f0;
@@ -32,13 +68,31 @@
             text-align: center;
             max-width: 500px;
             box-shadow: 0 0 20px #0f0;
+            z-index: 10;
+            border-radius: 8px;
+            user-select: none;
         }
-        
+
+        /* Judul dengan animasi ketik */
         h1 {
             margin-bottom: 20px;
             text-shadow: 0 0 5px #0f0;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid #0f0;
+            width: 0;
+            animation: typing 3s steps(30, end) forwards, blink-caret 0.75s step-end infinite;
         }
-        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        @keyframes blink-caret {
+            0%, 100% { border-color: transparent }
+            50% { border-color: #0f0 }
+        }
+
+        /* Input dan tombol */
         input {
             background: transparent;
             border: 1px solid #0f0;
@@ -47,8 +101,14 @@
             width: 80%;
             margin: 10px 0;
             font-family: 'Courier New', monospace;
+            border-radius: 4px;
+            transition: box-shadow 0.3s ease;
         }
-        
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #0f0;
+        }
+
         button {
             background: transparent;
             border: 1px solid #0f0;
@@ -56,71 +116,143 @@
             padding: 10px 20px;
             cursor: pointer;
             transition: 0.3s;
+            border-radius: 4px;
+            font-weight: bold;
+            user-select: none;
         }
-        
         button:hover {
+            background: #0f0;
+            color: black;
+            box-shadow: 0 0 15px #0f0;
+            transform: scale(1.05);
+        }
+
+        /* Audio control button */
+        #audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            user-select: none;
+            z-index: 100001;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        #audio-control:hover {
             background: #0f0;
             color: black;
         }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        Loading<span id="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+
     <!-- Efek Matrix -->
     <canvas id="matrix"></canvas>
-    
-    <div class="verification-box">
-        <h1> IDENTITAS TAK DIKENAL </h1>
+
+    <!-- Kotak Verifikasi -->
+    <div class="verification-box" style="display:none;">
+        <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
         <p>1. SIAPA KAMU?</p>
-        <input type="text" id="answer" placeholder="Ketik jawaban...">
+        <input type="text" id="answer" placeholder="Ketik jawaban..." autocomplete="off" />
         <button onclick="verifyIdentity()">SUBMIT</button>
     </div>
 
+    <!-- Kontrol Audio -->
+    <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
+
+    <!-- Audio Ambient -->
+    <audio id="ambient-audio" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1a3a3a7a3a.mp3?filename=ambient-technology-11054.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+    </audio>
+
     <script>
+        // Loading screen simulasi
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.querySelector('.verification-box').style.display = 'block';
+            }, 2500); // 2.5 detik loading
+        };
+
         // Efek Matrix
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
         const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
         const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const nums = '0123456789';
         const alphabet = katakana + latin + nums;
-        
+
         const fontSize = 16;
         const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
-        
+
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#0f0';
             ctx.font = fontSize + 'px monospace';
-            
+
             for (let i = 0; i < drops.length; i++) {
                 const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                
+
                 if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
                 drops[i]++;
             }
         }
-        
         setInterval(drawMatrix, 33);
-        
+
         // Validasi Jawaban
         function verifyIdentity() {
             const answer = document.getElementById("answer").value.toLowerCase();
             const validAnswers = ["ezra", "elvi"];
-            
+
             if (validAnswers.includes(answer)) {
                 window.location.href = "index.html";
             } else {
                 window.location.href = "https://wa.me/6281434046148"; // Ganti dengan link WA-mu
             }
         }
+
+        // Audio control
+        const audio = document.getElementById('ambient-audio');
+        const audioControl = document.getElementById('audio-control');
+        audio.volume = 0.2;
+        audio.play().catch(() => {
+            // Handle autoplay restrictions
+            audioControl.textContent = '🔊';
+        });
+
+        audioControl.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                audioControl.textContent = '🔊';
+            } else {
+                audio.pause();
+                audioControl.textContent = '🔇';
+            }
+        });
+    })();
     </script>
 </body>
 </html>
