@@ -232,18 +232,62 @@
             }
         }
 
-        const audio = document.getElementById('ambient-audio');
-        const audioControl = document.getElementById('audio-control');
+        <audio id="audio" controls loop hidden>
+        <source src="whereweare.mp3" type="audio/mpeg">
+    </audio>
 
-        audioControl.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                audioControl.textContent = '🔊';
-            } else {
-                audio.pause();
-                audioControl.textContent = '🔇';
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Audio context setup
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioCtx.createAnalyser();
+        const source = audioCtx.createMediaElementSource(audio);
+        
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        analyser.fftSize = 256;
+        
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        // Auto play setelah interaksi
+        document.body.addEventListener('click', () => {
+            audio.play();
+            audioCtx.resume();
+        }, { once: true });
+
+        function visualize() {
+            requestAnimationFrame(visualize);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            ctx.fillStyle = 'rgb(0, 0, 0)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let x = 0;
+            
+            for(let i = 0; i < bufferLength; i++) {
+                const barHeight = dataArray[i] / 2;
+                const hue = i * 2;
+                
+                ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                
+                x += barWidth + 1;
             }
-        });
+        }
+        
+        visualize();
     </script>
 </body>
 </html>
