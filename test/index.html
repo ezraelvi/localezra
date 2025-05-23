@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Index</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+</head>
+<body>
+  <h1>Selamat datang di halaman utama</h1>
+  <p id="user-info"></p>
+  <button id="btn-logout">Logout</button>
+
+<script>
+  const supabaseUrl = 'https://gxbviujvmqbguavlsmyh.supabase.co'; // Ganti dengan URL Supabase kamu
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4YnZpdWp2bXFiZ3VhdmxzbXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDMzMDUsImV4cCI6MjA2MzI3OTMwNX0.pZrpc5487ET1zKfIvWDBsnXPGTx6s01HJhwkI8BkMqI'; // Ganti dengan anon key Supabase kamu
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function checkUser() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      // Jika belum login, redirect ke login.html
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('user-info').textContent = 'Halo, ' + user.email;
+    }
+  }
+
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  });
+
+  checkUser();
+</script>
+</body>
+</html>
