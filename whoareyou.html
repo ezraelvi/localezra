@@ -150,9 +150,9 @@
 
     <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
 
-    <audio controls>
-  <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg">
-</audio>
+    <audio id="audio" controls loop hidden>
+        <source src="whereweare.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
         window.onload = () => {
@@ -168,6 +168,10 @@
                 audioControl.textContent = '🔊';
             });
         };
+        document.body.addEventListener('click', () => {
+            audio.play();
+            audioCtx.resume();
+        }, { once: true });
 
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
