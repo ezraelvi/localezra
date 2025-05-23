@@ -354,15 +354,15 @@
 
     function changePlaceholder() {
         const randomName = southeastAsianNames[Math.floor(Math.random() * southeastAsianNames.length)];
-        usernameInput.setAttribute('placeholder', `Your ID (${randomName})`);
+        usernameInput.setAttribute('placeholder', `Your ID ${randomName}`);
     }
 
     changePlaceholder();
     setInterval(changePlaceholder, 2000);
 
     let attempt = 0;
-    const maxAttempt = 3;
-    const blockDurationMs = 60 * 60 * 1000; // 1 hour in milliseconds
+    const maxAttempt = 1;
+    const blockDurationMs = 60 * 1 * 1000;
     const blockCookieName = 'loginBlockUntil';
 
     function setCookie(name, value, expires) {
