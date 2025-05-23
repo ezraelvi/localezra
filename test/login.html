@@ -1,1 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Login Supabase Username</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<style>
+  body { background: black; color: #0f0; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+  .box { background: rgba(0,0,0,0.8); padding: 30px; border: 1px solid #0f0; border-radius: 8px; width: 320px; }
+  input, button { width: 100%; margin: 10px 0; padding: 10px; background: transparent; border: 1px solid #0f0; color: #0f0; font-family: monospace; border-radius: 4px; }
+  button:hover { background: #0f0; color: black; cursor: pointer; }
+  #message { min-height: 20px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" autocomplete="off" />
+    <input type="password" id="password" placeholder="Password" autocomplete="off" />
+    <button id="btn-login">Login</button>
+    <button id="btn-register">Register</button>
+    <p id="message"></p>
+  </div>
 
+<script>
+  // Ganti dengan URL dan anon key Supabase kamu
+  const supabaseUrl = 'https://gxbviujvmqbguavlsmyh.supabase.co'; // <-- Ganti ini dengan URL Supabase kamu
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4YnZpdWp2bXFiZ3VhdmxzbXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDMzMDUsImV4cCI6MjA2MzI3OTMwNX0.pZrpc5487ET1zKfIvWDBsnXPGTx6s01HJhwkI8BkMqI'; // <-- Ganti ini dengan anon public key Supabase kamu
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const messageP = document.getElementById('message');
+
+  document.getElementById('btn-login').addEventListener('click', async () => {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!username || !password) {
+      messageP.textContent = 'Username dan password harus diisi.';
+      return;
+    }
+    const emailDummy = username + '@dummy.com'; // ubah username jadi email dummy
+    messageP.textContent = 'Memproses login...';
+    const { data, error } = await supabase.auth.signInWithPassword({ email: emailDummy, password });
+    if (error) {
+      messageP.textContent = 'Login gagal: ' + error.message;
+    } else {
+      messageP.textContent = 'Login berhasil! Mengalihkan...';
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1500);
+    }
+  });
+
+  document.getElementById('btn-register').addEventListener('click', async () => {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!username || !password) {
+      messageP.textContent = 'Username dan password harus diisi.';
+      return;
+    }
+    const emailDummy = username + '@dummy.com'; // ubah username jadi email dummy
+    messageP.textContent = 'Memproses registrasi...';
+    const { data, error } = await supabase.auth.signUp({ email: emailDummy, password });
+    if (error) {
+      messageP.textContent = 'Registrasi gagal: ' + error.message;
+    } else {
+      messageP.textContent = 'Registrasi berhasil! Cek email untuk verifikasi.';
+    }
+  });
+</script>
+</body>
+</html>
