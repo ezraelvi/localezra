@@ -2,72 +2,423 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Login Supabase</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Secure Login | V Style</title>
 <style>
-  body { background: black; color: #0f0; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-  .box { background: rgba(0,0,0,0.8); padding: 30px; border: 1px solid #0f0; border-radius: 8px; width: 320px; }
-  input, button { width: 100%; margin: 10px 0; padding: 10px; background: transparent; border: 1px solid #0f0; color: #0f0; font-family: monospace; border-radius: 4px; }
-  button:hover { background: #0f0; color: black; cursor: pointer; }
-  #message { min-height: 20px; }
+    :root {
+        --deepseek-blue: #00a8ff;
+        --deepseek-dark: #0d1b2a;
+        --neon-glow: 0 0 10px var(--deepseek-blue);
+        --placeholder-font-size: 1rem;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--deepseek-dark);
+        font-family: 'Courier New', monospace;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+    }
+    #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    .login-container {
+        background: rgba(13, 27, 42, 0.85);
+        border: 1px solid var(--deepseek-blue);
+        border-radius: 8px;
+        padding: 2rem 2.5rem;
+        width: 320px;
+        max-width: 90vw;
+        box-shadow: var(--neon-glow);
+        animation: pulse-border 2s infinite;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+    @keyframes pulse-border {
+        0% { box-shadow: 0 0 10px var(--deepseek-blue); }
+        50% { box-shadow: 0 0 20px var(--deepseek-blue); }
+        100% { box-shadow: 0 0 10px var(--deepseek-blue); }
+    }
+    .login-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+    .login-header h1 {
+        color: var(--deepseek-blue);
+        text-shadow: var(--neon-glow);
+        font-size: 1.8rem;
+        margin: 0;
+        user-select: none;
+    }
+    .input-group {
+        margin-bottom: 1.8rem;
+        position: relative;
+        width: 100%;
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--deepseek-blue);
+        font-weight: 600;
+        font-size: 1rem;
+        user-select: none;
+    }
+    .input-group input {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border: 1.5px solid var(--deepseek-blue);
+        border-radius: 5px;
+        background: transparent;
+        color: white;
+        font-family: 'Courier New', monospace;
+        font-size: var(--placeholder-font-size);
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .input-group input::placeholder {
+        color: #66ccff99;
+        font-style: italic;
+        user-select: none;
+        font-size: var(--placeholder-font-size);
+    }
+    .input-group input:focus {
+        outline: none;
+        box-shadow: var(--neon-glow);
+        border-color: var(--deepseek-blue);
+    }
+
+    .icon-toggle-container {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+        user-select: none;
+    }
+    .icon-toggle-container svg {
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        fill: var(--deepseek-blue);
+        filter: drop-shadow(0 0 5px var(--deepseek-blue));
+        transition: transform 0.3s ease;
+    }
+    .icon-toggle-container svg.mangekyo {
+        animation: spin 3s linear infinite;
+    }
+    .icon-toggle-container svg:hover {
+        transform: scale(1.2);
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+    }
+
+    .login-btn {
+        width: 50%;
+        padding: 0.5rem 0;
+        background: transparent;
+        border: 1.5px solid var(--deepseek-blue);
+        color: var(--deepseek-blue);
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: all 0.3s;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        user-select: none;
+        margin: 0 auto;
+        display: block;
+    }
+    .login-btn:hover {
+        background: var(--deepseek-blue);
+        color: var(--deepseek-dark);
+        box-shadow: var(--neon-glow);
+    }
+    .error-message {
+        color: #ff5555;
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 1rem;
+        text-shadow: 0 0 5px #ff5555;
+        min-height: 1.2em;
+        user-select: none;
+    }
+
+    .visiting-btn {
+        position: fixed;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--deepseek-blue);
+        color: var(--deepseek-dark);
+        font-weight: bold;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Courier New', monospace;
+        box-shadow: var(--neon-glow);
+        user-select: none;
+        border: none;
+        transition: background 0.3s ease;
+        z-index: 20;
+    }
+    .visiting-btn:hover {
+        background: #0080ff;
+    }
+    .visiting-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: var(--deepseek-dark);
+        filter: drop-shadow(0 0 3px var(--deepseek-dark));
+    }
+
+    @media (max-width: 400px) {
+        .login-container {
+            width: 90vw;
+            padding: 1.5rem 1.8rem;
+        }
+        .login-header h1 {
+            font-size: 1.5rem;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+        }
+        .input-group input {
+            font-size: var(--placeholder-font-size);
+            padding: 0.5rem 0.7rem;
+        }
+        .icon-toggle-container svg {
+            width: 28px;
+            height: 28px;
+        }
+        .login-btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 0;
+            width: 60%;
+        }
+        .visiting-btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 1rem;
+        }
+    }
 </style>
 </head>
 <body>
-  <div class="box">
-    <h2>Login</h2>
-    <input type="email" id="email" placeholder="Email" autocomplete="off" />
-    <input type="password" id="password" placeholder="Password" autocomplete="off" />
-    <button id="btn-login">Login</button>
-    <button id="btn-register">Register</button>
-    <p id="message"></p>
-  </div>
+<div id="particles-js"></div>
 
+<div class="login-container" role="main" aria-label="Login form">
+    <div class="login-header">
+        <h1><span class="deepseek-text"></span> Login</h1>
+    </div>
+
+    <form id="loginForm" autocomplete="off" novalidate>
+        <div class="input-group">
+            <label for="username">USERNAME</label>
+            <input type="text" id="username" placeholder="your ID" required aria-required="true" aria-describedby="usernameHelp" />
+        </div>
+
+        <div class="input-group">
+            <label for="password">PASSWORD</label>
+            <input type="password" id="password" placeholder="" required aria-required="true" />
+        </div>
+        <div id="errorMsg" class="error-message" role="alert" aria-live="assertive"></div>
+
+        <button type="submit" class="login-btn">ACCESS SYSTEM</button>
+    </form>
+</div>
+
+<div class="icon-toggle-container" aria-label="Toggle password visibility icons" role="region">
+    <svg id="shieldIcon" class="shield-icon" tabindex="0" role="button" aria-pressed="true" aria-label="Hide password" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" >
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+    </svg>
+    <svg id="mangekyoIcon" class="mangekyo" tabindex="0" role="button"aria-pressed" aria-label="Show password" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" >
+        <circle cx="32" cy="32" r="30" stroke="var(--deepseek-blue)" stroke-width="4" fill="none"/>
+        <path fill="var(--deepseek-blue)" d="M32 2 L42 22 L62 22 L46 36 L52 56 L32 44 L12 56 L18 36 L2 22 L22 22 Z"/>
+    </svg>
+</div>
+
+<button class="visiting-btn" id="visitingBtn" aria-label="Visiting dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="var(--deepseek-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+    </svg>
+    Visiting
+</button>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script>
-  // Ganti dengan URL dan anon key Supabase kamu
-  const supabaseUrl = 'https://gxbviujvmqbguavlsmyh.supabase.co'; // <-- Ganti ini dengan URL Supabase kamu
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4YnZpdWp2bXFiZ3VhdmxzbXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDMzMDUsImV4cCI6MjA2MzI3OTMwNX0.pZrpc5487ET1zKfIvWDBsnXPGTx6s01HJhwkI8BkMqI'; // <-- Ganti ini dengan anon public key Supabase kamu
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: '#00a8ff' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.5, random: true },
+            size: { value: 3, random: true },
+            line_linked: { enable: true, distance: 150, color: '#00a8ff', opacity: 0.4, width: 1 },
+            move: { enable: true, speed: 2, direction: 'none', random: true, straight: false, out_mode: 'out' }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: { enable: true, mode: 'repulse' },
+                onclick: { enable: true, mode: 'push' }
+            }
+        }
+    });
 
-  const emailInput = document.getElementById('email');
-  const passwordInput = document.getElementById('password');
-  const messageP = document.getElementById('message');
+    const passwordInput = document.getElementById('password');
+    const shieldIcon = document.getElementById('shieldIcon');
+    const mangekyoIcon = document.getElementById('mangekyoIcon');
 
-  document.getElementById('btn-login').addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) {
-      messageP.textContent = 'Email dan password harus diisi.';
-      return;
+    function setToggleState(showPassword) {
+        if (showPassword) {
+            passwordInput.type = 'text';
+            shieldIcon.setAttribute('aria-pressed', 'false');
+            mangekyoIcon.setAttribute('aria-pressed', 'true');
+            shieldIcon.style.display = 'none';
+            mangekyoIcon.style.display = 'inline-block';
+        } else {
+            passwordInput.type = 'password';
+            shieldIcon.setAttribute('aria-pressed', 'true');
+            mangekyoIcon.setAttribute('aria-pressed', 'false');
+            shieldIcon.style.display = 'inline-block';
+            mangekyoIcon.style.display = 'none';
+        }
     }
-    messageP.textContent = 'Memproses login...';
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      messageP.textContent = 'Login gagal: ' + error.message;
-    } else {
-      messageP.textContent = 'Login berhasil! Mengalihkan...';
-      // Redirect ke halaman index.html atau halaman lain yang kamu inginkan
-      setTimeout(() => {
-        window.location.href = 'whoareyou.html';
-      }, 1500);
-    }
-  });
 
-  document.getElementById('btn-register').addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) {
-      messageP.textContent = 'Email dan password harus diisi.';
-      return;
+    setToggleState(false);
+
+    function togglePassword() {
+        setToggleState(passwordInput.type === 'password');
     }
-    messageP.textContent = 'Memproses registrasi...';
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      messageP.textContent = 'Registrasi gagal: ' + error.message;
-    } else {
-      messageP.textContent = 'Registrasi berhasil! Cek email untuk verifikasi.';
+
+    shieldIcon.addEventListener('click', togglePassword);
+    mangekyoIcon.addEventListener('click', togglePassword);
+
+    shieldIcon.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePassword();
+        }
+    });
+    mangekyoIcon.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePassword();
+        }
+    });
+
+    const usernameInput = document.getElementById('username');
+    const southeastAsianNames = [
+        "Adi", "Budi", "Chai", "Dewi", "Eka", "Fahmi", "Gita", "Hana", "Ika", "Jaya",
+        "Kanya", "Lina", "Maya", "Nina", "Oki", "Putra", "Rina", "Sari", "Tari", "Udin",
+        "Vina", "Wira", "Xuan", "Yani", "Zain",
+        "Anong", "Chai", "Kanya", "Malee", "Niran", "Pim", "Somsak", "Tida", "Wichai",
+        "Chen", "Fang", "Jing", "Lei", "Mei", "Qiang", "Tao", "Wei", "Xiao", "Ying",
+        "Dae", "Hana", "Jin", "Min", "Soo", "Yuna", "Young", "Ji", "Hyun", "Seok",
+        "Akira", "Haruka", "Kenji", "Mika", "Naoki", "Rina", "Sora", "Takumi", "Yuki", "Yumi"
+    ];
+
+    function changePlaceholder() {
+        const randomName = southeastAsianNames[Math.floor(Math.random() * southeastAsianNames.length)];
+        usernameInput.setAttribute('placeholder', `Your ID (${randomName})`);
     }
-  });
+
+    changePlaceholder();
+    setInterval(changePlaceholder, 2000);
+
+    let attempt = 0;
+    const maxAttempt = 3;
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function setCookie(name, value, hours) {
+        const d = new Date();
+        d.setTime(d.getTime() + (hours*60*60*1000));
+        const expires = "expires="+ d.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    function isBlocked() {
+        const blockTime = getCookie('blockLogin');
+        if (!blockTime) return false;
+        const now = new Date().getTime();
+        return now < parseInt(blockTime);
+    }
+
+    if (isBlocked()) {
+        document.getElementById('errorMsg').textContent = "ACCESS BLOCKED! Please try again after 1 hour.";
+        document.getElementById('loginForm').querySelectorAll('input, button').forEach(el => el.disabled = true);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (isBlocked()) {
+            document.getElementById('errorMsg').textContent = "ACCESS BLOCKED Please try again after 1 hour.";
+            return;
+        }
+
+        const users = {
+            ezra: { password: 'v', redirect: 'ezra.html' },
+            elvi: { password: 'love', redirect: 'elvi.html' }
+        };
+
+        const username = usernameInput.value.toLowerCase();
+        const password = passwordInput.value;
+
+        if (users[username] && users[username].password === password) {
+            sessionStorage.setItem('loggedInUser', username);
+            document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
+            setTimeout(() => {
+                window.location.href = users[username].redirect;
+            }, 1000);
+        } else {
+            attempt++;
+            document.getElementById('errorMsg').textContent = `ACCESS DENIED (Attempt ${attempt}/${maxAttempt})`;
+            usernameInput.value = '';
+            passwordInput.value = '';
+            usernameInput.focus();
+
+            if (attempt >= maxAttempt) {
+                const blockUntil = new Date().getTime() + (60 * 60 * 1000);
+                setCookie('blockLogin', blockUntil, 1);
+
+                setTimeout(() => {
+                    window.location.href = 'whoareyou.html';
+                }, 1000);
+            }
+        }
+    });
+
+    document.getElementById('visitingBtn').addEventListener('click', () => {
+        window.location.href = '/test/login.html';
+    });
 </script>
 </body>
 </html>
