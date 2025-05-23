@@ -25,21 +25,39 @@
 
 <script>
   // Ganti dengan URL dan anon key Supabase kamu
-  const supabaseUrl = 'https://gxbviujvmqbguavlsmyh.supabase.co'; // <-- Ganti ini dengan URL Supabase kamu
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4YnZpdWp2bXFiZ3VhdmxzbXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDMzMDUsImV4cCI6MjA2MzI3OTMwNX0.pZrpc5487ET1zKfIvWDBsnXPGTx6s01HJhwkI8BkMqI'; // <-- Ganti ini dengan anon public key Supabase kamu
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  // Import Supabase
+import { createClient } from '@supabase/supabase-js';
 
-  const usernameInput = document.getElementById('username');
-  const passwordInput = document.getElementById('password');
-  const messageP = document.getElementById('message');
+// Inisialisasi Supabase
+const supabaseUrl = 'https://gxbviujvmqbguavlsmyh.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4YnZpdWp2bXFiZ3VhdmxzbXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDMzMDUsImV4cCI6MjA2MzI3OTMwNX0.pZrpc5487ET1zKfIvWDBsnXPGTx6s01HJhwkI8BkMqI';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-  document.getElementById('btn-login').addEventListener('click', async () => {
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!username || !password) {
-      messageP.textContent = 'Username dan password harus diisi.';
-      return;
+// Fungsi untuk mendaftar
+async function signUp(email, password) {
+    const { user, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
+    if (error) {
+        console.error('Error signing up:', error.message);
+    } else {
+        console.log('User signed up:', user);
     }
+}
+
+// Fungsi untuk login
+async function signIn(email, password) {
+    const { user, error } = await supabase.auth.signIn({
+        email: email,
+        password: password,
+    });
+    if (error) {
+        console.error('Error signing in:', error.message);
+    } else {
+        console.log('User signed in:', user);
+    }
+}
     const emailDummy = username + '@dummy.com'; // ubah username jadi email dummy
     messageP.textContent = 'Memproses login...';
     const { data, error } = await supabase.auth.signInWithPassword({ email: emailDummy, password });
