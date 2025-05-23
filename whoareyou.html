@@ -132,6 +132,15 @@
             background: #0f0;
             color: black;
         }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -140,6 +149,7 @@
     </div>
 
     <canvas id="matrix"></canvas>
+    <canvas id="particle-canvas"></canvas>
 
     <div class="verification-box" style="display:none;">
         <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
@@ -152,42 +162,205 @@
 
     <audio id="ambient-audio" loop>
         <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
-                Your browser does not support the audio element.
+        Your browser does not support the audio element.
     </audio>
-    
-    <canvas id="particle-canvas" style="position: fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index: 1000;"></canvas>
-
 
 <script>
-	
+    const audio = document.getElementById('ambient-audio');
+    const audioControl = document.getElementById('audio-control');
+
     window.onload = () => {
         setTimeout(() => {
             document.getElementById('loading-screen').style.display = 'none';
             document.querySelector('.verification-box').style.display = 'block';
         }, 2500);
 
-        const audio = document.getElementById('ambient-audio');
         audio.volume = 0.2;
-        
+
         function startAudioOnInteraction() {
-            audio.play().catch(() => {});
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            audio.play().then(() => {
+                audioControl.textContent = '🔊';
+            }).catch(() => {
+                audioControl.textContent = '🔇';
+            });
             document.body.removeEventListener('click', startAudioOnInteraction);
         }
         document.body.addEventListener('click', startAudioOnInteraction);
     };
 
-    const audio = document.getElementById('ambient-audio');
-    const audioControl = document.getElementById('audio-control');
-
     audioControl.addEventListener('click', () => {
         if (audio.paused) {
-            audio.play();
-            audioControl.textContent = '🔊';
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            audio.play().then(() => {
+                audioControl.textContent = '🔊';
+            }).catch(() => {
+                audioControl.textContent = '🔇';
+            });
         } else {
             audio.pause();
             audioControl.textContent = '🔇';
         }
     });
+
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
+    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const nums = '0123456789';
+    const alphabet = katakana + latin + nums;
+
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0f0';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if (drops[i] * fontSize> canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+    setInterval(drawMatrix, 33);
+
+    function verifyIdentity() {
+        const answer = document.getElementById("answer").value.toLowerCase();
+        const validAnswers = ["ezra", "elvi"];
+
+        if (validAnswers.includes(answer)) {
+            window.location.href = "index.html";
+        } else {
+            window.location.href = "https://wa.me/6281434046148";
+        }
+    }
+
+    const particleCanvas = document.getElementById('particle-canvas');
+    const pCtx = particleCanvas.getContext('2d');
+
+    function resizeParticleCanvas() {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+    }
+    resizeParticleCanvas();
+    window.addEventListener('resize', resizeParticleCanvas);
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 1;
+            this.vy = (Math.random() - 0.5) * 1;
+            this.size = 3 + Math.random() * 3;
+            this.color = color;
+        }
+        update(gravityX, gravityY) {
+            this.vx += gravityX * 0.1;
+            this.vy += gravityY * 0.1;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.x < 0) { this.x = 0; this.vx *= -0.6; }
+            if (this.x > particleCanvas.width) { this.x = particleCanvas.width; this.vx *= -0.6; }
+            if (this.y < 0) { this.y = 0; this.vy *= -0.6; }
+            if (this.y > particleCanvas.height) { this.y = particleCanvas.height; this.vy *= -0.6; }
+        }
+        draw(ctx) {
+            ctx.beginPath();
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 5;
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    let particles = [];
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+
+    function randomColor() {
+        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    let gravityX = 0;
+    let gravityY = 0;
+
+    window.addEventListener('deviceorientation', (event) => {
+        gravityX = event.gamma ? event.gamma / 90 : 0;
+        gravityY = event.beta ? event.beta / 90 : 0;
+    });
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaElementSource(audio);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function getAverageVolume(array) {
+        let values = 0;
+        let length = array.length;
+        for (let i = 0; i < length; i++) {
+            values += array[i];
+        }
+        return values / length;
+    }
+
+    function animateParticles() {
+        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+        analyser.getByteFrequencyData(dataArray);
+        const volume = getAverageVolume(dataArray) / 255;
+
+        const targetCount = Math.floor(volume * 100);
+
+        while (particles.length < targetCount) {
+            particles.push(new Particle(centerX, centerY, randomColor()));
+        }
+        while (particles.length > targetCount) {
+            particles.pop();
+        }
+
+        particles.forEach(p => {
+            p.update(gravityX, gravityY);
+            p.draw(pCtx);
+        });
+
+        requestAnimationFrame(animateParticles);
+    }
+
+    function startParticleEffect() {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        animateParticles();
+        document.body.removeEventListener('click', startParticleEffect);
+    }
+
+    document.body.addEventListener('click', startParticleEffect);
 </script>
 </body>
 </html>
