@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Secure Login | V Style</title>
+<style>
+    :root {
+        --deepseek-blue: #00a8ff;
+        --deepseek-dark: #0d1b2a;
+        --neon-glow: 0 0 10px var(--deepseek-blue);
+        --placeholder-font-size: 1rem;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--deepseek-dark);
+        font-family: 'Courier New', monospace;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+    }
+    #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    .login-container {
+        background: rgba(13, 27, 42, 0.85);
+        border: 1px solid var(--deepseek-blue);
+        border-radius: 8px;
+        padding: 2rem 2.5rem;
+        width: 320px;
+        max-width: 90vw;
+        box-shadow: var(--neon-glow);
+        animation: pulse-border 2s infinite;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+    @keyframes pulse-border {
+        0% { box-shadow: 0 0 10px var(--deepseek-blue); }
+        50% { box-shadow: 0 0 20px var(--deepseek-blue); }
+        100% { box-shadow: 0 0 10px var(--deepseek-blue); }
+    }
+    .login-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+    .login-header h1 {
+        color: var(--deepseek-blue);
+        text-shadow: var(--neon-glow);
+        font-size: 1.8rem;
+        margin: 0;
+        user-select: none;
+    }
+    .input-group {
+        margin-bottom: 1.8rem;
+        position: relative;
+        width: 100%;
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--deepseek-blue);
+        font-weight: 600;
+        font-size: 1rem;
+        user-select: none;
+    }
+    .input-group input {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border: 1.5px solid var(--deepseek-blue);
+        border-radius: 5px;
+        background: transparent;
+        color: white;
+        font-family: 'Courier New', monospace;
+        font-size: var(--placeholder-font-size);
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .input-group input::placeholder {
+        color: #66ccff99;
+        font-style: italic;
+        user-select: none;
+        font-size: var(--placeholder-font-size);
+    }
+    .input-group input:focus {
+        outline: none;
+        box-shadow: var(--neon-glow);
+        border-color: var(--deepseek-blue);
+    }
+
+    .icon-toggle-container {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+        user-select: none;
+    }
+    .icon-toggle-container svg {
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        fill: var(--deepseek-blue);
+        filter: drop-shadow(0 0 5px var(--deepseek-blue));
+        transition: transform 0.3s ease;
+    }
+    .icon-toggle-container svg.mangekyo {
+        animation: spin 3s linear infinite;
+    }
+    .icon-toggle-container svg:hover {
+        transform: scale(1.2);
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+    }
+
+    .login-btn {
+        width: 50%;
+        padding: 0.5rem 0;
+        background: transparent;
+        border: 1.5px solid var(--deepseek-blue);
+        color: var(--deepseek-blue);
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: all 0.3s;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        user-select: none;
+        margin: 0 auto;
+        display: block;
+    }
+    .login-btn:hover {
+        background: var(--deepseek-blue);
+        color: var(--deepseek-dark);
+        box-shadow: var(--neon-glow);
+    }
+    .error-message {
+        color: #ff5555;
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 1rem;
+        text-shadow: 0 0 5px #ff5555;
+        min-height: 1.2em;
+        user-select: none;
+    }
+    .countdown-message {
+        color: #00ffff;
+        text-align: center;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        user-select: none;
+        min-height: 1.2em;
+    }
+
+    .visiting-btn {
+        position: fixed;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--deepseek-blue);
+        color: var(--deepseek-dark);
+        font-weight: bold;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Courier New', monospace;
+        box-shadow: var(--neon-glow);
+        user-select: none;
+        border: none;
+        transition: background 0.3s ease;
+        z-index: 20;
+    }
+    .visiting-btn:hover {
+        background: #0080ff;
+    }
+    .visiting-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: var(--deepseek-dark);
+        filter: drop-shadow(0 0 3px var(--deepseek-dark));
+    }
+
+    @media (max-width: 400px) {
+        .login-container {
+            width: 90vw;
+            padding: 1.5rem 1.8rem;
+        }
+        .login-header h1 {
+            font-size: 1.5rem;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+        }
+        .input-group input {
+            font-size: var(--placeholder-font-size);
+            padding: 0.5rem 0.7rem;
+        }
+        .icon-toggle-container svg {
+            width: 28px;
+            height: 28px;
+        }
+        .login-btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 0;
+            width: 60%;
+        }
+        .visiting-btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 1rem;
+        }
+    }
+</style>
+</head>
+<body>
+<div id="particles-js"></div>
+
+<div class="login-container" role="main" aria-label="Login form">
+    <div class="login-header">
+        <h1><span class="deepseek-text"></span> Login</h1>
+    </div>
+
+    <form id="loginForm" autocomplete="off" novalidate>
+        <div class="input-group">
+            <label for="username">USERNAME</label>
+            <input type="text" id="username" placeholder="your ID" required aria-required="true" aria-describedby="usernameHelp" />
+        </div>
+
+        <div class="input-group">
+            <label for="password">PASSWORD</label>
+            <input type="password" id="password" placeholder="" required aria-required="true" />
+        </div>
+        <div id="errorMsg" class="error-message" role="alert" aria-live="assertive"></div>
+        <div id="countdownMsg" class="countdown-message" aria-live="polite"></div>
+
+        <button type="submit" class="login-btn">ACCESS SYSTEM</button>
+    </form>
+</div>
+
+<div class="icon-toggle-container" aria-label="Toggle password visibility icons" role="region">
+    <svg id="shieldIcon" class="shield" tabindex="0" role="button" aria-pressed="true" aria-label="Show password" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" >
+        <path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4zM12 19a4 4 0 110-8 4 4 0 010 8z"/>
+    </svg>
+    <svg id="mangekyoIcon" class="mangekyo" tabindex="0" role="button" aria-pressed="false" aria-label="Hide password" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+        <circle cx="12" cy="12" r="10" stroke="var(--deepseek-blue)" stroke-width="2" fill="none"/>
+        <path d="M12 6v6l4 2" stroke="var(--deepseek-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+</div>
+
+<button class="visiting-btn" aria-label="Visit whoareyou page" onclick="window.location.href='whoareyou.html'">
+    VISITING
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M10 17l5-5-5-5v10z" fill="var(--deepseek-dark)"/>
+    </svg>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+    // Initialize particles.js background
+    particlesJS.load('particles-js', 'particles.json', function() {
+        // particles loaded
+    });
+
+    // Supabase config - Ganti dengan milikmu
+    const supabaseUrl = 'https://your-project.supabase.co';
+    const supabaseKey = 'public-anon-key';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const passwordInput = document.getElementById('password');
+    const shieldIcon = document.getElementById('shieldIcon');
+    const mangekyoIcon = document.getElementById('mangekyoIcon');
+    const errorMsg = document.getElementById('errorMsg');
+    const countdownMsg = document.getElementById('countdownMsg');
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+
+    function setToggleState(showPassword) {
+        if (showPassword) {
+            passwordInput.type = 'text';
+            shieldIcon.setAttribute('aria-pressed', 'false');
+            mangekyoIcon.setAttribute('aria-pressed', 'true');
+            shieldIcon.style.display = 'none';
+            mangekyoIcon.style.display = 'inline-block';
+        } else {
+            passwordInput.type = 'password';
+            shieldIcon.setAttribute('aria-pressed', 'true');
+            mangekyoIcon.setAttribute('aria-pressed', 'false');
+            shieldIcon.style.display = 'inline-block';
+            mangekyoIcon.style.display = 'none';
+        }
+    }
+
+    setToggleState(false);
+
+    function togglePassword() {
+        setToggleState(passwordInput.type === 'password');
+    }
+
+    shieldIcon.addEventListener('click', togglePassword);
+    mangekyoIcon.addEventListener('click', togglePassword);
+
+    shieldIcon.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePassword();
+        }
+    });
+    mangekyoIcon.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePassword();
+        }
+    });
+    npm install @supabase/supabase-js
+
+    // Cookie helper functions
+    function setCookie(name, value, expires) {
+        document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+    }
+    function getCookie(name) {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        for (const c of cookies) {
+            if (c.startsWith(name + '=')) {
+                return c.substring(name.length + 1);
+            }
+        }
+        return null;
+    }
+    function deleteCookie(name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
+    }
+
+    // Block cookie names
+    const blockCookieName = 'loginBlockUntil';
+    const attemptCookieName = 'loginAttemptCount';
+    const blockLevelCookieName = 'loginBlockLevel';
+
+    // Durations in minutes for block levels: 1, 5, 10 minutes max
+    const blockDurations = [1, 5, 10];
+
+    // Disable or enable form inputs and button
+    function disableForm(disable) {
+        usernameInput.disabled = disable;
+        passwordInput.disabled = disable;
+        loginForm.querySelector('button[type="submit"]').disabled = disable;
+    }
+
+    // Start countdown timer for block
+    let countdownInterval;
+    function startCountdown(blockUntil) {
+        function updateCountdown() {
+            const now = new Date();
+            const diff = blockUntil - now;
+            if (diff <= 0) {
+                clearInterval(countdownInterval);
+                countdownMsg.textContent = '';
+                deleteCookie(blockCookieName);
+                deleteCookie(attemptCookieName);
+                deleteCookie(blockLevelCookieName);
+                disableForm(false);
+                errorMsg.textContent = '';
+                return;
+            }
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            countdownMsg.textContent = `Too many failed attempts. Please wait ${minutes}m ${seconds}s before trying again.`;
+        }
+        updateCountdown();
+        countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    // Check if user is blocked
+    function checkBlock() {
+        const blockUntilStr = getCookie(blockCookieName);
+        if (blockUntilStr) {
+            const blockUntil = new Date(blockUntilStr);
+            const now = new Date();
+            if (blockUntil > now) {
+                startCountdown(blockUntil);
+                disableForm(true);
+                return true;
+            } else {
+                // Block expired
+                clearInterval(countdownInterval);
+                deleteCookie(blockCookieName);
+                deleteCookie(attemptCookieName);
+                deleteCookie(blockLevelCookieName);
+                disableForm(false);
+                countdownMsg.textContent = '';
+                errorMsg.textContent = '';
+                return false;
+            }
+        }
+        disableForm(false);
+        countdownMsg.textContent = '';
+        return false;
+    }
+
+    // On page load, check block status
+    if (checkBlock()) {
+        errorMsg.textContent = 'ACCESS DENIED! Too many failed attempts.';
+    }
+
+    // Get current attempt count from cookie or 0
+    function getAttemptCount() {
+        const val = getCookie(attemptCookieName);
+        return val ? parseInt(val, 10) : 0;
+    }
+
+    // Get current block level from cookie or 0
+    function getBlockLevel() {
+        const val = getCookie(blockLevelCookieName);
+        return val ? parseInt(val, 10) : 0;
+    }
+
+    // Set attempt count cookie with 1 day expiry
+    function setAttemptCount(count) {
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 1);
+        setCookie(attemptCookieName, count, expires);
+    }
+
+    // Set block level cookie with 1 day expiry
+    function setBlockLevel(level) {
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 1);
+        setCookie(blockLevelCookieName, level, expires);
+    }
+
+    loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        if (checkBlock()) {
+            return;
+        }
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        // Supabase expects email, so simulate email from username
+        const email = username + '@example.com';
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            let attempt = getAttemptCount();
+            let blockLevel = getBlockLevel();
+
+            attempt++;
+            setAttemptCount(attempt);
+
+            errorMsg.textContent = `ACCESS DENIED! (Attempt ${attempt}/3)`;
+
+            usernameInput.value = '';
+            passwordInput.value = '';
+            usernameInput.focus();
+
+            if (attempt >= 3) {
+                blockLevel = Math.min(blockLevel + 1, blockDurations.length);
+                setBlockLevel(blockLevel);
+
+                const blockMinutes = blockDurations[blockLevel - 1];
+                const blockUntil = new Date(Date.now() + blockMinutes * 60000);
+                setCookie(blockCookieName, blockUntil.toUTCString(), blockUntil);
+
+                disableForm(true);
+                startCountdown(blockUntil);
+
+                setAttemptCount(0);
+
+                setTimeout(() => {
+                    window.location.href = 'whoareyou.html';
+                }, 1000);
+            }
+        } else {
+            // Login success
+            deleteCookie(attemptCookieName);
+            deleteCookie(blockCookieName);
+            deleteCookie(blockLevelCookieName);
+
+            sessionStorage.setItem('loggedInUser', username);
+            document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
+            setTimeout(() => {
+                // Redirect ke halaman dashboard atau halaman lain yang diinginkan
+                window.location.href = 'mydashboard.html';
+            }, 1000);
+        }
+    });
+</script>
+</body>
+</html>
