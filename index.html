@@ -361,7 +361,7 @@
     setInterval(changePlaceholder, 2000);
 
     let attempt = 0;
-    const maxAttempt = 1;
+    const maxAttempt = 2;
     const blockDurationMs = 60 * 1 * 1000;
     const blockCookieName = 'loginBlockUntil';
 
@@ -424,14 +424,14 @@
             }
             const minutes = Math.floor(diff / 60000);
             const seconds = Math.floor((diff % 60000) / 1000);
-            countdownMsg.textContent = `Too many failed attempts. Please wait ${minutes}m ${seconds}s before trying again.`;
+            countdownMsg.textContent = `Too many failed attempts. Tolong tunggu ${minutes}m ${seconds}d lalu coba lagi`;
         }
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 1000);
     }
 
     if (checkBlock()) {
-        errorMsg.textContent = 'ACCESS DENIED Too many failed attempts.';
+        errorMsg.textContent = 'ACCESS Ditolak, terlalu banyak percobaan';
     }
 
     loginForm.addEventListener('submit', function (e) {
