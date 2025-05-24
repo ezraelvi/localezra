@@ -480,20 +480,13 @@
         window.location.href = 'mydashboard.html';
     });
 	
-  // Ganti URL dengan alamat Cloudflare Worker Anda
-  const workerUrl = "https://testv.ezvvel.workers.dev/";
-  
-  // Kirim data kunjungan ke Worker
-  fetch(`${workerUrl}?page=${encodeURIComponent(window.location.pathname)}`)
-    .then(response => response.json())
-    .then(data => {
-      console.log("Data berhasil dikirim:", data);
-    })
-    .catch(error => {
-      console.error("Gagal mengirim data:", error);
-    });
 
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
+  fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
+    .then(res => console.log("Data tersimpan!"))
+    .catch(err => console.error("Gagal:", err));
 
+	
 </script>
 </body>
 </html>
