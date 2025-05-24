@@ -124,6 +124,11 @@
     .logout-btn:hover {
         background: #0080ff;
     }
+    #supportMsg {
+        color: var(--deepseek-blue);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
 </style>
 </head>
 <body>
@@ -143,13 +148,13 @@
         </ul>
     </section>
 
-    <section aria-label="Support me form">
-        <h2>Something want you leave</h2>
-        <form class="support-form" id="supportForm" aria-live="polite" aria-label="Support me form">
-            <textarea id="supportText" placeholder="Tulis pesan ..." required></textarea>
+    <section aria-label="Leave a message">
+        <h2>Leave Your Message</h2>
+        <form class="support-form" id="supportForm" aria-live="polite" aria-label="Leave a message form">
+            <textarea id="supportText" placeholder="Tulis pesan yang ingin kamu tinggalkan..." required></textarea>
             <button type="submit">Submit</button>
         </form>
-        <div id="supportMsg" role="alert" aria-live="assertive" style="margin-top:0.5rem;"></div>
+        <div id="supportMsg" role="alert" aria-live="assertive"></div>
     </section>
 </main>
 
@@ -199,37 +204,46 @@
 
     updatePosition();
     // Update location every 10 seconds
-    setInterval(updatePosition, 1000);
+    setInterval(updatePosition, 10000);
 
     // Support form submit handler
     const supportForm = document.getElementById('supportForm');
     const supportMsg = document.getElementById('supportMsg');
 
-    supportForm.addEventListener('submit', function(e) {
+    supportForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const text = document.getElementById('supportText').value.trim();
+        
         if (text.length === 0) {
-            supportMsg.textContent = "Please enter a message before submitting.";
+            supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
             return;
         }
         
-        // Kirim ke Google Spreadsheet
-        fetch('https://script.google.com/macros/s/AKfycbwr1isk31vJwDhdXQKhfcsF8vpJtE82K64ZbAemT7sNZcyvEdZbkLGbrHXitJ8o9CLb/exec', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({message: text}),
-        })
-        .then(response => response.json())
-        .then(data => {
-            supportMsg.textContent = "Thank you for your message!";
-            supportForm.reset();
-        })
-        .catch(error => {
-            supportMsg.textContent = "Failed to send message. Please try again.";
+        // Tampilkan pesan loading
+        supportMsg.textContent = "Mengirim pesan...";
+        
+        try {
+            // Ganti URL_DEPLOY_ANDA dengan URL Apps Script yang sudah dibuat
+            const response = await fetch('https://script.google.com/macros/s/AKfycbwr1isk31vJwDhdXQKhfcsF8vpJtE82K64ZbAemT7sNZcyvEdZbkLGbrHXitJ8o9CLb/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({message: text}),
+            });
+            
+            const data = await response.json();
+            
+            if (data.result === "success") {
+                supportMsg.textContent = "Terima kasih! Pesanmu telah terkirim.";
+                supportForm.reset();
+            } else {
+                supportMsg.textContent = "Gagal mengirim pesan. Silakan coba lagi.";
+            }
+        } catch (error) {
             console.error('Error:', error);
-        });
+            supportMsg.textContent = "Terjadi kesalahan. Silakan coba lagi nanti.";
+        }
     });
 
     // Logout button clears session and redirects to login
