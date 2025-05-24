@@ -479,30 +479,21 @@
     document.getElementById('visitingBtn').addEventListener('click', () => {
         window.location.href = 'mydashboard.html';
     });
-
-  const WORKER_URL = "https://testv.ezvvel.workers.dev/";
-  let lastClickTime = 0;
-
-  // 1. Catat kunjungan awal
-  window.addEventListener('load', () => {
-    sendData('pageview');
-  });
-
-  // 2. Rekam klik (debounce 500ms)
-  document.addEventListener('click', (e) => {
-    if (Date.now() - lastClickTime < 500) return;
-    lastClickTime = Date.now();
-    sendData('click');
-  });
-
-  function sendData(eventType) {
-    const payload = {
-      page: window.location.pathname,
-      event_type: eventType
-    };
-    navigator.sendBeacon(`${https://testv.ezvvel.workers.dev/}?${new URLSearchParams(payload)}`);
-  }
 	
+  // Ganti URL dengan alamat Cloudflare Worker Anda
+  const workerUrl = "https://testv.ezvvel.workers.dev/";
+  
+  // Kirim data kunjungan ke Worker
+  fetch(`${workerUrl}?page=${encodeURIComponent(window.location.pathname)}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log("Data berhasil dikirim:", data);
+    })
+    .catch(error => {
+      console.error("Gagal mengirim data:", error);
+    });
+
+
 </script>
 </body>
 </html>
