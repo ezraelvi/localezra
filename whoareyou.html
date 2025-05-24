@@ -506,6 +506,55 @@ document.body.addEventListener('mouseup', endTouch);
 
 animateTouchParticles();
 
+function animateParticlesCombined() {
+  pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+  analyser.getByteFrequencyData(dataArray);
+  const volume = getAverageVolume(dataArray) / 255;
+  const targetCount = Math.floor(volume * 100);
+
+  // Update jumlah partikel pusat sesuai volume
+  while (particles.length < targetCount) {
+    particles.push(new Particle(centerX, centerY, randomColor()));
+  }
+  while (particles.length > targetCount) {
+    particles.pop();
+  }
+
+  // Update dan gambar partikel pusat
+  particles.forEach(p => {
+    p.update(gravityX, gravityY);
+    p.draw(pCtx);
+  });
+
+  // Update dan gambar partikel sentuh
+  touchParticles.forEach((p, i) => {
+    p.update();
+    p.draw(pCtx);
+    if (p.life <= 0) {
+      touchParticles.splice(i, 1);
+    }
+  });
+
+  // Jika sedang menyentuh layar, tambahkan efek dan partikel sentuh
+  if (isTouching) {
+    applyScreenBeatEffect(volume);
+    applyTouchBassEffect(touchX, touchY, volume);
+    for (let i = 0; i < 5; i++) {
+      const offsetX = touchX + (Math.random() - 0.5) * 50;
+      const offsetY = touchY + (Math.random() - 0.5) * 50;
+      touchParticles.push(new TouchParticle(offsetX, offsetY));
+    }
+  } else {
+    body.style.transform = '';
+  }
+
+  requestAnimationFrame(animateParticlesCombined);
+}
+
+// Ganti pemanggilan animateTouchParticles dengan animateParticlesCombined
+animateParticlesCombined();
+
 </script>
 </body>
 </html>
