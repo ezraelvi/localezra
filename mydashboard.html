@@ -161,11 +161,6 @@
 <button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
 
 <script>
-    // Redirect to index if not logged in
-    const loggedInUser = sessionStorage.getItem('loggedInUser');
-    if (!loggedInUser) {
-        window.location.href = 'index.html';
-    }
 
     // Initialize map with Geolocation API and OpenStreetMap
     const mapDiv = document.getElementById('map');
