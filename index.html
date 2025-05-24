@@ -480,9 +480,15 @@
     });
 
   const workerUrl = "https://testv.ezvvel.workers.dev/";
+  
   fetch(`${workerUrl}?page=${encodeURIComponent(window.location.pathname)}`)
-    .then(res => console.log("Data + IP tersimpan!"))
-    .catch(err => console.error("Gagal:", err));
+    .then(res => res.json())
+    .then(data => {
+      console.log("Data tersimpan:", data);
+    })
+    .catch(err => {
+      console.error("Gagal mengirim data:", err);
+    });
 	
 </script>
 </body>
