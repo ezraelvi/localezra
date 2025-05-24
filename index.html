@@ -232,48 +232,29 @@
     }
 <script>
   const WORKER_URL = "https://testv.ezvvel.workers.dev/";
-  let startTime;
   let lastClickTime = 0;
 
-  // 1. Mulai rekam durasi
+  // 1. Catat kunjungan awal
   window.addEventListener('load', () => {
-    startTime = Date.now();
     sendData('pageview');
   });
 
-  // 2. Rekam klik (debounce 1 detik)
+  // 2. Rekam klik (debounce 500ms)
   document.addEventListener('click', (e) => {
-    if (Date.now() - lastClickTime < 1000) return;
+    if (Date.now() - lastClickTime < 500) return;
     lastClickTime = Date.now();
-    
-    const target = e.target.tagName + (e.target.id ? `#${e.target.id}` : '') + 
-                  (e.target.className ? `.${e.target.className}` : '');
-    
-    sendData('click', {
-      click_x: e.clientX,
-      click_y: e.clientY,
-      click_element: target
-    });
+    sendData('click');
   });
 
-  // 3. Kirim durasi saat tab ditutup
-  window.addEventListener('beforeunload', () => {
-    const duration = Math.floor((Date.now() - startTime) / 1000); // dalam detik
-    sendData('pageexit', { duration });
-  });
-
-  // Fungsi pengiriman data
-  function sendData(eventType, extraData = {}) {
+  function sendData(eventType) {
     const payload = {
       page: window.location.pathname,
-      event_type: eventType,
-      ...extraData
+      event_type: eventType
     };
-    
     navigator.sendBeacon(`${WORKER_URL}?${new URLSearchParams(payload)}`);
   }
 </script>
-	
+	  
 </style>
 </head>
 <body>
