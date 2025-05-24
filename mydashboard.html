@@ -201,19 +201,35 @@
     // Update location every 10 seconds
     setInterval(updatePosition, 1000);
 
-    // Support form submit handler (frontend only)
+    // Support form submit handler
     const supportForm = document.getElementById('supportForm');
     const supportMsg = document.getElementById('supportMsg');
 
-    supportForm.addEventListener('submit', e    e.preventDefault();
+    supportForm.addEventListener('submit', function(e) {
+        e.preventDefault();
         const text = document.getElementById('supportText').value.trim();
         if (text.length === 0) {
             supportMsg.textContent = "Please enter a message before submitting.";
             return;
         }
-        // Here you can add code to send the message to a server or API
-        supportMsg.textContent = "Thank you for your support!";
-        supportForm.reset();
+        
+        // Kirim ke Google Spreadsheet
+        fetch('https://script.google.com/macros/s/AKfycbwr1isk31vJwDhdXQKhfcsF8vpJtE82K64ZbAemT7sNZcyvEdZbkLGbrHXitJ8o9CLb/exec', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({message: text}),
+        })
+        .then(response => response.json())
+        .then(data => {
+            supportMsg.textContent = "Thank you for your message!";
+            supportForm.reset();
+        })
+        .catch(error => {
+            supportMsg.textContent = "Failed to send message. Please try again.";
+            console.error('Error:', error);
+        });
     });
 
     // Logout button clears session and redirects to login
