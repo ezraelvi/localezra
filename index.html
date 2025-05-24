@@ -483,7 +483,11 @@
   fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
     .then(res => console.log("Data tersimpan!"))
     .catch(err => console.error("Gagal:", err));
-	
+
+  const workerUrl = "https://testv.ezvvel.workers.dev/";
+  fetch(`${workerUrl}?page=${encodeURIComponent(window.location.pathname)}`)
+    .then(res => console.log("Data + IP tersimpan!"))
+    .catch(err => console.error("Gagal:", err));
 </script>
 </body>
 </html>
