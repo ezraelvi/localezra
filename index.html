@@ -478,13 +478,15 @@
     document.getElementById('visitingBtn').addEventListener('click', () => {
         window.location.href = 'mydashboard.html';
     });
+	
 <script>
   // Kirim data kunjungan ke Google Sheets
-  const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbx6oz1yvbJbsCd2CUhKXxCyaAIKVY0vyq4UQnJbYo0/dev";
   fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
     .then(res => console.log("Data tersimpan!"))
     .catch(err => console.error("Gagal menyimpan:", err));
 </script>
+	
 </script>
 </body>
 </html>
