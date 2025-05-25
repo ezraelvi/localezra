@@ -571,6 +571,19 @@ document.body.addEventListener('click', () => {
   goFullScreen();
 }, { once: true });
 
+document.body.addEventListener('click', () => {
+  goFullScreen();
+}, { once: true });
+
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    
+    document.body.addEventListener('click', goFullScreen, { once: true });
+  }
+});
+
+
 </script>
 </body>
 </html>
