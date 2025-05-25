@@ -513,7 +513,7 @@ function animateParticlesCombined() {
   const volume = getAverageVolume(dataArray) / 255;
   const targetCount = Math.floor(volume * 100);
 
-  // Update jumlah partikel pusat sesuai volume
+    
   while (particles.length < targetCount) {
     particles.push(new Particle(centerX, centerY, randomColor()));
   }
@@ -521,13 +521,13 @@ function animateParticlesCombined() {
     particles.pop();
   }
 
-  // Update dan gambar partikel pusat
+    
   particles.forEach(p => {
     p.update(gravityX, gravityY);
     p.draw(pCtx);
   });
 
-  // Update dan gambar partikel sentuh
+    
   touchParticles.forEach((p, i) => {
     p.update();
     p.draw(pCtx);
@@ -536,7 +536,7 @@ function animateParticlesCombined() {
     }
   });
 
-  // Jika sedang menyentuh layar, tambahkan efek dan partikel sentuh
+    
   if (isTouching) {
     applyScreenBeatEffect(volume);
     applyTouchBassEffect(touchX, touchY, volume);
@@ -552,8 +552,24 @@ function animateParticlesCombined() {
   requestAnimationFrame(animateParticlesCombined);
 }
 
-// Ganti pemanggilan animateTouchParticles dengan animateParticlesCombined
+
 animateParticlesCombined();
+
+function goFullScreen() {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+}
+
+    
+document.body.addEventListener('click', () => {
+  goFullScreen();
+}, { once: true });
 
 </script>
 </body>
