@@ -1,37 +1,64 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Index</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Cube with Three.js</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
-  <h1>Selamat datang di halaman utama</h1>
-  <p id="user-info"></p>
-  <button id="btn-logout">Logout</button>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.min.js"></script>
+  <script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x202020);
 
-<script>
-  const supabaseUrl = 'https://gxbviujvmqbguavlsmyh.supabase.co'; // Ganti dengan URL Supabase kamu
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4YnZpdWp2bXFiZ3VhdmxzbXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDMzMDUsImV4cCI6MjA2MzI3OTMwNX0.pZrpc5487ET1zKfIvWDBsnXPGTx6s01HJhwkI8BkMqI'; // Ganti dengan anon key Supabase kamu
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    // Camera setup
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
 
-  async function checkUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      // Jika belum login, redirect ke login.html
-      window.location.href = 'login.html';
-    } else {
-      document.getElementById('user-info').textContent = 'Halo, ' + user.email;
+    // Renderer setup
+    const renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Cube geometry and material
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, metalness: 0.5, roughness: 0.5 });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // Light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5,5,5);
+    scene.add(directionalLight);
+
+    // Controls for mouse interaction
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
     }
-  }
-
-  document.getElementById('btn-logout').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    window.location.href = 'login.html';
-  });
-
-  checkUser();
-</script>
+    animate();
+  </script>
 </body>
 </html>
