@@ -245,7 +245,7 @@
 
     function verifyIdentity() {
         const answer = document.getElementById("answer").value.toLowerCase();
-        const validAnswers = ["ezra", "elvi"];
+        const validAnswers = ["ezra",["elvi"];
 
         if (validAnswers.includes(answer)) {
             window.location.href = "index.html";
@@ -295,6 +295,8 @@
     }
 
     let particles = [];
+    let touchParticles = [];
+
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
 
@@ -447,7 +449,9 @@
         }
     }
 
-    let touchParticles = [];
+    let isTouching = false;
+    let touchX = 0;
+    let touchY = 0;
 
     function startTouch(e) {
         isTouching = true;
@@ -488,7 +492,7 @@
         const elem = document.documentElement;
         if (elem.requestFullscreen) {
             elem.requestFullscreen();
-        } else if (    elem.mozRequestFullScreen) { /* Firefox */
+        } else if (elem.mozRequestFullScreen) { /* Firefox */
             elem.mozRequestFullScreen();
         } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
             elem.webkitRequestFullscreen();
@@ -498,16 +502,6 @@
     }
 
     const body = document.body;
-    let isTouching = false;
-    let touchX = 0;
-    let touchY = 0;
-
-    // Optional: start fullscreen on user interaction
-    document.body.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            goFullScreen();
-        }
-    });
 </script>
 </body>
 </html>
