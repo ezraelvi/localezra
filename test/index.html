@@ -483,79 +483,37 @@
 
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
   fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
-    .then(res => console.log("Data tersimpan!"))
+    .then(res => console.log(""))
     .catch(err => console.error("Gagal:", err));
 
-    // --- Fitur Deteksi Lukisan Love dan Mode Love Aktif ---
+   // --- Fitur Aktifkan Mode Love dengan 3x Touch Cepat ---
 
-let drawing = false;
-let points = [];
+let touchCount = 0;
+let touchTimeout = null;
+let loveModeActive = false;
+let loveInterval;
 
-function distance(p1, p2) {
-    return Math.hypot(p2.x - p1.x, p2.y - p1.y);
-}
-
-// Fungsi sederhana deteksi pola hati kasar berdasarkan titik-titik
-function isHeartShape(points) {
-    if (points.length < 10) return false;
-
-    // Cari titik paling kiri, kanan, atas, bawah
-    let minX = points[0].x, maxX = points[0].x;
-    let minY = points[0].y, maxY = points[0].y;
-    points.forEach(p => {
-        if (p.x < minX) minX = p.x;
-        if (p.x > maxX) maxX = p.x;
-        if (p.y < minY) minY = p.y;
-        if (p.y > maxY) maxY = p.y;
-    });
-
-    const width = maxX - minX;
-    const height = maxY - minY;
-
-    // Rasio tinggi dan lebar hati kira-kira 1:1
-    if (width === 0 || height === 0) return false;
-    const ratio = height / width;
-    if (ratio < 0.8 || ratio > 1.2) return false;
-
-    // Cek apakah titik awal dan akhir dekat (melukis bentuk tertutup)
-    if (distance(points[0], points[points.length - 1]) > width * 0.3) return false;
-
-    // Cek apakah ada lekukan atas (dua puncak) dan lekukan bawah (titik bawah hati)
-    // Sederhananya, cek apakah ada titik di kiri atas dan kanan atas lebih tinggi dari titik tengah bawah
-    let topY = minY + height * 0.3;
-    let bottomY = maxY - height * 0.1;
-    let leftTop = points.some(p => p.x < minX + width * 0.4 && p.y < topY);
-    let rightTop = points.some(p => p.x > minX + width * 0.6 && p.y < topY);
-    let bottomPoint = points.some(p => p.x > minX + width * 0.4 && p.x < minX + width * 0.6 && p.y > bottomY);
-
-    return leftTop && rightTop && bottomPoint;
-}
-
-function startDraw(e) {
-    drawing = true;
-    points = [];
-    addPoint(e);
-}
-
-function addPoint(e) {
-    let x, y;
-    if (e.touches && e.touches.length > 0) {
-        x = e.touches[0].clientX;
-        y = e.touches[0].clientY;
-    } else {
-        x = e.clientX;
-        y = e.clientY;
+function resetTouchCount() {
+    touchCount = 0;
+    if (touchTimeout) {
+        clearTimeout(touchTimeout);
+        touchTimeout = null;
     }
-    points.push({x, y});
 }
 
-function endDraw() {
-    drawing = false;
-    if (isHeartShape(points)) {
-        alert("Danger, mode love aktif");
-        activateLoveMode();
-    }
-    points = [];
+function activateLoveMode() {
+    if (loveModeActive) return;
+    loveModeActive = true;
+
+    // Munculkan love warna-warni acak di layar setiap 300ms
+    loveInterval = setInterval(() => {
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        const size = 20 + Math.random() * 30;
+        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c', '#ff69b4', '#ff4500'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        drawLove(x, y, size, color);
+    }, 300);
 }
 
 function drawLove(x, y, size, color) {
@@ -576,25 +534,6 @@ function drawLove(x, y, size, color) {
     setTimeout(() => love.remove(), 3000);
 }
 
-let loveModeActive = false;
-let loveInterval;
-
-function activateLoveMode() {
-    if (loveModeActive) return;
-    loveModeActive = true;
-
-    // Munculkan love warna-warni acak di layar setiap 300ms
-    loveInterval = setInterval(() => {
-        const x = Math.random() * window.innerWidth;
-        const y = Math.random() * window.innerHeight;
-        const size = 20 + Math.random() * 30;
-        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c', '#ff69b4', '#ff4500'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        drawLove(x, y, size, color);
-    }, 300);
-}
-
-// Efek gelombang air pada sentuhan saat mode love aktif
 function createWaterRipple(x, y) {
     const ripple = document.createElement('div');
     ripple.style.position = 'fixed';
@@ -619,51 +558,39 @@ function createWaterRipple(x, y) {
     setTimeout(() => ripple.remove(), 600);
 }
 
-// Override event listener sentuhan/mouse untuk efek ripple saat love mode aktif
-function loveModeTouchHandler(e) {
-    if (!loveModeActive) return;
-    let x, y;
-    if (e.touches && e.touches.length > 0) {
-        x = e.touches[0].clientX;
-        y = e.touches[0].clientY;
-    } else {
-        x = e.clientX;
-        y = e.clientY;
+function onTouchForLoveMode(e) {
+    if (loveModeActive) {
+        // Jika mode love aktif, buat efek gelombang air di sentuhan
+        let x, y;
+        if (e.touches && e.touches.length > 0) {
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+        } else {
+            x = e.clientX;
+            y = e.clientY;
+        }
+        createWaterRipple(x, y);
+        return;
     }
-    createWaterRipple(x, y);
+
+    // Jika mode love belum aktif, hitung sentuhan
+    touchCount++;
+    if (touchCount === 3) {
+        alert("Danger, mode love aktif");
+        activateLoveMode();
+        resetTouchCount();
+    } else {
+        if (touchTimeout) clearTimeout(touchTimeout);
+        touchTimeout = setTimeout(() => {
+            resetTouchCount();
+        }, 2000); // reset hitungan jika tidak mencapai 3 touch dalam 2 detik
+    }
 }
 
-// Tambahkan event listener untuk deteksi lukisan love
-document.body.addEventListener('mousedown', (e) => {
-    if (loveModeActive) return; // Jangan deteksi lagi kalau sudah aktif
-    startDraw(e);
-});
-document.body.addEventListener('mousemove', (e) => {
-    if (!drawing) return;
-    addPoint(e);
-});
-document.body.addEventListener('mouseup', (e) => {
-    if (!drawing) return;
-    endDraw();
-});
-document.body.addEventListener('touchstart', (e) => {
-    if (loveModeActive) return;
-    startDraw(e);
-});
-document.body.addEventListener('touchmove', (e) => {
-    if (!drawing) return;
-    addPoint(e);
-});
-document.body.addEventListener('touchend', (e) => {
-    if (!drawing) return;
-    endDraw();
-});
+document.body.addEventListener('touchstart', onTouchForLoveMode);
+document.body.addEventListener('mousedown', onTouchForLoveMode);
 
-// Tambahkan event listener untuk efek gelombang air saat mode love aktif
-document.body.addEventListener('mousedown', loveModeTouchHandler);
-document.body.addEventListener('touchstart', loveModeTouchHandler);
 
-	
 </script>
 </body>
 </html>
