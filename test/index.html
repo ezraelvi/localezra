@@ -486,109 +486,248 @@
     .then(res => console.log(""))
     .catch(err => console.error("Gagal:", err));
 
-   // --- Fitur Aktifkan Mode Love dengan 3x Touch Cepat ---
+  // --- Gesture Detection: Lukis huruf "e" sederhana ---
 
-let touchCount = 0;
-let touchTimeout = null;
+let drawing = false;
+let points = [];
+
+function startDraw(e) {
+    drawing = true;
+    points = [];
+    addPoint(e);
+}
+
+function addPoint(e) {
+    let x, y;
+    if (e.touches && e.touches.length > 0) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+    } else {
+        x = e.clientX;
+        y = e.clientY;
+    }
+    points.push({x, y});
+}
+
+function endDraw() {
+    drawing = false;
+    if (isLetterE(points)) {
+        alert("Danger, mode love aktif");
+        activateLoveMode();
+    }
+    points = [];
+}
+
+// Fungsi sederhana deteksi huruf "e" berdasarkan pola titik
+function isLetterE(points) {
+    if (points.length < 10) return false;
+
+    // Cek arah utama: garis horizontal ke kanan, lalu lengkung ke bawah
+    // Ambil bounding box
+    let minX = points[0].x, maxX = points[0].x;
+    let minY = points[0].y, maxY = points[0].y;
+    points.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+    });
+    const width = maxX - minX;
+    const height = maxY - minY;
+    if (width < 30 || height < 30) return false; // minimal ukuran
+
+    // Cek pola kasar: titik awal di kiri atas, titik akhir di bawah kanan
+    const start = points[0];
+    const end = points[points.length - 1];
+    if (start.x > minX + width * 0.3) return false; // harus mulai kiri
+    if (start.y > minY + height * 0.3) return false; // harus mulai atas
+    if (end.x < minX + width * 0.7) return false; // harus berakhir kanan
+    if (end.y < minY + height * 0.7) return false; // harus berakhir bawah
+
+    // Cek ada lengkungan ke bawah di tengah (y naik setelah x naik)
+    let midIndex = Math.floor(points.length / 2);
+    let mid = points[midIndex];
+    if (mid.y < start.y) return false; // harus ada lengkung ke bawah
+
+    return true;
+}
+
+// --- Mode Love dengan partikel love mengikuti gravitasi ---
+
 let loveModeActive = false;
-let loveInterval;
+let loveParticles = [];
+const loveCanvas = document.createElement('canvas');
+loveCanvas.style.position = 'fixed';
+loveCanvas.style.top = '0';
+loveCanvas.style.left = '0';
+loveCanvas.style.width = '100vw';
+loveCanvas.style.height = '100vh';
+loveCanvas.style.pointerEvents = 'none';
+loveCanvas.style.zIndex = 100005;
+document.body.appendChild(loveCanvas);
+const loveCtx = loveCanvas.getContext('2d');
 
-function resetTouchCount() {
-    touchCount = 0;
-    if (touchTimeout) {
-        clearTimeout(touchTimeout);
-        touchTimeout = null;
+function resizeLoveCanvas() {
+    loveCanvas.width = window.innerWidth;
+    loveCanvas.height = window.innerHeight;
+}
+resizeLoveCanvas();
+window.addEventListener('resize', resizeLoveCanvas);
+
+class LoveParticle {
+    constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.size = 20 + Math.random() * 20;
+        this.color = color;
+        this.life = 200 + Math.random() * 100;
+    }
+    update(gravityX, gravityY) {
+        this.vx += gravityX * 0.1;
+        this.vy += gravityY * 0.1;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+    }
+    draw(ctx) {
+        ctx.font = `${this.size}px serif`;
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 10;
+        ctx.fillText('❤️', this.x, this.y);
     }
 }
 
-function activateLoveMode() {
-    if (loveModeActive) return;
-    loveModeActive = true;
+let gravityX = 0;
+let gravityY = 0;
+window.addEventListener('deviceorientation', (event) => {
+    gravityX = event.gamma ? event.gamma / 90 : 0;
+    gravityY = event.beta ? event.beta / 90 : 0;
+});
 
-    // Munculkan love warna-warni acak di layar setiap 300ms
-    loveInterval = setInterval(() => {
-        const x = Math.random() * window.innerWidth;
-        const y = Math.random() * window.innerHeight;
-        const size = 20 + Math.random() * 30;
-        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c', '#ff69b4', '#ff4500'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        drawLove(x, y, size, color);
-    }, 300);
+// Tambah partikel love baru secara berkala
+function addLoveParticle() {
+    if (!loveModeActive) return;
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c', '#ff69b4', '#ff4500'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    loveParticles.push(new LoveParticle(x, y, color));
 }
 
-function drawLove(x, y, size, color) {
-    const love = document.createElement('div');
-    love.textContent = '❤️';
-    love.style.position = 'fixed';
-    love.style.left = `${x - size/2}px`;
-    love.style.top = `${y - size/2}px`;
-    love.style.fontSize = `${size}px`;
-    love.style.pointerEvents = 'none';
-    love.style.userSelect = 'none';
-    love.style.zIndex = 100003;
-    love.style.color = color;
-    love.style.textShadow = `0 0 5px ${color}`;
-    document.body.appendChild(love);
-
-    // Hapus love setelah 3 detik
-    setTimeout(() => love.remove(), 3000);
+// Animasi partikel love
+function animateLoveParticles() {
+    loveCtx.clearRect(0, 0, loveCanvas.width, loveCanvas.height);
+    loveParticles = loveParticles.filter(p => p.life > 0);
+    loveParticles.forEach(p => {
+        p.update(gravityX, gravityY);
+        p.draw(loveCtx);
+    });
+    requestAnimationFrame(animateLoveParticles);
 }
 
-function createWaterRipple(x, y) {
+// --- Efek gelombang air pink cerah dengan area efek visual ---
+
+const rippleContainer = document.createElement('div');
+rippleContainer.style.position = 'fixed';
+rippleContainer.style.top = '0';
+rippleContainer.style.left = '0';
+rippleContainer.style.width = '100vw';
+rippleContainer.style.height = '100vh';
+rippleContainer.style.pointerEvents = 'none';
+rippleContainer.style.zIndex = 100006;
+document.body.appendChild(rippleContainer);
+
+// CSS filter untuk efek gelombang area
+const waveFilterId = 'wave-filter-effect';
+if (!document.getElementById(waveFilterId)) {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("style", "position:absolute; width:0; height:0;");
+    svg.setAttribute("id", waveFilterId);
+    svg.innerHTML = `
+    <filter id="ripple" x="0" y="0" width="100%" height="100%">
+      <feTurbulence id="turbulence" baseFrequency="0.02" numOctaves="2" result="turbulence"/>
+      <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+      <animate xlink:href="#turbulence" attributeName="baseFrequency" dur="3s" values="0.02;0.05;0.02" repeatCount="indefinite"/>
+    </filter>`;
+    document.body.appendChild(svg);
+}
+
+function createPinkRipple(x, y) {
     const ripple = document.createElement('div');
     ripple.style.position = 'fixed';
     ripple.style.left = `${x}px`;
     ripple.style.top = `${y}px`;
-    ripple.style.width = '100px';
-    ripple.style.height = '100px';
+    ripple.style.width = '150px';
+    ripple.style.height = '150px';
     ripple.style.borderRadius = '50%';
-    ripple.style.border = '2px solid rgba(0, 255, 255, 0.7)';
+    ripple.style.background = 'rgba(255, 105, 180, 0.3)'; // pink cerah transparan
     ripple.style.pointerEvents = 'none';
-    ripple.style.zIndex = 100004;
+    ripple.style.zIndex = 100007;
     ripple.style.transform = 'translate(-50%, -50%) scale(0)';
     ripple.style.opacity = '0.7';
-    ripple.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
-    document.body.appendChild(ripple);
+    ripple.style.filter = 'url(#ripple)';
+    ripple.style.transition = 'transform 0.8s ease-out, opacity 0.8s ease-out';
+    rippleContainer.appendChild(ripple);
 
     requestAnimationFrame(() => {
         ripple.style.transform = 'translate(-50%, -50%) scale(1.5)';
         ripple.style.opacity = '0';
     });
 
-    setTimeout(() => ripple.remove(), 600);
+    setTimeout(() => ripple.remove(), 800);
 }
 
-function onTouchForLoveMode(e) {
+// --- Event Listener untuk gesture dan efek ripple ---
+
+document.body.addEventListener('touchstart', (e) => {
+    if    if (!drawing) startDraw(e);
+    else addPoint(e);
+});
+document.body.addEventListener('touchmove', (e) => {
+    if (drawing) addPoint(e);
+});
+document.body.addEventListener('touchend', (e) => {
+    if (drawing) endDraw();
+});
+
+document.body.addEventListener('mousedown', (e) => {
+    if (!drawing) startDraw(e);
+    else addPoint(e);
+});
+document.body.addEventListener('mousemove', (e) => {
+    if (drawing) addPoint(e);
+});
+document.body.addEventListener('mouseup', (e) => {
+    if (drawing) endDraw();
+});
+
+// Saat mode love aktif, sentuhan buat efek gelombang pink
+document.body.addEventListener('touchstart', (e) => {
     if (loveModeActive) {
-        // Jika mode love aktif, buat efek gelombang air di sentuhan
-        let x, y;
-        if (e.touches && e.touches.length > 0) {
-            x = e.touches[0].clientX;
-            y = e.touches[0].clientY;
-        } else {
-            x = e.clientX;
-            y = e.clientY;
-        }
-        createWaterRipple(x, y);
-        return;
+        let x = e.touches[0].clientX;
+        let y = e.touches[0].clientY;
+        createPinkRipple(x, y);
     }
+});
+document.body.addEventListener('mousedown', (e) => {
+    if (loveModeActive) {
+        createPinkRipple(e.clientX, e.clientY);
+    }
+});
 
-    // Jika mode love belum aktif, hitung sentuhan
-    touchCount++;
-    if (touchCount === 3) {
-        alert("Danger, mode love aktif");
-        activateLoveMode();
-        resetTouchCount();
-    } else {
-        if (touchTimeout) clearTimeout(touchTimeout);
-        touchTimeout = setTimeout(() => {
-            resetTouchCount();
-        }, 2000); // reset hitungan jika tidak mencapai 3 touch dalam 2 detik
+// Tambah partikel love secara berkala saat mode aktif
+function loveModeLoop() {
+    if (loveModeActive) {
+        addLoveParticle();
     }
+    requestAnimationFrame(loveModeLoop);
 }
-
-document.body.addEventListener('touchstart', onTouchForLoveMode);
-document.body.addEventListener('mousedown', onTouchForLoveMode);
+loveModeLoop();
+animateLoveParticles();
 
 
 </script>
