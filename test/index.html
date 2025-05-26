@@ -367,144 +367,180 @@
     changePlaceholder();
     setInterval(changePlaceholder, 2000);
 
-    // Login attempt tracking
-    let attempt = 0;
-    const maxAttempt = 3;
-    const blockDurationMs = 5 * 60 * 1000; // 5 minutes
+    // Enhanced Cookie Management System
+    class LoginSecurity {
+        constructor() {
+            this.maxAttempts = 3;
+            this.blockDurationMinutes = 5;
+            this.cookieName = 'loginSecurityData';
+            this.attemptData = this.loadAttemptData();
+            this.checkBlockStatus();
+        }
 
-    // Cookie management dengan enkripsi sederhana
-    function setCookie(name, value, days) {
-        const encodedValue = btoa(encodeURIComponent(JSON.stringify(value)));
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        document.cookie = `${name}=${encodedValue};expires=${date.toUTCString()};path=/;SameSite=Lax`;
-    }
-
-    function getCookie(name) {
-        const cookies = document.cookie.split(';').map(c => c.trim());
-        for (const c of cookies) {
-            if (c.startsWith(name + '=')) {
+        // Load or initialize attempt data from cookie
+        loadAttemptData() {
+            const cookieData = this.getCookie(this.cookieName);
+            if (cookieData) {
                 try {
-                    return JSON.parse(decodeURIComponent(atob(c.substring(name.length + 1))));
+                    const data = JSON.parse(decodeURIComponent(cookieData));
+                    // Validate the data structure
+                    if (data && typeof data === 'object' && 
+                        'attempts' in data && 'lastAttempt' in data && 'blockUntil' in data) {
+                        return data;
+                    }
                 } catch (e) {
-                    return null;
+                    console.error('Failed to parse cookie data:', e);
                 }
             }
-        }
-        return null;
-    }
-
-    let loginAttempts = getCookie('loginAttempts') || { count: 0, lastAttempt: null };
-
-    function updateLoginAttempts(isSuccess) {
-        if (isSuccess) {
-            loginAttempts = { count: 0, lastAttempt: null };
-        } else {
-            loginAttempts.count += 1;
-            loginAttempts.lastAttempt = new Date().toISOString();
-        }
-        setCookie('loginAttempts', loginAttempts, 1); // Simpan 1 hari
-    }
-
-    function checkLoginAttempts() {
-        const now = new Date();
-        const lastAttempt = new Date(loginAttempts.lastAttempt);
-        const hoursSinceLastAttempt = (now - lastAttempt) / (1000 * 60 * 60);
-
-        // Reset jika lebih dari 24 jam sejak percobaan terakhir
-        if (hoursSinceLastAttempt > 24) {
-            loginAttempts = { count: 0, lastAttempt: null };
-            setCookie('loginAttempts', loginAttempts, 1);
+            // Return default data if no valid cookie exists
+            return {
+                attempts: 0,
+                lastAttempt: null,
+                blockUntil: null
+            };
         }
 
-        if (loginAttempts.count >= 3) {
-            disableForm(true);
-            errorMsg.textContent = 'Terlalu banyak percobaan gagal. Coba lagi besok.';
-            return true;
+        // Save attempt data to cookie
+        saveAttemptData() {
+            const expires = new Date();
+            expires.setDate(expires.getDate() + 1); // 1 day expiration
+            const data = encodeURIComponent(JSON.stringify(this.attemptData));
+            this.setCookie(this.cookieName, data, expires);
         }
-        return false;
-    }
 
-    // Cookie management
-    function setCookie(name, value, expires) {
-        document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
-    }
+        // Set cookie with expiration
+        setCookie(name, value, expires) {
+            document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure`;
+        }
 
-    function getCookie(name) {
-        const cookies = document.cookie.split(';').map(c => c.trim());
-        for (const c of cookies) {
-            if (c.startsWith(name + '=')) {
-                return c.substring(name.length + 1);
+        // Get cookie by name
+        getCookie(name) {
+            const cookies = document.cookie.split(';').map(c => c.trim());
+            for (const c of cookies) {
+                if (c.startsWith(name + '=')) {
+                    return c.substring(name.length + 1);
+                }
             }
+            return null;
         }
-        return null;
-    }
 
-    function deleteCookie(name) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
-    }
+        // Delete cookie
+        deleteCookie(name) {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
 
-    // Block system functions
-    function checkBlock() {
-        const blockUntilStr = getCookie('loginBlockUntil');
-        if (blockUntilStr) {
-            const blockUntil = new Date(blockUntilStr);
+        // Record a failed login attempt
+        recordFailedAttempt() {
             const now = new Date();
-            if (blockUntil > now) {
-                startCountdown(blockUntil);
-                disableForm(true);
-                return true;
-            } else {
-                deleteCookie('loginBlockUntil');
-                disableForm(false);
-                countdownMsg.textContent = '';
+            this.attemptData.attempts++;
+            this.attemptData.lastAttempt = now.toISOString();
+
+            // If max attempts reached, set block until time
+            if (this.attemptData.attempts >= this.maxAttempts) {
+                const blockUntil = new Date(now.getTime() + this.blockDurationMinutes * 60000);
+                this.attemptData.blockUntil = blockUntil.toISOString();
+            }
+
+            this.saveAttemptData();
+        }
+
+        // Reset attempts on successful login
+        resetAttempts() {
+            this.attemptData = {
+                attempts: 0,
+                lastAttempt: null,
+                blockUntil: null
+            };
+            this.saveAttemptData();
+        }
+
+        // Check if user is currently blocked
+        isBlocked() {
+            if (!this.attemptData.blockUntil) return false;
+            
+            const blockUntil = new Date(this.attemptData.blockUntil);
+            const now = new Date();
+            
+            // If block has expired, clear it
+            if (now > blockUntil) {
+                this.resetAttempts();
                 return false;
             }
+            
+            return true;
         }
-        return false;
-    }
 
-    function disableForm(disable) {
-        usernameInput.disabled = disable;
-        passwordInput.disabled = disable;
-        loginForm.querySelector('button[type="submit"]').disabled = disable;
-    }
-
-    let countdownInterval;
-    function startCountdown(blockUntil) {
-        clearInterval(countdownInterval);
-        
-        function updateCountdown() {
+        // Get remaining block time in seconds
+        getRemainingBlockTime() {
+            if (!this.isBlocked()) return 0;
+            
+            const blockUntil = new Date(this.attemptData.blockUntil);
             const now = new Date();
-            const diff = blockUntil - now;
-            if (diff <= 0) {
-                clearInterval(countdownInterval);
-                countdownMsg.textContent = '';
-                deleteCookie('loginBlockUntil');
-                disableForm(false);
-                errorMsg.textContent = '';
-                attempt = 0;
-                return;
-            }
-            const minutes = Math.floor(diff / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
-            countdownMsg.textContent = `Too many attempts. Please wait ${minutes}m ${seconds}s`;
+            return Math.round((blockUntil - now) / 1000);
         }
-        
-        updateCountdown();
-        countdownInterval = setInterval(updateCountdown, 1000);
+
+        // Check and handle block status on page load
+        checkBlockStatus() {
+            if (this.isBlocked()) {
+                this.disableForm(true);
+                const remainingTime = this.getRemainingBlockTime();
+                this.startCountdown(remainingTime);
+                errorMsg.textContent = 'System temporarily locked due to too many attempts';
+                return true;
+            }
+            return false;
+        }
+
+        // Disable/enable form elements
+        disableForm(disable) {
+            usernameInput.disabled = disable;
+            passwordInput.disabled = disable;
+            loginForm.querySelector('button[type="submit"]').disabled = disable;
+        }
+
+        // Start countdown timer
+        startCountdown(remainingSeconds) {
+            clearInterval(window.countdownInterval);
+            
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}m ${secs}s`;
+            }
+            
+            function updateDisplay() {
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                countdownMsg.textContent = `Too many attempts. Please wait ${minutes}m ${seconds}s`;
+                
+                if (remainingSeconds <= 0) {
+                    clearInterval(window.countdownInterval);
+                    countdownMsg.textContent = '';
+                    loginSecurity.disableForm(false);
+                    errorMsg.textContent = '';
+                    return;
+                }
+                
+                remainingSeconds--;
+            }
+            
+            updateDisplay();
+            window.countdownInterval = setInterval(updateDisplay, 1000);
+        }
     }
 
-    // Check for existing block on page load
-    if (checkBlock()) {
-        errorMsg.textContent = 'System temporarily locked due to too many attempts';
-    }
+    // Initialize login security system
+    const loginSecurity = new LoginSecurity();
 
     // Form submission handler
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        if (checkBlock()) {
+        // Check if user is blocked
+        if (loginSecurity.isBlocked()) {
+            const remainingTime = loginSecurity.getRemainingBlockTime();
+            loginSecurity.startCountdown(remainingTime);
+            errorMsg.textContent = 'System temporarily locked due to too many attempts';
             return;
         }
 
@@ -525,6 +561,7 @@
 
             if (response.ok && data.success) {
                 // Successful login
+                loginSecurity.resetAttempts();
                 sessionStorage.setItem('authToken', data.token);
                 sessionStorage.setItem('loggedInUser', username);
                 
@@ -538,28 +575,28 @@
                 }, 1000);
             } else {
                 // Failed login
+                loginSecurity.recordFailedAttempt();
                 handleFailedLogin(data.error || 'Invalid credentials');
             }
         } catch (error) {
             console.error('Login error:', error);
+            loginSecurity.recordFailedAttempt();
             handleFailedLogin('Network error. Please try again.');
         }
     });
 
     function handleFailedLogin(errorMessage) {
-        attempt++;
-        errorMsg.textContent = `${errorMessage} (Attempt ${attempt}/${maxAttempt})`;
+        errorMsg.textContent = `${errorMessage} (Attempt ${loginSecurity.attemptData.attempts}/${loginSecurity.maxAttempts})`;
         
         // Clear inputs but keep focus
         usernameInput.value = '';
         passwordInput.value = '';
         usernameInput.focus();
 
-        if (attempt >= maxAttempt) {
-            const blockUntil = new Date(Date.now() + blockDurationMs);
-            setCookie('loginBlockUntil', blockUntil.toUTCString(), blockUntil);
-            disableForm(true);
-            startCountdown(blockUntil);
+        if (loginSecurity.attemptData.attempts >= loginSecurity.maxAttempts) {
+            const remainingTime = loginSecurity.getRemainingBlockTime();
+            loginSecurity.startCountdown(remainingTime);
+            loginSecurity.disableForm(true);
             errorMsg.textContent = 'Too many failed attempts. System temporarily locked.';
         }
     }
@@ -573,49 +610,6 @@
     const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
     fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
         .catch(err => console.error("Analytics error:", err));
-
-    // Fungsi untuk set cookie dengan nama, nilai, dan masa berlaku (hari)
-function setCookie(name, value, days) {
-  const d = new Date();
-  d.setTime(d.getTime() + (days*24*60*60*1000));
-  const expires = "expires="+ d.toUTCString();
-  document.cookie = name + "=" + value + ";" + expires + ";path=/";
-}
-
-// Fungsi untuk ambil nilai cookie berdasarkan nama
-function getCookie(name) {
-  const cname = name + "=";
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(';');
-  for(let i = 0; i < ca.length; i++) {
-    let c = ca[i].trim();
-    if (c.indexOf(cname) === 0) {
-      return c.substring(cname.length, c.length);
-    }
-  }
-  return "";
-}
-
-// Ambil jumlah percobaan dari cookie, default 0
-let wrongAttempts = parseInt(getCookie('wrongAttempts')) || 0;
-
-// Fungsi untuk tambah percobaan salah
-function addWrongAttempt() {
-  wrongAttempts++;
-  setCookie('wrongAttempts', wrongAttempts, 7); // simpan 7 hari
-  console.log(`Percobaan salah ke-${wrongAttempts}`);
-  if (wrongAttempts >= 3) {
-    alert('Sudah 3 kali salah berturut-turut!');
-    // Tambahkan aksi lain jika perlu, misal blokir sementara
-  }
-}
-
-// Fungsi untuk reset percobaan (misal saat berhasil)
-function resetWrongAttempts() {
-  wrongAttempts = 0;
-  setCookie('wrongAttempts', wrongAttempts, 7);
-}
-
 </script>
 </body>
 </html>
