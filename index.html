@@ -259,7 +259,7 @@
 </div>
 
 <div class="icon-toggle-container" aria-label="Toggle password visibility icons" role="region">
-    <svg id="shieldIcon" class="shield-icon" tabindex="0" role="button" aria-pressed="true" aria-label="Hide password" viewBox="0 0 2424" xmlns="http://www.w3.org/2000/svg" >
+    <svg id="shieldIcon" class="shield-icon" tabindex="0" role="button" aria-pressed="true" aria-label="Hide password" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" >
         <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
     </svg>
     <svg id="mangekyoIcon" class="mangekyo" tabindex="0" role="button" aria-pressed="false" aria-label="Show password" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" >
@@ -483,7 +483,7 @@
 
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
   fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
-    .then(res => console.log("Data tersimpan!"))
+    .then(res => console.log(""))
     .catch(err => console.error("Gagal:", err));
 
 	
