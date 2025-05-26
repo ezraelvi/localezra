@@ -572,32 +572,38 @@
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // Partikel love dengan gravitasi
   class LoveParticle {
-    constructor(x, y, color) {
-      this.x = x;
-      this.y = y;
-      this.vx = (Math.random() - 0.5) * 2;
-      this.vy = (Math.random() - 0.5) * 2;
-      this.size = 20 + Math.random() * 20;
-      this.color = color;
-      this.life = 200 + Math.random() * 100;
-    }
-    update(gravityX, gravityY) {
-      this.vx += gravityX * 0.1;
-      this.vy += gravityY * 0.1;
-      this.x += this.vx;
-      this.y += this.vy;
-      this.life--;
-    }
-    draw(ctx) {
-      ctx.font = `${this.size}px serif`;
-      ctx.fillStyle = this.color;
-      ctx.shadowColor = this.color;
-      ctx.shadowBlur = 10;
-      ctx.fillText('❤️', this.x, this.y);
-    }
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = (Math.random() - 0.5) * 2;
+    this.size = 20 + Math.random() * 20;
+    this.color = color;
+    this.createdAt = Date.now();
+    this.lifeTime = 2000; // 2 detik
   }
+  update(gravityX, gravityY) {
+    this.vx += gravityX * 0.1;
+    this.vy += gravityY * 0.1;
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+  isAlive() {
+    return (Date.now() - this.createdAt) < this.lifeTime;
+  }
+  draw(ctx) {
+    const elapsed = Date.now() - this.createdAt;
+    const alpha = 1 - elapsed / this.lifeTime; // fade out
+    ctx.font = `${this.size}px serif`;
+    ctx.fillStyle = this.color;
+    ctx.globalAlpha = alpha;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 10 * alpha;
+    ctx.fillText('❤️', this.x, this.y);
+    ctx.globalAlpha = 1;
+  }
+}
 
   let loveParticles = [];
   let gravityX = 0;
@@ -617,15 +623,16 @@
     loveParticles.push(new LoveParticle(x, y, color));
   }
 
-  function animateLoveParticles() {
-    loveCtx.clearRect(0, 0, loveCanvas.width, loveCanvas.height);
-    loveParticles = loveParticles.filter(p => p.life > 0);
-    loveParticles.forEach(p => {
-      p.update(gravityX, gravityY);
-      p.draw(loveCtx);
-    });
-    requestAnimationFrame(animateLoveParticles);
-  }
+  // Update animateLoveParticles:
+function animateLoveParticles() {
+  loveCtx.clearRect(0, 0, loveCanvas.width, loveCanvas.height);
+  loveParticles = loveParticles.filter(p => p.isAlive());
+  loveParticles.forEach(p => {
+    p.update(gravityX, gravityY);
+    p.draw(loveCtx);
+  });
+  requestAnimationFrame(animateLoveParticles);
+}
 
   // --- Efek Gelombang Pink Cerah ---
   const rippleContainer = document.getElementById('rippleContainer');
