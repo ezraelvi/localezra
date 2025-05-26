@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Secure Login | V Style</title>
-	<link rel="icon" type="image/png" href="/imgvidaud/icon.png">
+<link rel="icon" type="image/png" href="/imgvidaud/icon.png">
 <style>
     :root {
         --deepseek-blue: #00a8ff;
@@ -230,7 +230,6 @@
             padding: 0.4rem 1rem;
         }
     }
-		  
 </style>
 </head>
 <body>
@@ -279,7 +278,7 @@
 
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script>
-	
+    
     particlesJS('particles-js', {
         particles: {
             number: { value: 80, density: { enable: true, value_area: 800 } },
@@ -306,6 +305,7 @@
     const countdownMsg = document.getElementById('countdownMsg');
     const loginForm = document.getElementById('loginForm');
     const usernameInput = document.getElementById('username');
+    const visitingBtn = document.getElementById('visitingBtn');
 
     function setToggleState(showPassword) {
         if (showPassword) {
@@ -323,15 +323,14 @@
         }
     }
 
-    setToggleState(false);
-
     function togglePassword() {
         setToggleState(passwordInput.type === 'password');
     }
 
+    setToggleState(false);
+
     shieldIcon.addEventListener('click', togglePassword);
     mangekyoIcon.addEventListener('click', togglePassword);
-
     shieldIcon.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -362,130 +361,229 @@
     changePlaceholder();
     setInterval(changePlaceholder, 2000);
 
-    let attempt = 0;
-    const maxAttempt = 2;
-    const blockDurationMs = 60 * 1 * 1000;
-    const blockCookieName = 'loginBlockUntil';
-
-    function setCookie(name, value, expires) {
-        document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
-    }
-    function getCookie(name) {
-        const cookies = document.cookie.split(';').map(c => c.trim());
-        for (const c of cookies) {
-            if (c.startsWith(name + '=')) {
-                return c.substring(name.length + 1);
-            }
+    class LoginSecurity {
+        constructor() {
+            this.maxAttempts = 3;
+            this.blockDurationMinutes = 5;
+            this.cookieName = 'loginSecurityData';
+            this.attemptData = this.loadAttemptData();
+            this.checkBlockStatus();
         }
-        return null;
-    }
-    function deleteCookie(name) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
-    }
 
-    function checkBlock() {
-        const blockUntilStr = getCookie(blockCookieName);
-        if (blockUntilStr) {
-            const blockUntil = new Date(blockUntilStr);
+        loadAttemptData() {
+            const cookieData = this.getCookie(this.cookieName);
+            if (cookieData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(cookieData));
+                    
+                    if (data && typeof data === 'object' && 
+                        'attempts' in data && 'lastAttempt' in data && 'blockUntil' in data) {
+                        return data;
+                    }
+                } catch (e) {
+                    console.error('Failed to parse cookie data:', e);
+                }
+            }
+            
+            return {
+                attempts: 0,
+                lastAttempt: null,
+                blockUntil: null
+            };
+        }
+
+        saveAttemptData() {
+            const expires = new Date();
+            expires.setDate(expires.getDate() + 1);
+            const data = encodeURIComponent(JSON.stringify(this.attemptData));
+            this.setCookie(this.cookieName, data, expires);
+        }
+
+        setCookie(name, value, expires) {
+            document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure`;
+        }
+
+        getCookie(name) {
+            const cookies = document.cookie.split(';').map(c => c.trim());
+            for (const c of cookies) {
+                if (c.startsWith(name + '=')) {
+                    return c.substring(name.length + 1);
+                }
+            }
+            return null;
+        }
+
+        deleteCookie(name) {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+
+        recordFailedAttempt() {
             const now = new Date();
-            if (blockUntil > now) {
-                startCountdown(blockUntil);
-                disableForm(true);
-                return true;
-            } else {
-                deleteCookie(blockCookieName);
-                disableForm(false);
-                countdownMsg.textContent = '';
-                return false;
-            }
-        }
-        disableForm(false);
-        countdownMsg.textContent = '';
-        return false;
-    }
+            this.attemptData.attempts++;
+            this.attemptData.lastAttempt = now.toISOString();
 
-    function disableForm(disable) {
-        usernameInput.disabled = disable;
-        passwordInput.disabled = disable;
-        loginForm.querySelector('button[type="submit"]').disabled = disable;
-    }
-
-    let countdownInterval;
-    function startCountdown(blockUntil) {
-        function updateCountdown() {
-            const now = new Date();
-            const diff = blockUntil - now;
-            if (diff <= 0) {
-                clearInterval(countdownInterval);
-                countdownMsg.textContent = '';
-                deleteCookie(blockCookieName);
-                disableForm(false);
-                errorMsg.textContent = '';
-                attempt = 0;
-                return;
-            }
-            const minutes = Math.floor(diff / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
-            countdownMsg.textContent = `Too many failed attempts. Tolong tunggu ${minutes}m ${seconds}d lalu coba lagi`;
-        }
-        updateCountdown();
-        countdownInterval = setInterval(updateCountdown, 1000);
-    }
-
-    if (checkBlock()) {
-        errorMsg.textContent = 'ACCESS Ditolak, terlalu banyak percobaan';
-    }
-
-    loginForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        if (checkBlock()) {
-            return;
-        }
-
-        const users = {
-            ezra: { password: 'v', redirect: 'https://docs.google.com/spreadsheets/u/0/d/1LlyYPss-YVmaxvff3FQKTWSlYb8C98yf21N94J3ivgI/htmlview' },
-            elvi: { password: 'love', redirect: 'elvi.html' }
-        };
-
-        const username = usernameInput.value.toLowerCase();
-        const password = passwordInput.value;
-
-        if (users[username] && users[username].password === password) {
-            sessionStorage.setItem('loggedInUser', username);
-                       document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
-            setTimeout(() => {
-                window.location.href = users[username].redirect;
-            }, 1000);
-        } else {
-            attempt++;
-            errorMsg.textContent = `ACCESS DENIED (Attempt ${attempt}/${maxAttempt})`;
-            usernameInput.value = '';
-            passwordInput.value = '';
-            usernameInput.focus();
-
-            if (attempt >= maxAttempt) {
-                const blockUntil = new Date(Date.now() + blockDurationMs);
-                setCookie(blockCookieName, blockUntil.toUTCString(), blockUntil);
-                disableForm(true);
-                startCountdown(blockUntil);
+            if (this.attemptData.attempts >= this.maxAttempts) {
+                const blockUntil = new Date(now.getTime() + this.blockDurationMinutes * 60000);
+                this.attemptData.blockUntil = blockUntil.toISOString();
                 setTimeout(() => {
                     window.location.href = 'whoareyou.html';
                 }, 1000);
             }
+
+            this.saveAttemptData();
+        }
+
+        resetAttempts() {
+            this.attemptData = {
+                attempts: 0,
+                lastAttempt: null,
+                blockUntil: null
+            };
+            this.saveAttemptData();
+        }
+
+        isBlocked() {
+            if (!this.attemptData.blockUntil) return false;
+            
+            const blockUntil = new Date(this.attemptData.blockUntil);
+            const now = new Date();
+            
+            if (now > blockUntil) {
+                this.resetAttempts();
+                return false;
+            }
+            
+            return true;
+        }
+
+        getRemainingBlockTime() {
+            if (!this.isBlocked()) return 0;
+            
+            const blockUntil = new Date(this.attemptData.blockUntil);
+            const now = new Date();
+            return Math.round((blockUntil - now) / 1000);
+        }
+
+        checkBlockStatus() {
+            if (this.isBlocked()) {
+                this.disableForm(true);
+                const remainingTime = this.getRemainingBlockTime();
+                this.startCountdown(remainingTime);
+                errorMsg.textContent = 'System temporarily locked due to too many attempts';
+                return true;
+            }
+            return false;
+        }
+
+        disableForm(disable) {
+            usernameInput.disabled = disable;
+            passwordInput.disabled = disable;
+            loginForm.querySelector('button[type="submit"]').disabled = disable;
+        }
+
+        startCountdown(remainingSeconds) {
+            clearInterval(window.countdownInterval);
+            
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}m ${secs}s`;
+            }
+            
+            function updateDisplay() {
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                countdownMsg.textContent = `Too many attempts. Please wait ${minutes}m ${seconds}s`;
+                
+                if (remainingSeconds <= 0) {
+                    clearInterval(window.countdownInterval);
+                    countdownMsg.textContent = '';
+                    loginSecurity.disableForm(false);
+                    errorMsg.textContent = '';
+                    return;
+                }
+                
+                remainingSeconds--;
+            }
+            
+            updateDisplay();
+            window.countdownInterval = setInterval(updateDisplay, 1000);
+        }
+    }
+
+    const loginSecurity = new LoginSecurity();
+
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (loginSecurity.isBlocked()) {
+            const remainingTime = loginSecurity.getRemainingBlockTime();
+            loginSecurity.startCountdown(remainingTime);
+            errorMsg.textContent = 'Anda Tidak Diperbolehkan Masuk';
+            return;
+        }
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        try {
+            
+            const response = await fetch('https://flat-bread-4a16.ezvvel.workers.dev/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                
+                loginSecurity.resetAttempts();
+                sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('loggedInUser', username);
+                
+                document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
+                errorMsg.textContent = '';
+                
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl || 'dashboard.html';
+                }, 1000);
+            } else {
+                
+                loginSecurity.recordFailedAttempt();
+                handleFailedLogin(data.error || 'Invalid credentials');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            loginSecurity.recordFailedAttempt();
+            handleFailedLogin('Network error. Please try again.');
         }
     });
 
-    document.getElementById('visitingBtn').addEventListener('click', () => {
+    function handleFailedLogin(errorMessage) {
+        errorMsg.textContent = `${errorMessage} (Attempt ${loginSecurity.attemptData.attempts}/${loginSecurity.maxAttempts})`;
+        
+        usernameInput.value = '';
+        passwordInput.value = '';
+        usernameInput.focus();
+
+        if (loginSecurity.attemptData.attempts >= loginSecurity.maxAttempts) {
+            const remainingTime = loginSecurity.getRemainingBlockTime();
+            loginSecurity.startCountdown(remainingTime);
+            loginSecurity.disableForm(true);
+            errorMsg.textContent = 'Too many failed attempts. System temporarily locked.';
+        }
+    }
+
+    visitingBtn.addEventListener('click', () => {
         window.location.href = 'mydashboard.html';
     });
-	
 
-  const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
-  fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
-    .catch(err => console.error("Gagal:", err));
-
-	
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
+    fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
+        .catch(err => console.error("Analytics error:", err));
 </script>
 </body>
 </html>
