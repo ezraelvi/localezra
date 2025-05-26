@@ -684,7 +684,7 @@ function createPinkRipple(x, y) {
 // --- Event Listener untuk gesture dan efek ripple ---
 
 document.body.addEventListener('touchstart', (e) => {
-    if    if (!drawing) startDraw(e);
+    if (!drawing) startDraw(e);
     else addPoint(e);
 });
 document.body.addEventListener('touchmove', (e) => {
