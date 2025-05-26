@@ -508,45 +508,47 @@
         errorMsg.textContent = 'ACCESS Ditolak, terlalu banyak percobaan';
     }
 
-    loginForm.addEventListener('submit', function (e) {
-        e.preventDefault();
+   <!-- Di bagian form login -->
+<form id="loginForm">
+  <input type="text" id="username" placeholder="Username" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button type="submit">Login</button>
+</form>
+<div id="errorMsg"></div>
 
-        if (checkBlock()) {
-            return;
-        }
 
-        const users = {
-            ezra: { password: 'v', redirect: 'https://docs.google.com/spreadsheets/u/0/d/1LlyYPss-YVmaxvff3FQKTWSlYb8C98yf21N94J3ivgI/htmlview' },
-            elvi: { password: 'love', redirect: 'elvi.html' }
-        };
+  const loginForm = document.getElementById('loginForm');
+  const errorMsg = document.getElementById('errorMsg');
+  const WORKER_URL = 'https://worker.js 1.https://flat-bread-4a16.ezvvel.workers.dev/';
 
-        const username = usernameInput.value.toLowerCase();
-        const password = passwordInput.value;
-
-        if (users[username] && users[username].password === password) {
-            sessionStorage.setItem('loggedInUser', username);
-                       document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
-            setTimeout(() => {
-                window.location.href = users[username].redirect;
-            }, 1000);
-        } else {
-            attempt++;
-            errorMsg.textContent = `ACCESS DENIED (Attempt ${attempt}/${maxAttempt})`;
-            usernameInput.value = '';
-            passwordInput.value = '';
-            usernameInput.focus();
-
-            if (attempt >= maxAttempt) {
-                const blockUntil = new Date(Date.now() + blockDurationMs);
-                setCookie(blockCookieName, blockUntil.toUTCString(), blockUntil);
-                disableForm(true);
-                startCountdown(blockUntil);
-                setTimeout(() => {
-                    window.location.href = 'whoareyou.html';
-                }, 1000);
-            }
-        }
-    });
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+      const response = await fetch(`${https://flat-bread-4a16.ezvvel.workers.dev/}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Simpan token dan redirect
+        sessionStorage.setItem('authToken', data.token);
+        sessionStorage.setItem('loggedInUser', data.user);
+        window.location.href = 'mydashboard.html';
+      } else {
+        errorMsg.textContent = data.error || 'Login gagal';
+      }
+    } catch (error) {
+      errorMsg.textContent = 'Koneksi error. Coba lagi.';
+      console.error('Login error:', error);
+    }
+  });
 
     document.getElementById('visitingBtn').addEventListener('click', () => {
         window.location.href = 'mydashboard.html';
