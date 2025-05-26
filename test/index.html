@@ -425,6 +425,9 @@
             if (this.attemptData.attempts >= this.maxAttempts) {
                 const blockUntil = new Date(now.getTime() + this.blockDurationMinutes * 60000);
                 this.attemptData.blockUntil = blockUntil.toISOString();
+                setTimeout(() => {
+                    window.location.href = 'whoareyou.html';
+                }, 1000);
             }
 
             this.saveAttemptData();
@@ -516,7 +519,7 @@
         if (loginSecurity.isBlocked()) {
             const remainingTime = loginSecurity.getRemainingBlockTime();
             loginSecurity.startCountdown(remainingTime);
-            errorMsg.textContent = 'System temporarily locked due to too many attempts';
+            errorMsg.textContent = 'Anda Tidak Diperbolehkan Masuk';
             return;
         }
 
