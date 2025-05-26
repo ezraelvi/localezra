@@ -520,6 +520,141 @@
     const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
     fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
         .catch(err => console.error("Analytics error:", err));
+
+    <script>
+    // ... (kode particles.js dan variabel lainnya tetap sama) ...
+
+    // Cookie management dengan enkripsi sederhana
+    function setCookie(name, value, days) {
+        const encodedValue = btoa(encodeURIComponent(JSON.stringify(value)));
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${encodedValue};expires=${date.toUTCString()};path=/;SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        for (const c of cookies) {
+            if (c.startsWith(name + '=')) {
+                try {
+                    return JSON.parse(decodeURIComponent(atob(c.substring(name.length + 1))));
+                } catch (e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Tracking percobaan login
+    let loginAttempts = getCookie('loginAttempts') || { count: 0, lastAttempt: null };
+
+    function updateLoginAttempts(isSuccess) {
+        if (isSuccess) {
+            loginAttempts = { count: 0, lastAttempt: null };
+        } else {
+            loginAttempts.count += 1;
+            loginAttempts.lastAttempt = new Date().toISOString();
+        }
+        setCookie('loginAttempts', loginAttempts, 1); // Simpan 1 hari
+    }
+
+    // Cek percobaan login saat halaman dimuat
+    function checkLoginAttempts() {
+        const now = new Date();
+        const lastAttempt = new Date(loginAttempts.lastAttempt);
+        const hoursSinceLastAttempt = (now - lastAttempt) / (1000 * 60 * 60);
+
+        // Reset jika lebih dari 24 jam sejak percobaan terakhir
+        if (hoursSinceLastAttempt > 24) {
+            loginAttempts = { count: 0, lastAttempt: null };
+            setCookie('loginAttempts', loginAttempts, 1);
+        }
+
+        if (loginAttempts.count >= 3) {
+            disableForm(true);
+            errorMsg.textContent = 'Terlalu banyak percobaan gagal. Coba lagi besok.';
+            return true;
+        }
+        return false;
+    }
+
+    // Panggil saat halaman dimuat
+    if (checkLoginAttempts()) {
+        errorMsg.textContent = `Percobaan login gagal: ${loginAttempts.count}/3`;
+    }
+
+    // Form submission handler
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (checkLoginAttempts()) {
+            return;
+        }
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        try {
+            // Kirim ke backend (Cloudflare Worker)
+            const response = await fetch('https://flat-bread-4a16.ezvvel.workers.dev/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                updateLoginAttempts(true);
+                
+                // Login berhasil
+                sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('loggedInUser', username);
+                
+                // Feedback visual
+                document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
+                errorMsg.textContent = '';
+                
+                // Redirect khusus untuk user elvi
+                if (username.toLowerCase() === 'elvi') {
+                    setTimeout(() => {
+                        window.location.href = 'elvi.html';
+                    }, 1000);
+                } else {
+                    // Redirect default untuk user lain
+                    setTimeout(() => {
+                        window.location.href = data.redirectUrl || 'dashboard.html';
+                    }, 1000);
+                }
+            } else {
+                // Login gagal
+                updateLoginAttempts(false);
+                handleFailedLogin(data.error || 'Username atau password salah');
+            }
+        } catch (error) {
+            console.error('Network Error:', error);
+            errorMsg.textContent = 'Gagal terhubung ke server. Coba lagi nanti.';
+        }
+    });
+
+    function handleFailedLogin(message) {
+        errorMsg.textContent = `${message} (Percobaan ${loginAttempts.count}/3)`;
+        usernameInput.value = '';
+        passwordInput.value = '';
+        usernameInput.focus();
+
+        if (loginAttempts.count >= 3) {
+            disableForm(true);
+            errorMsg.textContent = 'Terlalu banyak percobaan gagal. Coba lagi besok.';
+        }
+    }
+
+    // ... (kode lainnya tetap sama) ...
+</script>
     
 </script>
 </body>
