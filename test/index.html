@@ -372,6 +372,59 @@
     const maxAttempt = 3;
     const blockDurationMs = 5 * 60 * 1000; // 5 minutes
 
+    // Cookie management dengan enkripsi sederhana
+    function setCookie(name, value, days) {
+        const encodedValue = btoa(encodeURIComponent(JSON.stringify(value)));
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${encodedValue};expires=${date.toUTCString()};path=/;SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        for (const c of cookies) {
+            if (c.startsWith(name + '=')) {
+                try {
+                    return JSON.parse(decodeURIComponent(atob(c.substring(name.length + 1))));
+                } catch (e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    let loginAttempts = getCookie('loginAttempts') || { count: 0, lastAttempt: null };
+
+    function updateLoginAttempts(isSuccess) {
+        if (isSuccess) {
+            loginAttempts = { count: 0, lastAttempt: null };
+        } else {
+            loginAttempts.count += 1;
+            loginAttempts.lastAttempt = new Date().toISOString();
+        }
+        setCookie('loginAttempts', loginAttempts, 1); // Simpan 1 hari
+    }
+
+    function checkLoginAttempts() {
+        const now = new Date();
+        const lastAttempt = new Date(loginAttempts.lastAttempt);
+        const hoursSinceLastAttempt = (now - lastAttempt) / (1000 * 60 * 60);
+
+        // Reset jika lebih dari 24 jam sejak percobaan terakhir
+        if (hoursSinceLastAttempt > 24) {
+            loginAttempts = { count: 0, lastAttempt: null };
+            setCookie('loginAttempts', loginAttempts, 1);
+        }
+
+        if (loginAttempts.count >= 3) {
+            disableForm(true);
+            errorMsg.textContent = 'Terlalu banyak percobaan gagal. Coba lagi besok.';
+            return true;
+        }
+        return false;
+    }
+
     // Cookie management
     function setCookie(name, value, expires) {
         document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
