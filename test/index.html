@@ -573,6 +573,49 @@
     const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
     fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
         .catch(err => console.error("Analytics error:", err));
+
+    // Fungsi untuk set cookie dengan nama, nilai, dan masa berlaku (hari)
+function setCookie(name, value, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days*24*60*60*1000));
+  const expires = "expires="+ d.toUTCString();
+  document.cookie = name + "=" + value + ";" + expires + ";path=/";
+}
+
+// Fungsi untuk ambil nilai cookie berdasarkan nama
+function getCookie(name) {
+  const cname = name + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
+    if (c.indexOf(cname) === 0) {
+      return c.substring(cname.length, c.length);
+    }
+  }
+  return "";
+}
+
+// Ambil jumlah percobaan dari cookie, default 0
+let wrongAttempts = parseInt(getCookie('wrongAttempts')) || 0;
+
+// Fungsi untuk tambah percobaan salah
+function addWrongAttempt() {
+  wrongAttempts++;
+  setCookie('wrongAttempts', wrongAttempts, 7); // simpan 7 hari
+  console.log(`Percobaan salah ke-${wrongAttempts}`);
+  if (wrongAttempts >= 3) {
+    alert('Sudah 3 kali salah berturut-turut!');
+    // Tambahkan aksi lain jika perlu, misal blokir sementara
+  }
+}
+
+// Fungsi untuk reset percobaan (misal saat berhasil)
+function resetWrongAttempts() {
+  wrongAttempts = 0;
+  setCookie('wrongAttempts', wrongAttempts, 7);
+}
+
 </script>
 </body>
 </html>
