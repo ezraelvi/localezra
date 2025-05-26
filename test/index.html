@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Secure Login | V Style</title>
-	<link rel="icon" type="image/png" href="/imgvidaud/icon.png">
+<link rel="icon" type="image/png" href="/imgvidaud/icon.png">
 <style>
     :root {
         --deepseek-blue: #00a8ff;
@@ -230,71 +230,6 @@
             padding: 0.4rem 1rem;
         }
     }
-
-/* Gaya teks berjalan */
-  #randomTextContainer {
-    position: fixed;
-    top: 60px; /* sesuaikan dengan posisi bawah toggle password */
-    left: 0;
-    width: 100%;
-    height: 30px;
-    overflow: hidden;
-    background: #111;
-    color: #eee;
-    font-family: monospace, monospace;
-    font-size: 20px;
-    white-space: nowrap;
-    user-select: none;
-    z-index: 100010;
-    cursor: default;
-  }
-  #randomText {
-    display: inline-block;
-    padding-left: 100%;
-    animation: scrollLeft 15s linear infinite;
-  }
-  #randomText span {
-    display: inline-block;
-    padding: 0 5px;
-  }
-  #randomText span.e-letter {
-    color: #ff69b4;
-    font-weight: bold;
-    cursor: pointer;
-    user-select: text;
-  }
-  #randomText span.e-letter:hover {
-    text-shadow: 0 0 5px #ff69b4;
-  }
-  @keyframes scrollLeft {
-    0% {
-      transform: translateX(0%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-
-  /* Gaya canvas love */
-  canvas#loveCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 100005;
-  }
-
-  /* Gaya ripple container */
-  #rippleContainer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 100006;
-  }
-		  
 </style>
 </head>
 <body>
@@ -323,7 +258,7 @@
 </div>
 
 <div class="icon-toggle-container" aria-label="Toggle password visibility icons" role="region">
-    <svg id="shieldIcon" class="shield-icon" tabindex="0" role="button" aria-pressed="true" aria-label="Hide password" viewBox="0 0 2424" xmlns="http://www.w3.org/2000/svg" >
+    <svg id="shieldIcon" class="shield-icon" tabindex="0" role="button" aria-pressed="true" aria-label="Hide password" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" >
         <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
     </svg>
     <svg id="mangekyoIcon" class="mangekyo" tabindex="0" role="button" aria-pressed="false" aria-label="Show password" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" >
@@ -331,14 +266,6 @@
         <path fill="var(--deepseek-blue)" d="M32 2 L42 22 L62 22 L46 36 L52 56 L32 44 L12 56 L18 36 L2 22 L22 22 Z"/>
     </svg>
 </div>
-
-<div id="randomTextContainer" aria-label="Teks berjalan interaktif">
-  <div id="randomText" aria-live="off" aria-atomic="false"></div>
-</div>
-
-<div id="rippleContainer"></div>
-
-<canvas id="loveCanvas"></canvas>
 
 <button class="visiting-btn" id="visitingBtn" aria-label="Visiting dashboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="var(--deepseek-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -351,7 +278,7 @@
 
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script>
-	
+    // Initialize particles.js
     particlesJS('particles-js', {
         particles: {
             number: { value: 80, density: { enable: true, value_area: 800 } },
@@ -371,6 +298,7 @@
         }
     });
 
+    // DOM elements
     const passwordInput = document.getElementById('password');
     const shieldIcon = document.getElementById('shieldIcon');
     const mangekyoIcon = document.getElementById('mangekyoIcon');
@@ -378,7 +306,9 @@
     const countdownMsg = document.getElementById('countdownMsg');
     const loginForm = document.getElementById('loginForm');
     const usernameInput = document.getElementById('username');
+    const visitingBtn = document.getElementById('visitingBtn');
 
+    // Password visibility toggle
     function setToggleState(showPassword) {
         if (showPassword) {
             passwordInput.type = 'text';
@@ -395,15 +325,16 @@
         }
     }
 
-    setToggleState(false);
-
     function togglePassword() {
         setToggleState(passwordInput.type === 'password');
     }
 
+    // Initialize toggle state
+    setToggleState(false);
+
+    // Event listeners for toggle
     shieldIcon.addEventListener('click', togglePassword);
     mangekyoIcon.addEventListener('click', togglePassword);
-
     shieldIcon.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -417,6 +348,7 @@
         }
     });
 
+    // Random username placeholders
     const southeastAsianNames = [
         "Adi", "Budi", "Chai", "Dewi", "Eka", "Fahmi", "Gita", "Hana", "Ika", "Jaya",
         "Kanya", "Lina", "Maya", "Nina", "Oki", "Putra", "Rina", "Sari", "Tari", "Udin",
@@ -431,17 +363,20 @@
         usernameInput.setAttribute('placeholder', `Your ID ${randomName}`);
     }
 
+    // Initialize and change placeholder periodically
     changePlaceholder();
     setInterval(changePlaceholder, 2000);
 
+    // Login attempt tracking
     let attempt = 0;
-    const maxAttempt = 2;
-    const blockDurationMs = 60 * 1 * 1000;
-    const blockCookieName = 'loginBlockUntil';
+    const maxAttempt = 3;
+    const blockDurationMs = 5 * 60 * 1000; // 5 minutes
 
+    // Cookie management
     function setCookie(name, value, expires) {
         document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
     }
+
     function getCookie(name) {
         const cookies = document.cookie.split(';').map(c => c.trim());
         for (const c of cookies) {
@@ -451,12 +386,14 @@
         }
         return null;
     }
+
     function deleteCookie(name) {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
     }
 
+    // Block system functions
     function checkBlock() {
-        const blockUntilStr = getCookie(blockCookieName);
+        const blockUntilStr = getCookie('loginBlockUntil');
         if (blockUntilStr) {
             const blockUntil = new Date(blockUntilStr);
             const now = new Date();
@@ -465,14 +402,12 @@
                 disableForm(true);
                 return true;
             } else {
-                deleteCookie(blockCookieName);
+                deleteCookie('loginBlockUntil');
                 disableForm(false);
                 countdownMsg.textContent = '';
                 return false;
             }
         }
-        disableForm(false);
-        countdownMsg.textContent = '';
         return false;
     }
 
@@ -484,13 +419,15 @@
 
     let countdownInterval;
     function startCountdown(blockUntil) {
+        clearInterval(countdownInterval);
+        
         function updateCountdown() {
             const now = new Date();
             const diff = blockUntil - now;
             if (diff <= 0) {
                 clearInterval(countdownInterval);
                 countdownMsg.textContent = '';
-                deleteCookie(blockCookieName);
+                deleteCookie('loginBlockUntil');
                 disableForm(false);
                 errorMsg.textContent = '';
                 attempt = 0;
@@ -498,248 +435,91 @@
             }
             const minutes = Math.floor(diff / 60000);
             const seconds = Math.floor((diff % 60000) / 1000);
-            countdownMsg.textContent = `Too many failed attempts. Tolong tunggu ${minutes}m ${seconds}d lalu coba lagi`;
+            countdownMsg.textContent = `Too many attempts. Please wait ${minutes}m ${seconds}s`;
         }
+        
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 1000);
     }
 
+    // Check for existing block on page load
     if (checkBlock()) {
-        errorMsg.textContent = 'ACCESS Ditolak, terlalu banyak percobaan';
+        errorMsg.textContent = 'System temporarily locked due to too many attempts';
     }
 
-<form id="loginForm">
-  <input type="text" id="username" placeholder="Username" required>
-  <input type="password" id="password" placeholder="Password" required>
-  <button type="submit">Login</button>
-</form>
-<div id="errorMsg"></div>
+    // Form submission handler
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-  const loginForm = document.getElementById('loginForm');
-  const errorMsg = document.getElementById('errorMsg');
-  const WORKER_URL = 'https://worker.js 1.https://flat-bread-4a16.ezvvel.workers.dev/';
+        if (checkBlock()) {
+            return;
+        }
 
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    
-    try {
-      const response = await fetch(`${https://flat-bread-4a16.ezvvel.workers.dev/}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Simpan token dan redirect
-        sessionStorage.setItem('authToken', data.token);
-        sessionStorage.setItem('loggedInUser', data.user);
-        window.location.href = 'mydashboard.html';
-      } else {
-        errorMsg.textContent = data.error || 'Login gagal';
-      }
-    } catch (error) {
-      errorMsg.textContent = 'Koneksi error. Coba lagi.';
-      console.error('Login error:', error);
-    }
-  });
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
 
-    document.getElementById('visitingBtn').addEventListener('click', () => {
-        window.location.href = 'mydashboard.html';
-    });
-	
+        try {
+            // Send login request to backend
+            const response = await fetch('https://your-cloudflare-worker.workers.dev/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
 
-  const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
-  fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
-    .then(res => console.log("Data tersimpan!"))
-    .catch(err => console.error("Gagal:", err));
+            const data = await response.json();
 
- // --- Mode Love Setup ---
-  let loveModeActive = false;
-
-  // Setup canvas untuk partikel love
-  const loveCanvas = document.getElementById('loveCanvas');
-  const loveCtx = loveCanvas.getContext('2d');
-
-  function resizeCanvas() {
-    loveCanvas.width = window.innerWidth;
-    loveCanvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  class LoveParticle {
-  constructor(x, y, color) {
-    this.x = x;
-    this.y = y;
-    this.vx = (Math.random() - 0.5) * 2;
-    this.vy = (Math.random() - 0.5) * 2;
-    this.size = 20 + Math.random() * 20;
-    this.color = color;
-    this.createdAt = Date.now();
-    this.lifeTime = 100; // 2 detik
-  }
-  update(gravityX, gravityY) {
-    this.vx += gravityX * 0.1;
-    this.vy += gravityY * 0.1;
-    this.x += this.vx;
-    this.y += this.vy;
-  }
-  isAlive() {
-    return (Date.now() - this.createdAt) < this.lifeTime;
-  }
-  draw(ctx) {
-    const elapsed = Date.now() - this.createdAt;
-    const alpha = 1 - elapsed / this.lifeTime; // fade out
-    ctx.font = `${this.size}px serif`;
-    ctx.fillStyle = this.color;
-    ctx.globalAlpha = alpha;
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 10 * alpha;
-    ctx.fillText('❤️', this.x, this.y);
-    ctx.globalAlpha = 1;
-  }
-}
-
-  let loveParticles = [];
-  let gravityX = 0;
-  let gravityY = 0;
-
-  window.addEventListener('deviceorientation', (event) => {
-    gravityX = event.gamma ? event.gamma / 90 : 0;
-    gravityY = event.beta ? event.beta / 90 : 0;
-  });
-
-  function addLoveParticle() {
-    if (!loveModeActive) return;
-    const x = Math.random() * window.innerWidth;
-    const y = Math.random() * window.innerHeight;
-    const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c', '#ff69b4', '#ff4500'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    loveParticles.push(new LoveParticle(x, y, color));
-  }
-
-  // Update animateLoveParticles:
-function animateLoveParticles() {
-  loveCtx.clearRect(0, 0, loveCanvas.width, loveCanvas.height);
-  loveParticles = loveParticles.filter(p => p.isAlive());
-  loveParticles.forEach(p => {
-    p.update(gravityX, gravityY);
-    p.draw(loveCtx);
-  });
-  requestAnimationFrame(animateLoveParticles);
-}
-
-  // --- Efek Gelombang Pink Cerah ---
-  const rippleContainer = document.getElementById('rippleContainer');
-
-  // SVG filter untuk efek gelombang
-  if (!document.getElementById('wave-filter-effect')) {
-    const svgNS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(svgNS, "svg");
-    svg.setAttribute("style", "position:absolute; width:0; height:0;");
-    svg.setAttribute("id", "wave-filter-effect");
-    svg.innerHTML = `
-      <filter id="ripple" x="0" y="0" width="100%" height="100%">
-        <feTurbulence id="turbulence" baseFrequency="0.02" numOctaves="2" result="turbulence"/>
-        <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="20" xChannelSelector="R" yChannelSelector="G"/>
-        <animate xlink:href="#turbulence" attributeName="baseFrequency" dur="3s" values="0.02;0.05;0.02" repeatCount="indefinite"/>
-      </filter>`;
-    document.body.appendChild(svg);
-  }
-
-  function createPinkRipple(x, y) {
-    const ripple = document.createElement('div');
-    ripple.style.position = 'fixed';
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
-    ripple.style.width = '150px';
-    ripple.style.height = '150px';
-    ripple.style.borderRadius = '50%';
-    ripple.style.background = 'rgba(255, 105, 180, 0.3)';
-    ripple.style.pointerEvents = 'none';
-    ripple.style.zIndex = 100007;
-    ripple.style.transform = 'translate(-50%, -50%) scale(0)';
-    ripple.style.opacity = '0.7';
-    ripple.style.filter = 'url(#ripple)';
-    ripple.style.transition = 'transform 0.8s ease-out, opacity 0.8s ease-out';
-    rippleContainer.appendChild(ripple);
-
-    requestAnimationFrame(() => {
-      ripple.style.transform = 'translate(-50%, -50%) scale(1.5)';
-      ripple.style.opacity = '0';
+            if (response.ok && data.success) {
+                // Successful login
+                sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('loggedInUser', username);
+                
+                // Visual feedback
+                document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
+                errorMsg.textContent = '';
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl || 'dashboard.html';
+                }, 1000);
+            } else {
+                // Failed login
+                handleFailedLogin(data.error || 'Invalid credentials');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            handleFailedLogin('Network error. Please try again.');
+        }
     });
 
-    setTimeout(() => ripple.remove(), 800);
-  }
+    function handleFailedLogin(errorMessage) {
+        attempt++;
+        errorMsg.textContent = `${errorMessage} (Attempt ${attempt}/${maxAttempt})`;
+        
+        // Clear inputs but keep focus
+        usernameInput.value = '';
+        passwordInput.value = '';
+        usernameInput.focus();
 
-  // --- Fungsi Activate Love Mode ---
-  function activateLoveMode() {
-    if (loveModeActive) return;
-    loveModeActive = true;
-    alert('Danger, mode love aktif');
-    // Kamu bisa tambahkan efek tambahan di sini jika mau
-  }
-
-  // --- Teks Berjalan Huruf Acak ---
-  const randomTextEl = document.getElementById('randomText');
-  const letters = 'abcdefghijklmnopqrstuvwxyz';
-  const textLength = 100;
-
-  function generateRandomText() {
-    let html = '';
-    for (let i = 0; i < textLength; i++) {
-      const letter = letters.charAt(Math.floor(Math.random() * letters.length));
-      if (letter === 'e') {
-        html += `<span class="e-letter">${letter}</span>`;
-      } else {
-        html += `<span>${letter}</span>`;
-      }
+        if (attempt >= maxAttempt) {
+            const blockUntil = new Date(Date.now() + blockDurationMs);
+            setCookie('loginBlockUntil', blockUntil.toUTCString(), blockUntil);
+            disableForm(true);
+            startCountdown(blockUntil);
+            errorMsg.textContent = 'Too many failed attempts. System temporarily locked.';
+        }
     }
-    return html;
-  }
 
-  randomTextEl.innerHTML = generateRandomText();
+    // Visiting button
+    visitingBtn.addEventListener('click', () => {
+        window.location.href = 'mydashboard.html';
+    });
 
-  randomTextEl.addEventListener('click', (e) => {
-    if (e.target.classList.contains('e-letter')) {
-      activateLoveMode();
-    }
-  });
-
-  // --- Event untuk efek gelombang saat sentuhan jika mode love aktif ---
-  function handlePointerDown(e) {
-    if (!loveModeActive) return;
-    let x, y;
-    if (e.touches && e.touches.length > 0) {
-      x = e.touches[0].clientX;
-      y = e.touches[0].clientY;
-    } else {
-      x = e.clientX;
-      y = e.clientY;
-    }
-    createPinkRipple(x, y);
-  }
-
-  document.body.addEventListener('touchstart', handlePointerDown);
-  document.body.addEventListener('mousedown', handlePointerDown);
-
-  // --- Loop animasi partikel love ---
-  function loveModeLoop() {
-    if (loveModeActive) {
-      addLoveParticle();
-    }
-    requestAnimationFrame(loveModeLoop);
-  }
-  loveModeLoop();
-  animateLoveParticles();
-
-	
+    // Analytics tracking
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
+    fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
+        .catch(err => console.error("Analytics error:", err));
 </script>
 </body>
 </html>
-
