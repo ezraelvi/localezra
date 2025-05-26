@@ -1,507 +1,669 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Verification Required</title>
-    <style>
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background-color: black;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        #matrix {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -2;
-        }
-        #loading-screen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: black;
-            color: #0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            z-index: 100000;
-            flex-direction: column;
-        }
-        #loading-dots span {
-            animation: blink 1.4s infinite;
-            font-weight: bold;
-            font-size: 28px;
-            margin: 0 2px;
-        }
-        #loading-dots span:nth-child(1) { animation-delay: 0s; }
-        #loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        #loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink {
-            0%, 20% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        .verification-box {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid #0f0;
-            padding: 30px;
-            text-align: center;
-            max-width: 500px;
-            box-shadow: 0 0 20px #0f0;
-            z-index: 10;
-            border-radius: 8px;
-            user-select: none;
-        }
-        h1 {
-            margin-bottom: 20px;
-            text-shadow: 0 0 5px #0f0;
-            white-space: nowrap;
-            overflow: hidden;
-            border-right: 3px solid #0f0;
-            width: 0;
-            animation: typing 3s steps(30, end) forwards, blink-caret 0.75s step-end infinite;
-        }
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-        @keyframes blink-caret {
-            0%, 100% { border-color: transparent }
-            50% { border-color: #0f0 }
-        }
-        input {
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 10px;
-            width: 80%;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-            border-radius: 4px;
-            transition: box-shadow 0.3s ease;
-        }
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 10px #0f0;
-        }
-        button {
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            border-radius: 4px;
-            font-weight: bold;
-            user-select: none;
-        }
-        button:hover {
-            background: #0f0;
-            color: black;
-            box-shadow: 0 0 15px #0f0;
-            transform: scale(1.05);
-        }
-        #audio-control {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 14px;
-            user-select: none;
-            z-index: 100001;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        #audio-control:hover {
-            background: #0f0;
-            color: black;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Secure Login | V Style</title>
+	<link rel="icon" type="image/png" href="/imgvidaud/icon.png">
+<style>
+    :root {
+        --deepseek-blue: #00a8ff;
+        --deepseek-dark: #0d1b2a;
+        --neon-glow: 0 0 10px var(--deepseek-blue);
+        --placeholder-font-size: 1rem;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--deepseek-dark);
+        font-family: 'Courier New', monospace;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+    }
+    #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    .login-container {
+        background: rgba(13, 27, 42, 0.85);
+        border: 1px solid var(--deepseek-blue);
+        border-radius: 8px;
+        padding: 2rem 2.5rem;
+        width: 320px;
+        max-width: 90vw;
+        box-shadow: var(--neon-glow);
+        animation: pulse-border 2s infinite;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+    @keyframes pulse-border {
+        0% { box-shadow: 0 0 10px var(--deepseek-blue); }
+        50% { box-shadow: 0 0 20px var(--deepseek-blue); }
+        100% { box-shadow: 0 0 10px var(--deepseek-blue); }
+    }
+    .login-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+    .login-header h1 {
+        color: var(--deepseek-blue);
+        text-shadow: var(--neon-glow);
+        font-size: 1.8rem;
+        margin: 0;
+        user-select: none;
+    }
+    .input-group {
+        margin-bottom: 1.8rem;
+        position: relative;
+        width: 100%;
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--deepseek-blue);
+        font-weight: 600;
+        font-size: 1rem;
+        user-select: none;
+    }
+    .input-group input {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border: 1.5px solid var(--deepseek-blue);
+        border-radius: 5px;
+        background: transparent;
+        color: white;
+        font-family: 'Courier New', monospace;
+        font-size: var(--placeholder-font-size);
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .input-group input::placeholder {
+        color: #66ccff99;
+        font-style: italic;
+        user-select: none;
+        font-size: var(--placeholder-font-size);
+    }
+    .input-group input:focus {
+        outline: none;
+        box-shadow: var(--neon-glow);
+        border-color: var(--deepseek-blue);
+    }
 
-        #particle-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1000;
+    .icon-toggle-container {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+        user-select: none;
+    }
+    .icon-toggle-container svg {
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        fill: var(--deepseek-blue);
+        filter: drop-shadow(0 0 5px var(--deepseek-blue));
+        transition: transform 0.3s ease;
+    }
+    .icon-toggle-container svg.mangekyo {
+        animation: spin 3s linear infinite;
+    }
+    .icon-toggle-container svg:hover {
+        transform: scale(1.2);
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+    }
+
+    .login-btn {
+        width: 50%;
+        padding: 0.5rem 0;
+        background: transparent;
+        border: 1.5px solid var(--deepseek-blue);
+        color: var(--deepseek-blue);
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: all 0.3s;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        user-select: none;
+        margin: 0 auto;
+        display: block;
+    }
+    .login-btn:hover {
+        background: var(--deepseek-blue);
+        color: var(--deepseek-dark);
+        box-shadow: var(--neon-glow);
+    }
+    .error-message {
+        color: #ff5555;
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 1rem;
+        text-shadow: 0 0 5px #ff5555;
+        min-height: 1.2em;
+        user-select: none;
+    }
+    .countdown-message {
+        color: #00ffff;
+        text-align: center;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        user-select: none;
+        min-height: 1.2em;
+    }
+
+    .visiting-btn {
+        position: fixed;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--deepseek-blue);
+        color: var(--deepseek-dark);
+        font-weight: bold;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Courier New', monospace;
+        box-shadow: var(--neon-glow);
+        user-select: none;
+        border: none;
+        transition: background 0.3s ease;
+        z-index: 20;
+    }
+    .visiting-btn:hover {
+        background: #0080ff;
+    }
+    .visiting-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: var(--deepseek-dark);
+        filter: drop-shadow(0 0 3px var(--deepseek-dark));
+    }
+
+    @media (max-width: 400px) {
+        .login-container {
+            width: 90vw;
+            padding: 1.5rem 1.8rem;
         }
-    </style>
+        .login-header h1 {
+            font-size: 1.5rem;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+        }
+        .input-group input {
+            font-size: var(--placeholder-font-size);
+            padding: 0.5rem 0.7rem;
+        }
+        .icon-toggle-container svg {
+            width: 28px;
+            height: 28px;
+        }
+        .login-btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 0;
+            width: 60%;
+        }
+        .visiting-btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 1rem;
+        }
+    }
+		  
+</style>
 </head>
 <body>
-    <div id="loading-screen">
-        Loading<span id="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+<div id="particles-js"></div>
+
+<div class="login-container" role="main" aria-label="Login form">
+    <div class="login-header">
+        <h1><span class="deepseek-text"></span> Login</h1>
     </div>
 
-    <canvas id="matrix"></canvas>
-    <canvas id="particle-canvas"></canvas>
+    <form id="loginForm" autocomplete="off" novalidate>
+        <div class="input-group">
+            <label for="username">USERNAME</label>
+            <input type="text" id="username" placeholder="your ID" required aria-required="true" aria-describedby="usernameHelp" />
+        </div>
 
-    <div class="verification-box" style="display:none;">
-        <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
-        <p>1. SIAPA KAMU?</p>
-        <input type="text" id="answer" placeholder="Ketik jawaban..." autocomplete="off" />
-        <button onclick="verifyIdentity()">SUBMIT</button>
-    </div>
+        <div class="input-group">
+            <label for="password">PASSWORD</label>
+            <input type="password" id="password" placeholder="" required aria-required="true" />
+        </div>
+        <div id="errorMsg" class="error-message" role="alert" aria-live="assertive"></div>
+        <div id="countdownMsg" class="countdown-message" aria-live="polite"></div>
 
-    <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
+        <button type="submit" class="login-btn">ACCESS SYSTEM</button>
+    </form>
+</div>
 
-    <audio id="ambient-audio" loop>
-        <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-    </audio>
+<div class="icon-toggle-container" aria-label="Toggle password visibility icons" role="region">
+    <svg id="shieldIcon" class="shield-icon" tabindex="0" role="button" aria-pressed="true" aria-label="Hide password" viewBox="0 0 2424" xmlns="http://www.w3.org/2000/svg" >
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+    </svg>
+    <svg id="mangekyoIcon" class="mangekyo" tabindex="0" role="button" aria-pressed="false" aria-label="Show password" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" >
+        <circle cx="32" cy="32" r="30" stroke="var(--deepseek-blue)" stroke-width="4" fill="none"/>
+        <path fill="var(--deepseek-blue)" d="M32 2 L42 22 L62 22 L46 36 L52 56 L32 44 L12 56 L18 36 L2 22 L22 22 Z"/>
+    </svg>
+</div>
 
+<button class="visiting-btn" id="visitingBtn" aria-label="Visiting dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="var(--deepseek-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+    </svg>
+    Visiting
+</button>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script>
-    const audio = document.getElementById('ambient-audio');
-    const audioControl = document.getElementById('audio-control');
-
-    window.onload = () => {
-        setTimeout(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.querySelector('.verification-box').style.display = 'block';
-        }, 2500);
-
-        audio.volume = 0.2;
-
-        function startAudioOnInteraction() {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
+	
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: '#00a8ff' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.5, random: true },
+            size: { value: 3, random: true },
+            line_linked: { enable: true, distance: 150, color: '#00a8ff', opacity: 0.4, width: 1 },
+            move: { enable: true, speed: 2, direction: 'none', random: true, straight: false, out_mode: 'out' }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: { enable: true, mode: 'repulse' },
+                onclick: { enable: true, mode: 'push' }
             }
-            audio.play().then(() => {
-                audioControl.textContent = '🔊';
-            }).catch(() => {
-                audioControl.textContent = '🔇';
-            });
-            document.body.removeEventListener('click', startAudioOnInteraction);
-        }
-        document.body.addEventListener('click', startAudioOnInteraction);
-    };
-
-    audioControl.addEventListener('click', () => {
-        if (audio.paused) {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            audio.play().then(() => {
-                audioControl.textContent = '🔊';
-            }).catch(() => {
-                audioControl.textContent = '🔇';
-            });
-        } else {
-            audio.pause();
-            audioControl.textContent = '🔇';
         }
     });
 
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    const passwordInput = document.getElementById('password');
+    const shieldIcon = document.getElementById('shieldIcon');
+    const mangekyoIcon = document.getElementById('mangekyoIcon');
+    const errorMsg = document.getElementById('errorMsg');
+    const countdownMsg = document.getElementById('countdownMsg');
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
 
-    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
-    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const nums = '0123456789';
-    const alphabet = katakana + latin + nums;
-
-    const fontSize = 16;
-    const columns = Math.floor(canvas.width / fontSize);
-    const drops = Array(columns).fill(1);
-
-    function drawMatrix() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#0f0';
-        ctx.font = fontSize + 'px monospace';
-
-        for (let i = 0; i < drops.length; i++) {
-            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-            if (drops[i] * fontSize> canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
-            }
-           drops[i]++;
-        }
-    }
-    setInterval(drawMatrix, 33);
-
-    function verifyIdentity() {
-        const answer = document.getElementById("answer").value.toLowerCase();
-        const validAnswers = ["ezra",["elvi"]
-
-        if (validAnswers.includes(answer)) {
-            window.location.href = "index.html";
+    function setToggleState(showPassword) {
+        if (showPassword) {
+            passwordInput.type = 'text';
+            shieldIcon.setAttribute('aria-pressed', 'false');
+            mangekyoIcon.setAttribute('aria-pressed', 'true');
+            shieldIcon.style.display = 'none';
+            mangekyoIcon.style.display = 'inline-block';
         } else {
-            window.location.href = "https://wa.me/6281434046148";
+            passwordInput.type = 'password';
+            shieldIcon.setAttribute('aria-pressed', 'true');
+            mangekyoIcon.setAttribute('aria-pressed', 'false');
+            shieldIcon.style.display = 'inline-block';
+            mangekyoIcon.style.display = 'none';
         }
     }
 
-    const particleCanvas = document.getElementById('particle-canvas');
-    const pCtx = particleCanvas.getContext('2d');
+    setToggleState(false);
 
-    function resizeParticleCanvas() {
-        particleCanvas.width = window.innerWidth;
-        particleCanvas.height = window.innerHeight;
-    }
-    resizeParticleCanvas();
-    window.addEventListener('resize', resizeParticleCanvas);
-
-    class Particle {
-        constructor(x, y, color) {
-            this.x = x;
-            this.y = y;
-            this.vx = (Math.random() - 0.5) * 1;
-            this.vy = (Math.random() - 0.5) * 1;
-            this.size = 3 + Math.random() * 3;
-            this.color = color;
-        }
-        update(gravityX, gravityY) {
-            this.vx += gravityX * 0.1;
-            this.vy += gravityY * 0.1;
-            this.x += this.vx;
-            this.y += this.vy;
-
-            if (this.x < 0) { this.x = 0; this.vx *= -0.6; }
-            if (this.x > particleCanvas.width) { this.x = particleCanvas.width; this.vx *= -0.6; }
-            if (this.y < 0) { this.y = 0; this.vy *= -0.6; }
-            if (this.y > particleCanvas.height) { this.y = particleCanvas.height; this.vy *= -0.6; }
-        }
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 5;
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
+    function togglePassword() {
+        setToggleState(passwordInput.type === 'password');
     }
 
-    let particles = [];
-    let touchParticles = [];
+    shieldIcon.addEventListener('click', togglePassword);
+    mangekyoIcon.addEventListener('click', togglePassword);
 
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-
-    function randomColor() {
-        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c'];
-        return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    let gravityX = 0;
-    let gravityY = 0;
-
-    window.addEventListener('deviceorientation', (event) => {
-        gravityX = event.gamma ? event.gamma / 90 : 0;
-        gravityY = event.beta ? event.beta / 90 : 0;
+    shieldIcon.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePassword();
+        }
+    });
+    mangekyoIcon.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePassword();
+        }
     });
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioCtx.createMediaElementSource(audio);
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
+    const southeastAsianNames = [
+        "Adi", "Budi", "Chai", "Dewi", "Eka", "Fahmi", "Gita", "Hana", "Ika", "Jaya",
+        "Kanya", "Lina", "Maya", "Nina", "Oki", "Putra", "Rina", "Sari", "Tari", "Udin",
+        "Anong", "Chai", "Kanya", "Malee", "Niran", "Pim", "Somsak", "Tida", "Wichai",
+        "Chen", "Fang", "Jing", "Lei", "Mei", "Qiang", "Tao", "Wei", "Xiao", "Ying",
+        "Dae", "Hana", "Jin", "Min", "Soo", "Yuna", "Young", "Ji", "Hyun", "Seok",
+        "Akira", "Haruka", "Kenji", "Mika", "Naoki", "Rina", "Sora", "Takumi", "Yuki"
+    ];
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    // Define bass frequency range indices
-    const bassFrequencyStart = 0;
-    const bassFrequencyEnd = Math.floor(150 / (audioCtx.sampleRate / 2) * analyser.frequencyBinCount);
-
-    function getBassVolume(array) {
-        let values = 0;
-        let count = 0;
-        for (let i = bassFrequencyStart; i <= bassFrequencyEnd; i++) {
-            values += array[i];
-            count++;
-        }
-        return count > 0 ? values / count : 0;
+    function changePlaceholder() {
+        const randomName = southeastAsianNames[Math.floor(Math.random() * southeastAsianNames.length)];
+        usernameInput.setAttribute('placeholder', `Your ID ${randomName}`);
     }
 
-    function animateParticlesCombined() {
-        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+    changePlaceholder();
+    setInterval(changePlaceholder, 2000);
 
-        analyser.getByteFrequencyData(dataArray);
-        const bassVolume = getBassVolume(dataArray) / 255;
+    let attempt = 0;
+    const maxAttempt = 2;
+    const blockDurationMs = 60 * 1 * 1000;
+    const blockCookieName = 'loginBlockUntil';
 
-        const targetCount = Math.floor(bassVolume * 100);
-
-        while (particles.length < targetCount) {
-            particles.push(new Particle(centerX, centerY, randomColor()));
-        }
-        while (particles.length > targetCount) {
-            particles.pop();
-        }
-
-        particles.forEach(p => {
-            p.update(gravityX, gravityY);
-            p.draw(pCtx);
-        });
-
-        touchParticles.forEach((p, i) => {
-            p.update();
-            p.draw(pCtx);
-            if (p.life <= 0) {
-                touchParticles.splice(i, 1);
+    function setCookie(name, value, expires) {
+        document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+    }
+    function getCookie(name) {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        for (const c of cookies) {
+            if (c.startsWith(name + '=')) {
+                return c.substring(name.length + 1);
             }
-        });
+        }
+        return null;
+    }
+    function deleteCookie(name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
+    }
 
-        // Threshold for screen beat effect activation
-        const screenBeatThreshold = 0.3;
-
-        if (isTouching) {
-            if (bassVolume > screenBeatThreshold) {
-                applyScreenBeatEffect(bassVolume);
+    function checkBlock() {
+        const blockUntilStr = getCookie(blockCookieName);
+        if (blockUntilStr) {
+            const blockUntil = new Date(blockUntilStr);
+            const now = new Date();
+            if (blockUntil > now) {
+                startCountdown(blockUntil);
+                disableForm(true);
+                return true;
             } else {
-                body.style.transform = '';
+                deleteCookie(blockCookieName);
+                disableForm(false);
+                countdownMsg.textContent = '';
+                return false;
             }
-            applyTouchBassEffect(touchX, touchY, bassVolume);
-            for (let i = 0; i < 5; i++) {
-                const offsetX = touchX + (Math.random() - 0.5) * 50;
-                const offsetY = touchY + (Math.random() - 0.5) * 50;
-                touchParticles.push(new TouchParticle(offsetX, offsetY));
+        }
+        disableForm(false);
+        countdownMsg.textContent = '';
+        return false;
+    }
+
+    function disableForm(disable) {
+        usernameInput.disabled = disable;
+        passwordInput.disabled = disable;
+        loginForm.querySelector('button[type="submit"]').disabled = disable;
+    }
+
+    let countdownInterval;
+    function startCountdown(blockUntil) {
+        function updateCountdown() {
+            const now = new Date();
+            const diff = blockUntil - now;
+            if (diff <= 0) {
+                clearInterval(countdownInterval);
+                countdownMsg.textContent = '';
+                deleteCookie(blockCookieName);
+                disableForm(false);
+                errorMsg.textContent = '';
+                attempt = 0;
+                return;
             }
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            countdownMsg.textContent = `Too many failed attempts. Tolong tunggu ${minutes}m ${seconds}d lalu coba lagi`;
+        }
+        updateCountdown();
+        countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    if (checkBlock()) {
+        errorMsg.textContent = 'ACCESS Ditolak, terlalu banyak percobaan';
+    }
+
+    loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (checkBlock()) {
+            return;
+        }
+
+        const users = {
+            ezra: { password: 'v', redirect: 'https://docs.google.com/spreadsheets/u/0/d/1LlyYPss-YVmaxvff3FQKTWSlYb8C98yf21N94J3ivgI/htmlview' },
+            elvi: { password: 'love', redirect: 'elvi.html' }
+        };
+
+        const username = usernameInput.value.toLowerCase();
+        const password = passwordInput.value;
+
+        if (users[username] && users[username].password === password) {
+            sessionStorage.setItem('loggedInUser', username);
+                       document.querySelector('.login-container').style.animation = 'pulse-border 0.5s infinite';
+            setTimeout(() => {
+                window.location.href = users[username].redirect;
+            }, 1000);
         } else {
-            body.style.transform = '';
-        }
+            attempt++;
+            errorMsg.textContent = `ACCESS DENIED (Attempt ${attempt}/${maxAttempt})`;
+            usernameInput.value = '';
+            passwordInput.value = '';
+            usernameInput.focus();
 
-        requestAnimationFrame(animateParticlesCombined);
-    }
-
-    animateParticlesCombined();
-
-    function applyScreenBeatEffect(volume) {
-        const intensity = volume * 20; // lebih kuat untuk efek denyut
-        const offsetX = (Math.random() - 0.5) * intensity;
-        const offsetY = (Math.random() - 0.5) * intensity;
-        body.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-        body.style.transition = 'transform 0.05s ease';
-    }
-
-    function applyTouchBassEffect(x, y, volume) {
-        const bassEffect = document.createElement('div');
-        bassEffect.style.position = 'fixed';
-        bassEffect.style.left = `${x}px`;
-        bassEffect.style.top = `${y}px`;
-        bassEffect.style.width = '100px';
-        bassEffect.style.height = '100px';
-        bassEffect.style.borderRadius = '50%';
-        bassEffect.style.pointerEvents = 'none';
-        bassEffect.style.zIndex = 100002;
-        bassEffect.style.background = `rgba(0, 255, 0, ${0.3 + volume * 0.7})`;
-        bassEffect.style.boxShadow = `0 0 ${20 + volume * 40}px #0f0, 0 0 ${40 + volume * 80}px #0f0`;
-        bassEffect.style.transform = 'scale(1)';
-        bassEffect.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-        document.body.appendChild(bassEffect);
-
-        requestAnimationFrame(() => {
-            bassEffect.style.transform = 'scale(1.5)';
-            bassEffect.style.opacity = '0';
-        });
-
-        setTimeout(() => {
-            bassEffect.remove();
-        }, 300);
-    }
-
-    class TouchParticle {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-            this.vx = (Math.random() - 0.5) * 4;
-            this.vy = (Math.random() - 0.5) * 4;
-            this.size = 4 + Math.random() * 4;
-            this.color = randomColor();
-            this.life = 30 + Math.random() * 30;
-        }
-        update() {
-            this.vx += gravityX * 0.2;
-            this.vy += gravityY * 0.2;
-            this.x += this.vx;
-            this.y += this.vy;
-            this.life--;
-        }
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 8;
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    let isTouching = false;
-    let touchX = 0;
-    let touchY = 0;
-
-    function startTouch(e) {
-        isTouching = true;
-        if (e.touches && e.touches.length > 0) {
-            touchX = e.touches[0].clientX;
-            touchY = e.touches[0].clientY;
-        } else {
-            touchX = e.clientX;
-            touchY = e.clientY;
-        }
-    }
-
-    function moveTouch(e) {
-        if (isTouching) {
-            if (e.touches && e.touches.length > 0) {
-                touchX = e.touches[0].clientX;
-                touchY = e.touches[0].clientY;
-            } else {
-                touchX = e.clientX;
-                touchY = e.clientY;
+            if (attempt >= maxAttempt) {
+                const blockUntil = new Date(Date.now() + blockDurationMs);
+                setCookie(blockCookieName, blockUntil.toUTCString(), blockUntil);
+                disableForm(true);
+                startCountdown(blockUntil);
+                setTimeout(() => {
+                    window.location.href = 'whoareyou.html';
+                }, 1000);
             }
         }
+    });
+
+    document.getElementById('visitingBtn').addEventListener('click', () => {
+        window.location.href = 'mydashboard.html';
+    });
+	
+
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
+  fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
+    .then(res => console.log("Data tersimpan!"))
+    .catch(err => console.error("Gagal:", err));
+
+    // --- Fitur Deteksi Lukisan Love dan Mode Love Aktif ---
+
+let drawing = false;
+let points = [];
+
+function distance(p1, p2) {
+    return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+}
+
+// Fungsi sederhana deteksi pola hati kasar berdasarkan titik-titik
+function isHeartShape(points) {
+    if (points.length < 10) return false;
+
+    // Cari titik paling kiri, kanan, atas, bawah
+    let minX = points[0].x, maxX = points[0].x;
+    let minY = points[0].y, maxY = points[0].y;
+    points.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+    });
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    // Rasio tinggi dan lebar hati kira-kira 1:1
+    if (width === 0 || height === 0) return false;
+    const ratio = height / width;
+    if (ratio < 0.8 || ratio > 1.2) return false;
+
+    // Cek apakah titik awal dan akhir dekat (melukis bentuk tertutup)
+    if (distance(points[0], points[points.length - 1]) > width * 0.3) return false;
+
+    // Cek apakah ada lekukan atas (dua puncak) dan lekukan bawah (titik bawah hati)
+    // Sederhananya, cek apakah ada titik di kiri atas dan kanan atas lebih tinggi dari titik tengah bawah
+    let topY = minY + height * 0.3;
+    let bottomY = maxY - height * 0.1;
+    let leftTop = points.some(p => p.x < minX + width * 0.4 && p.y < topY);
+    let rightTop = points.some(p => p.x > minX + width * 0.6 && p.y < topY);
+    let bottomPoint = points.some(p => p.x > minX + width * 0.4 && p.x < minX + width * 0.6 && p.y > bottomY);
+
+    return leftTop && rightTop && bottomPoint;
+}
+
+function startDraw(e) {
+    drawing = true;
+    points = [];
+    addPoint(e);
+}
+
+function addPoint(e) {
+    let x, y;
+    if (e.touches && e.touches.length > 0) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+    } else {
+        x = e.clientX;
+        y = e.clientY;
     }
+    points.push({x, y});
+}
 
-    function endTouch() {
-        isTouching = false;
-        body.style.transform = '';
+function endDraw() {
+    drawing = false;
+    if (isHeartShape(points)) {
+        alert("Danger, mode love aktif");
+        activateLoveMode();
     }
+    points = [];
+}
 
-    document.body.addEventListener('touchstart', startTouch);
-    document.body.addEventListener('touchmove', moveTouch);
-    document.body.addEventListener('touchend', endTouch);
-    document.body.addEventListener('mousedown', startTouch);
-    document.body.addEventListener('mousemove', moveTouch);
-    document.body.addEventListener('mouseup', endTouch);
+function drawLove(x, y, size, color) {
+    const love = document.createElement('div');
+    love.textContent = '❤️';
+    love.style.position = 'fixed';
+    love.style.left = `${x - size/2}px`;
+    love.style.top = `${y - size/2}px`;
+    love.style.fontSize = `${size}px`;
+    love.style.pointerEvents = 'none';
+    love.style.userSelect = 'none';
+    love.style.zIndex = 100003;
+    love.style.color = color;
+    love.style.textShadow = `0 0 5px ${color}`;
+    document.body.appendChild(love);
 
-    function goFullScreen() {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen) { /* Firefox */
-            elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { /* IE/Edge */
-            elem.msRequestFullscreen();
-        }
+    // Hapus love setelah 3 detik
+    setTimeout(() => love.remove(), 3000);
+}
+
+let loveModeActive = false;
+let loveInterval;
+
+function activateLoveMode() {
+    if (loveModeActive) return;
+    loveModeActive = true;
+
+    // Munculkan love warna-warni acak di layar setiap 300ms
+    loveInterval = setInterval(() => {
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        const size = 20 + Math.random() * 30;
+        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c', '#ff69b4', '#ff4500'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        drawLove(x, y, size, color);
+    }, 300);
+}
+
+// Efek gelombang air pada sentuhan saat mode love aktif
+function createWaterRipple(x, y) {
+    const ripple = document.createElement('div');
+    ripple.style.position = 'fixed';
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    ripple.style.width = '100px';
+    ripple.style.height = '100px';
+    ripple.style.borderRadius = '50%';
+    ripple.style.border = '2px solid rgba(0, 255, 255, 0.7)';
+    ripple.style.pointerEvents = 'none';
+    ripple.style.zIndex = 100004;
+    ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+    ripple.style.opacity = '0.7';
+    ripple.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
+    document.body.appendChild(ripple);
+
+    requestAnimationFrame(() => {
+        ripple.style.transform = 'translate(-50%, -50%) scale(1.5)';
+        ripple.style.opacity = '0';
+    });
+
+    setTimeout(() => ripple.remove(), 600);
+}
+
+// Override event listener sentuhan/mouse untuk efek ripple saat love mode aktif
+function loveModeTouchHandler(e) {
+    if (!loveModeActive) return;
+    let x, y;
+    if (e.touches && e.touches.length > 0) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+    } else {
+        x = e.clientX;
+        y = e.clientY;
     }
+    createWaterRipple(x, y);
+}
 
-    const body = document.body;
+// Tambahkan event listener untuk deteksi lukisan love
+document.body.addEventListener('mousedown', (e) => {
+    if (loveModeActive) return; // Jangan deteksi lagi kalau sudah aktif
+    startDraw(e);
+});
+document.body.addEventListener('mousemove', (e) => {
+    if (!drawing) return;
+    addPoint(e);
+});
+document.body.addEventListener('mouseup', (e) => {
+    if (!drawing) return;
+    endDraw();
+});
+document.body.addEventListener('touchstart', (e) => {
+    if (loveModeActive) return;
+    startDraw(e);
+});
+document.body.addEventListener('touchmove', (e) => {
+    if (!drawing) return;
+    addPoint(e);
+});
+document.body.addEventListener('touchend', (e) => {
+    if (!drawing) return;
+    endDraw();
+});
+
+// Tambahkan event listener untuk efek gelombang air saat mode love aktif
+document.body.addEventListener('mousedown', loveModeTouchHandler);
+document.body.addEventListener('touchstart', loveModeTouchHandler);
+
+	
 </script>
 </body>
 </html>
