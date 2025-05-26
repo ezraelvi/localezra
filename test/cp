@@ -1,0 +1,82 @@
+<style>
+  #randomTextContainer {
+    position: fixed;
+    top: 60px; /* sesuaikan dengan posisi bawah toggle password */
+    left: 0;
+    width: 100%;
+    height: 30px;
+    overflow: hidden;
+    background: #111;
+    color: #eee;
+    font-family: monospace, monospace;
+    font-size: 20px;
+    white-space: nowrap;
+    user-select: none;
+    z-index: 100010;
+    cursor: default;
+  }
+  #randomText {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scrollLeft 15s linear infinite;
+  }
+  #randomText span {
+    display: inline-block;
+    padding: 0 5px;
+  }
+  #randomText span.e-letter {
+    color: #ff69b4;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: text;
+  }
+  #randomText span.e-letter:hover {
+    text-shadow: 0 0 5px #ff69b4;
+  }
+  @keyframes scrollLeft {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+</style>
+
+<div id="randomTextContainer" aria-label="Teks berjalan interaktif">
+  <div id="randomText" aria-live="off" aria-atomic="false"></div>
+</div>
+
+<script>
+  const randomTextEl = document.getElementById('randomText');
+  const letters = 'abcdefghijklmnopqrstuvwxyz';
+  const textLength = 100; // panjang teks berjalan
+
+  function generateRandomText() {
+    let html = '';
+    for (let i = 0; i < textLength; i++) {
+      const letter = letters.charAt(Math.floor(Math.random() * letters.length));
+      if (letter === 'e') {
+        html += `<span class="e-letter">${letter}</span>`;
+      } else {
+        html += `<span>${letter}</span>`;
+      }
+    }
+    return html;
+  }
+
+  randomTextEl.innerHTML = generateRandomText();
+
+  // Event delegation untuk klik huruf 'e'
+  randomTextEl.addEventListener('click', (e) => {
+    if (e.target.classList.contains('e-letter')) {
+      // Aktifkan mode love
+      if (!window.loveModeActive) {
+        alert('Danger, mode love aktif');
+        activateLoveMode();
+      }
+    }
+  });
+
+  // Fungsi activateLoveMode dan variabel loveModeActive harus sudah ada di script utama
+</script>
