@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+        <script>
+        const user = sessionStorage.getItem('loggedInUser');
+        if (user !== 'elvi') {
+            alert('Access denied! Kamu harus login dulu.');
+            window.location.href = 'index.html';
+        }
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>V Area</title>
+    <link rel="icon" type="image/png" href="/imgvidaud/downloadicon.png">
     <style>
         
         body {
