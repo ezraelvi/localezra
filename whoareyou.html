@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Verification Required</title>
-    <link rel="icon" type="image/png" href="/imgvidaud/whoareyouicon.png">
     <style>
         body, html {
             margin: 0; padding: 0; height: 100%;
@@ -188,23 +187,12 @@
             background: #0f0;
             color: black;
         }
-
     </style>
 </head>
 <body>
     <div id="loading-screen">
         Loading<span id="loading-dots"><span>.</span><span>.</span><span>.</span></span>
     </div>
-    
-    <button id="fullscreen-toggle" style="
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 15px;
-    font-size: 14px;
-    z-index: 9999;
-    cursor: pointer;
-    ">Fullscreen</button>
 
     <canvas id="matrix"></canvas>
     <canvas id="particle-canvas"></canvas>
@@ -220,6 +208,16 @@
     <button class="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
     
     <div id="bass-meter"></div>
+    <button id="fullscreen-toggle" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    font-size: 14px;
+    z-index: 9999;
+    cursor: pointer;
+    ">Fulls</button>
+
 
     <audio id="ambient-audio" loop>
         <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
@@ -270,41 +268,21 @@
             audioControl.textContent = '🔇';
         }
     });
-    const btn = document.getElementById('fullscreen-toggle');
 
-    function isFullscreen() {
-        return !!document.fullscreenElement;
-    }
-
-    function enterFullscreen() {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.error('Failed to enter fullscreen:', err);
-        });
-    }
-
-    function exitFullscreen() {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
-
-    btn.addEventListener('click', () => {
-        if (isFullscreen()) {
-            exitFullscreen();
-            btn.textContent = 'Fullscreen';
+    // Fullscreen functionality
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
         } else {
-            enterFullscreen();
-            btn.textContent = 'Exit Fullscreen';
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
         }
-    });
-
-    document.addEventListener('fullscreenchange', () => {
-        if (!isFullscreen()) {
-            btn.textContent = 'Fullscreen';
-        } else {
-            btn.textContent = 'Exit Fullscreen';
-        }
-    });
+    }
     
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
@@ -352,7 +330,7 @@
 
     function verifyIdentity() {
         const answer = document.getElementById("answer").value.toLowerCase();
-        const validAnswers = ["ezra"];
+        const validAnswers = ["ezra", "elvi"];
 
         if (validAnswers.includes(answer)) {
             window.location.href = "index.html";
@@ -436,78 +414,18 @@
         }
         return values / length;
     }
-
-    let maxBassPeak = 0.7; // Titik awal threshold
-    let lastBassTime = 0;
-    const bassCooldown = 100; // Cooldown dalam ms antara zoom
-
-    function animateParticles() {
-        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-
-        analyser.getByteFrequencyData(dataArray);
-        const volume = getAverageVolume(dataArray) / 255;
-        const bassVolume = getBassVolume(dataArray);
-        const currentTime = Date.now();
-        
-        // Update bass meter
-        for (let i = 0; i < bassBars.length; i++) {
-            const barHeight = Math.min(60, bassVolume * 60 * (1 + Math.sin(Date.now() / 100 + i * 0.3) * 0.5));
-            bassBars[i].style.height = `${barHeight}px`;
-            bassBars[i].style.background = `hsl(${120 + bassVolume * 60}, 100%, 50%)`;
-            bassBars[i].style.boxShadow = `0 0 ${5 + bassVolume * 10}px hsl(${120 + bassVolume * 60}, 100%, 50%)`;
-        }
-        
-        // Dynamic bass threshold system
-        if (bassVolume > maxBassPeak) {
-            maxBassPeak = bassVolume; // Naikkan threshold ke peak tertinggi
-        } else {
-            // Perlahan turunkan threshold jika tidak ada peak baru
-            maxBassPeak = Math.max(0.7, maxBassPeak * 0.995);
-        }
-
-        // Zoom in effect - hanya aktif ketika mencapai peak tertinggi
-        if (bassVolume >= maxBassPeak && bassVolume > 0.7 && 
-            currentTime - lastBassTime > bassCooldown) {
-            
-            const zoomIntensity = 1.0 + (bassVolume - 0.7) * 0.5; // 1.0 - 1.15
-            document.body.style.transform = `scale(${zoomIntensity})`;
-            document.querySelector('.verification-box').style.transform = `scale(${zoomIntensity * 1.1})`;
-            
-            isZoomed = true;
-            lastBassTime = currentTime;
-            
-            // Trigger alert hanya pertama kali
-            if (!hasShownBassAlert) {
-                hasShownBassAlert = true;
-                showBassAlert();
-            }
-        } 
-
-        const targetCount = Math.floor(volume * 100);
-        while (particles.length < targetCount) {
-            particles.push(new Particle(centerX, centerY, randomColor()));
-        }
-        while (particles.length > targetCount) {
-            particles.pop();
-        }
-
-        particles.forEach(p => {
-            p.update(gravityX, gravityY);
-            p.draw(pCtx);
-        });
-
-        requestAnimationFrame(animateParticles);
-    }
-
+    
     function getBassVolume(array) {
+        // Focus on lower frequencies (bass)
         let sum = 0;
-        const bassRange = 5;
+        const bassRange = 5; // First few frequency bins represent bass
         for (let i = 0; i < bassRange; i++) {
             sum += array[i];
         }
         return sum / bassRange / 255;
     }
 
+    // Create bass meter bars
     const bassMeter = document.getElementById('bass-meter');
     const bassBars = [];
     const barCount = 30;
@@ -527,18 +445,21 @@
         const volume = getAverageVolume(dataArray) / 255;
         const bassVolume = getBassVolume(dataArray);
         
+        // Update bass meter
         for (let i = 0; i < bassBars.length; i++) {
-    const barHeight = Math.min(60, bassVolume * 60 * (1 + Math.sin(Date.now() / 100 + i * 0.3) * 0.5));
-    bassBars[i].style.height = `${barHeight}px`;
-    bassBars[i].style.background = `hsl(${120 + bassVolume * 60}, 100%, 50%)`;
-    bassBars[i].style.boxShadow = `0 0 ${5 + bassVolume * 10}px hsl(${120 + bassVolume * 60}, 100%, 50%)`;
-    }
+            const barHeight = Math.min(60, bassVolume * 60 * (1 + Math.sin(Date.now() / 100 + i * 0.3) * 0.5);
+            bassBars[i].style.height = `${barHeight}px`;
+            bassBars[i].style.background = `hsl(${120 + bassVolume * 60}, 100%, 50%)`;
+            bassBars[i].style.boxShadow = `0 0 ${5 + bassVolume * 10}px hsl(${120 + bassVolume * 60}, 100%, 50%)`;
+        }
         
+        // Check for bass threshold (0.7)
         if (bassVolume >= 0.7 && !hasShownBassAlert) {
             hasShownBassAlert = true;
             showBassAlert();
         }
         
+        // Zoom effect based on bass
         if (bassVolume >= 0.7 && !isZoomed) {
             isZoomed = true;
             document.body.style.transform = 'scale(1.05)';
@@ -591,8 +512,10 @@
         document.body.appendChild(alertBox);
         
         document.getElementById('alert-ok-btn').addEventListener('click', function() {
+            // Clear all particles and reset to center
             particles = [];
             
+            // Add some initial particles
             for (let i = 0; i < 30; i++) {
                 particles.push(new Particle(centerX, centerY, randomColor()));
             }
@@ -693,6 +616,7 @@
       const volume = getAverageVolume(dataArray) / 255;
       const bassVolume = getBassVolume(dataArray);
       
+      // Update bass meter
       for (let i = 0; i < bassBars.length; i++) {
           const barHeight = Math.min(60, bassVolume * 60 * (1 + Math.sin(Date.now() / 100 + i * 0.3) * 0.5));
           bassBars[i].style.height = `${barHeight}px`;
@@ -700,11 +624,13 @@
           bassBars[i].style.boxShadow = `0 0 ${5 + bassVolume * 10}px hsl(${120 + bassVolume * 60}, 100%, 50%)`;
       }
       
+      // Check for bass threshold (0.7)
       if (bassVolume >= 0.7 && !hasShownBassAlert) {
           hasShownBassAlert = true;
           showBassAlert();
       }
       
+      // Zoom effect based on bass
       if (bassVolume >= 0.7 && !isZoomed) {
           isZoomed = true;
           document.body.style.transform = 'scale(1.05)';
@@ -776,6 +702,43 @@
     document.body.addEventListener('mousedown', startTouch);
     document.body.addEventListener('mousemove', moveTouch);
     document.body.addEventListener('mouseup', endTouch);
+
+    animateTouchParticles();
+    const btn = document.getElementById('fullscreen-toggle');
+
+    function isFullscreen() {
+        return !!document.fullscreenElement;
+    }
+
+    function enterFullscreen() {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error('Failed to enter fullscreen:', err);
+        });
+    }
+
+    function exitFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+
+    btn.addEventListener('click', () => {
+        if (isFullscreen()) {
+            exitFullscreen();
+            btn.textContent = 'Fullscreen';
+        } else {
+            enterFullscreen();
+            btn.textContent = 'Exit Fullscreen';
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!isFullscreen()) {
+            btn.textContent = 'Fullscreen';
+        } else {
+            btn.textContent = 'Exit Fullscreen';
+        }
+    });
 
 </script>
 </body>
