@@ -298,6 +298,95 @@
         }
     });
 
+    // --- Mode Love Variables ---
+    let loveModeActive = false;
+    let gestureCount = 0;
+    let lastGestureTime = 0;
+    let lastTouchY = null;
+
+    // Function to create love particles config for particles.js
+    function createLoveParticlesConfig() {
+        return {
+            particles: {
+                number: { value: 10, density: { enable: false } },
+                color: { value: '#ff69b4' },
+                shape: {
+                    type: 'image',
+                    image: {
+                        src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 29.6"><path fill="%23ff69b4" d="M23.6 0c-2.7 0-5 1.7-6 4.1C16.4 1.7 14.1 0 11.4 0 6.4 0 2.4 4 2.4 9c0 7.1 9.6 13.6 13.6 20.6 4-7 13.6-13.5 13.6-20.6 0-5-4-9-9-9z"/></svg>',
+                        width: 32,
+                        height: 29.6
+                    }
+                },
+                opacity: { value: 0.8, random: true, anim: { enable: true, speed: 1, opacity_min: 0, sync: false } },
+                size: { value: 10, random: true, anim: { enable: true, speed: 5, size_min: 5, sync: false } },
+                move: { enable: true, speed: 2, direction: 'top', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        };
+    }
+
+    // Function to launch love particles in batches of 10 every 3 seconds, with lifetime 3.5s
+    function startLoveParticles() {
+        if (!loveModeActive) return;
+
+        // Load love particles config
+        particlesJS('particles-js', createLoveParticlesConfig());
+
+        // Schedule next batch after 3 seconds
+        setTimeout(() => {
+            if (loveModeActive) {
+                startLoveParticles();
+            }
+        }, 3000);
+    }
+
+    // Gesture detection for 5 up-down swipes
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            lastTouchY = e.touches[0].clientY;
+        }
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        if (!lastTouchY || loveModeActive) return;
+
+        const currentY = e.touches[0].clientY;
+        const now = Date.now();
+
+        // Detect vertical swipe up or down with threshold 30px
+        if (Math.abs(currentY - lastTouchY) > 30) {
+            // Check time between gestures to avoid counting too fast
+            if (now - lastGestureTime > 300) {
+                gestureCount++;
+                lastGestureTime = now;
+
+                if (gestureCount >= 5) {
+                    gestureCount = 0;
+                    // Activate love mode with alert
+                    if (confirm('danger mode love aktif')) {
+                        loveModeActive = true;
+                        startLoveParticles();
+                    }
+                }
+            }
+            lastTouchY = currentY;
+        }
+    });
+
+    // Reset gesture count if no gesture for 2 seconds
+    setInterval(() => {
+        if (Date.now() - lastGestureTime > 2000) {
+            gestureCount = 0;
+        }
+    }, 1000);
+
+    // --- Existing code below ---
+
     const passwordInput = document.getElementById('password');
     const shieldIcon = document.getElementById('shieldIcon');
     const mangekyoIcon = document.getElementById('mangekyoIcon');
@@ -387,6 +476,7 @@
             
             return {
                 attempts: 0,
+                lastAttempt: 0,
                 lastAttempt: null,
                 blockUntil: null
             };
@@ -469,7 +559,7 @@
                 this.disableForm(true);
                 const remainingTime = this.getRemainingBlockTime();
                 this.startCountdown(remainingTime);
-                errorMsg.textContent = 'System temporarily locked due to too many attempts';
+                errorMsg.textContent = 'Anda Tidak Diperbolehkan Masuk';
                 return true;
             }
             return false;
