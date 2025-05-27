@@ -152,17 +152,32 @@
             <li tabindex="0" onclick="window.open('https://wa.me/6281434046148', '_blank')">WhatsApp</li>
             <li tabindex="0" style="cursor:pointer;" onclick="handleFacebookClick()">Facebook</li>
         </ul>
+<li tabindex="0" style="cursor:pointer;" onclick="handleFacebookClick()">Facebook</li>
 
 <script>
   function handleFacebookClick() {
-  alert('Maaf, saya tidak punya Facebook.');
+    alert('Maaf, saya tidak punya Facebook.');
 
-  // Set flag bahwa user akan ke Google search
-  sessionStorage.setItem('fromGoogleSearch', 'true');
+    sessionStorage.setItem('fromGoogleSearch', 'true');
+    window.location.href = 'https://www.google.com/search?q=ezravv+fb';
+  }
 
-  // Redirect ke Google Search
-  window.location.href = 'https://www.google.com/search?q=ezravv+fb';
-} 
+  // Cek saat halaman dashboard dimuat
+  window.addEventListener('load', () => {
+    if (sessionStorage.getItem('fromGoogleSearch') === 'true') {
+      sessionStorage.removeItem('fromGoogleSearch');
+      sessionStorage.setItem('fromBingSearch', 'true');
+      window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
+      return;
+    }
+
+    if (sessionStorage.getItem('fromBingSearch') === 'true') {
+      sessionStorage.removeItem('fromBingSearch');
+      alert('gk percayakan, udah dibilan');
+      // Redirect ke mydasboard.html (pastikan ini URL yang benar)
+      window.location.href = 'https://ezravvv.netlify.app/mydasboard.html';
+    }
+  });
 </script>
         
     </section>
@@ -180,13 +195,6 @@
 <button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
 
 <script>
-    // Cek apakah user baru saja kembali dari Google search redirect
-if (sessionStorage.getItem('fromGoogleSearch') === 'true') {
-  // Hapus flag supaya tidak looping
-  sessionStorage.removeItem('fromGoogleSearch');
-  // Redirect ke Bing search
-  window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
-}
     
     const mapDiv = document.getElementById('map');
     let map, marker;
