@@ -236,7 +236,8 @@
     const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const nums = '0123456789';
     const alphabet = katakana + latin + nums;
-    const fontSize = 16    const columns = Math.floor(matrixCanvas.width / fontSize);
+    const fontSize = 16
+    const columns = Math.floor(matrixCanvas.width / fontSize);
     const drops = Array(columns).fill(1);
 
     function drawMatrix() {
