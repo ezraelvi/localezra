@@ -188,6 +188,16 @@
             background: #0f0;
             color: black;
         }
+        <button id="fullscreen-toggle" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    font-size: 14px;
+    z-index: 9999;
+    cursor: pointer;
+    ">Fullscreen</button>
+
     </style>
 </head>
 <body>
@@ -259,20 +269,41 @@
             audioControl.textContent = '🔇';
         }
     });
+    const btn = document.getElementById('fullscreen-toggle');
 
-    fullscreenBtn.addEventListener('click', toggleFullscreen);
-    
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable fullscreen: ${err.message}`);
-            });
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
+    function isFullscreen() {
+        return !!document.fullscreenElement;
+    }
+
+    function enterFullscreen() {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error('Failed to enter fullscreen:', err);
+        });
+    }
+
+    function exitFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
         }
     }
+
+    btn.addEventListener('click', () => {
+        if (isFullscreen()) {
+            exitFullscreen();
+            btn.textContent = 'Fullscreen';
+        } else {
+            enterFullscreen();
+            btn.textContent = 'Exit Fullscreen';
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!isFullscreen()) {
+            btn.textContent = 'Fullscreen';
+        } else {
+            btn.textContent = 'Exit Fullscreen';
+        }
+    });
     
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
@@ -682,36 +713,6 @@
     document.body.addEventListener('mousedown', startTouch);
     document.body.addEventListener('mousemove', moveTouch);
     document.body.addEventListener('mouseup', endTouch);
-
-    animateTouchParticles();
-    function enterFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-    }
-}
-
-function exitFullscreen() {
-    if (document.fullscreenElement) {
-        document.exitFullscreen();
-    }
-}
-
-document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement && document.hasFocus()) {
-        enterFullscreen();
-    }
-});
-
-window.addEventListener('focus', () => {
-    enterFullscreen();
-});
-
-window.addEventListener('blur', () => {
-});
-
-window.onload = () => {
-    enterFullscreen();
-};
 
 </script>
 </body>
