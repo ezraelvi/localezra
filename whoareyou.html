@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification Required</title>
     <link rel="icon" type="image/png" href="/imgvidaud/icon1.png">
     <style>
@@ -16,7 +16,13 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-        }
+            
+          body {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+        @media (max-width: 768px) {
         #matrix {
             position: fixed;
             top: 0; left: 0;
@@ -141,6 +147,7 @@
             height: 100vh;
             pointer-events: none;
             z-index: 1000;
+        }
         }
     </style>
 </head>
