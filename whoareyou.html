@@ -436,7 +436,76 @@
         }
         return values / length;
     }
-    
+
+    let maxBassPeak = 0.7; // Titik awal threshold
+    let isZoomed = false;
+    let lastBassTime = 0;
+    const bassCooldown = 100; // Cooldown dalam ms antara zoom
+
+    function animateParticles() {
+        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+        analyser.getByteFrequencyData(dataArray);
+        const volume = getAverageVolume(dataArray) / 255;
+        const bassVolume = getBassVolume(dataArray);
+        const currentTime = Date.now();
+        
+        // Update bass meter
+        for (let i = 0; i < bassBars.length; i++) {
+            const barHeight = Math.min(60, bassVolume * 60 * (1 + Math.sin(Date.now() / 100 + i * 0.3) * 0.5));
+            bassBars[i].style.height = `${barHeight}px`;
+            bassBars[i].style.background = `hsl(${120 + bassVolume * 60}, 100%, 50%)`;
+            bassBars[i].style.boxShadow = `0 0 ${5 + bassVolume * 10}px hsl(${120 + bassVolume * 60}, 100%, 50%)`;
+        }
+        
+        // Dynamic bass threshold system
+        if (bassVolume > maxBassPeak) {
+            maxBassPeak = bassVolume; // Naikkan threshold ke peak tertinggi
+        } else {
+            // Perlahan turunkan threshold jika tidak ada peak baru
+            maxBassPeak = Math.max(0.7, maxBassPeak * 0.995);
+        }
+
+        // Zoom in effect - hanya aktif ketika mencapai peak tertinggi
+        if (bassVolume >= maxBassPeak && bassVolume > 0.7 && 
+            currentTime - lastBassTime > bassCooldown) {
+            
+            const zoomIntensity = 1.0 + (bassVolume - 0.7) * 0.5; // 1.0 - 1.15
+            document.body.style.transform = `scale(${zoomIntensity})`;
+            document.querySelector('.verification-box').style.transform = `scale(${zoomIntensity * 1.1})`;
+            
+            isZoomed = true;
+            lastBassTime = currentTime;
+            
+            // Trigger alert hanya pertama kali
+            if (!hasShownBassAlert) {
+                hasShownBassAlert = true;
+                showBassAlert();
+            }
+        } 
+        // Zoom out effect - sangat sensitif terhadap penurunan bass
+        else if (bassVolume < 0.65 && isZoomed) {
+            document.body.style.transform = 'scale(1)';
+            document.querySelector('.verification-box').style.transform = 'scale(1)';
+            isZoomed = false;
+        }
+
+        const targetCount = Math.floor(volume * 100);
+        while (particles.length < targetCount) {
+            particles.push(new Particle(centerX, centerY, randomColor()));
+        }
+        while (particles.length > targetCount) {
+            particles.pop();
+        }
+
+        particles.forEach(p => {
+            p.update(gravityX, gravityY);
+            p.draw(pCtx);
+        });
+
+        requestAnimationFrame(animateParticles);
+    }
+
     function getBassVolume(array) {
         let sum = 0;
         const bassRange = 5;
