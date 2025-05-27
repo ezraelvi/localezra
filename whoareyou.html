@@ -188,7 +188,15 @@
             background: #0f0;
             color: black;
         }
-        <button id="fullscreen-toggle" style="
+
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        Loading<span id="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+    
+    <button id="fullscreen-toggle" style="
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -197,13 +205,6 @@
     z-index: 9999;
     cursor: pointer;
     ">Fullscreen</button>
-
-    </style>
-</head>
-<body>
-    <div id="loading-screen">
-        Loading<span id="loading-dots"><span>.</span><span>.</span><span>.</span></span>
-    </div>
 
     <canvas id="matrix"></canvas>
     <canvas id="particle-canvas"></canvas>
