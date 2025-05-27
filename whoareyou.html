@@ -165,7 +165,7 @@
         <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
     </audio>
-
+    
 <script>
     let isFullscreen = false;
     
@@ -252,20 +252,52 @@
     const columns = Math.floor(canvas.width / fontSize);
     const drops = Array(columns).fill(1);
 
+    // Flag untuk mode gelombang hijau (wave mode)
+    let waveModeActive = false;
+
+    // Variabel untuk animasi gelombang hijau
+    let waveOffset = 0;
+
     function drawMatrix() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#0f0';
-        ctx.font = fontSize + 'px monospace';
+        if (waveModeActive) {
+            // Ganti background jadi gelombang hijau bergerak
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#001a00'; // background gelap hijau gelap
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        for (let i = 0; i < drops.length; i++) {
-            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
 
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
+            const waveHeight = 20;
+            const waveLength = 100;
+            const speed = 0.15;
+
+            waveOffset += speed;
+
+            for (let y = 0; y < canvas.height; y += 30) {
+                ctx.beginPath();
+                for (let x = 0; x <= canvas.width; x++) {
+                    const yOffset = Math.sin((x / waveLength) * 2 * Math.PI + waveOffset + y / 20) * waveHeight;
+                    ctx.lineTo(x, y + yOffset);
+                }
+                ctx.stroke();
             }
-            drops[i]++;
+        } else {
+            // Matrix biasa
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
         }
     }
     setInterval(drawMatrix, 33);
@@ -299,25 +331,37 @@
             this.vy = (Math.random() - 0.5) * 1;
             this.size = 3 + Math.random() * 3;
             this.color = color;
+            this.alpha = 1;
+            this.life = 100; // lifetime dalam frame (~3.3 detik di 30fps)
+            this.exploding = false; // flag untuk ledakan partikel
         }
         update(gravityX, gravityY) {
-            this.vx += gravityX * 0.1;
-            this.vy += gravityY * 0.1;
-            this.x += this.vx;
-            this.y += this.vy;
+            if (this.exploding) {
+                // Saat exploding, gerak bebas tanpa gravitasi, kecepatan besar sesuai vx, vy
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 0.03;
+                if (this.alpha < 0) this.alpha = 0;
+            } else {
+                this.vx += gravityX * 0.1;
+                this.vy += gravityY * 0.1;
+                this.x += this.vx;
+                this.y += this.vy;
+            }
 
-            if (this.x < 0) { this.x = 0; this.vx *= -0.6; }
-            if (this.x > particleCanvas.width) { this.x = particleCanvas.width; this.vx *= -0.6; }
-            if (this.y < 0) { this.y = 0; this.vy *= -0.6; }
-            if (this.y > particleCanvas.height) { this.y = particleCanvas.height; this.vy *= -0.6; }
+            this.life--;
         }
         draw(ctx) {
+            if (this.alpha <= 0) return;
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
             ctx.beginPath();
             ctx.fillStyle = this.color;
             ctx.shadowColor = this.color;
             ctx.shadowBlur = 5;
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fill();
+            ctx.restore();
         }
     }
 
@@ -357,30 +401,38 @@
         return sum / bassRange / 255;
     }
 
-    function createBassEffect(intensity) {
-        if (intensity > 0.7) {
-            const effectSize = intensity * 100;
-            const effect = document.createElement('div');
-            effect.style.position = 'fixed';
-            effect.style.left = '50%';
-            effect.style.top = '50%';
-            effect.style.width = `${effectSize}px`;
-            effect.style.height = `${effectSize}px`;
-            effect.style.marginLeft = `-${effectSize/2}px`;
-            effect.style.marginTop = `-${effectSize/2}px`;
-            effect.style.borderRadius = '50%';
-            effect.style.background = `radial-gradient(circle, rgba(0,255,0,${intensity*0.3}) 0%, rgba(0,255,0,0) 70%)`;
-            effect.style.pointerEvents = 'none';
-            effect.style.zIndex = '100002';
-            effect.style.transition = 'opacity 0.5s';
-            effect.style.opacity = '1';
-            document.body.appendChild(effect);
+    // Variabel untuk menandai apakah alert sudah muncul dan fitur aktif
+    let bassAlertShown = false;
 
-            setTimeout(() => {
-                effect.style.opacity = '0';
-                setTimeout(() => effect.remove(), 500);
-            }, 50);
-        }
+    // Variabel untuk zoom layar
+    let zoomScale = 1;
+
+    // Fungsi untuk lempar partikel lama dengan kecepatan sesuai bass
+    function explodeParticles(bassLevel) {
+        particles.forEach(p => {
+            p.exploding = true;
+            p.vx = (Math.random() - 0.5) * 20 * bassLevel;
+            p.vy = (Math.random() - 0.5) * 20 * bassLevel;
+        });
+    }
+
+    // Fungsi untuk zoom in dan zoom out layar sesuai bass
+    function applyZoomEffect(bassLevel) {
+        // Zoom antara 1 dan 1.1 sesuai bassLevel
+        zoomScale = 1 + bassLevel * 0.1;
+        document.body.style.transform = `scale(${zoomScale})`;
+        document.body.style.transition = 'transform 0.1s ease-out';
+    }
+
+    // Fungsi untuk mengganti background ke gelombang hijau bergerak
+    function activateWaveBackground() {
+        waveModeActive = true;
+    }
+
+    // Fungsi untuk reset efek zoom dan background ke default
+    function resetEffects() {
+        document.body.style.transform = 'scale(1)';
+        waveModeActive = false;
     }
 
     function animateParticles() {
@@ -388,29 +440,47 @@
 
         analyser.getByteFrequencyData(bassDataArray);
         const bassLevel = getBassLevel(bassDataArray);
-        
+
         if (bassLevel > 0.7) {
-            createBassEffect(bassLevel);
-            
-            for (let i = 0; i < Math.floor(bassLevel * 3); i++) {
-                particles.push(new Particle(
-                    centerX + (Math.random() - 0.5) * 100,
-                    centerY + (Math.random() - 0.5) * 100,
-                    randomColor()
-                ));
+            if (!bassAlertShown) {
+                bassAlertShown = true;
+                alert('sepertinya musiknya enak');
+                // Setelah OK, aktifkan fitur
+                explodeParticles(bassLevel);
+                activateWaveBackground();
+            } else {
+                // Jika sudah aktif, terus update zoom dan tambah partikel baru
+                applyZoomEffect(bassLevel);
+
+                for (let i = 0; i < Math.floor(bassLevel * 3); i++) {
+                    particles.push(new Particle(
+                        centerX + (Math.random() - 0.5) * 100,
+                        centerY + (Math.random() - 0.5) * 100,
+                        randomColor()
+                    ));
+                }
+            }
+        } else {
+            // Jika bass turun di bawah threshold, reset efek dan alert flag
+            if (bassAlertShown) {
+                bassAlertShown = false;
+                resetEffects();
             }
         }
 
         particles.forEach((p, i) => {
             p.update(gravityX, gravityY);
             p.draw(pCtx);
-            
-            if (p.size < 0.1 || 
-                p.x < -100 || p.x > particleCanvas.width + 100 || 
+
+            // Hapus partikel yang sudah tidak terlihat atau habis life
+            if (p.alpha <= 0 || p.life <= 0 ||
+                p.x < -100 || p.x > particleCanvas.width + 100 ||
                 p.y < -100 || p.y > particleCanvas.height + 100) {
                 particles.splice(i, 1);
             } else {
-                p.size *= 0.98;
+                if (!p.exploding) {
+                    p.size *= 0.98;
+                }
             }
         });
 
