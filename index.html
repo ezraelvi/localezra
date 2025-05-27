@@ -298,6 +298,83 @@
         }
     });
 
+    let loveModeActive = false;
+    let gestureCount = 0;
+    let lastGestureTime = 0;
+    let lastTouchY = null;
+
+    function createLoveParticlesConfig() {
+        return {
+            particles: {
+                number: { value: 10, density: { enable: false } },
+                color: { value: '#ff69b4' },
+                shape: {
+                    type: 'image',
+                    image: {
+                        src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 29.6"><path fill="%23ff69b4" d="M23.6 0c-2.7 0-5 1.7-6 4.1C16.4 1.7 14.1 0 11.4 0 6.4 0 2.4 4 2.4 9c0 7.1 9.6 13.6 13.6 20.6 4-7 13.6-13.5 13.6-20.6 0-5-4-9-9-9z"/></svg>',
+                        width: 32,
+                        height: 29.6
+                    }
+                },
+                opacity: { value: 0.8, random: true, anim: { enable: true, speed: 1, opacity_min: 0, sync: false } },
+                size: { value: 10, random: true, anim: { enable: true, speed: 5, size_min: 5, sync: false } },
+                move: { enable: true, speed: 2, direction: 'top', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        };
+    }
+
+    function startLoveParticles() {
+        if (!loveModeActive) return;
+
+        particlesJS('particles-js', createLoveParticlesConfig());
+
+        setTimeout(() => {
+            if (loveModeActive) {
+                startLoveParticles();
+            }
+        }, 3000);
+    }
+
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            lastTouchY = e.touches[0].clientY;
+        }
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        if (!lastTouchY || loveModeActive) return;
+
+        const currentY = e.touches[0].clientY;
+        const now = Date.now();
+
+        if (Math.abs(currentY - lastTouchY) > 30) {
+            if (now - lastGestureTime > 300) {
+                gestureCount++;
+                lastGestureTime = now;
+
+                if (gestureCount >= 5) {
+                    gestureCount = 0;
+                    if (confirm('danger mode love aktif')) {
+                        loveModeActive = true;
+                        startLoveParticles();
+                    }
+                }
+            }
+            lastTouchY = currentY;
+        }
+    });
+
+    setInterval(() => {
+        if (Date.now() - lastGestureTime > 2000) {
+            gestureCount = 0;
+        }
+    }, 1000);
+
     const passwordInput = document.getElementById('password');
     const shieldIcon = document.getElementById('shieldIcon');
     const mangekyoIcon = document.getElementById('mangekyoIcon');
@@ -387,6 +464,7 @@
             
             return {
                 attempts: 0,
+                lastAttempt: 0,
                 lastAttempt: null,
                 blockUntil: null
             };
