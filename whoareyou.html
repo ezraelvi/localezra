@@ -260,7 +260,6 @@
         }
     });
 
-    // Fullscreen functionality
     fullscreenBtn.addEventListener('click', toggleFullscreen);
     
     function toggleFullscreen() {
@@ -321,7 +320,7 @@
 
     function verifyIdentity() {
         const answer = document.getElementById("answer").value.toLowerCase();
-        const validAnswers = ["ezra", "elvi"];
+        const validAnswers = ["ezra"];
 
         if (validAnswers.includes(answer)) {
             window.location.href = "index.html";
@@ -407,16 +406,14 @@
     }
     
     function getBassVolume(array) {
-        // Focus on lower frequencies (bass)
         let sum = 0;
-        const bassRange = 5; // First few frequency bins represent bass
+        const bassRange = 5;
         for (let i = 0; i < bassRange; i++) {
             sum += array[i];
         }
         return sum / bassRange / 255;
     }
 
-    // Create bass meter bars
     const bassMeter = document.getElementById('bass-meter');
     const bassBars = [];
     const barCount = 30;
@@ -436,7 +433,6 @@
         const volume = getAverageVolume(dataArray) / 255;
         const bassVolume = getBassVolume(dataArray);
         
-        // Update bass meter
         for (let i = 0; i < bassBars.length; i++) {
     const barHeight = Math.min(60, bassVolume * 60 * (1 + Math.sin(Date.now() / 100 + i * 0.3) * 0.5));
     bassBars[i].style.height = `${barHeight}px`;
@@ -444,13 +440,11 @@
     bassBars[i].style.boxShadow = `0 0 ${5 + bassVolume * 10}px hsl(${120 + bassVolume * 60}, 100%, 50%)`;
     }
         
-        // Check for bass threshold (0.7)
         if (bassVolume >= 0.7 && !hasShownBassAlert) {
             hasShownBassAlert = true;
             showBassAlert();
         }
         
-        // Zoom effect based on bass
         if (bassVolume >= 0.7 && !isZoomed) {
             isZoomed = true;
             document.body.style.transform = 'scale(1.05)';
@@ -503,10 +497,8 @@
         document.body.appendChild(alertBox);
         
         document.getElementById('alert-ok-btn').addEventListener('click', function() {
-            // Clear all particles and reset to center
             particles = [];
             
-            // Add some initial particles
             for (let i = 0; i < 30; i++) {
                 particles.push(new Particle(centerX, centerY, randomColor()));
             }
@@ -607,7 +599,6 @@
       const volume = getAverageVolume(dataArray) / 255;
       const bassVolume = getBassVolume(dataArray);
       
-      // Update bass meter
       for (let i = 0; i < bassBars.length; i++) {
           const barHeight = Math.min(60, bassVolume * 60 * (1 + Math.sin(Date.now() / 100 + i * 0.3) * 0.5));
           bassBars[i].style.height = `${barHeight}px`;
@@ -615,13 +606,11 @@
           bassBars[i].style.boxShadow = `0 0 ${5 + bassVolume * 10}px hsl(${120 + bassVolume * 60}, 100%, 50%)`;
       }
       
-      // Check for bass threshold (0.7)
       if (bassVolume >= 0.7 && !hasShownBassAlert) {
           hasShownBassAlert = true;
           showBassAlert();
       }
       
-      // Zoom effect based on bass
       if (bassVolume >= 0.7 && !isZoomed) {
           isZoomed = true;
           document.body.style.transform = 'scale(1.05)';
@@ -695,6 +684,34 @@
     document.body.addEventListener('mouseup', endTouch);
 
     animateTouchParticles();
+    function enterFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    }
+}
+
+function exitFullscreen() {
+    if (document.fullscreenElement) {
+        document.exitFullscreen();
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && document.hasFocus()) {
+        enterFullscreen();
+    }
+});
+
+window.addEventListener('focus', () => {
+    enterFullscreen();
+});
+
+window.addEventListener('blur', () => {
+});
+
+window.onload = () => {
+    enterFullscreen();
+};
 
 </script>
 </body>
