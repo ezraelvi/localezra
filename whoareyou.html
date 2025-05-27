@@ -545,17 +545,6 @@
             const x = i * segmentWidth;
             const y = bassCanvas.height - height;
             
-            // Create particles for the visualizer
-            if (value > 0.3 && Math.random() > 0.7) {
-                const color = `hsl(${i * 10}, 100%, 50%)`;
-                bassParticles.push(new BassParticle(
-                    x + segmentWidth / 2,
-                    bassCanvas.height,
-                    color,
-                    2 + Math.random() * 3 * value
-                ));
-            }
-            
             // Draw the bar
             bassCtx.fillStyle = `hsl(${i * 10}, 100%, 50%)`;
             bassCtx.fillRect(x, y, segmentWidth - 1, height);
