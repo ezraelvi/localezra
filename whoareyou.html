@@ -400,7 +400,7 @@
             createBassEffect(bassLevel);
             
             // Add particles on strong bass
-            for (let i = 0; i < Math.floor(bassLevel * 10); i++) {
+            for (let i = 0; i < Math.floor(bassLevel * 3); i++) {
                 particles.push(new Particle(
                     centerX + (Math.random() - 0.5) * 100,
                     centerY + (Math.random() - 0.5) * 100,
@@ -426,8 +426,8 @@
         });
 
         // Limit number of particles
-        if (particles.length > 500) {
-            particles = particles.slice(-500);
+        if (particles.length > 100) {
+            particles = particles.slice(-100);
         }
 
         requestAnimationFrame(animateParticles);
