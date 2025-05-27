@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<!DOCTYPE html>
-<html>
-<head>
-
     <script>
         const user = sessionStorage.getItem('loggedInUser');
         if (user !== 'elvi') {
             alert('Access denied! Kamu harus login dulu.');
             window.location.href = 'index.html';
         }
-    </script>
-    
+    </script>    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website ezvvel</title>
@@ -23,7 +18,7 @@
     margin: 0;
     padding: 0;
     font-family: 'Courier New', monospace;
-    background: url('/imgvidaud/backgroundelvi.png'); /* Ganti dengan path folder & nama file */
+    background: url('/imgvidaud/backgroundelvi.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -180,7 +175,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Footer */
         footer {
             position: fixed;
             bottom: 0;
@@ -195,22 +189,20 @@
     
     <div id="video-container">
         <video width="100%" autoplay loop muted>
-            <source src="data:video/mp4;base64, "
+          <source src="/imgvidaud/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
         </video>
     </div>
     
     <div class="social-container tiktok-container">
         <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
         <div class="social-tab tiktok-tab">
-            <img src="data:image/png;base64,"
-        </div>
+            <img src="imgvidaud/TikTok 27 may 2025.png"  style="max-width: 100%; height: auto;">        </div>
     </div>
  
     <div class="social-container instagram-container">
         <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
         <div class="social-tab instagram-tab">
-            <img src="data:image/png;base64,"
-        </div>
+            <img src="imgvidaud/Instagram 27 may 2025.png"  style="max-width: 100%; height: auto;">        </div>
     </div>
 
     <script>
@@ -230,21 +222,19 @@
     </div>
     
     <div id="video-middle-right">
-        <video width="100%" autoplay loop muted>
-            <source src="data:video/mp4;base64,"
+        <video width="100%" autoplay loop>
+            <source src="/imgvidaud/FDownloader.Net_13.mp4" type="audio/mpeg" />
         </video>
     </div>
     
     <div id="video-bottom-right">
         <video width="100%" autoplay loop muted>
-            <source src="data:video/mp4;base64,
+            <source src="/imgvidaud/FDownloader.Net 4.mp4" type="audio/mpeg" />
         </video>
     </div>
 
-    
     <footer>
-        <img src="data:image/jpeg;base64,"
-        <p> 2025 Dibuat dengan ❤ oleh Kamu</p>
-    </footer>
+    <img src="imgvidaud/October 25, 2024 at 8.11 AM.png" " style="max-width: 100%; height: auto;">
+</footer>
 </body>
 </html>
