@@ -4,7 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>My Dashboard</title>
-     <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
+<link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
+
+<!-- Leaflet CSS and JS for map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
     :root {
         --deepseek-blue: #00a8ff;
@@ -162,8 +167,6 @@
 <button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
 
 <script>
-
-    // Initialize map with Geolocation API and OpenStreetMap
     const mapDiv = document.getElementById('map');
     let map, marker;
 
@@ -199,51 +202,44 @@
     }
 
     updatePosition();
-    // Update location every 10 seconds
     setInterval(updatePosition, 10000);
 
-   supportForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const text = document.getElementById('supportText').value.trim();
-    
-    if (text.length === 0) {
-        supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
-        return;
-    }
-    
-    supportMsg.textContent = "Mengirim pesan...";
-    
-    try {
-        // Gunakan mode 'no-cors' dan ubah cara pengiriman
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzCfn7C9Cer1HOgYUtN7mCnEiLIDryU3tt1Q-_HhtoaWxkvOWHrdtWdP3Ym0Tt3xARh/exec', {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `message=${encodeURIComponent(text)}`
-        });
-        
-        // Karena mode no-cors, kita tidak bisa membaca response
-        // Tapi anggap saja berhasil jika tidak ada error
-        supportMsg.textContent = "Pesan terkirim! (Cek spreadsheet untuk memastikan)";
-        supportForm.reset();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
-    }
-       
-    // Logout button clears session and redirects to login
+    const supportForm = document.getElementById('supportForm');
+    const supportMsg = document.getElementById('supportMsg');
+
+    supportForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const text = document.getElementById('supportText').value.trim();
+
+        if (text.length === 0) {
+            supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
+            return;
+        }
+
+        supportMsg.textContent = "Mengirim pesan...";
+
+        try {
+            await fetch('https://script.google.com/macros/s/AKfycbzCfn7C9Cer1HOgYUtN7mCnEiLIDryU3tt1Q-_HhtoaWxkvOWHrdtWdP3Ym0Tt3xARh/exec', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `message=${encodeURIComponent(text)}`
+            });
+            supportMsg.textContent = "Pesan terkirim! (Cek spreadsheet untuk memastikan)";
+            supportForm.reset();
+        } catch (error) {
+            console.error('Error:', error);
+            supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
+        }
+    });
+
     document.getElementById('logoutBtn').addEventListener('click', () => {
         sessionStorage.removeItem('loggedInUser');
         window.location.href = 'index.html';
     });
 </script>
-
-<!-- Leaflet CSS and JS for map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 </body>
 </html>
