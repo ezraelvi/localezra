@@ -1,11 +1,4 @@
-1.interaksi khusus di index.html
-2.interaksi khusus tambahan di index.html
 3.efek layar whoareyou yg diganti menjadi peka hanya terhadap suara bass
 4.menyelesaikan geo location di mydashboard
  opsional
-5.membuat login di index menjadi proses backend google atau cloudflare
 
-oke keren, tapi aku mau diubah sedikit, ketika mode love aktif
-partikle love yg bermunculan hanya 10 per 3 itupun bermunculan tidak bersamaan (agar tidak terlalu kaku) dalam range 3 detik itu detik dengan life nya partikle nya 3.5 detik
-artinya particle nya 10 + 10 +10 + .... per 3 detik
-dengan lifetime 3.5 detik
