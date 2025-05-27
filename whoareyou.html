@@ -389,7 +389,7 @@
         analyser.getByteFrequencyData(bassDataArray);
         const bassLevel = getBassLevel(bassDataArray);
         
-        if (bassLevel > 0.5) {
+        if (bassLevel > 0.7) {
             createBassEffect(bassLevel);
             
             for (let i = 0; i < Math.floor(bassLevel * 3); i++) {
