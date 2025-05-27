@@ -16,8 +16,7 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            transition: transform 0.3s ease;
-            transform-origin: center center;
+            transition: transform 0.5s ease;
         }
         #matrix {
             position: fixed;
@@ -135,25 +134,7 @@
             background: #0f0;
             color: black;
         }
-        #fullscreen-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 6px 10px;
-            font-size: 12px;
-            cursor: pointer;
-            border-radius: 4px;
-            user-select: none;
-            z-index: 100002;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        #fullscreen-toggle:hover {
-            background: #0f0;
-            color: black;
-        }
+
         #particle-canvas {
             position: fixed;
             top: 0; left: 0;
@@ -162,21 +143,58 @@
             pointer-events: none;
             z-index: 1000;
         }
+        
+        #fullscreen-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            user-select: none;
+            z-index: 100001;
+            transition: background-color 0.3s, color 0.3s;
+            display: none;
+        }
+        #fullscreen-toggle:hover {
+            background: #0f0;
+            color: black;
+        }
+        
         #bass-visualizer {
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 100vw;
-            height: 120px;
-            pointer-events: none;
-            z-index: 100003;
-            background: linear-gradient(90deg, rgba(0,255,0,0.1), rgba(0,255,0,0.3));
-            overflow: visible;
-        }
-        #bass-visualizer canvas {
             width: 100%;
-            height: 100%;
-            display: block;
+            height: 100px;
+            z-index: 999;
+            pointer-events: none;
+        }
+        
+        .bass-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0f0;
+            padding: 20px;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            z-index: 100002;
+            box-shadow: 0 0 20px #0f0;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .bass-alert button {
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -187,6 +205,7 @@
 
     <canvas id="matrix"></canvas>
     <canvas id="particle-canvas"></canvas>
+    <canvas id="bass-visualizer"></canvas>
 
     <div class="verification-box" style="display:none;">
         <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
@@ -197,191 +216,32 @@
 
     <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
     <button id="fullscreen-toggle" title="Toggle Fullscreen">⛶</button>
+    
+    <div class="bass-alert" id="bass-alert">
+        <h2>Nikmati Musiknya!</h2>
+        <p>Bass telah mencapai level maksimal!</p>
+        <button id="bass-alert-ok">OKE</button>
+    </div>
 
     <audio id="ambient-audio" loop>
         <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
     </audio>
 
-    <div id="bass-visualizer"></div>
-
 <script>
     const audio = document.getElementById('ambient-audio');
     const audioControl = document.getElementById('audio-control');
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
-    const particleCanvas = document.getElementById('particle-canvas');
-    const pCtx = particleCanvas.getContext('2d');
-    const bassVisualizerDiv = document.getElementById('bass-visualizer');
+    const bassAlert = document.getElementById('bass-alert');
+    const bassAlertOk = document.getElementById('bass-alert-ok');
+    
+    // Variables for bass features
+    let bassAlertShown = false;
+    let isZoomed = false;
+    let zoomStartTime = 0;
+    let maxBassValue = 0;
+    let maxBassFrequency = 0;
 
-    // Resize canvases
-    function resizeCanvas() {
-        particleCanvas.width = window.innerWidth;
-        particleCanvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // Matrix canvas setup (unchanged)
-    const matrixCanvas = document.getElementById('matrix');
-    const ctx = matrixCanvas.getContext('2d');
-    function resizeMatrixCanvas() {
-        matrixCanvas.width = window.innerWidth;
-        matrixCanvas.height = window.innerHeight;
-    }
-    resizeMatrixCanvas();
-    window.addEventListener('resize', resizeMatrixCanvas);
-
-    // Matrix effect variables
-    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
-    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const nums = '0123456789';
-    const alphabet = katakana + latin + nums;
-    const fontSize = 16
-    const columns = Math.floor(matrixCanvas.width / fontSize);
-    const drops = Array(columns).fill(1);
-
-    function drawMatrix() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
-        ctx.fillStyle = '#0f0';
-        ctx.font = fontSize + 'px monospace';
-
-        for (let i = 0; i < drops.length; i++) {
-            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-            if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
-            }
-            drops[i]++;
-        }
-    }
-    setInterval(drawMatrix, 33);
-
-    // Audio context and analyser setup
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioCtx.createMediaElementSource(audio);
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 512;
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-
-    const frequencyData = new Uint8Array(analyser.frequencyBinCount);
-
-    // Bass frequency range indices (approx 20Hz - 250Hz)
-    // fftSize=512, sampleRate=~44100, freqBin = sampleRate/fftSize ~ 86Hz per bin
-    // So bins 0-3 roughly cover bass range (0-344Hz)
-    const bassBinCount = 4;
-
-    // Particle class for top-center bass particles
-    class Particle {
-        constructor(x, y, color) {
-            this.x = x;
-            this.y = y;
-            this.vx = (Math.random() - 0.5) * 1.5;
-            this.vy = (Math.random() - 0.5) * 1.5 - 1;
-            this.size = 3 + Math.random() * 3;
-            this.color = color;
-            this.alpha = 1;
-            this.life = 60 + Math.random() * 30;
-        }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.alpha -= 1 / this.life;
-            this.size *= 0.97;
-            this.life--;
-        }
-        draw(ctx) {
-            if (this.alpha <= 0) return;
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
-            ctx.beginPath();
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 10;
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-        isDead() {
-            return this.life <= 0 || this.alpha <= 0 || this.size <= 0.1;
-        }
-    }
-
-    // Bass visualizer particle class (bottom bar)
-    class BassParticle {
-        constructor(x, y, size, color, speedY) {
-            this.x = x;
-            this.y = y;
-            this.size = size;
-            this.color = color;
-            this.speedY = speedY;
-            this.alpha = 1;
-        }
-        update() {
-            this.y -= this.speedY;
-            this.alpha -= 0.02;
-            if (this.alpha < 0) this.alpha = 0;
-        }
-        draw(ctx) {
-            if (this.alpha <= 0) return;
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
-            ctx.beginPath();
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 8;
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-        isDead() {
-            return this.alpha <= 0 || this.y + this.size < 0;
-        }
-    }
-
-    // Variables for particles
-    let bassParticles = [];
-    let topCenterParticles = [];
-
-    // Flag for alert once
-    let alertShown = false;
-
-    // Zoom variables
-    let zoomActive = false;
-    let zoomTargetX = window.innerWidth / 2;
-    let zoomTargetY = window.innerHeight / 2;
-    let zoomScale = 1;
-    const zoomThreshold = 0.7;
-    const zoomMaxScale = 1.3;
-    const zoomSpeed = 0.05;
-
-    // Fullscreen toggle button
-    fullscreenToggle.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            document.exitFullscreen();
-        }
-    });
-
-    // Audio control toggle
-    audioControl.addEventListener('click', () => {
-        if (audio.paused) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            audio.play().then(() => {
-                audioControl.textContent = '🔊';
-            }).catch(() => {
-                audioControl.textContent = '🔇';
-            });
-        } else {
-            audio.pause();
-            audioControl.textContent = '🔇';
-        }
-    });
-
-    // Start audio on first user interaction
     window.onload = () => {
         setTimeout(() => {
             document.getElementById('loading-screen').style.display = 'none';
@@ -396,6 +256,7 @@
             }
             audio.play().then(() => {
                 audioControl.textContent = '🔊';
+                fullscreenToggle.style.display = 'block';
             }).catch(() => {
                 audioControl.textContent = '🔇';
             });
@@ -404,7 +265,74 @@
         document.body.addEventListener('click', startAudioOnInteraction);
     };
 
-    // Verify identity function (unchanged)
+    audioControl.addEventListener('click', () => {
+        if (audio.paused) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            audio.play().then(() => {
+                audioControl.textContent = '🔊';
+                fullscreenToggle.style.display = 'block';
+            }).catch(() => {
+                audioControl.textContent = '🔇';
+            });
+        } else {
+            audio.pause();
+            audioControl.textContent = '🔇';
+        }
+    });
+    
+    // Fullscreen toggle
+    fullscreenToggle.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+            fullscreenToggle.textContent = '🗗';
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                fullscreenToggle.textContent = '⛶';
+            }
+        }
+    });
+
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
+    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const nums = '0123456789';
+    const alphabet = katakana + latin + nums;
+
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0f0';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if (drops[i] * fontSize> canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+    setInterval(drawMatrix, 33);
+
     function verifyIdentity() {
         const answer = document.getElementById("answer").value.toLowerCase();
         const validAnswers = ["ezra", "elvi"];
@@ -416,133 +344,396 @@
         }
     }
 
-    // Helper to get average bass volume (normalized 0-1)
-    function getBassVolume(data) {
-        let sum = 0;
-        for (let i = 0; i < bassBinCount; i++) {
-            sum += data[i];
+    const particleCanvas = document.getElementById('particle-canvas');
+    const pCtx = particleCanvas.getContext('2d');
+    const bassCanvas = document.getElementById('bass-visualizer');
+    const bassCtx = bassCanvas.getContext('2d');
+
+    function resizeParticleCanvas() {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+        bassCanvas.width = window.innerWidth;
+        bassCanvas.height = 100;
+    }
+    resizeParticleCanvas();
+    window.addEventListener('resize', resizeParticleCanvas);
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 1;
+            this.vy = (Math.random() - 0.5) * 1;
+            this.size = 3 + Math.random() * 3;
+            this.color = color;
         }
-        return sum / (bassBinCount * 255);
+        update(gravityX, gravityY) {
+            this.vx += gravityX * 0.1;
+            this.vy += gravityY * 0.1;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.x < 0) { this.x = 0; this.vx *= -0.6; }
+            if (this.x > particleCanvas.width) { this.x = particleCanvas.width; this.vx *= -0.6; }
+            if (this.y < 0) { this.y = 0; this.vy *= -0.6; }
+            if (this.y > particleCanvas.height) { this.y = particleCanvas.height; this.vy *= -0.6; }
+        }
+        draw(ctx) {
+            ctx.beginPath();
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 5;
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    class BassParticle {
+        constructor(x, y, color, speed) {
+            this.x = x;
+            this.y = y;
+            this.vy = -speed;
+            this.size = 2 + Math.random() * 4;
+            this.color = color;
+            this.life = 50 + Math.random() * 50;
+        }
+        update() {
+            this.y += this.vy;
+            this.life--;
+        }
+        draw(ctx) {
+            const opacity = this.life / 100;
+            ctx.beginPath();
+            ctx.fillStyle = `${this.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 5;
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
-    // Helper to get peak bass frequency bin index and value
-    function getPeakBass(data) {
-        let peakIndex = 0;
-        let peakValue = 0;
-        for (let i = 0; i < bassBinCount; i++) {
-            if (data[i] > peakValue) {
-                peakValue = data[i];
-                peakIndex = i;
-            }
-        }
-        return { peakIndex, peakValue };
-    }
+    let particles = [];
+    let bassParticles = [];
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    let topCenterParticles = [];
 
-    // Particle colors for bass particles
-    function randomBassColor() {
-        const colors = ['#00ff00', '#33ff33', '#66ff66', '#99ff99', '#ccffcc'];
+    function randomColor() {
+        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c'];
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    // Animate particles and bass visualizer
-    function animate() {
-        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+    let gravityX = 0;
+    let gravityY = 0;
 
-        analyser.getByteFrequencyData(frequencyData);
-        const bassVolume = getBassVolume(frequencyData);
+    window.addEventListener('deviceorientation', (event) => {
+        gravityX = event.gamma ? event.gamma / 90 : 0;
+        gravityY = event.beta ? event.beta / 90 : 0;
+    });
 
-        // Show alert once when bass >= 0.7
-        if (bassVolume >= 0.7 && !alertShown) {
-            alert("nikmati musiknya");
-            alertShown = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaElementSource(audio);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    const bassAnalyser = audioCtx.createAnalyser();
+    bassAnalyser.fftSize = 32;
+    source.connect(bassAnalyser);
+    
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const bassDataArray = new Uint8Array(bassAnalyser.frequencyBinCount);
+
+    function getAverageVolume(array) {
+        let values = 0;
+        let length = array.length;
+        for (let i = 0; i < length; i++) {
+            values += array[i];
         }
-
-        // === Top center particles ===
-        // Clear all particles if bass < 0.7
-        if (bassVolume < 0.7) {
-            topCenterParticles = [];
-        } else {
-            // Add particles at top center proportional to bass volume
-            const targetCount = Math.floor(bassVolume * 30);
-            while (topCenterParticles.length < targetCount) {
-                const x = window.innerWidth / 2 + (Math.random() - 0.5) * 100;
-                const y = 50 + Math.random() * 30;
-                topCenterParticles.push(new Particle(x, y, randomBassColor()));
-            }
-            while (topCenterParticles.length > targetCount) {
-                topCenterParticles.pop();
-            }
+        return values / length;
+    }
+    
+    function getBassValue() {
+        analyser.getByteFrequencyData(bassDataArray);
+        // Get the lowest frequencies (bass)
+        let bassValue = 0;
+        for (let i = 0; i < 5; i++) {
+            bassValue += bassDataArray[i];
         }
-
-        // Update and draw top center particles
-        topCenterParticles.forEach((p, i) => {
-            p.update();
-            p.draw(pCtx);
-            if (p.isDead()) topCenterParticles.splice(i, 1);
-        });
-
-        // === Zoom in/out logic ===
-        if (bassVolume >= zoomThreshold) {
-            if (!zoomActive) zoomActive = true;
-            // Find peak bass bin and map to screen x position
-            const { peakIndex } = getPeakBass(frequencyData);
-            // Map peakIndex (0 to bassBinCount-1) to screen width (left to right)
-            zoomTargetX = (peakIndex + 0.5) / bassBinCount * window.innerWidth;
-            zoomTargetY = window.innerHeight / 2; // center vertically
-            // Smooth zoom scale up
-            zoomScale += (zoomMaxScale - zoomScale) * zoomSpeed;
-        } else {
-            // Smooth zoom scale down
-            zoomScale += (1 - zoomScale) * zoomSpeed;
-            if (zoomScale < 1.01) {
-                zoomScale = 1;
-                zoomActive = false;
+        return bassValue / (5 * 255);
+    }
+    
+    function getMaxBassFrequency() {
+        analyser.getByteFrequencyData(bassDataArray);
+        let maxIndex = 0;
+        let maxValue = 0;
+        for (let i = 0; i < 10; i++) { // Only check the first 10 frequencies (bass range)
+            if (bassDataArray[i] > maxValue) {
+                maxValue = bassDataArray[i];
+                maxIndex = i;
             }
         }
-
-        // Apply zoom transform with origin at zoomTargetX, zoomTargetY
-        const originX = zoomTargetX;
-        const originY = zoomTargetY;
-        document.body.style.transformOrigin = `${originX}px ${originY}px`;
-        document.body.style.transform = `scale(${zoomScale})`;
-
-        // === Bass visualizer particles at bottom ===
-        // Add new bass particles proportional to bass volume
-        const bassParticleCount = Math.floor(bassVolume * 50);
-        for (let i = 0; i < bassParticleCount; i++) {
-            const x = Math.random() * window.innerWidth;
-            const y = window.innerHeight - 20 + Math.random() * 20;
-            const size = 2 + Math.random() * 4;
-            const speedY = 1 + Math.random() * 2;
-            bassParticles.push(new BassParticle(x, y, size, randomBassColor(), speedY));
-        }
-
-        // Draw bass visualizer particles on separate canvas inside bass-visualizer div
-        if (!bassVisualizerDiv._canvas) {
-            const canvas = document.createElement('canvas');
-            canvas.width = window.innerWidth;
-            canvas.height = 120;
-            bassVisualizerDiv.appendChild(canvas);
-            bassVisualizerDiv._canvas = canvas;
-            bassVisualizerDiv._ctx = canvas.getContext('2d');
-            window.addEventListener('resize', () => {
-                canvas.width = window.innerWidth;
-                canvas.height = 120;
-            });
-        }
-        const bCtx = bassVisualizerDiv._ctx;
-        bCtx.clearRect(0, 0, bassVisualizerDiv._canvas.width, bassVisualizerDiv._canvas.height);
-
-        bassParticles.forEach((p, i) => {
-            p.update();
-            p.draw(bCtx);
-            if (p.isDead()) bassParticles.splice(i, 1);
-        });
-
-        requestAnimationFrame(animate);
+        return maxIndex;
     }
 
-    animate();
+    function animateParticles() {
+        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        bassCtx.clearRect(0, 0, bassCanvas.width, bassCanvas.height);
+
+        analyser.getByteFrequencyData(dataArray);
+        const volume = getAverageVolume(dataArray) / 255;
+        const bassValue = getBassValue();
+        
+        // Check for bass level to show alert
+        if (bassValue >= 0.7 && !bassAlertShown) {
+            bassAlert.style.display = 'block';
+            bassAlertShown = true;
+        }
+        
+        // Zoom effect when bass is strong
+        if (bassValue >= 0.7 && !isZoomed) {
+            isZoomed = true;
+            zoomStartTime = Date.now();
+            maxBassValue = bassValue;
+            maxBassFrequency = getMaxBassFrequency();
+            document.body.style.transform = 'scale(1.1)';
+        } else if (bassValue < 0.7 && isZoomed) {
+            isZoomed = false;
+            document.body.style.transform = 'scale(1)';
+        }
+        
+        // Update top center particles based on bass
+        if (bassValue >= 0.7) {
+            const particleCount = Math.floor(bassValue * 20);
+            while (topCenterParticles.length < particleCount) {
+                const x = centerX + (Math.random() - 0.5) * 100;
+                const y = 50 + Math.random() * 20;
+                topCenterParticles.push(new Particle(x, y, randomColor()));
+            }
+            while (topCenterParticles.length > particleCount) {
+                topCenterParticles.shift();
+            }
+        } else {
+            topCenterParticles = [];
+        }
+        
+        // Update regular particles
+        const targetCount = Math.floor(volume * 100);
+        while (particles.length < targetCount) {
+            particles.push(new Particle(centerX, centerY, randomColor()));
+        }
+        while (particles.length > targetCount) {
+            particles.pop();
+        }
+
+        particles.forEach(p => {
+            p.update(gravityX, gravityY);
+            p.draw(pCtx);
+        });
+        
+        topCenterParticles.forEach(p => {
+            p.update(gravityX, gravityY);
+            p.draw(pCtx);
+        });
+        
+        // Bass visualizer at bottom
+        const segmentWidth = bassCanvas.width / bassDataArray.length;
+        for (let i = 0; i < bassDataArray.length; i++) {
+            const value = bassDataArray[i] / 255;
+            const height = value * bassCanvas.height;
+            const x = i * segmentWidth;
+            const y = bassCanvas.height - height;
+            
+            // Create particles for the visualizer
+            if (value > 0.3 && Math.random() > 0.7) {
+                const color = `hsl(${i * 10}, 100%, 50%)`;
+                bassParticles.push(new BassParticle(
+                    x + segmentWidth / 2,
+                    bassCanvas.height,
+                    color,
+                    2 + Math.random() * 3 * value
+                ));
+            }
+            
+            // Draw the bar
+            bassCtx.fillStyle = `hsl(${i * 10}, 100%, 50%)`;
+            bassCtx.fillRect(x, y, segmentWidth - 1, height);
+        }
+        
+        // Update and draw bass particles
+        for (let i = bassParticles.length - 1; i >= 0; i--) {
+            bassParticles[i].update();
+            bassParticles[i].draw(bassCtx);
+            if (bassParticles[i].life <= 0) {
+                bassParticles.splice(i, 1);
+            }
+        }
+
+        requestAnimationFrame(animateParticles);
+    }
+
+    function startParticleEffect() {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        animateParticles();
+        document.body.removeEventListener('click', startParticleEffect);
+    }
+
+    document.body.addEventListener('click', startParticleEffect);
+    
+    // Handle bass alert OK button
+    bassAlertOk.addEventListener('click', () => {
+        bassAlert.style.display = 'none';
+        // Clear all existing particles and only keep top center ones
+        particles = [];
+    });
+
+let isTouching = false;
+let touchX = 0;
+let touchY = 0;
+    
+const body = document.body;
+
+function applyScreenBeatEffect(volume) {
+  const intensity = volume * 10;
+  const offsetX = (Math.random() - 0.5) * intensity;
+  const offsetY = (Math.random() - 0.5) * intensity;
+  body.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  body.style.transition = 'transform 0.05s ease';
+}
+
+function applyTouchBassEffect(x, y, volume) {
+  const bassEffect = document.createElement('div');
+  bassEffect.style.position = 'fixed';
+  bassEffect.style.left = `${x}px`;
+  bassEffect.style.top = `${y}px`;
+  bassEffect.style.width = '100px';
+  bassEffect.style.height = '100px';
+  bassEffect.style.borderRadius = '50%';
+  bassEffect.style.pointerEvents = 'none';
+  bassEffect.style.zIndex = 100002;
+  bassEffect.style.background = `rgba(0, 255, 0, ${0.3 + volume * 0.7})`;
+  bassEffect.style.boxShadow = `0 0 ${20 + volume * 40}px #0f0, 0 0 ${40 + volume * 80}px #0f0`;
+  bassEffect.style.transform = 'scale(1)';
+  bassEffect.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  document.body.appendChild(bassEffect);
+
+  requestAnimationFrame(() => {
+    bassEffect.style.transform = 'scale(1.5)';
+    bassEffect.style.opacity = '0';
+  });
+
+  setTimeout(() => {
+    bassEffect.remove();
+  }, 300);
+}
+
+class TouchParticle {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random() - 0.5) * 4;
+    this.vy = (Math.random() - 0.5) * 4;
+    this.size = 4 + Math.random() * 4;
+    this.color = randomColor();
+    this.life = 30 + Math.random() * 30;
+  }
+  update() {
+    this.vx += gravityX * 0.2;
+    this.vy += gravityY * 0.2;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life--;
+  }
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.fillStyle = this.color;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 8;
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+let touchParticles = [];
+
+function animateTouchParticles() {
+  pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+  touchParticles.forEach((p, i) => {
+    p.update();
+    p.draw(pCtx);
+    if (p.life <= 0) {
+      touchParticles.splice(i, 1);
+    }
+  });
+  analyser.getByteFrequencyData(dataArray);
+  const volume = getAverageVolume(dataArray) / 255;
+  const targetCount = Math.floor(volume * 100);
+  while (particles.length < targetCount) {
+    particles.push(new Particle(centerX, centerY, randomColor()));
+  }
+  while (particles.length > targetCount) {
+    particles.pop();
+  }
+  particles.forEach(p => {
+    p.update(gravityX, gravityY);
+    p.draw(pCtx);
+  });
+
+  if (isTouching) {
+    applyScreenBeatEffect(volume);
+    applyTouchBassEffect(touchX, touchY, volume);
+    for (let i = 0; i < 5; i++) {
+      const offsetX = touchX + (Math.random() - 0.5) * 50;
+      const offsetY = touchY + (Math.random() - 0.5) * 50;
+      touchParticles.push(new TouchParticle(offsetX, offsetY));
+    }
+  } else {
+    body.style.transform = '';
+  }
+
+  requestAnimationFrame(animateTouchParticles);
+}
+
+function startTouch(e) {
+  isTouching = true;
+  if (e.touches && e.touches.length > 0) {
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+  } else {
+    touchX = e.clientX;
+    touchY = e.clientY;
+  }
+}
+
+function moveTouch(e) {
+  if (isTouching) {
+    if (e.touches && e.touches.length > 0) {
+      touchX = e.touches[0].clientX;
+      touchY = e.touches[0].clientY;
+    } else {
+      touchX = e.clientX;
+      touchY = e.clientY;
+    }
+  }
+}
+
+function endTouch() {
+  isTouching = false;
+  body.style.transform = '';
+}
+
+document.body.addEventListener('touchstart', startTouch);
+document.body.addEventListener('touchmove', moveTouch);
+document.body.addEventListener('touchend', endTouch);
+document.body.addEventListener('mousedown', startTouch);
+document.body.addEventListener('mousemove', moveTouch);
+document.body.addEventListener('mouseup', endTouch);
+
+animateTouchParticles();
+
 </script>
 </body>
 </html>
