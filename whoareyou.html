@@ -483,12 +483,6 @@
                 showBassAlert();
             }
         } 
-        // Zoom out effect - sangat sensitif terhadap penurunan bass
-        else if (bassVolume < 0.65 && isZoomed) {
-            document.body.style.transform = 'scale(1)';
-            document.querySelector('.verification-box').style.transform = 'scale(1)';
-            isZoomed = false;
-        }
 
         const targetCount = Math.floor(volume * 100);
         while (particles.length < targetCount) {
