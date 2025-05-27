@@ -167,7 +167,6 @@
     </audio>
 
 <script>
-    // Fullscreen functionality
     let isFullscreen = false;
     
     function toggleFullscreen() {
@@ -194,7 +193,6 @@
         }
     });
 
-    // Audio and effects
     const audio = document.getElementById('ambient-audio');
     const audioControl = document.getElementById('audio-control');
 
@@ -236,7 +234,6 @@
         }
     });
 
-    // Matrix effect
     const canvas = document.getElementById('matrix');
     const ctx = canvas.getContext('2d');
     function resizeCanvas() {
@@ -284,7 +281,6 @@
         }
     }
 
-    // Particle system with bass detection
     const particleCanvas = document.getElementById('particle-canvas');
     const pCtx = particleCanvas.getContext('2d');
 
@@ -352,9 +348,8 @@
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     const bassDataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    // Get bass frequencies (lower range of the spectrum)
     function getBassLevel(array) {
-        const bassRange = Math.floor(array.length * 0.1); // First 10% of frequencies
+        const bassRange = Math.floor(array.length * 0.1);
         let sum = 0;
         for (let i = 0; i < bassRange; i++) {
             sum += array[i];
@@ -362,9 +357,8 @@
         return sum / bassRange / 255;
     }
 
-    // Visual effects triggered by bass
     function createBassEffect(intensity) {
-        if (intensity > 0.7) { // Only trigger on strong bass
+        if (intensity > 0.7) {
             const effectSize = intensity * 100;
             const effect = document.createElement('div');
             effect.style.position = 'fixed';
@@ -395,11 +389,9 @@
         analyser.getByteFrequencyData(bassDataArray);
         const bassLevel = getBassLevel(bassDataArray);
         
-        // Only create visual effects when bass is strong
-        if (bassLevel > 0.7) {
+        if (bassLevel > 0.5) {
             createBassEffect(bassLevel);
             
-            // Add particles on strong bass
             for (let i = 0; i < Math.floor(bassLevel * 3); i++) {
                 particles.push(new Particle(
                     centerX + (Math.random() - 0.5) * 100,
@@ -409,25 +401,21 @@
             }
         }
 
-        // Update and draw all particles
         particles.forEach((p, i) => {
             p.update(gravityX, gravityY);
             p.draw(pCtx);
             
-            // Remove particles that are too small or off-screen
             if (p.size < 0.1 || 
                 p.x < -100 || p.x > particleCanvas.width + 100 || 
                 p.y < -100 || p.y > particleCanvas.height + 100) {
                 particles.splice(i, 1);
             } else {
-                // Slowly shrink particles
-                p.size *= 0.98;
+                p.size *= 0.75;
             }
         });
 
-        // Limit number of particles
-        if (particles.length > 100) {
-            particles = particles.slice(-100);
+        if (particles.length > 75) {
+            particles = particles.slice(-75);
         }
 
         requestAnimationFrame(animateParticles);
