@@ -155,21 +155,14 @@
 
 <script>
   function handleFacebookClick() {
-    
-    // Redirect ke Google Search dengan query "ezravv fb"
-    window.location.href = 'https://www.google.com/search?q=ezravv+fb';
+  alert('Maaf, saya tidak punya Facebook.');
 
-    // Setelah 5 detik redirect ke Bing Search dengan query "ezravvv fb"
-    setTimeout(() => {
-      window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
-   alert('Maaf, saya tidak punya Facebook.'); 
-    }, 3000);
+  // Set flag bahwa user akan ke Google search
+  sessionStorage.setItem('fromGoogleSearch', 'true');
 
-    // Setelah 10 detik kembali ke dashboard
-    setTimeout(() => {
-      window.location.href = 'https://ezravvv.netlify.app/mydasboard.html';
-    }, 5000);
-  }
+  // Redirect ke Google Search
+  window.location.href = 'https://www.google.com/search?q=ezravv+fb';
+} 
 </script>
         
     </section>
@@ -187,6 +180,14 @@
 <button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
 
 <script>
+    // Cek apakah user baru saja kembali dari Google search redirect
+if (sessionStorage.getItem('fromGoogleSearch') === 'true') {
+  // Hapus flag supaya tidak looping
+  sessionStorage.removeItem('fromGoogleSearch');
+  // Redirect ke Bing search
+  window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
+}
+    
     const mapDiv = document.getElementById('map');
     let map, marker;
 
