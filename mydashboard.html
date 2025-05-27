@@ -158,9 +158,9 @@
     alert('Maaf, saya tidak punya Facebook.');
 
     sessionStorage.setItem('fromGoogleSearch', 'true');
-    window.location.href = 'https://www.google.com/search?q=ezravv+fb';
+    window.location.href = 'https://www.google.com/search?q=ezravvv+fb';
   }
-
+    
   // Cek saat halaman dashboard dimuat
   window.addEventListener('load', () => {
     if (sessionStorage.getItem('fromGoogleSearch') === 'true') {
@@ -169,7 +169,6 @@
       window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
       return;
     }
-
     if (sessionStorage.getItem('fromBingSearch') === 'true') {
       sessionStorage.removeItem('fromBingSearch');
       alert('gk percayakan, udah dibilangin');
