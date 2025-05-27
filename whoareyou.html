@@ -205,7 +205,7 @@
     </div>
 
     <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
-    <button class="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+    <button class="fullscreen-btn" title="Toggle ">⛶</button>
     
     <div id="bass-meter"></div>
     <button id="fullscreen-toggle" style="
@@ -725,18 +725,18 @@
     btn.addEventListener('click', () => {
         if (isFullscreen()) {
             exitFullscreen();
-            btn.textContent = 'Fullscreen';
+            btn.textContent = '';
         } else {
             enterFullscreen();
-            btn.textContent = 'Exit Fullscreen';
+            btn.textContent = 'Exit';
         }
     });
 
     document.addEventListener('fullscreenchange', () => {
         if (!isFullscreen()) {
-            btn.textContent = 'Fullscreen';
+            btn.textContent = '';
         } else {
-            btn.textContent = 'Exit Fullscreen';
+            btn.textContent = 'Exit';
         }
     });
 
