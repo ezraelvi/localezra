@@ -235,7 +235,6 @@
     const bassAlert = document.getElementById('bass-alert');
     const bassAlertOk = document.getElementById('bass-alert-ok');
     
-    // Variables for bass features
     let bassAlertShown = false;
     let isZoomed = false;
     let zoomStartTime = 0;
@@ -282,7 +281,6 @@
         }
     });
     
-    // Fullscreen toggle
     fullscreenToggle.addEventListener('click', () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
@@ -335,7 +333,7 @@
 
     function verifyIdentity() {
         const answer = document.getElementById("answer").value.toLowerCase();
-        const validAnswers = ["ezra", "elvi"];
+        const validAnswers = ["ezra"];
 
         if (validAnswers.includes(answer)) {
             window.location.href = "index.html";
@@ -456,7 +454,6 @@
     
     function getBassValue() {
         analyser.getByteFrequencyData(bassDataArray);
-        // Get the lowest frequencies (bass)
         let bassValue = 0;
         for (let i = 0; i < 5; i++) {
             bassValue += bassDataArray[i];
@@ -468,7 +465,7 @@
         analyser.getByteFrequencyData(bassDataArray);
         let maxIndex = 0;
         let maxValue = 0;
-        for (let i = 0; i < 10; i++) { // Only check the first 10 frequencies (bass range)
+        for (let i = 0; i < 10; i++) {
             if (bassDataArray[i] > maxValue) {
                 maxValue = bassDataArray[i];
                 maxIndex = i;
@@ -485,13 +482,11 @@
         const volume = getAverageVolume(dataArray) / 255;
         const bassValue = getBassValue();
         
-        // Check for bass level to show alert
         if (bassValue >= 0.7 && !bassAlertShown) {
             bassAlert.style.display = 'block';
             bassAlertShown = true;
         }
         
-        // Zoom effect when bass is strong
         if (bassValue >= 0.7 && !isZoomed) {
             isZoomed = true;
             zoomStartTime = Date.now();
@@ -503,7 +498,6 @@
             document.body.style.transform = 'scale(1)';
         }
         
-        // Update top center particles based on bass
         if (bassValue >= 0.7) {
             const particleCount = Math.floor(bassValue * 20);
             while (topCenterParticles.length < particleCount) {
@@ -518,7 +512,6 @@
             topCenterParticles = [];
         }
         
-        // Update regular particles
         const targetCount = Math.floor(volume * 100);
         while (particles.length < targetCount) {
             particles.push(new Particle(centerX, centerY, randomColor()));
@@ -537,7 +530,6 @@
             p.draw(pCtx);
         });
         
-        // Bass visualizer at bottom
         const segmentWidth = bassCanvas.width / bassDataArray.length;
         for (let i = 0; i < bassDataArray.length; i++) {
             const value = bassDataArray[i] / 255;
@@ -545,12 +537,10 @@
             const x = i * segmentWidth;
             const y = bassCanvas.height - height;
             
-            // Draw the bar
             bassCtx.fillStyle = `hsl(${i * 10}, 100%, 50%)`;
             bassCtx.fillRect(x, y, segmentWidth - 1, height);
         }
         
-        // Update and draw bass particles
         for (let i = bassParticles.length - 1; i >= 0; i--) {
             bassParticles[i].update();
             bassParticles[i].draw(bassCtx);
@@ -572,10 +562,8 @@
 
     document.body.addEventListener('click', startParticleEffect);
     
-    // Handle bass alert OK button
     bassAlertOk.addEventListener('click', () => {
         bassAlert.style.display = 'none';
-        // Clear all existing particles and only keep top center ones
         particles = [];
     });
 
