@@ -155,14 +155,14 @@
 
 <script>
   function handleFacebookClick() {
-    alert('Maaf, saya tidak punya Facebook.');
-
+    
     // Redirect ke Google Search dengan query "ezravv fb"
     window.location.href = 'https://www.google.com/search?q=ezravv+fb';
 
     // Setelah 5 detik redirect ke Bing Search dengan query "ezravvv fb"
     setTimeout(() => {
       window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
+   alert('Maaf, saya tidak punya Facebook.'); 
     }, 3000);
 
     // Setelah 10 detik kembali ke dashboard
