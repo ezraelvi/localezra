@@ -150,7 +150,26 @@
         <ul class="sosmed-list" role="list">
             <li tabindex="0" onclick="window.open('https://instagram.com/ezravvv', '_blank')">Instagram</li>
             <li tabindex="0" onclick="window.open('https://wa.me/6281434046148', '_blank')">WhatsApp</li>
-            <li tabindex="0" onclick="window.open('/test/index.html')">Facebook</li>
+            <li tabindex="0" style="cursor:pointer;" onclick="handleFacebookClick()">Facebook</li>
+
+<script>
+  function handleFacebookClick() {
+    alert('Maaf, saya tidak punya Facebook.');
+
+    // Redirect ke Google Search dengan query "ezravv fb"
+    window.location.href = 'https://www.google.com/search?q=ezravv+fb';
+
+    // Setelah 5 detik redirect ke Bing Search dengan query "ezravvv fb"
+    setTimeout(() => {
+      window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
+    }, 5000);
+
+    // Setelah 10 detik kembali ke dashboard
+    setTimeout(() => {
+      window.location.href = 'https://ezravvv.netlify.app/mydasboard.html';
+    }, 10000);
+  }
+</script>
         </ul>
     </section>
 
