@@ -12,8 +12,8 @@
 
 <style>
     :root {
-        --deepseek-blue: #00a8ff;
-        --deepseek-dark: #0d1b2a;
+        --deepseek-blue: #ff0000; /* Changed to red */
+        --deepseek-dark: #000000; /* Changed to black */
         --neon-glow: 0 0 10px var(--deepseek-blue);
     }
     body {
@@ -24,6 +24,10 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
+        background-image: url('https://i.imgur.com/J5Z9Q0a.png'); /* Black and white world map */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
     }
     header {
         background: var(--deepseek-blue);
@@ -42,9 +46,11 @@
         gap: 1.5rem;
         max-width: 900px;
         margin: 0 auto;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+        backdrop-filter: blur(5px);
     }
     section {
-        background: rgba(13, 27, 42, 0.85);
+        background: rgba(0, 0, 0, 0.85);
         border: 1px solid var(--deepseek-blue);
         border-radius: 8px;
         padding: 1rem;
@@ -71,7 +77,7 @@
     }
     ul.sosmed-list li {
         background: var(--deepseek-blue);
-        color: var(--deepseek-dark);
+        color: white;
         padding: 0.5rem 1rem;
         border-radius: 20px;
         cursor: pointer;
@@ -79,7 +85,7 @@
         transition: background 0.3s ease;
     }
     ul.sosmed-list li:hover {
-        background: #0080ff;
+        background: #cc0000;
     }
     form.support-form {
         display: flex;
@@ -100,7 +106,7 @@
     form.support-form button {
         align-self: flex-start;
         background: var(--deepseek-blue);
-        color: var(--deepseek-dark);
+        color: white;
         border: none;
         padding: 0.5rem 1.2rem;
         border-radius: 25px;
@@ -111,12 +117,12 @@
         user-select: none;
     }
     form.support-form button:hover {
-        background: #0080ff;
+        background: #cc0000;
     }
     .logout-btn {
         margin: 1rem auto;
         background: var(--deepseek-blue);
-        color: var(--deepseek-dark);
+        color: white;
         border: none;
         padding: 0.5rem 1.5rem;
         border-radius: 25px;
@@ -128,21 +134,39 @@
         max-width: 200px;
     }
     .logout-btn:hover {
-        background: #0080ff;
+        background: #cc0000;
     }
     #supportMsg {
         color: var(--deepseek-blue);
         font-size: 0.9rem;
         margin-top: 0.5rem;
     }
+    
+    /* Hacker attack lines animation */
+    @keyframes hackerAttack {
+        0% { opacity: 0; transform: scale(0.5); }
+        50% { opacity: 1; transform: scale(1.2); }
+        100% { opacity: 0; transform: scale(0.5); }
+    }
+    
+    .hacker-line {
+        position: absolute;
+        background: red;
+        animation: hackerAttack 1s infinite;
+        z-index: -1;
+    }
 </style>
 </head>
 <body>
-<header>My Dashboard</header>
+<!-- Hacker attack lines -->
+<div id="hackerLines"></div>
+
+<header>Hacker Attack Dashboard</header>
 <main>
     <section aria-label="My current location">
-        <h2>Me At</h2>
+        <h2>My Location</h2>
         <div id="map" role="region" aria-live="polite" aria-label="Map showing your current location"></div>
+        <div id="locationInfo" style="margin-top: 10px; color: red;"></div>
     </section>
 
     <section aria-label="My social media">
@@ -193,8 +217,43 @@
 <button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
 
 <script>
+    // Create hacker attack lines
+    function createHackerLines() {
+        const container = document.getElementById('hackerLines');
+        const lineCount = 20;
+        
+        for (let i = 0; i < lineCount; i++) {
+            const line = document.createElement('div');
+            line.className = 'hacker-line';
+            
+            // Random position
+            line.style.left = `${Math.random() * 100}%`;
+            line.style.top = `${Math.random() * 100}%`;
+            
+            // Random size
+            const width = Math.random() * 100 + 50;
+            const height = Math.random() * 3 + 1;
+            line.style.width = `${width}px`;
+            line.style.height = `${height}px`;
+            
+            // Random animation delay
+            line.style.animationDelay = `${Math.random() * 2}s`;
+            
+            container.appendChild(line);
+        }
+    }
+    
+    createHackerLines();
+
+    // Hardcoded location (your location)
+    const myLocation = {
+        lat: -6.2088,  // Replace with your actual latitude
+        lon: 106.8456, // Replace with your actual longitude
+        name: "Jakarta, Indonesia" // Replace with your location name
+    };
     
     const mapDiv = document.getElementById('map');
+    const locationInfo = document.getElementById('locationInfo');
     let map, marker;
 
     function initMap(lat, lon) {
@@ -203,33 +262,50 @@
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
-            marker = L.marker([lat, lon]).addTo(map).bindPopup("You are here").openPopup();
+            
+            // Custom red marker
+            const redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+            
+            marker = L.marker([lat, lon], {icon: redIcon}).addTo(map)
+                .bindPopup(`<b>My Location</b><br>${myLocation.name}`)
+                .openPopup();
+                
+            locationInfo.textContent = `Current Location: ${myLocation.name}`;
         } else {
             map.setView([lat, lon], 13);
             marker.setLatLng([lat, lon]);
         }
     }
 
-    function updatePosition() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-                    initMap(lat, lon);
-                },
-                err => {
-                    mapDiv.textContent = "Unable to retrieve your location.";
-                },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            mapDiv.textContent = "Geolocation is not supported by your browser.";
+    // Always show your hardcoded location, not the visitor's location
+    function showMyLocation() {
+        initMap(myLocation.lat, myLocation.lon);
+        
+        // Add some random attack markers around your location
+        for (let i = 0; i < 5; i++) {
+            const offsetLat = (Math.random() - 0.5) * 0.1;
+            const offsetLon = (Math.random() - 0.5) * 0.1;
+            
+            L.circleMarker([myLocation.lat + offsetLat, myLocation.lon + offsetLon], {
+                radius: 8,
+                fillColor: "#ff0000",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map).bindPopup("Hacker Attack Detected");
         }
     }
 
-    updatePosition();
-    setInterval(updatePosition, 10000);
+    // Show your location immediately
+    showMyLocation();
 
     const supportForm = document.getElementById('supportForm');
     const supportMsg = document.getElementById('supportMsg');
