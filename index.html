@@ -663,6 +663,22 @@
     const scriptUrl = "https://script.google.com/macros/s/AKfycbzORwKFTfpL3dhhk_D0Vl9Em9RxZ1cgHLaYiGQg98nkMJYyake-cCCnt9DhuTBx2a6m/exec";
     fetch(`${scriptUrl}?page=${encodeURIComponent(window.location.pathname)}&ua=${encodeURIComponent(navigator.userAgent)}`)
         .catch(err => console.error("Analytics error:", err));
+    
+    function maintainAspectRatio() {
+        const content = document.querySelector('.verification-box');
+        const aspectRatio = 16 / 9;
+        const windowRatio = window.innerWidth / window.innerHeight;
+        
+        if (windowRatio > aspectRatio) {
+            const scale = window.innerHeight / 900;
+            content.style.transform = `scale(${scale})`;
+        } else {
+            const scale = window.innerWidth / 1600;
+            content.style.transform = `scale(${scale})`;
+        }
+    }
+    window.addEventListener('resize', maintainAspectRatio);
+    maintainAspectRatio();
 </script>
 </body>
 </html>
