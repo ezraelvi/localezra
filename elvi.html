@@ -225,6 +225,21 @@
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
+        function maintainAspectRatio() {
+        const content = document.querySelector('.verification-box');
+        const aspectRatio = 16 / 9;
+        const windowRatio = window.innerWidth / window.innerHeight;
+        
+        if (windowRatio > aspectRatio) {
+            const scale = window.innerHeight / 900;
+            content.style.transform = `scale(${scale})`;
+        } else {
+            const scale = window.innerWidth / 1600;
+            content.style.transform = `scale(${scale})`;
+        }
+    }
+    window.addEventListener('resize', maintainAspectRatio);
+    maintainAspectRatio();
     </script>
     
     <div style="padding: 20px; margin-bottom: 50px;">
