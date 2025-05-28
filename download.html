@@ -77,5 +77,22 @@
         <button class="btn" onclick="window.open('https://lh3.googleusercontent.com/a/ACg8ocIV9DZoTVBQneTMcveh-asGdoyDxSFpWRZIpW7SycQEb6vTYQ8=s420-c-no', '_blank')">>_ Mau lihat ini? _<</button>
         <button class="btn" onclick="window.location.href='elvi.html'">>_ Kembali ke Home _<</button>
     </div>
+<script>
+        function maintainAspectRatio() {
+        const content = document.querySelector('.verification-box');
+        const aspectRatio = 16 / 9;
+        const windowRatio = window.innerWidth / window.innerHeight;
+        
+        if (windowRatio > aspectRatio) {
+            const scale = window.innerHeight / 900;
+            content.style.transform = `scale(${scale})`;
+        } else {
+            const scale = window.innerWidth / 1600;
+            content.style.transform = `scale(${scale})`;
+        }
+    }
+    window.addEventListener('resize', maintainAspectRatio);
+    maintainAspectRatio();
+</script>
 </body>
 </html>
