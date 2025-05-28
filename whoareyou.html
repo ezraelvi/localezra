@@ -143,6 +143,27 @@
             z-index: 1000;
         }
         
+        #top-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            pointer-events: none;
+            z-index: 999;
+        }
+        
+        #visualizer-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            pointer-events: none;
+            z-index: 998;
+        }
+        
         #fullscreen-toggle {
             position: fixed;
             bottom: 20px;
@@ -159,39 +180,30 @@
             z-index: 100001;
             transition: background-color 0.3s, color 0.3s;
         }
+        
         #fullscreen-toggle:hover {
             background: #0f0;
             color: black;
         }
         
-        #visualizer-container {
+        #bass-message {
             position: fixed;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            z-index: 1000;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px #0f0;
+            z-index: 100002;
+            display: none;
+            text-align: center;
         }
         
-        .visualizer-bar {
-            width: 4px;
-            margin: 0 1px;
-            background: linear-gradient(to top, #0f0, #3cff3c);
-            border-radius: 2px;
-            transition: height 0.1s ease-out;
-        }
-        
-        #spiral-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 999;
+        #bass-message button {
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -201,8 +213,9 @@
     </div>
 
     <canvas id="matrix"></canvas>
-    <canvas id="spiral-particles"></canvas>
+    <canvas id="top-particles"></canvas>
     <canvas id="particle-canvas"></canvas>
+    <div id="visualizer-container"></div>
 
     <div class="verification-box" style="display:none;">
         <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
@@ -211,10 +224,13 @@
         <button onclick="verifyIdentity()">SUBMIT</button>
     </div>
 
+    <div id="bass-message">
+        <p>Nikmati musiknya!</p>
+        <button id="ok-button">OKE</button>
+    </div>
+
     <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
     <button id="fullscreen-toggle" title="Toggle Fullscreen">⛶</button>
-    
-    <div id="visualizer-container"></div>
 
     <audio id="ambient-audio" loop>
         <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
@@ -225,12 +241,15 @@
     const audio = document.getElementById('ambient-audio');
     const audioControl = document.getElementById('audio-control');
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
-    let bassAlertShown = false;
-    
+    const bassMessage = document.getElementById('bass-message');
+    const okButton = document.getElementById('ok-button');
+    let bassMessageShown = false;
+
+    // Fullscreen toggle
     fullscreenToggle.addEventListener('click', () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                console.log(`Error attempting to enable fullscreen: ${err.message}`);
             });
         } else {
             if (document.exitFullscreen) {
@@ -238,16 +257,27 @@
             }
         }
     });
-    const visualizerContainer = document.getElementById('visualizer-container');
-    const visualizerBars = [];
-    
-    for (let i = 0; i < 128; i++) {
-        const bar = document.createElement('div');
-        bar.className = 'visualizer-bar';
-        bar.style.height = '1px';
-        visualizerContainer.appendChild(bar);
-        visualizerBars.push(bar);
+
+    // Check for bass strength and show message if needed
+    function checkBassStrength() {
+        if (bassMessageShown) return;
+        
+        analyser.getByteFrequencyData(dataArray);
+        const bass = dataArray[0] / 255; // Get bass frequency (lower frequencies)
+        
+        if (bass >= 0.7) {
+            bassMessage.style.display = 'block';
+            bassMessageShown = true;
+        }
     }
+
+    okButton.addEventListener('click', () => {
+        bassMessage.style.display = 'none';
+        // Initialize all the effects after user clicks OK
+        initTopParticles();
+        initNoiceVisualizer();
+    });
+
     window.onload = () => {
         setTimeout(() => {
             document.getElementById('loading-screen').style.display = 'none';
@@ -255,12 +285,15 @@
         }, 2500);
 
         audio.volume = 0.2;
+
         function startAudioOnInteraction() {
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
             audio.play().then(() => {
                 audioControl.textContent = '🔊';
+                // Start checking bass strength after audio starts playing
+                setInterval(checkBassStrength, 100);
             }).catch(() => {
                 audioControl.textContent = '🔇';
             });
@@ -268,6 +301,7 @@
         }
         document.body.addEventListener('click', startAudioOnInteraction);
     };
+
     audioControl.addEventListener('click', () => {
         if (audio.paused) {
             if (audioCtx.state === 'suspended') {
@@ -283,6 +317,7 @@
             audioControl.textContent = '🔇';
         }
     });
+
     const canvas = document.getElementById('matrix');
     const ctx = canvas.getContext('2d');
     function resizeCanvas() {
@@ -291,13 +326,16 @@
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
+
     const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
     const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const nums = '0123456789';
     const alphabet = katakana + latin + nums;
+
     const fontSize = 16;
     const columns = Math.floor(canvas.width / fontSize);
     const drops = Array(columns).fill(1);
+
     function drawMatrix() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -318,7 +356,7 @@
 
     function verifyIdentity() {
         const answer = document.getElementById("answer").value.toLowerCase();
-        const validAnswers = ["ezra"];
+        const validAnswers = ["ezra", "elvi"];
 
         if (validAnswers.includes(answer)) {
             window.location.href = "index.html";
@@ -326,144 +364,220 @@
             window.location.href = "https://wa.me/6281434046148";
         }
     }
+
+    // Audio context and analyzer setup
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const source = audioCtx.createMediaElementSource(audio);
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
-    const frequencyData = new Uint8Array(analyser.frequencyBinCount);
-    const timeDomainData = new Uint8Array(analyser.frequencyBinCount);
-    const spiralCanvas = document.getElementById('spiral-particles');
-    const spiralCtx = spiralCanvas.getContext('2d');    
-    function resizeSpiralCanvas() {
-        spiralCanvas.width = window.innerWidth;
-        spiralCanvas.height = window.innerHeight;
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function getAverageVolume(array) {
+        let values = 0;
+        let length = array.length;
+        for (let i = 0; i < length; i++) {
+            values += array[i];
+        }
+        return values / length;
     }
-    resizeSpiralCanvas();
-    window.addEventListener('resize', resizeSpiralCanvas);    
-    class SpiralParticle {
+
+    // Top particles effect
+    const topParticlesCanvas = document.getElementById('top-particles');
+    const topParticlesCtx = topParticlesCanvas.getContext('2d');
+    
+    function resizeTopParticlesCanvas() {
+        topParticlesCanvas.width = window.innerWidth;
+        topParticlesCanvas.height = 150;
+    }
+    resizeTopParticlesCanvas();
+    window.addEventListener('resize', resizeTopParticlesCanvas);
+    
+    class TopParticle {
         constructor() {
-            this.angle = Math.random() * Math.PI * 2;
-            this.distance = 0;
-            this.speed = 0.01 + Math.random() * 0.02;
-            this.size = 2 + Math.random() * 3;
-            this.color = randomColor();
-            this.opacity = 0;
-            this.maxDistance = 50 + Math.random() * 100;
-            this.growthRate = 0.1 + Math.random() * 0.2;
-        }        
-        update(bassIntensity) {
-            this.angle += this.speed;
-            if (this.distance < this.maxDistance) {
-                this.distance += this.growthRate;
-            }
-            this.opacity = Math.min(1, this.opacity + 0.02);
+            this.x = Math.random() * topParticlesCanvas.width;
+            this.y = Math.random() * topParticlesCanvas.height;
+            this.size = Math.random() * 3 + 1;
+            this.speedX = (Math.random() - 0.5) * 2;
+            this.speedY = Math.random() * 1 + 0.5;
+            this.color = `hsl(${Math.random() * 60 + 100}, 100%, 50%)`;
+        }
+        
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
             
-            if (bassIntensity > 0.7) {
-                this.distance += bassIntensity * 2;
-                this.size = Math.min(6, this.size + bassIntensity * 0.5);
+            if (this.y > topParticlesCanvas.height) {
+                this.y = 0;
+                this.x = Math.random() * topParticlesCanvas.width;
             }
-            
-            this.size = Math.max(2, this.size * 0.98);
-        }        
-        draw(ctx, centerX, centerY) {
-            const x = centerX + Math.cos(this.angle) * this.distance;
-            const y = centerY + Math.sin(this.angle) * this.distance;            
-            ctx.beginPath();
-            ctx.globalAlpha = this.opacity;
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 10;
-            ctx.arc(x, y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        }
-    }    
-    const spiralParticles = [];
-    const spiralCenterX = window.innerWidth / 2;
-    const spiralCenterY = window.innerHeight / 2;    
-    function randomColor() {
-        const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c'];
-        return colors[Math.floor(Math.random() * colors.length)];
-    }
-    
-    function animate() {
-        analyser.getByteFrequencyData(frequencyData);
-        analyser.getByteTimeDomainData(timeDomainData);        
-        const bassIntensity = getBassIntensity(frequencyData);
-        
-        if (bassIntensity >= 0.7 && !bassAlertShown) {
-            alert("Nikmati musiknya");
-            bassAlertShown = true;
-        }
-        
-        updateVisualizer(frequencyData);
-        
-        updateSpiralParticles(bassIntensity);
-        
-        requestAnimationFrame(animate);
-    }    
-    function getBassIntensity(data) {
-        let sum = 0;
-        const bassCount = 10;
-        for (let i = 0; i < bassCount; i++) {
-            sum += data[i] / 255;
-        }
-        return sum / bassCount;
-    }    
-    function updateVisualizer(data) {
-        for (let i = 0; i < visualizerBars.length; i++) {
-            const index = Math.floor(i * (data.length / visualizerBars.length));
-            const value = data[index] / 255;
-            const height = value * 100;
-            const randomFactor = 0.8 + Math.random() * 0.4;
-            const finalHeight = Math.max(1, height * randomFactor);
-            visualizerBars[i].style.height = `${finalHeight}px`;
-            const intensity = Math.min(1, value * 2);
-            visualizerBars[i].style.background = `linear-gradient(to top, 
-                rgba(0, 255, 0, ${intensity}), 
-                rgba(60, 255, 60, ${intensity * 0.7}))`;      
-            visualizerBars[i].style.boxShadow = `0 0 ${5 + intensity * 10}px rgba(0, 255, 0, ${intensity * 0.7})`;
-        }
-    }    
-    function updateSpiralParticles(bassIntensity) {
-        spiralCtx.clearRect(0, 0, spiralCanvas.width, spiralCanvas.height);
-        
-        if (bassIntensity > 0.7 && Math.random() < 0.3) {
-            spiralParticles.push(new SpiralParticle());
-        }
-        
-        for (let i = 0; i < spiralParticles.length; i++) {
-            spiralParticles[i].update(bassIntensity);
-            spiralParticles[i].draw(spiralCtx, spiralCenterX, spiralCenterY);
-            
-            if (spiralParticles[i].distance > spiralParticles[i].maxDistance * 1.5) {
-                spiralParticles.splice(i, 1);
-                i--;
+            if (this.x < 0 || this.x > topParticlesCanvas.width) {
+                this.speedX *= -1;
             }
+        }
+        
+        draw() {
+            topParticlesCtx.beginPath();
+            topParticlesCtx.fillStyle = this.color;
+            topParticlesCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            topParticlesCtx.fill();
         }
     }
     
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-    animate(); 
-    function maintainAspectRatio() {
-        const content = document.querySelector('.verification-box');
-        const aspectRatio = 16 / 9;
-        const windowRatio = window.innerWidth / window.innerHeight;
-        
-        if (windowRatio > aspectRatio) {
-            const scale = window.innerHeight / 900;
-            content.style.transform = `scale(${scale})`;
-        } else {
-            const scale = window.innerWidth / 1600;
-            content.style.transform = `scale(${scale})`;
+    let topParticles = [];
+    let topParticlesActive = false;
+    
+    function initTopParticles() {
+        topParticlesActive = true;
+        for (let i = 0; i < 50; i++) {
+            topParticles.push(new TopParticle());
         }
+        animateTopParticles();
     }
-    window.addEventListener('resize', maintainAspectRatio);
-    maintainAspectRatio();
+    
+    function animateTopParticles() {
+        if (!topParticlesActive) return;
+        
+        topParticlesCtx.clearRect(0, 0, topParticlesCanvas.width, topParticlesCanvas.height);
+        
+        analyser.getByteFrequencyData(dataArray);
+        const bass = dataArray[0] / 255;
+        
+        // Add more particles when bass is strong
+        if (bass >= 0.7 && Math.random() > 0.7) {
+            topParticles.push(new TopParticle());
+        }
+        
+        // Limit particles to prevent performance issues
+        if (topParticles.length > 100) {
+            topParticles = topParticles.slice(-100);
+        }
+        
+        topParticles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+        
+        requestAnimationFrame(animateTopParticles);
+    }
+
+    // Noice Visualizer (Galaxy Supernova effect)
+    const visualizerContainer = document.getElementById('visualizer-container');
+    let noiceVisualizerActive = false;
+    
+    function initNoiceVisualizer() {
+        noiceVisualizerActive = true;
+        animateNoiceVisualizer();
+    }
+    
+    function animateNoiceVisualizer() {
+        if (!noiceVisualizerActive) return;
+        
+        analyser.getByteFrequencyData(dataArray);
+        const bass = dataArray[0] / 255;
+        const mid = dataArray[Math.floor(dataArray.length / 2)] / 255;
+        const high = dataArray[dataArray.length - 1] / 255;
+        
+        // Clear previous frame
+        visualizerContainer.innerHTML = '';
+        
+        // Create central glow
+        const centerGlow = document.createElement('div');
+        centerGlow.style.position = 'absolute';
+        centerGlow.style.width = '100px';
+        centerGlow.style.height = '100px';
+        centerGlow.style.borderRadius = '50%';
+        centerGlow.style.background = 'radial-gradient(circle, rgba(0,255,0,0.8) 0%, rgba(0,255,0,0) 70%)';
+        centerGlow.style.filter = `blur(${5 + bass * 10}px)`;
+        centerGlow.style.opacity = bass;
+        centerGlow.style.transform = 'translate(-50%, -50%)';
+        centerGlow.style.transition = 'all 0.1s ease-out';
+        visualizerContainer.appendChild(centerGlow);
+        
+        // Create star particles
+        const starCount = Math.floor(20 + bass * 50);
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.style.position = 'absolute';
+            star.style.width = `${Math.random() * 4 + 2}px`;
+            star.style.height = star.style.width;
+            star.style.background = '#fff';
+            star.style.borderRadius = '50%';
+            star.style.boxShadow = `0 0 ${5 + high * 10}px #0f0`;
+            
+            // Random position around center
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 100 * bass;
+            const x = 150 + Math.cos(angle) * distance;
+            const y = 150 + Math.sin(angle) * distance;
+            
+            star.style.left = `${x}px`;
+            star.style.top = `${y}px`;
+            star.style.opacity = 0.5 + Math.random() * 0.5;
+            
+            // Animation
+            star.style.transition = `all ${0.5 + Math.random() * 1}s ease-out`;
+            visualizerContainer.appendChild(star);
+            
+            // Animate stars outward
+            setTimeout(() => {
+                const newDistance = distance * (1.5 + bass);
+                const newX = 150 + Math.cos(angle) * newDistance;
+                const newY = 150 + Math.sin(angle) * newDistance;
+                star.style.left = `${newX}px`;
+                star.style.top = `${newY}px`;
+                star.style.opacity = '0';
+                
+                // Remove star after animation
+                setTimeout(() => {
+                    star.remove();
+                }, 1000);
+            }, 50);
+        }
+        
+        // Create light beams when bass is strong
+        if (bass > 0.7) {
+            const beamCount = 3 + Math.floor(bass * 5);
+            for (let i = 0; i < beamCount; i++) {
+                const beam = document.createElement('div');
+                beam.style.position = 'absolute';
+                beam.style.width = `${2 + Math.random() * 3}px`;
+                beam.style.height = `${100 + Math.random() * 100}px`;
+                beam.style.background = 'linear-gradient(to bottom, rgba(0,255,0,0.8), rgba(0,255,0,0))';
+                beam.style.transformOrigin = 'center bottom';
+                
+                const angle = Math.random() * Math.PI * 2;
+                beam.style.transform = `translate(-50%, -50%) rotate(${angle}rad) translateY(-50px)`;
+                beam.style.filter = 'blur(1px)';
+                beam.style.opacity = 0.7;
+                visualizerContainer.appendChild(beam);
+                
+                // Animate beam
+                setTimeout(() => {
+                    beam.style.height = `${200 + Math.random() * 100}px`;
+                    beam.style.opacity = '0';
+                    beam.style.transform = `translate(-50%, -50%) rotate(${angle}rad) translateY(-100px)`;
+                    
+                    // Remove beam after animation
+                    setTimeout(() => {
+                        beam.remove();
+                    }, 300);
+                }, 50);
+            }
+        }
+        
+        requestAnimationFrame(animateNoiceVisualizer);
+    }
+
+    // Handle window resize for all elements
+    function handleResize() {
+        resizeCanvas();
+        resizeTopParticlesCanvas();
+    }
+    
+    window.addEventListener('resize', handleResize);
 </script>
 </body>
 </html>
