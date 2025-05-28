@@ -16,7 +16,7 @@
             align-items: center;
             flex-direction: column;
             transform-origin: center center;
-            transition: transform 0.3s ease;
+            transition: transform 0.1s ease-out;
         }
         #matrix {
             position: fixed;
@@ -64,6 +64,7 @@
             z-index: 10;
             border-radius: 8px;
             user-select: none;
+            transform-origin: center center;
         }
         h1 {
             margin-bottom: 20px;
@@ -160,40 +161,20 @@
             z-index: 100001;
             transition: background-color 0.3s, color 0.3s;
         }
+        
         #fullscreen-toggle:hover {
             background: #0f0;
             color: black;
         }
         
-        #visualizer-container {
+        #visualizer {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
             height: 100px;
             z-index: 999;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        
-        .visualizer-bar {
-            background: #0f0;
-            width: 8px;
-            margin: 0 2px;
-            border-radius: 4px 4px 0 0;
-            box-shadow: 0 0 10px #0f0;
-            transition: height 0.1s ease-out;
-        }
-        
-        #top-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 30%;
-            pointer-events: none;
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
@@ -204,7 +185,7 @@
 
     <canvas id="matrix"></canvas>
     <canvas id="particle-canvas"></canvas>
-    <canvas id="top-particles"></canvas>
+    <canvas id="visualizer"></canvas>
 
     <div class="verification-box" style="display:none;">
         <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
@@ -215,8 +196,6 @@
 
     <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
     <button id="fullscreen-toggle" title="Toggle Fullscreen">⛶</button>
-    
-    <div id="visualizer-container"></div>
 
     <audio id="ambient-audio" loop>
         <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
@@ -227,25 +206,7 @@
     const audio = document.getElementById('ambient-audio');
     const audioControl = document.getElementById('audio-control');
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
-    const visualizerContainer = document.getElementById('visualizer-container');
-    const topParticlesCanvas = document.getElementById('top-particles');
-    const topParticlesCtx = topParticlesCanvas.getContext('2d');
-    
-    // Variables for bass detection
     let bassAlertShown = false;
-    let currentBassLevel = 0;
-    let maxBassLevel = 0;
-    let zoomActive = false;
-    let zoomStartTime = 0;
-    
-    // Create visualizer bars
-    const visualizerBars = [];
-    for (let i = 0; i < 64; i++) {
-        const bar = document.createElement('div');
-        bar.className = 'visualizer-bar';
-        visualizerContainer.appendChild(bar);
-        visualizerBars.push(bar);
-    }
 
     window.onload = () => {
         setTimeout(() => {
@@ -284,7 +245,7 @@
             audioControl.textContent = '🔇';
         }
     });
-    
+
     fullscreenToggle.addEventListener('click', () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
@@ -325,7 +286,7 @@
             const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
             ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            if (drops[i] * fontSize> canvas.height && Math.random() > 0.975) {
                 drops[i] = 0;
             }
             drops[i]++;
@@ -350,8 +311,6 @@
     function resizeParticleCanvas() {
         particleCanvas.width = window.innerWidth;
         particleCanvas.height = window.innerHeight;
-        topParticlesCanvas.width = window.innerWidth;
-        topParticlesCanvas.height = window.innerHeight * 0.3;
     }
     resizeParticleCanvas();
     window.addEventListener('resize', resizeParticleCanvas);
@@ -385,37 +344,10 @@
             ctx.fill();
         }
     }
-    
-    class TopParticle {
-        constructor() {
-            this.x = Math.random() * topParticlesCanvas.width;
-            this.y = Math.random() * topParticlesCanvas.height;
-            this.vx = (Math.random() - 0.5) * 0.5;
-            this.vy = (Math.random() - 0.5) * 0.5;
-            this.size = 2 + Math.random() * 3;
-            this.color = randomColor();
-        }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            
-            if (this.x < 0 || this.x > topParticlesCanvas.width) this.vx *= -1;
-            if (this.y < 0 || this.y > topParticlesCanvas.height) this.vy *= -1;
-        }
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 5;
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
 
     let particles = [];
-    let topParticles = [];
     const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
+    const topCenterY = window.innerHeight * 0.2;
 
     function randomColor() {
         const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c'];
@@ -436,14 +368,8 @@
     analyser.fftSize = 256;
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
-    
-    const bassAnalyser = audioCtx.createAnalyser();
-    bassAnalyser.fftSize = 32;
-    source.connect(bassAnalyser);
-    bassAnalyser.connect(audioCtx.destination);
 
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    const bassDataArray = new Uint8Array(bassAnalyser.frequencyBinCount);
 
     function getAverageVolume(array) {
         let values = 0;
@@ -453,82 +379,42 @@
         }
         return values / length;
     }
-    
-    function getBassLevel() {
-        bassAnalyser.getByteFrequencyData(bassDataArray);
+
+    function getBassVolume(array) {
+        // Focus on the lower frequencies (bass)
         let sum = 0;
-        // Only use the first few bins which represent the bass frequencies
-        for (let i = 0; i < 8; i++) {
-            sum += bassDataArray[i];
+        const bassCount = 10; // Number of low frequency bins to consider
+        for (let i = 0; i < bassCount; i++) {
+            sum += array[i];
         }
-        return sum / (8 * 255);
+        return sum / bassCount / 255;
     }
 
     function animateParticles() {
         pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-        topParticlesCtx.clearRect(0, 0, topParticlesCanvas.width, topParticlesCanvas.height);
 
         analyser.getByteFrequencyData(dataArray);
         const volume = getAverageVolume(dataArray) / 255;
-        currentBassLevel = getBassLevel();
-        
-        // Update visualizer bars
-        for (let i = 0; i < visualizerBars.length; i++) {
-            const barIndex = Math.floor(i * (dataArray.length / visualizerBars.length));
-            const barHeight = (dataArray[barIndex] / 255) * 100;
-            visualizerBars[i].style.height = `${barHeight}px`;
-            visualizerBars[i].style.opacity = 0.5 + (barHeight / 200);
-        }
-        
-        // Check for bass level and show alert if needed
-        if (currentBassLevel >= 0.7 && !bassAlertShown) {
-            alert("Nikmati musiknya!");
+        const bassVolume = getBassVolume(dataArray);
+
+        // Check bass volume for alert
+        if (bassVolume >= 0.7 && !bassAlertShown) {
+            alert("Nikmati musiknya");
             bassAlertShown = true;
         }
-        
-        // Handle zoom effect based on bass level
-        if (currentBassLevel >= 0.7) {
-            if (!zoomActive) {
-                zoomActive = true;
-                zoomStartTime = Date.now();
-                maxBassLevel = currentBassLevel;
-            } else {
-                if (currentBassLevel > maxBassLevel) {
-                    maxBassLevel = currentBassLevel;
-                }
-            }
-            
-            const zoomIntensity = Math.min(1.2 + (maxBassLevel - 0.7) * 0.5, 1.5);
-            document.body.style.transform = `scale(${zoomIntensity})`;
-        } else {
-            if (zoomActive) {
-                zoomActive = false;
-                document.body.style.transform = 'scale(1)';
-            }
-        }
 
-        // Add top particles when bass is strong
-        if (currentBassLevel >= 0.7) {
-            while (topParticles.length < 50) {
-                topParticles.push(new TopParticle());
-            }
-        } else {
-            // Remove some particles when bass is low
-            if (topParticles.length > 0) {
-                topParticles.pop();
-            }
-        }
-        
-        // Update and draw top particles
-        topParticles.forEach(p => {
-            p.update();
-            p.draw(topParticlesCtx);
-        });
+        // Apply zoom effect based on bass volume
+        const zoomIntensity = 1 + (bassVolume * 0.3);
+        document.body.style.transform = `scale(${zoomIntensity})`;
 
-        const targetCount = Math.floor(volume * 100);
+        const targetCount = Math.floor(bassVolume * 100);
 
         while (particles.length < targetCount) {
-            particles.push(new Particle(centerX, centerY, randomColor()));
+            particles.push(new Particle(
+                Math.random() * window.innerWidth, 
+                topCenterY + (Math.random() * 50),
+                randomColor()
+            ));
         }
         while (particles.length > targetCount) {
             particles.pop();
@@ -547,155 +433,86 @@
             audioCtx.resume();
         }
         animateParticles();
+        animateVisualizer();
         document.body.removeEventListener('click', startParticleEffect);
     }
 
     document.body.addEventListener('click', startParticleEffect);
 
-    let isTouching = false;
-    let touchX = 0;
-    let touchY = 0;
+    // Visualizer setup
+    const visualizer = document.getElementById('visualizer');
+    const vCtx = visualizer.getContext('2d');
+
+    function resizeVisualizer() {
+        visualizer.width = window.innerWidth;
+        visualizer.height = 100;
+    }
+    resizeVisualizer();
+    window.addEventListener('resize', resizeVisualizer);
+
+    function animateVisualizer() {
+        analyser.getByteFrequencyData(dataArray);
         
-    const body = document.body;
-
-    function applyScreenBeatEffect(volume) {
-      const intensity = volume * 10;
-      const offsetX = (Math.random() - 0.5) * intensity;
-      const offsetY = (Math.random() - 0.5) * intensity;
-      body.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${zoomActive ? 1.2 : 1})`;
-      body.style.transition = 'transform 0.05s ease';
-    }
-
-    function applyTouchBassEffect(x, y, volume) {
-      const bassEffect = document.createElement('div');
-      bassEffect.style.position = 'fixed';
-      bassEffect.style.left = `${x}px`;
-      bassEffect.style.top = `${y}px`;
-      bassEffect.style.width = '100px';
-      bassEffect.style.height = '100px';
-      bassEffect.style.borderRadius = '50%';
-      bassEffect.style.pointerEvents = 'none';
-      bassEffect.style.zIndex = 100002;
-      bassEffect.style.background = `rgba(0, 255, 0, ${0.3 + volume * 0.7})`;
-      bassEffect.style.boxShadow = `0 0 ${20 + volume * 40}px #0f0, 0 0 ${40 + volume * 80}px #0f0`;
-      bassEffect.style.transform = 'scale(1)';
-      bassEffect.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-      document.body.appendChild(bassEffect);
-
-      requestAnimationFrame(() => {
-        bassEffect.style.transform = 'scale(1.5)';
-        bassEffect.style.opacity = '0';
-      });
-
-      setTimeout(() => {
-        bassEffect.remove();
-      }, 300);
-    }
-
-    class TouchParticle {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.vx = (Math.random() - 0.5) * 4;
-        this.vy = (Math.random() - 0.5) * 4;
-        this.size = 4 + Math.random() * 4;
-        this.color = randomColor();
-        this.life = 30 + Math.random() * 30;
-      }
-      update() {
-        this.vx += gravityX * 0.2;
-        this.vy += gravityY * 0.2;
-        this.x += this.vx;
-        this.y += this.vy;
-        this.life--;
-      }
-      draw(ctx) {
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 8;
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    let touchParticles = [];
-
-    function animateTouchParticles() {
-      pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-      touchParticles.forEach((p, i) => {
-        p.update();
-        p.draw(pCtx);
-        if (p.life <= 0) {
-          touchParticles.splice(i, 1);
+        vCtx.clearRect(0, 0, visualizer.width, visualizer.height);
+        vCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        vCtx.fillRect(0, 0, visualizer.width, visualizer.height);
+        
+        // Draw sine wave visualizer
+        vCtx.lineWidth = 2;
+        vCtx.strokeStyle = '#0f0';
+        vCtx.shadowBlur = 10;
+        vCtx.shadowColor = '#0f0';
+        vCtx.beginPath();
+        
+        const sliceWidth = visualizer.width * 1.0 / analyser.frequencyBinCount;
+        let x = 0;
+        
+        for(let i = 0; i < analyser.frequencyBinCount; i++) {
+            const v = dataArray[i] / 255;
+            const y = v * visualizer.height;
+            
+            if(i === 0) {
+                vCtx.moveTo(x, y);
+            } else {
+                vCtx.lineTo(x, y);
+            }
+            
+            x += sliceWidth;
         }
-      });
-      analyser.getByteFrequencyData(dataArray);
-      const volume = getAverageVolume(dataArray) / 255;
-      const targetCount = Math.floor(volume * 100);
-      while (particles.length < targetCount) {
-        particles.push(new Particle(centerX, centerY, randomColor()));
-      }
-      while (particles.length > targetCount) {
-        particles.pop();
-      }
-      particles.forEach(p => {
-        p.update(gravityX, gravityY);
-        p.draw(pCtx);
-      });
-
-      if (isTouching) {
-        applyScreenBeatEffect(volume);
-        applyTouchBassEffect(touchX, touchY, volume);
-        for (let i = 0; i < 5; i++) {
-          const offsetX = touchX + (Math.random() - 0.5) * 50;
-          const offsetY = touchY + (Math.random() - 0.5) * 50;
-          touchParticles.push(new TouchParticle(offsetX, offsetY));
+        
+        vCtx.lineTo(visualizer.width, visualizer.height/2);
+        vCtx.stroke();
+        
+        // Draw bars
+        const barWidth = (visualizer.width / analyser.frequencyBinCount) * 2.5;
+        x = 0;
+        
+        for(let i = 0; i < analyser.frequencyBinCount; i++) {
+            const v = dataArray[i] / 255;
+            const barHeight = v * visualizer.height;
+            
+            const gradient = vCtx.createLinearGradient(0, visualizer.height - barHeight, 0, visualizer.height);
+            gradient.addColorStop(0, '#0f0');
+            gradient.addColorStop(1, '#0a0');
+            
+            vCtx.fillStyle = gradient;
+            vCtx.fillRect(x, visualizer.height - barHeight, barWidth, barHeight);
+            
+            x += barWidth + 1;
         }
-      } else {
-        body.style.transform = zoomActive ? `scale(1.2)` : 'scale(1)';
-      }
-
-      requestAnimationFrame(animateTouchParticles);
+        
+        requestAnimationFrame(animateVisualizer);
     }
 
-    function startTouch(e) {
-      isTouching = true;
-      if (e.touches && e.touches.length > 0) {
-        touchX = e.touches[0].clientX;
-        touchY = e.touches[0].clientY;
-      } else {
-        touchX = e.clientX;
-        touchY = e.clientY;
-      }
+    // Ensure consistent sizing across browsers
+    function ensureConsistentSizing() {
+        const setHeight = () => {
+            document.body.style.height = `${window.innerHeight}px`;
+        };
+        window.addEventListener('resize', setHeight);
+        setHeight();
     }
-
-    function moveTouch(e) {
-      if (isTouching) {
-        if (e.touches && e.touches.length > 0) {
-          touchX = e.touches[0].clientX;
-          touchY = e.touches[0].clientY;
-        } else {
-          touchX = e.clientX;
-          touchY = e.clientY;
-        }
-      }
-    }
-
-    function endTouch() {
-      isTouching = false;
-      body.style.transform = zoomActive ? `scale(1.2)` : 'scale(1)';
-    }
-
-    document.body.addEventListener('touchstart', startTouch);
-    document.body.addEventListener('touchmove', moveTouch);
-    document.body.addEventListener('touchend', endTouch);
-    document.body.addEventListener('mousedown', startTouch);
-    document.body.addEventListener('mousemove', moveTouch);
-    document.body.addEventListener('mouseup', endTouch);
-
-    animateTouchParticles();
-
+    ensureConsistentSizing();
 </script>
 </body>
 </html>
