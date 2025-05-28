@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>My Dashboard</title>
+<title>Hacker Attack Map</title>
 <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
+
+<!-- Three.js for 3D Earth -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
 
 <!-- Leaflet CSS and JS for map -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -12,25 +16,40 @@
 
 <style>
     :root {
-        --deepseek-blue: #ff0000; /* Changed to red */
-        --deepseek-dark: #000000; /* Changed to black */
-        --neon-glow: 0 0 10px var(--deepseek-blue);
+        --hacker-red: #ff0000;
+        --hacker-dark: #000000;
+        --neon-glow: 0 0 10px var(--hacker-red);
     }
     body {
-        margin: 0; padding: 0;
-        background-color: var(--deepseek-dark);
+        margin: 0; 
+        padding: 0;
+        overflow: hidden;
+        background-color: var(--hacker-dark);
         color: white;
         font-family: 'Courier New', monospace;
+    }
+    
+    #earth-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    
+    #content {
+        position: relative;
+        z-index: 1;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
-        min-height: 100vh;
-        background-image: url('https://i.imgur.com/J5Z9Q0a.png'); /* Black and white world map */
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
     }
+    
     header {
-        background: var(--deepseek-blue);
+        background: var(--hacker-red);
         padding: 1rem;
         text-align: center;
         font-size: 1.5rem;
@@ -38,6 +57,7 @@
         box-shadow: var(--neon-glow);
         user-select: none;
     }
+    
     main {
         flex: 1;
         padding: 1rem;
@@ -46,27 +66,37 @@
         gap: 1.5rem;
         max-width: 900px;
         margin: 0 auto;
-        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
-        backdrop-filter: blur(5px);
+        width: 100%;
     }
+    
     section {
         background: rgba(0, 0, 0, 0.85);
-        border: 1px solid var(--deepseek-blue);
+        border: 1px solid var(--hacker-red);
         border-radius: 8px;
         padding: 1rem;
         box-shadow: var(--neon-glow);
     }
+    
     h2 {
         margin-top: 0;
-        color: var(--deepseek-blue);
+        color: var(--hacker-red);
         user-select: none;
     }
+    
     #map {
         width: 100%;
         height: 300px;
         border-radius: 8px;
-        border: 1px solid var(--deepseek-blue);
+        border: 1px solid var(--hacker-red);
     }
+    
+    .location-info {
+        margin-top: 10px;
+        color: var(--hacker-red);
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+    }
+    
     ul.sosmed-list {
         list-style: none;
         padding: 0;
@@ -75,8 +105,9 @@
         gap: 1rem;
         flex-wrap: wrap;
     }
+    
     ul.sosmed-list li {
-        background: var(--deepseek-blue);
+        background: var(--hacker-red);
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 20px;
@@ -84,28 +115,32 @@
         user-select: none;
         transition: background 0.3s ease;
     }
+    
     ul.sosmed-list li:hover {
         background: #cc0000;
     }
+    
     form.support-form {
         display: flex;
         flex-direction: column;
         gap: 0.8rem;
     }
+    
     form.support-form textarea {
         resize: vertical;
         min-height: 80px;
         padding: 0.5rem;
         border-radius: 5px;
-        border: 1.5px solid var(--deepseek-blue);
+        border: 1.5px solid var(--hacker-red);
         background: transparent;
         color: white;
         font-family: 'Courier New', monospace;
         font-size: 1rem;
     }
+    
     form.support-form button {
         align-self: flex-start;
-        background: var(--deepseek-blue);
+        background: var(--hacker-red);
         color: white;
         border: none;
         padding: 0.5rem 1.2rem;
@@ -116,12 +151,14 @@
         transition: background 0.3s ease;
         user-select: none;
     }
+    
     form.support-form button:hover {
         background: #cc0000;
     }
+    
     .logout-btn {
         margin: 1rem auto;
-        background: var(--deepseek-blue);
+        background: var(--hacker-red);
         color: white;
         border: none;
         padding: 0.5rem 1.5rem;
@@ -133,129 +170,275 @@
         transition: background 0.3s ease;
         max-width: 200px;
     }
+    
     .logout-btn:hover {
         background: #cc0000;
     }
+    
     #supportMsg {
-        color: var(--deepseek-blue);
+        color: var(--hacker-red);
         font-size: 0.9rem;
         margin-top: 0.5rem;
     }
     
-    /* Hacker attack lines animation */
-    @keyframes hackerAttack {
-        0% { opacity: 0; transform: scale(0.5); }
-        50% { opacity: 1; transform: scale(1.2); }
-        100% { opacity: 0; transform: scale(0.5); }
-    }
-    
-    .hacker-line {
+    /* Attack line styles */
+    .attack-line {
         position: absolute;
-        background: red;
-        animation: hackerAttack 1s infinite;
-        z-index: -1;
+        background: var(--hacker-red);
+        z-index: 10;
+        transform-origin: 0 0;
     }
 </style>
 </head>
 <body>
-<!-- Hacker attack lines -->
-<div id="hackerLines"></div>
-
-<header>Hacker Attack Dashboard</header>
-<main>
-    <section aria-label="My current location">
-        <h2>My Location</h2>
-        <div id="map" role="region" aria-live="polite" aria-label="Map showing your current location"></div>
-        <div id="locationInfo" style="margin-top: 10px; color: red;"></div>
-    </section>
-
-    <section aria-label="My social media">
-        <h2>My Sosmed</h2>
-        <ul class="sosmed-list" role="list">
-            <li tabindex="0" onclick="window.open('https://instagram.com/ezravvv', '_blank')">Instagram</li>
-            <li tabindex="0" onclick="window.open('https://wa.me/6281434046148', '_blank')">WhatsApp</li>
-            <li tabindex="0" style="cursor:pointer;" onclick="handleFacebookClick()">Facebook</li>
-        </ul>
-
-<script>
-  function handleFacebookClick() {
-    alert('Maaf, saya tidak punya Facebook.');
-
-    sessionStorage.setItem('fromGoogleSearch', 'true');
-    window.location.href = 'https://www.google.com/search?q=ezravvv+fb';
-  }
+    <!-- 3D Earth Container -->
+    <div id="earth-container"></div>
     
-  // Cek saat halaman dashboard dimuat
-  window.addEventListener('load', () => {
-    if (sessionStorage.getItem('fromGoogleSearch') === 'true') {
-      sessionStorage.removeItem('fromGoogleSearch');
-      sessionStorage.setItem('fromBingSearch', 'true');
-      window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
-      return;
-    }
-    if (sessionStorage.getItem('fromBingSearch') === 'true') {
-      sessionStorage.removeItem('fromBingSearch');
-      alert('gk percayakan, udah dibilangin');
-      // Redirect ke mydasboard.html (pastikan ini URL yang benar)
-      window.location.href = 'https://ezravvv.netlify.app/mydashboard.html';
-    }
-  });
-</script>
-        
-    </section>
+    <!-- Attack lines will be added here by JavaScript -->
+    
+    <div id="content">
+        <header>Hacker Attack Global Map</header>
+        <main>
+            <section aria-label="My current location">
+                <h2>Live Location Tracking</h2>
+                <div id="map" role="region" aria-live="polite" aria-label="Map showing your current location"></div>
+                <div id="locationInfo" class="location-info">Acquiring your location...</div>
+            </section>
 
-    <section aria-label="Leave a message">
-        <h2>Leave Your Message</h2>
-        <form class="support-form" id="supportForm" aria-live="polite" aria-label="Leave a message form">
-            <textarea id="supportText" placeholder="Tulis pesan yang ingin kamu tinggalkan..." required></textarea>
-            <button type="submit">Submit</button>
-        </form>
-        <div id="supportMsg" role="alert" aria-live="assertive"></div>
-    </section>
-</main>
+            <section aria-label="My social media">
+                <h2>My Sosmed</h2>
+                <ul class="sosmed-list" role="list">
+                    <li tabindex="0" onclick="window.open('https://instagram.com/ezravvv', '_blank')">Instagram</li>
+                    <li tabindex="0" onclick="window.open('https://wa.me/6281434046148', '_blank')">WhatsApp</li>
+                    <li tabindex="0" style="cursor:pointer;" onclick="handleFacebookClick()">Facebook</li>
+                </ul>
+            </section>
 
-<button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
+            <section aria-label="Leave a message">
+                <h2>Leave Your Message</h2>
+                <form class="support-form" id="supportForm" aria-live="polite" aria-label="Leave a message form">
+                    <textarea id="supportText" placeholder="Tulis pesan yang ingin kamu tinggalkan..." required></textarea>
+                    <button type="submit">Submit</button>
+                </form>
+                <div id="supportMsg" role="alert" aria-live="assertive"></div>
+            </section>
+        </main>
+
+        <button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
+    </div>
 
 <script>
-    // Create hacker attack lines
-    function createHackerLines() {
-        const container = document.getElementById('hackerLines');
-        const lineCount = 20;
+    // 3D Earth Implementation
+    let scene, camera, renderer, earth, controls;
+    let attackLines = [];
+    let myLatitude = 0;
+    let myLongitude = 0;
+    
+    function init3DEarth() {
+        // Scene setup
+        scene = new THREE.Scene();
         
-        for (let i = 0; i < lineCount; i++) {
-            const line = document.createElement('div');
-            line.className = 'hacker-line';
+        // Camera setup
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 2.5;
+        
+        // Renderer setup
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('earth-container').appendChild(renderer.domElement);
+        
+        // Controls for rotating the Earth
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = false;
+        controls.enablePan = false;
+        controls.rotateSpeed = 0.5;
+        controls.minDistance = 2;
+        controls.maxDistance = 2;
+        
+        // Earth geometry
+        const geometry = new THREE.SphereGeometry(1, 64, 64);
+        
+        // Earth texture
+        const textureLoader = new THREE.TextureLoader();
+        const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
+        const bumpMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_normal_2048.jpg');
+        const specularMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg');
+        
+        // Earth material
+        const material = new THREE.MeshPhongMaterial({
+            map: earthTexture,
+            bumpMap: bumpMap,
+            bumpScale: 0.05,
+            specularMap: specularMap,
+            specular: new THREE.Color('grey'),
+            shininess: 5
+        });
+        
+        // Create Earth mesh
+        earth = new THREE.Mesh(geometry, material);
+        scene.add(earth);
+        
+        // Add ambient light
+        const ambientLight = new THREE.AmbientLight(0x333333);
+        scene.add(ambientLight);
+        
+        // Add directional light (sun)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 3, 5);
+        scene.add(directionalLight);
+        
+        // Add stars
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.05,
+            transparent: true
+        });
+        
+        const starsVertices = [];
+        for (let i = 0; i < 10000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starsVertices.push(x, y, z);
+        }
+        
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(stars);
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            earth.rotation.y += 0.0005;
+            controls.update();
+            renderer.render(scene, camera);
             
-            // Random position
-            line.style.left = `${Math.random() * 100}%`;
-            line.style.top = `${Math.random() * 100}%`;
-            
-            // Random size
-            const width = Math.random() * 100 + 50;
-            const height = Math.random() * 3 + 1;
-            line.style.width = `${width}px`;
-            line.style.height = `${height}px`;
-            
-            // Random animation delay
-            line.style.animationDelay = `${Math.random() * 2}s`;
-            
-            container.appendChild(line);
+            // Update attack lines
+            updateAttackLines();
+        }
+        
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    }
+    
+    // Create attack lines on the Earth
+    function createAttackLines() {
+        // Clear existing lines
+        attackLines.forEach(line => {
+            document.body.removeChild(line.element);
+        });
+        attackLines = [];
+        
+        // Create new attack lines (20 lines)
+        for (let i = 0; i < 20; i++) {
+            createAttackLine();
         }
     }
     
-    createHackerLines();
-
-    // Hardcoded location (your location)
-    const myLocation = {
-        lat: -6.2088,  // Replace with your actual latitude
-        lon: 106.8456, // Replace with your actual longitude
-        name: "Jakarta, Indonesia" // Replace with your location name
-    };
+    function createAttackLine() {
+        // Random start point (somewhere on Earth)
+        const startLat = Math.random() * 180 - 90;
+        const startLon = Math.random() * 360 - 180;
+        
+        // End point is your location
+        const endLat = myLatitude;
+        const endLon = myLongitude;
+        
+        // Convert coordinates to 3D positions
+        const startPos = latLongToVector3(startLat, startLon, 1.02);
+        const endPos = latLongToVector3(endLat, endLon, 1.02);
+        
+        // Create line element
+        const line = document.createElement('div');
+        line.className = 'attack-line';
+        document.body.appendChild(line);
+        
+        // Store line data
+        attackLines.push({
+            element: line,
+            startPos: startPos,
+            endPos: endPos,
+            progress: 0,
+            speed: Math.random() * 0.005 + 0.002
+        });
+    }
     
+    function updateAttackLines() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        attackLines.forEach(line => {
+            // Update progress
+            line.progress += line.speed;
+            
+            if (line.progress >= 1) {
+                // Reset line when it reaches the end
+                line.progress = 0;
+                const startLat = Math.random() * 180 - 90;
+                const startLon = Math.random() * 360 - 180;
+                line.startPos = latLongToVector3(startLat, startLon, 1.02);
+            }
+            
+            // Calculate current position
+            const currentPos = new THREE.Vector3().lerpVectors(
+                line.startPos,
+                line.endPos,
+                line.progress
+            );
+            
+            // Project 3D position to 2D screen coordinates
+            const vector = currentPos.clone().project(camera);
+            vector.x = (vector.x * 0.5 + 0.5) * width;
+            vector.y = -(vector.y * 0.5 - 0.5) * height;
+            
+            // Calculate length and angle
+            const endVector = line.endPos.clone().project(camera);
+            endVector.x = (endVector.x * 0.5 + 0.5) * width;
+            endVector.y = -(endVector.y * 0.5 - 0.5) * height;
+            
+            const dx = endVector.x - vector.x;
+            const dy = endVector.y - vector.y;
+            const length = Math.sqrt(dx * dx + dy * dy) * (1 - line.progress);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // Update line style
+            line.element.style.width = `${length}px`;
+            line.element.style.height = '1px';
+            line.element.style.left = `${vector.x}px`;
+            line.element.style.top = `${vector.y}px`;
+            line.element.style.transform = `rotate(${angle}deg)`;
+            line.element.style.opacity = line.progress < 0.9 ? 1 : 1 - (line.progress - 0.9) * 10;
+        });
+    }
+    
+    // Convert latitude/longitude to 3D vector
+    function latLongToVector3(lat, lon, radius) {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
+        
+        return new THREE.Vector3(
+            -radius * Math.sin(phi) * Math.cos(theta),
+            radius * Math.cos(phi),
+            radius * Math.sin(phi) * Math.sin(theta)
+        );
+    }
+    
+    // Initialize 3D Earth
+    init3DEarth();
+    
+    // Geolocation with Google Maps
     const mapDiv = document.getElementById('map');
     const locationInfo = document.getElementById('locationInfo');
     let map, marker;
-
+    
     function initMap(lat, lon) {
         if (!map) {
             map = L.map('map').setView([lat, lon], 13);
@@ -273,54 +456,151 @@
                 shadowSize: [41, 41]
             });
             
-            marker = L.marker([lat, lon], {icon: redIcon}).addTo(map)
-                .bindPopup(`<b>My Location</b><br>${myLocation.name}`)
-                .openPopup();
-                
-            locationInfo.textContent = `Current Location: ${myLocation.name}`;
+            marker = L.marker([lat, lon], {icon: redIcon}).addTo(map);
+            
+            // Add circle to show accuracy
+            L.circle([lat, lon], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.2,
+                radius: 100 // Default radius, will be updated
+            }).addTo(map);
+            
+            // Reverse geocode to get address
+            reverseGeocode(lat, lon);
         } else {
             map.setView([lat, lon], 13);
             marker.setLatLng([lat, lon]);
         }
     }
-
-    // Always show your hardcoded location, not the visitor's location
-    function showMyLocation() {
-        initMap(myLocation.lat, myLocation.lon);
-        
-        // Add some random attack markers around your location
-        for (let i = 0; i < 5; i++) {
-            const offsetLat = (Math.random() - 0.5) * 0.1;
-            const offsetLon = (Math.random() - 0.5) * 0.1;
+    
+    function reverseGeocode(lat, lon) {
+        // Using Nominatim (OpenStreetMap's geocoding service)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+            .then(response => response.json())
+            .then(data => {
+                let address = "Your location: ";
+                
+                if (data.address) {
+                    if (data.address.road) address += data.address.road + ', ';
+                    if (data.address.city) address += data.address.city + ', ';
+                    if (data.address.state) address += data.address.state + ', ';
+                    if (data.address.country) address += data.address.country;
+                    
+                    // Remove trailing comma if exists
+                    address = address.replace(/, $/, '');
+                } else {
+                    address += `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                }
+                
+                locationInfo.textContent = address;
+                marker.bindPopup(address).openPopup();
+                
+                // Update your location for attack lines
+                myLatitude = lat;
+                myLongitude = lon;
+                createAttackLines();
+            })
+            .catch(error => {
+                console.error('Geocoding error:', error);
+                locationInfo.textContent = `Your coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                marker.bindPopup(`Your location`).openPopup();
+                
+                // Still update your location for attack lines
+                myLatitude = lat;
+                myLongitude = lon;
+                createAttackLines();
+            });
+    }
+    
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    initMap(lat, lon);
+                },
+                error => {
+                    console.error('Geolocation error:', error);
+                    locationInfo.textContent = "Unable to retrieve your location. Using default location.";
+                    
+                    // Fallback to a default location (Jakarta)
+                    const defaultLat = -6.2088;
+                    const defaultLon = 106.8456;
+                    initMap(defaultLat, defaultLon);
+                },
+                { 
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
             
-            L.circleMarker([myLocation.lat + offsetLat, myLocation.lon + offsetLon], {
-                radius: 8,
-                fillColor: "#ff0000",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            }).addTo(map).bindPopup("Hacker Attack Detected");
+            // Watch for position changes
+            navigator.geolocation.watchPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    if (marker) {
+                        marker.setLatLng([lat, lon]);
+                        map.setView([lat, lon]);
+                        reverseGeocode(lat, lon);
+                    }
+                },
+                null,
+                { enableHighAccuracy: true }
+            );
+        } else {
+            locationInfo.textContent = "Geolocation is not supported by your browser. Using default location.";
+            
+            // Fallback to a default location (Jakarta)
+            const defaultLat = -6.2088;
+            const defaultLon = 106.8456;
+            initMap(defaultLat, defaultLon);
         }
     }
-
-    // Show your location immediately
-    showMyLocation();
-
+    
+    // Initialize location tracking
+    getLocation();
+    
+    // Social media functions
+    function handleFacebookClick() {
+        alert('Maaf, saya tidak punya Facebook.');
+        sessionStorage.setItem('fromGoogleSearch', 'true');
+        window.location.href = 'https://www.google.com/search?q=ezravvv+fb';
+    }
+    
+    window.addEventListener('load', () => {
+        if (sessionStorage.getItem('fromGoogleSearch') === 'true') {
+            sessionStorage.removeItem('fromGoogleSearch');
+            sessionStorage.setItem('fromBingSearch', 'true');
+            window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
+            return;
+        }
+        if (sessionStorage.getItem('fromBingSearch') === 'true') {
+            sessionStorage.removeItem('fromBingSearch');
+            alert('gk percayakan, udah dibilangin');
+            window.location.href = 'https://ezravvv.netlify.app/mydashboard.html';
+        }
+    });
+    
+    // Support form handling
     const supportForm = document.getElementById('supportForm');
     const supportMsg = document.getElementById('supportMsg');
-
+    
     supportForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const text = document.getElementById('supportText').value.trim();
-
+        
         if (text.length === 0) {
             supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
             return;
         }
-
+        
         supportMsg.textContent = "Mengirim pesan...";
-
+        
         try {
             await fetch('https://script.google.com/macros/s/AKfycbxL7jegUbHu29NbLReafEdc4ZNiY8kYeN3P0I3XqUfHbSpRWhwuO1WXoO1-PfyPDUuX/exec', {
                 method: 'POST',
@@ -337,7 +617,8 @@
             supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
         }
     });
-
+    
+    // Logout button
     document.getElementById('logoutBtn').addEventListener('click', () => {
         sessionStorage.removeItem('loggedInUser');
         window.location.href = 'index.html';
