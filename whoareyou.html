@@ -2,208 +2,227 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
     <title>Verification Required</title>
+    <meta name="description" content="Halaman verifikasi identitas">
     <link rel="icon" type="image/png" href="/imgvidaud/whoareyouicon.png">
     <style>
+        /* BASE STYLES - RELATIVE UNITS */
+        :root {
+            font-size: 16px; /* Base font size (bisa di-override oleh pengguna) */
+            --primary-color: #0f0;
+            --bg-color: #000;
+            --text-color: #0f0;
+            --font-stack: 'Courier New', monospace;
+        }
+
+        /* RESET & ACCESSIBILITY */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body, html {
-            margin: 0; padding: 0; height: 100%;
-            background-color: black;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            line-height: 1.5;
+            overflow-x: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
         }
+
+        /* MATRIX BACKGROUND */
         #matrix {
             position: fixed;
-            top: 0; left: 0;
+            top: 0; 
+            left: 0;
             width: 100vw;
             height: 100vh;
             z-index: -2;
         }
+
+        /* LOADING SCREEN - FLEXIBLE UNITS */
         #loading-screen {
             position: fixed;
-            top: 0; left: 0;
+            top: 0; 
+            left: 0;
             width: 100vw;
             height: 100vh;
-            background: black;
-            color: #0f0;
+            background: var(--bg-color);
+            color: var(--primary-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
+            font-size: clamp(1.5rem, 4vw, 2rem); /* Responsive font size */
+            font-family: var(--font-stack);
             z-index: 100000;
             flex-direction: column;
+            gap: 1rem;
         }
+
         #loading-dots span {
             animation: blink 1.4s infinite;
             font-weight: bold;
-            font-size: 28px;
-            margin: 0 2px;
+            font-size: 1.75rem; /* rem unit */
+            margin: 0 0.125rem; /* rem unit */
         }
+
         #loading-dots span:nth-child(1) { animation-delay: 0s; }
         #loading-dots span:nth-child(2) { animation-delay: 0.2s; }
         #loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
         @keyframes blink {
             0%, 20% { opacity: 0; }
             50% { opacity: 1; }
             100% { opacity: 0; }
         }
+
+        /* VERIFICATION BOX - FLUID LAYOUT */
         .verification-box {
             background: rgba(0, 0, 0, 0.7);
-            border: 1px solid #0f0;
-            padding: 30px;
+            border: 1px solid var(--primary-color);
+            padding: clamp(1.5rem, 5vw, 2rem);
             text-align: center;
-            max-width: 500px;
-            box-shadow: 0 0 20px #0f0;
+            width: 90%;
+            max-width: 31.25rem; /* 500px in rem */
+            box-shadow: 0 0 1.25rem var(--primary-color);
             z-index: 10;
-            border-radius: 8px;
+            border-radius: 0.5rem;
             user-select: none;
+            margin: 1rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
+
         h1 {
-            margin-bottom: 20px;
-            text-shadow: 0 0 5px #0f0;
+            margin-bottom: 1.25rem;
+            text-shadow: 0 0 0.3125rem var(--primary-color);
             white-space: nowrap;
             overflow: hidden;
-            border-right: 3px solid #0f0;
+            border-right: 0.1875rem solid var(--primary-color);
             width: 0;
-            animation: typing 3s steps(30, end) forwards, blink-caret 0.75s step-end infinite;
+            font-size: clamp(1.5rem, 5vw, 2.5rem); /* Responsive heading */
+            animation: typing 3s steps(30, end) forwards, 
+                       blink-caret 0.75s step-end infinite;
         }
+
         @keyframes typing {
             from { width: 0 }
             to { width: 100% }
         }
+
         @keyframes blink-caret {
             0%, 100% { border-color: transparent }
-            50% { border-color: #0f0 }
-        }
-        input {
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 10px;
-            width: 80%;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-            border-radius: 4px;
-            transition: box-shadow 0.3s ease;
-        }
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 10px #0f0;
-        }
-        button {
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            border-radius: 4px;
-            font-weight: bold;
-            user-select: none;
-        }
-        button:hover {
-            background: #0f0;
-            color: black;
-            box-shadow: 0 0 15px #0f0;
-            transform: scale(1.05);
-        }
-        #audio-control {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 14px;
-            user-select: none;
-            z-index: 100001;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        #audio-control:hover {
-            background: #0f0;
-            color: black;
+            50% { border-color: var(--primary-color) }
         }
 
+        /* FORM ELEMENTS */
+        p {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        input {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--text-color);
+            padding: 0.625rem;
+            width: 100%;
+            max-width: 25rem;
+            margin: 0.625rem 0;
+            font-family: var(--font-stack);
+            font-size: 1rem;
+            border-radius: 0.25rem;
+            transition: box-shadow 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0.625rem var(--primary-color);
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--text-color);
+            padding: 0.625rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            user-select: none;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        button:hover, button:focus {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 0.9375rem var(--primary-color);
+            transform: scale(1.05);
+            outline: none;
+        }
+
+        /* AUDIO CONTROL */
+        #audio-control {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--text-color);
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            font-family: var(--font-stack);
+            font-size: 0.875rem;
+            user-select: none;
+            z-index: 100001;
+            transition: all 0.3s;
+        }
+
+        #audio-control:hover, #audio-control:focus {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            outline: none;
+        }
+
+        /* PARTICLE CANVAS */
         #particle-canvas {
             position: fixed;
-            top: 0; left: 0;
+            top: 0; 
+            left: 0;
             width: 100vw;
             height: 100vh;
             pointer-events: none;
             z-index: 1000;
         }
-        
-        #top-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 150px;
-            pointer-events: none;
-            z-index: 999;
+
+        /* HIGH CONTRAST MODE SUPPORT */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary-color: #00ff00;
+                --text-color: #ffffff;
+            }
+            body {
+                background: #000 !important;
+            }
         }
-        
-        #visualizer-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-            pointer-events: none;
-            z-index: 998;
-        }
-        
-        #fullscreen-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: transparent;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 14px;
-            user-select: none;
-            z-index: 100001;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        
-        #fullscreen-toggle:hover {
-            background: #0f0;
-            color: black;
-        }
-        
-        #bass-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px #0f0;
-            z-index: 100002;
-            display: none;
-            text-align: center;
-        }
-        
-        #bass-message button {
-            margin-top: 15px;
+
+        /* ZOOM SAFETY */
+        @media (max-width: 768px) {
+            :root {
+                font-size: 14px;
+            }
+            .verification-box {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
@@ -212,372 +231,397 @@
         Loading<span id="loading-dots"><span>.</span><span>.</span><span>.</span></span>
     </div>
 
-    <canvas id="matrix"></canvas>
-    <canvas id="top-particles"></canvas>
-    <canvas id="particle-canvas"></canvas>
-    <div id="visualizer-container"></div>
+    <canvas id="matrix" aria-hidden="true"></canvas>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
 
-    <div class="verification-box" style="display:none;">
+    <div class="verification-box" style="display:none;" role="dialog" aria-labelledby="animated-title">
         <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
         <p>1. SIAPA KAMU?</p>
-        <input type="text" id="answer" placeholder="Ketik jawaban..." autocomplete="off" />
-        <button onclick="verifyIdentity()">SUBMIT</button>
+        <input type="text" id="answer" placeholder="Ketik jawaban..." autocomplete="off" aria-required="true" />
+        <button onclick="verifyIdentity()" aria-label="Submit jawaban">SUBMIT</button>
     </div>
 
-    <div id="bass-message">
-        <p>Nikmati musiknya!</p>
-        <button id="ok-button">OKE</button>
-    </div>
+    <button id="audio-control" title="Mute/Unmute Audio" aria-label="Toggle audio">🔊</button>
 
-    <button id="audio-control" title="Mute/Unmute Audio">🔊</button>
-    <button id="fullscreen-toggle" title="Toggle Fullscreen">⛶</button>
-
-    <audio id="ambient-audio" loop>
+    <audio id="ambient-audio" loop aria-label="Background audio">
         <source src="/imgvidaud/whereweare.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
     </audio>
 
 <script>
-    const audio = document.getElementById('ambient-audio');
-    const audioControl = document.getElementById('audio-control');
-    const fullscreenToggle = document.getElementById('fullscreen-toggle');
-    const bassMessage = document.getElementById('bass-message');
-    const okButton = document.getElementById('ok-button');
-    let bassMessageShown = false;
+    // Optimized JavaScript with better performance and accessibility
+    (function() {
+        'use strict';
 
-    // Fullscreen toggle
-    fullscreenToggle.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.log(`Error attempting to enable fullscreen: ${err.message}`);
+        // DOM Elements
+        const audio = document.getElementById('ambient-audio');
+        const audioControl = document.getElementById('audio-control');
+        const loadingScreen = document.getElementById('loading-screen');
+        const verificationBox = document.querySelector('.verification-box');
+        const answerInput = document.getElementById('answer');
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        const particleCanvas = document.getElementById('particle-canvas');
+        const pCtx = particleCanvas.getContext('2d');
+        const body = document.body;
+
+        // Audio Context
+        let audioCtx;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.warn('Web Audio API not supported');
+        }
+
+        // Global Variables
+        let particles = [];
+        let touchParticles = [];
+        let isTouching = false;
+        let touchX = 0;
+        let touchY = 0;
+        let gravityX = 0;
+        let gravityY = 0;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        // Initialize
+        window.addEventListener('load', init);
+
+        function init() {
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                verificationBox.style.display = 'block';
+            }, 2500);
+
+            audio.volume = 0.2;
+            setupEventListeners();
+            setupCanvas();
+            setupMatrixEffect();
+            setupAudioAnalyser();
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Audio Control
+            audioControl.addEventListener('click', toggleAudio);
+            audioControl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    toggleAudio();
+                }
             });
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
+
+            // Touch/Mouse Events
+            body.addEventListener('touchstart', handleTouchStart);
+            body.addEventListener('touchmove', handleTouchMove);
+            body.addEventListener('touchend', handleTouchEnd);
+            body.addEventListener('mousedown', handleTouchStart);
+            body.addEventListener('mousemove', handleTouchMove);
+            body.addEventListener('mouseup', handleTouchEnd);
+
+            // Device Orientation
+            window.addEventListener('deviceorientation', handleOrientation);
+
+            // Window Resize
+            window.addEventListener('resize', handleResize);
+
+            // Answer Input
+            answerInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    verifyIdentity();
+                }
+            });
+        }
+
+        // Canvas Setup
+        function setupCanvas() {
+            resizeCanvas(canvas, ctx);
+            resizeCanvas(particleCanvas, pCtx);
+        }
+
+        function resizeCanvas(canvasEl, context) {
+            canvasEl.width = window.innerWidth;
+            canvasEl.height = window.innerHeight;
+        }
+
+        function handleResize() {
+            resizeCanvas(canvas, ctx);
+            resizeCanvas(particleCanvas, pCtx);
+        }
+
+        // Matrix Effect
+        function setupMatrixEffect() {
+            const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
+            const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const nums = '0123456789';
+            const alphabet = katakana + latin + nums;
+
+            const fontSize = 16;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0f0';
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(drawMatrix, 33);
+        }
+
+        // Audio Functions
+        function toggleAudio() {
+            if (audio.paused) {
+                playAudio();
+            } else {
+                pauseAudio();
             }
         }
-    });
 
-    // Check for bass strength and show message if needed
-    function checkBassStrength() {
-        if (bassMessageShown) return;
-        
-        analyser.getByteFrequencyData(dataArray);
-        const bass = dataArray[0] / 255; // Get bass frequency (lower frequencies)
-        
-        if (bass >= 0.7) {
-            bassMessage.style.display = 'block';
-            bassMessageShown = true;
-        }
-    }
-
-    okButton.addEventListener('click', () => {
-        bassMessage.style.display = 'none';
-        // Initialize all the effects after user clicks OK
-        initTopParticles();
-        initNoiceVisualizer();
-    });
-
-    window.onload = () => {
-        setTimeout(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.querySelector('.verification-box').style.display = 'block';
-        }, 2500);
-
-        audio.volume = 0.2;
-
-        function startAudioOnInteraction() {
-            if (audioCtx.state === 'suspended') {
+        function playAudio() {
+            if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
             audio.play().then(() => {
                 audioControl.textContent = '🔊';
-                // Start checking bass strength after audio starts playing
-                setInterval(checkBassStrength, 100);
-            }).catch(() => {
+                audioControl.setAttribute('aria-label', 'Mute audio');
+            }).catch(e => {
+                console.error('Audio playback failed:', e);
                 audioControl.textContent = '🔇';
+                audioControl.setAttribute('aria-label', 'Unmute audio');
             });
-            document.body.removeEventListener('click', startAudioOnInteraction);
         }
-        document.body.addEventListener('click', startAudioOnInteraction);
-    };
 
-    audioControl.addEventListener('click', () => {
-        if (audio.paused) {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            audio.play().then(() => {
-                audioControl.textContent = '🔊';
-            }).catch(() => {
-                audioControl.textContent = '🔇';
-            });
-        } else {
+        function pauseAudio() {
             audio.pause();
             audioControl.textContent = '🔇';
+            audioControl.setAttribute('aria-label', 'Unmute audio');
         }
-    });
 
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+        // Audio Visualizer
+        function setupAudioAnalyser() {
+            if (!audioCtx) return;
 
-    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
-    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const nums = '0123456789';
-    const alphabet = katakana + latin + nums;
+            const source = audioCtx.createMediaElementSource(audio);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
 
-    const fontSize = 16;
-    const columns = Math.floor(canvas.width / fontSize);
-    const drops = Array(columns).fill(1);
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    function drawMatrix() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#0f0';
-        ctx.font = fontSize + 'px monospace';
-
-        for (let i = 0; i < drops.length; i++) {
-            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
+            function getAverageVolume(array) {
+                return array.reduce((sum, val) => sum + val, 0) / array.length;
             }
-            drops[i]++;
-        }
-    }
-    setInterval(drawMatrix, 33);
 
-    function verifyIdentity() {
-        const answer = document.getElementById("answer").value.toLowerCase();
-        const validAnswers = ["ezra", "elvi"];
+            function animate() {
+                analyser.getByteFrequencyData(dataArray);
+                const volume = getAverageVolume(dataArray) / 255;
 
-        if (validAnswers.includes(answer)) {
-            window.location.href = "index.html";
-        } else {
-            window.location.href = "https://wa.me/6281434046148";
-        }
-    }
+                updateParticles(volume);
+                if (isTouching) {
+                    handleTouchEffects(volume);
+                }
 
-    // Audio context and analyzer setup
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioCtx.createMediaElementSource(audio);
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    function getAverageVolume(array) {
-        let values = 0;
-        let length = array.length;
-        for (let i = 0; i < length; i++) {
-            values += array[i];
-        }
-        return values / length;
-    }
-
-    // Top particles effect
-    const topParticlesCanvas = document.getElementById('top-particles');
-    const topParticlesCtx = topParticlesCanvas.getContext('2d');
-    
-    function resizeTopParticlesCanvas() {
-        topParticlesCanvas.width = window.innerWidth;
-        topParticlesCanvas.height = 150;
-    }
-    resizeTopParticlesCanvas();
-    window.addEventListener('resize', resizeTopParticlesCanvas);
-    
-    class TopParticle {
-        constructor() {
-            this.x = Math.random() * topParticlesCanvas.width;
-            this.y = Math.random() * topParticlesCanvas.height;
-            this.size = Math.random() * 3 + 1;
-            this.speedX = (Math.random() - 0.5) * 2;
-            this.speedY = Math.random() * 1 + 0.5;
-            this.color = `hsl(${Math.random() * 60 + 100}, 100%, 50%)`;
-        }
-        
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            
-            if (this.y > topParticlesCanvas.height) {
-                this.y = 0;
-                this.x = Math.random() * topParticlesCanvas.width;
+                requestAnimationFrame(animate);
             }
-            if (this.x < 0 || this.x > topParticlesCanvas.width) {
-                this.speedX *= -1;
+
+            animate();
+        }
+
+        // Particles
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.size = 3 + Math.random() * 3;
+                this.color = color;
+            }
+            update(gravityX, gravityY) {
+                this.vx += gravityX * 0.1;
+                this.vy += gravityY * 0.1;
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Boundary checks with bounce
+                if (this.x < 0) { this.x = 0; this.vx *= -0.6; }
+                if (this.x > particleCanvas.width) { this.x = particleCanvas.width; this.vx *= -0.6; }
+                if (this.y < 0) { this.y = 0; this.vy *= -0.6; }
+                if (this.y > particleCanvas.height) { this.y = particleCanvas.height; this.vy *= -0.6; }
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 5;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
-        
-        draw() {
-            topParticlesCtx.beginPath();
-            topParticlesCtx.fillStyle = this.color;
-            topParticlesCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            topParticlesCtx.fill();
-        }
-    }
-    
-    let topParticles = [];
-    let topParticlesActive = false;
-    
-    function initTopParticles() {
-        topParticlesActive = true;
-        for (let i = 0; i < 50; i++) {
-            topParticles.push(new TopParticle());
-        }
-        animateTopParticles();
-    }
-    
-    function animateTopParticles() {
-        if (!topParticlesActive) return;
-        
-        topParticlesCtx.clearRect(0, 0, topParticlesCanvas.width, topParticlesCanvas.height);
-        
-        analyser.getByteFrequencyData(dataArray);
-        const bass = dataArray[0] / 255;
-        
-        // Add more particles when bass is strong
-        if (bass >= 0.7 && Math.random() > 0.7) {
-            topParticles.push(new TopParticle());
-        }
-        
-        // Limit particles to prevent performance issues
-        if (topParticles.length > 100) {
-            topParticles = topParticles.slice(-100);
-        }
-        
-        topParticles.forEach(particle => {
-            particle.update();
-            particle.draw();
-        });
-        
-        requestAnimationFrame(animateTopParticles);
-    }
 
-    // Noice Visualizer (Galaxy Supernova effect)
-    const visualizerContainer = document.getElementById('visualizer-container');
-    let noiceVisualizerActive = false;
-    
-    function initNoiceVisualizer() {
-        noiceVisualizerActive = true;
-        animateNoiceVisualizer();
-    }
-    
-    function animateNoiceVisualizer() {
-        if (!noiceVisualizerActive) return;
-        
-        analyser.getByteFrequencyData(dataArray);
-        const bass = dataArray[0] / 255;
-        const mid = dataArray[Math.floor(dataArray.length / 2)] / 255;
-        const high = dataArray[dataArray.length - 1] / 255;
-        
-        // Clear previous frame
-        visualizerContainer.innerHTML = '';
-        
-        // Create central glow
-        const centerGlow = document.createElement('div');
-        centerGlow.style.position = 'absolute';
-        centerGlow.style.width = '100px';
-        centerGlow.style.height = '100px';
-        centerGlow.style.borderRadius = '50%';
-        centerGlow.style.background = 'radial-gradient(circle, rgba(0,255,0,0.8) 0%, rgba(0,255,0,0) 70%)';
-        centerGlow.style.filter = `blur(${5 + bass * 10}px)`;
-        centerGlow.style.opacity = bass;
-        centerGlow.style.transform = 'translate(-50%, -50%)';
-        centerGlow.style.transition = 'all 0.1s ease-out';
-        visualizerContainer.appendChild(centerGlow);
-        
-        // Create star particles
-        const starCount = Math.floor(20 + bass * 50);
-        for (let i = 0; i < starCount; i++) {
-            const star = document.createElement('div');
-            star.style.position = 'absolute';
-            star.style.width = `${Math.random() * 4 + 2}px`;
-            star.style.height = star.style.width;
-            star.style.background = '#fff';
-            star.style.borderRadius = '50%';
-            star.style.boxShadow = `0 0 ${5 + high * 10}px #0f0`;
+        class TouchParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.size = 4 + Math.random() * 4;
+                this.color = randomColor();
+                this.life = 30 + Math.random() * 30;
+            }
+            update() {
+                this.vx += gravityX * 0.2;
+                this.vy += gravityY * 0.2;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 8;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function randomColor() {
+            const colors = ['#ff3c3c', '#3cff3c', '#3c3cff', '#ff3cff', '#3cffff', '#ffff3c'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function updateParticles(volume) {
+            pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+            const targetCount = Math.floor(volume * 100);
+
+            // Main particles
+            while (particles.length < targetCount) {
+                particles.push(new Particle(centerX, centerY, randomColor()));
+            }
+            while (particles.length > targetCount) {
+                particles.pop();
+            }
+
+            particles.forEach(p => {
+                p.update(gravityX, gravityY);
+                p.draw(pCtx);
+            });
+
+            // Touch particles
+            touchParticles.forEach((p, i) => {
+                p.update();
+                p.draw(pCtx);
+                if (p.life <= 0) {
+                    touchParticles.splice(i, 1);
+                }
+            });
+        }
+
+        // Touch Effects
+        function handleTouchStart(e) {
+            isTouching = true;
+            updateTouchPosition(e);
+        }
+
+        function handleTouchMove(e) {
+            if (isTouching) {
+                updateTouchPosition(e);
+            }
+        }
+
+        function handleTouchEnd() {
+            isTouching = false;
+            body.style.transform = '';
+        }
+
+        function updateTouchPosition(e) {
+            if (e.touches && e.touches.length > 0) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            } else {
+                touchX = e.clientX;
+                touchY = e.clientY;
+            }
+        }
+
+        function handleTouchEffects(volume) {
+            applyScreenBeatEffect(volume);
+            applyTouchBassEffect(touchX, touchY, volume);
             
-            // Random position around center
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 100 * bass;
-            const x = 150 + Math.cos(angle) * distance;
-            const y = 150 + Math.sin(angle) * distance;
-            
-            star.style.left = `${x}px`;
-            star.style.top = `${y}px`;
-            star.style.opacity = 0.5 + Math.random() * 0.5;
-            
-            // Animation
-            star.style.transition = `all ${0.5 + Math.random() * 1}s ease-out`;
-            visualizerContainer.appendChild(star);
-            
-            // Animate stars outward
+            // Add new touch particles
+            for (let i = 0; i < 5; i++) {
+                const offsetX = touchX + (Math.random() - 0.5) * 50;
+                const offsetY = touchY + (Math.random() - 0.5) * 50;
+                touchParticles.push(new TouchParticle(offsetX, offsetY));
+            }
+        }
+
+        function applyScreenBeatEffect(volume) {
+            const intensity = volume * 10;
+            const offsetX = (Math.random() - 0.5) * intensity;
+            const offsetY = (Math.random() - 0.5) * intensity;
+            body.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+            body.style.transition = 'transform 0.05s ease';
+        }
+
+        function applyTouchBassEffect(x, y, volume) {
+            const bassEffect = document.createElement('div');
+            bassEffect.style.position = 'fixed';
+            bassEffect.style.left = `${x}px`;
+            bassEffect.style.top = `${y}px`;
+            bassEffect.style.width = '100px';
+            bassEffect.style.height = '100px';
+            bassEffect.style.borderRadius = '50%';
+            bassEffect.style.pointerEvents = 'none';
+            bassEffect.style.zIndex = '100002';
+            bassEffect.style.background = `rgba(0, 255, 0, ${0.3 + volume * 0.7})`;
+            bassEffect.style.boxShadow = `0 0 ${20 + volume * 40}px #0f0, 0 0 ${40 + volume * 80}px #0f0`;
+            bassEffect.style.transform = 'scale(1)';
+            bassEffect.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+            document.body.appendChild(bassEffect);
+
+            requestAnimationFrame(() => {
+                bassEffect.style.transform = 'scale(1.5)';
+                bassEffect.style.opacity = '0';
+            });
+
             setTimeout(() => {
-                const newDistance = distance * (1.5 + bass);
-                const newX = 150 + Math.cos(angle) * newDistance;
-                const newY = 150 + Math.sin(angle) * newDistance;
-                star.style.left = `${newX}px`;
-                star.style.top = `${newY}px`;
-                star.style.opacity = '0';
-                
-                // Remove star after animation
-                setTimeout(() => {
-                    star.remove();
-                }, 1000);
-            }, 50);
+                bassEffect.remove();
+            }, 300);
         }
-        
-        // Create light beams when bass is strong
-        if (bass > 0.7) {
-            const beamCount = 3 + Math.floor(bass * 5);
-            for (let i = 0; i < beamCount; i++) {
-                const beam = document.createElement('div');
-                beam.style.position = 'absolute';
-                beam.style.width = `${2 + Math.random() * 3}px`;
-                beam.style.height = `${100 + Math.random() * 100}px`;
-                beam.style.background = 'linear-gradient(to bottom, rgba(0,255,0,0.8), rgba(0,255,0,0))';
-                beam.style.transformOrigin = 'center bottom';
-                
-                const angle = Math.random() * Math.PI * 2;
-                beam.style.transform = `translate(-50%, -50%) rotate(${angle}rad) translateY(-50px)`;
-                beam.style.filter = 'blur(1px)';
-                beam.style.opacity = 0.7;
-                visualizerContainer.appendChild(beam);
-                
-                // Animate beam
-                setTimeout(() => {
-                    beam.style.height = `${200 + Math.random() * 100}px`;
-                    beam.style.opacity = '0';
-                    beam.style.transform = `translate(-50%, -50%) rotate(${angle}rad) translateY(-100px)`;
-                    
-                    // Remove beam after animation
-                    setTimeout(() => {
-                        beam.remove();
-                    }, 300);
-                }, 50);
+
+        // Device Orientation
+        function handleOrientation(event) {
+            gravityX = event.gamma ? event.gamma / 90 : 0;
+            gravityY = event.beta ? event.beta / 90 : 0;
+        }
+
+        // Verification
+        function verifyIdentity() {
+            const answer = answerInput.value.toLowerCase().trim();
+            const validAnswers = ["ezra"];
+
+            if (validAnswers.includes(answer)) {
+                window.location.href = "index.html";
+            } else {
+                window.location.href = "https://wa.me/6281434046148";
             }
         }
-        
-        requestAnimationFrame(animateNoiceVisualizer);
-    }
-
-    // Handle window resize for all elements
-    function handleResize() {
-        resizeCanvas();
-        resizeTopParticlesCanvas();
-    }
-    
-    window.addEventListener('resize', handleResize);
+    })();
 </script>
 </body>
 </html>
