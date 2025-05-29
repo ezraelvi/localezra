@@ -250,7 +250,7 @@
 
     <div class="verification-box" style="display:none;">
         <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
-        <p>SIAPA KAMU?</p>
+        <p>SIAPA KAMU ?</p>
         <input type="text" id="answer" placeholder="Ketik jawaban..." autocomplete="off" />
         <button onclick="verifyIdentity()">SUBMIT</button>
     </div>
@@ -388,6 +388,7 @@
         if (validAnswers.includes(answer)) {
             window.location.href = "index.html";
         } else {
+            alert("Tidak dikenali")
             window.location.href = "https://wa.me/6281434046148";
         }
     }
