@@ -11,43 +11,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website ezvvel</title>
-    <meta name="description" content="Personal website of elvi">
     <link rel="icon" type="image/png" href="/imgvidaud/iconelvi.jpg">
     <style>
-        /* Optimized CSS with reduced redundancy and improved organization */
-        :root {
-            --tiktok-color: #00a8ff;
-            --instagram-color: #E1306C;
-            --text-shadow: 2px 2px 4px #000;
-        }
         
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', monospace;
-            background: url('/imgvidaud/backgroundelvi.png') center/cover fixed no-repeat;
-            color: yellow;
-            text-shadow: var(--text-shadow);
-        }
-        
-        /* Social container styles */
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    background: url('/imgvidaud/backgroundelvi.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    color: yellow;
+    text-shadow: 2px 2px 4px #000;
+    }
+               
         .social-container {
             position: fixed;
             left: 10px;
+            transform: translateY(-50%);
             width: 160px;
             z-index: 100;
         }
+
         
-        .tiktok-container { top: 40%; }
-        .instagram-container { top: 65%; }
+        .tiktok-container {
+            top: 40%;
+        }
+
         
-        /* Button styles */
+        .instagram-container {
+            top: 65%;
+        }
+
         .check-btn {
             width: 100%;
             padding: 8px;
             background: transparent;
             border: 2px solid;
-            font-family: inherit;
+            font-family: 'Courier New', monospace;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
@@ -55,30 +58,31 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
         }
+
         
         .tiktok-btn {
-            border-color: var(--tiktok-color);
-            color: var(--tiktok-color);
+            border-color: #00a8ff;
+            color: #00a8ff;
             box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
         }
-        
+
         .tiktok-btn:hover {
-            background: var(--tiktok-color);
+            background: #00a8ff;
             color: #0d1b2a;
         }
+
         
         .instagram-btn {
-            border-color: var(--instagram-color);
-            color: var(--instagram-color);
+            border-color: #E1306C;
+            color: #E1306C;
             box-shadow: 0 0 10px rgba(225, 48, 108, 0.5);
         }
-        
+
         .instagram-btn:hover {
-            background: var(--instagram-color);
+            background: #E1306C;
             color: white;
         }
-        
-        /* Social tab styles */
+
         .social-tab {
             width: 100%;
             height: 200px;
@@ -86,56 +90,70 @@
             border-radius: 5px;
             overflow: hidden;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
-            background: #000;
+            background: black;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-family: inherit;
+            font-family: 'Courier New', monospace;
             text-align: center;
             padding: 0;
             box-sizing: border-box;
         }
+
         
-        .tiktok-tab { border-color: var(--tiktok-color); }
-        .instagram-tab { border-color: var(--instagram-color); }
+        .tiktok-tab {
+            border-color: #00a8ff;
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
+        }
+
         
+        .instagram-tab {
+            border-color: #E1306C;
+            box-shadow: 0 0 15px rgba(225, 48, 108, 0.7);
+        }
+
         .tab-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         
-        /* Video container styles */
-        .video-container {
+        #video-container {
             position: fixed;
+            top: 0px;
             right: 10px;
             width: 175px;
+            border: 3px solid blue;
             border-radius: 10px;
             overflow: hidden;
         }
         
-        #video-top-right {
-            top: 0;
-            border: 3px solid blue;
-        }
-        
         #video-middle-right {
-            top: 50%;
+            position: fixed;
+            top: 47%;
+            right: 10px;
             transform: translateY(-50%);
             border: 3px solid red;
+            border-radius: 10px;
+            width: 175px;
         }
         
         #video-bottom-right {
-            bottom: 0;
+            position: fixed;
+            bottom: 0px;
+            right: 10px;
+            width: 175px;
             border: 3px solid green;
+            border-radius: 10px;
         }
+
         
-        /* Button styles */
         .btn {
             background: rgba(0, 123, 255, 0.7);
             position: fixed;
-            bottom: 30px;
+            bottom: 30;
             color: green;
             border: none;
             padding: 10px 20px;
@@ -143,7 +161,7 @@
             border-radius: 50px;
             cursor: pointer;
             font-size: 18px;
-            transition: transform 0.1s;
+            transition: 0.1s;
             animation: pulse 3s infinite;
         }
         
@@ -151,13 +169,12 @@
             background: rgba(0, 86, 179, 0.9);
             transform: scale(1.05);
         }
-        
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
+            0% { transform: scale(1); }
             50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
-        
-        /* Footer styles */
+
         footer {
             position: fixed;
             bottom: 0;
@@ -166,71 +183,41 @@
             padding: 5px;
             background: rgba(0, 0, 0, 0.5);
         }
-        
-        /* Content styles */
-        .content {
-            padding: 20px;
-            margin-bottom: 50px;
-        }
     </style>
 </head>
 <body>
-    <!-- Video elements -->
-    <div id="video-middle-right" class="video-container">
-        <video width="100%" autoplay loop muted playsinline>
-            <source src="/imgvidaud/FDownloader.Net_13.mp4" type="video/mp4">
+    
+    <div id="video-middle-right">
+        <video width="100%" autoplay loop muted>
+            <source src="/imgvidaud/FDownloader.Net_13.mp4" type="audio/mpeg" />
         </video>
     </div>
 
-    <div id="video-top-right" class="video-container">
-        <video width="100%" autoplay loop muted playsinline>
-            <source src="/imgvidaud/March 03, 2025 at 11.22 PM.mp4" type="video/mp4">
+    <div id="video-container">
+        <video width="100%" autoplay loop muted>
+          <source src="/imgvidaud/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
         </video>
     </div>
     
-    <div id="video-bottom-right" class="video-container">
-        <video width="100%" autoplay loop muted playsinline>
-            <source src="/imgvidaud/FDownloader.Net 4.mp4" type="video/mp4">
+    <div id="video-bottom-right">
+        <video width="100%" autoplay loop muted>
+            <source src="/imgvidaud/FDownloader.Net 4.mp4" type="audio/mpeg" />
         </video>
     </div>
    
-    <!-- Social media sections -->
     <div class="social-container tiktok-container">
         <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
         <div class="social-tab tiktok-tab">
-            <img src="imgvidaud/TikTok 27 may 2025.png" alt="TikTok Profile" class="tab-image">
-        </div>
+            <img src="imgvidaud/TikTok 27 may 2025.png"  style="max-width: 100%; height: auto;">        </div>
     </div>
  
     <div class="social-container instagram-container">
         <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
         <div class="social-tab instagram-tab">
-            <img src="imgvidaud/Instagram 27 may 2025.png" alt="Instagram Profile" class="tab-image">
-        </div>
+            <img src="imgvidaud/Instagram 27 may 2025.png"  style="max-width: 100%; height: auto;">        </div>
     </div>
-
-    <!-- Main content -->
-    <div class="content">
-        <h1>Welcome</h1>
-        <p>Klik tombol di bawah untuk:</p>
-        <button class="btn" onclick="window.location.href='download.html'">Me? =</button>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <img src="imgvidaud/October 25, 2024 at 8.11 AM.png" alt="Footer Image">
-        <p>2025 Dibuat dengan ❤ oleh Kamu</p>
-    </footer>
 
     <script>
-        // Authentication check
-        const user = sessionStorage.getItem('loggedInUser');
-        if (user !== 'elvi') {
-            alert('Access denied! Kamu harus login dulu.');
-            window.location.href = 'index.html';
-        }
-
-        // Social media functions
         function openTikTok() {
             window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
         }
@@ -238,37 +225,33 @@
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
-
-        // Responsive adjustments
         function maintainAspectRatio() {
-            const content = document.querySelector('.verification-box');
-            if (!content) return;
-            
-            const aspectRatio = 16 / 9;
-            const windowRatio = window.innerWidth / window.innerHeight;
-            const scale = windowRatio > aspectRatio 
-                ? window.innerHeight / 900 
-                : window.innerWidth / 1600;
-            
+        const content = document.querySelector('.verification-box');
+        const aspectRatio = 16 / 9;
+        const windowRatio = window.innerWidth / window.innerHeight;
+        
+        if (windowRatio > aspectRatio) {
+            const scale = window.innerHeight / 900;
+            content.style.transform = `scale(${scale})`;
+        } else {
+            const scale = window.innerWidth / 1600;
             content.style.transform = `scale(${scale})`;
         }
-
-        // Event listeners
-        window.addEventListener('DOMContentLoaded', () => {
-            maintainAspectRatio();
-            // Preload important resources
-            const images = [
-                'imgvidaud/TikTok 27 may 2025.png',
-                'imgvidaud/Instagram 27 may 2025.png',
-                'imgvidaud/October 25, 2024 at 8.11 AM.png'
-            ];
-            images.forEach(img => {
-                const image = new Image();
-                image.src = img;
-            });
-        });
-        
-        window.addEventListener('resize', maintainAspectRatio);
+    }
+    window.addEventListener('resize', maintainAspectRatio);
+    maintainAspectRatio();
     </script>
+    
+    <div style="padding: 20px; margin-bottom: 50px;">
+        <h1>Welcome</h1>
+        <p>Klik tombol di bawah untuk:</p>
+        
+        <button class="btn" onclick="window.location.href='download.html'">Me? =</button>
+    </div>
+
+    <footer>
+    <img src="imgvidaud/October 25, 2024 at 8.11 AM.png">
+    <p> 2025 Dibuat dengan ❤ oleh Kamu</p>
+    </footer>
 </body>
 </html>
