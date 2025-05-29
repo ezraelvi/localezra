@@ -8,20 +8,41 @@
             window.location.href = 'index.html';
         }
     </script>
-    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>V Area</title>
     <link rel="icon" type="image/png" href="/imgvidaud/downloadicon.png">
     <style>
+        :root {
+            --neon-green: #0f0;
+            --bg-color: #000;
+            --scanline-opacity: 0.05;
+            --btn-width: min(250px, 80vw);
+            --base-font-size: clamp(1rem, 2vw, 1.2rem);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             margin: 0;
             padding: 0;
             font-family: 'Courier New', monospace;
-            background-color: #000;
-            color: #0f0;
+            background-color: var(--bg-color);
+            color: var(--neon-green);
             overflow-x: hidden;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: var(--base-font-size);
+            line-height: 1.5;
         }
+
         body::after {
             content: "";
             position: fixed;
@@ -33,35 +54,118 @@
                 to bottom,
                 transparent,
                 transparent 2px,
-                rgba(0, 255, 0, 0.05) 3px
+                rgba(0, 255, 0, var(--scanline-opacity)) 3px
             );
             pointer-events: none;
+            z-index: -1;
         }
+
         .center-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             text-align: center;
-            width: 75%;
+            width: min(90%, 800px);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 5px var(--neon-green);
+            font-size: clamp(1.5rem, 5vw, 2rem);
+        }
+
+        p {
+            margin-bottom: 2rem;
+        }
+
         .btn {
             background: transparent;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 12px 24px;
-            margin: 15px;
-            font-family: 'Courier New', monospace;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            padding: 0.75rem 1.5rem;
+            margin: 0.75rem;
+            font-family: inherit;
             cursor: pointer;
-            transition: 0.3s;
-            width: 250px;
+            transition: all 0.3s ease;
+            width: var(--btn-width);
             text-align: center;
             animation: pulse 2s infinite;
+            font-size: var(--base-font-size);
+            position: relative;
+            overflow: hidden;
         }
+
+        .btn:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent,
+                transparent,
+                transparent,
+                var(--neon-green),
+                transparent
+            );
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .btn:hover::after {
+            animation: shine 1.5s ease;
+        }
+
         @keyframes pulse {
-            0% { transform: scale(1); }
+            0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        }
+
+        @keyframes shine {
+            0% {
+                opacity: 0;
+                top: -50%;
+                left: -50%;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                opacity: 0;
+                top: 120%;
+                left: 120%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .btn {
+                animation: none;
+            }
+            
+            .btn:hover::after {
+                animation: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .center-content {
+                width: 95%;
+                padding: 1rem 0.5rem;
+            }
+            
+            .btn {
+                width: 90%;
+                margin: 0.5rem auto;
+            }
         }
     </style>
 </head>
@@ -70,43 +174,118 @@
         <h1>>> DOWNLOAD <<</h1>
         <p>Pilih yang ingin diview</p>
         
-        <button class="btn" onclick="window.open('https://lh3.googleusercontent.com/a/ACg8ocIV9DZoTVBQneTMcveh-asGdoyDxSFpWRZIpW7SycQEb6vTYQ8=s420-c-no', '_blank')">>_ Mau lihat ini? _<</button>
+        <button class="btn" onclick="window.open('https://lh3.googleusercontent.com/a/ACg8ocIV9DZoTVBQneTMcveh-asGdoyDxSFpWRZIpW7SycQEb6vTYQ8=s420-c-no', '_blank')" aria-label="View image in new tab">
+            >_ Mau lihat ini? _<
+        </button>
         
-        <button class="btn" onclick="window.location.href='elvi.html'">>_ Kembali ke Home _<</button>
+        <button class="btn" onclick="window.location.href='elvi.html'" aria-label="Return to home">
+            >_ Kembali ke Home _<
+        </button>
         
-        <button class="btn" id="downloadBtn">>_ Download File _<</button>
+        <button class="btn" id="downloadBtn" aria-label="Download file">
+            >_ Download File _<
+        </button>
     </div>
 
-<script>
-    function forceDownload(url, filename) {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename || '';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-
-    document.getElementById('downloadBtn').addEventListener('click', () => {
+    <script>
+        // Check authentication first
+        (function checkAuth() {
+            const user = sessionStorage.getItem('loggedInUser');
+            if (user !== 'elvi') {
+                alert('Access denied! Kamu harus login dulu.');
+                window.location.href = 'index.html';
+                return;
+            }
             
-        forceDownload('https://www.dropbox.com/scl/fi/o8h8m1qmxxv6qy75ql3ym/August-22-2024-at-6.16-AM.jpg?rlkey=eatp1yey3rubu5zi7hygm2aoq&st=w5awia66&dl=0', 'myfile.img');
-    });
+            // Load other scripts only if authenticated
+            initMainScripts();
+        })();
 
-    function maintainAspectRatio() {
-        const content = document.querySelector('.verification-box');
-        const aspectRatio = 16 / 9;
-        const windowRatio = window.innerWidth / window.innerHeight;
-        
-        if (windowRatio > aspectRatio) {
-            const scale = window.innerHeight / 900;
-            content.style.transform = `scale(${scale})`;
-        } else {
-            const scale = window.innerWidth / 1600;
-            content.style.transform = `scale(${scale})`;
+        function initMainScripts() {
+            // Optimized force download function
+            function forceDownload(url, filename) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename || '';
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        // Cleanup after a short delay
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            resolve();
+                        }, 100);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            // Download button with loading state
+            document.getElementById('downloadBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('downloadBtn');
+                const originalText = btn.textContent;
+                
+                try {
+                    btn.disabled = true;
+                    btn.textContent = 'Downloading...';
+                    
+                    await forceDownload(
+                        'https://www.dropbox.com/scl/fi/o8h8m1qmxxv6qy75ql3ym/August-22-2024-at-6.16-AM.jpg?rlkey=eatp1yey3rubu5zi7hygm2aoq&st=w5awia66&dl=0', 
+                        'myfile.img'
+                    );
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    alert('Download failed. Please try again.');
+                } finally {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            });
+
+            // Responsive scaling
+            function maintainAspectRatio() {
+                const content = document.querySelector('.center-content');
+                const aspectRatio = 16 / 9;
+                const windowRatio = window.innerWidth / window.innerHeight;
+                
+                if (windowRatio > aspectRatio) {
+                    const scale = Math.min(1, window.innerHeight / 900);
+                    content.style.transform = `scale(${scale})`;
+                } else {
+                    const scale = Math.min(1, window.innerWidth / 1600);
+                    content.style.transform = `scale(${scale})`;
+                }
+            }
+
+            // Debounced resize handler
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(maintainAspectRatio, 100);
+            });
+
+            // Initial setup
+            maintainAspectRatio();
+            
+            // Preload resources
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(() => {
+                    const links = [
+                        'https://lh3.googleusercontent.com/a/ACg8ocIV9DZoTVBQneTMcveh-asGdoyDxSFpWRZIpW7SycQEb6vTYQ8=s420-c-no',
+                        'https://www.dropbox.com/scl/fi/o8h8m1qmxxv6qy75ql3ym/August-22-2024-at-6.16-AM.jpg?rlkey=eatp1yey3rubu5zi7hygm2aoq&st=w5awia66&dl=0'
+                    ];
+                    
+                    links.forEach(url => {
+                        const img = new Image();
+                        img.src = url;
+                    });
+                });
+            }
         }
-    }
-    window.addEventListener('resize', maintainAspectRatio);
-    maintainAspectRatio();
-</script>
+    </script>
 </body>
 </html>
