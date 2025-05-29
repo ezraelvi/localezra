@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Verification Required</title>
+    <title>ID Verification</title>
     <link rel="icon" type="image/png" href="/imgvidaud/whoareyouicon.png">
     <style>
         :root {
@@ -250,7 +250,7 @@
 
     <div class="verification-box" style="display:none;">
         <h1 id="animated-title">IDENTITAS TAK DIKENAL</h1>
-        <p>1. SIAPA KAMU?</p>
+        <p>SIAPA KAMU?</p>
         <input type="text" id="answer" placeholder="Ketik jawaban..." autocomplete="off" />
         <button onclick="verifyIdentity()">SUBMIT</button>
     </div>
@@ -266,7 +266,6 @@
     </audio>
 
 <script>
-    // Audio Context dan Analyser
     const audio = document.getElementById('ambient-audio');
     const audioControl = document.getElementById('audio-control');
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -280,7 +279,6 @@
     const visualizer = document.getElementById('visualizer');
     const visualizerBars = [];
     
-    // Inisialisasi visualizer
     for (let i = 0; i < 64; i++) {
         const bar = document.createElement('div');
         bar.className = 'visualizer-bar';
@@ -288,7 +286,6 @@
         visualizerBars.push(bar);
     }
 
-    // Fullscreen toggle
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
     fullscreenToggle.addEventListener('click', toggleFullscreen);
     
@@ -346,7 +343,6 @@
         }
     });
 
-    // Matrix Effect
     const canvas = document.getElementById('matrix');
     const ctx = canvas.getContext('2d');
     
@@ -396,7 +392,6 @@
         }
     }
 
-    // Particle System
     const particleCanvas = document.getElementById('particle-canvas');
     const pCtx = particleCanvas.getContext('2d');
 
