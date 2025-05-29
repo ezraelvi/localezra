@@ -368,6 +368,114 @@
             grid-template-columns: 1fr;
         }
     }
+    /* Floating Code Editor Button */
+    .floating-code-btn {
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        background: var(--primary);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .floating-code-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Code Editor Panel */
+    .code-editor-panel {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        height: 100vh;
+        background: #1e1e2f;
+        z-index: 999;
+        transition: right 0.3s ease;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .code-editor-panel.active {
+        right: 0;
+    }
+    
+    .editor-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    
+    .editor-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+    
+    /* Adjust the editor styles for the panel */
+    .code-editor-panel .editor-container {
+        height: 100%;
+        background: #1e1e2f;
+    }
+    
+    .code-editor-panel .toolbar {
+        background: #2d2d44;
+    }
+    
+    .code-editor-panel .editor-area {
+        background: #1e1e2f;
+        color: #f8f9fa;
+    }
+    
+    .code-editor-panel .preview-frame {
+        background: white;
+    }
+    
+    .code-editor-panel .status-bar {
+        background: #2d2d44;
+    }
+    
+    .close-editor-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1001;
+    }
+    
+    @media (max-width: 768px) {
+        .code-editor-panel {
+            width: 100%;
+        }
+    }
 </style>
 </head>
 <body>
@@ -475,7 +583,62 @@
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
     </div>
+    <button class="floating-code-btn" id="codeEditorBtn">CODE</button>
 
+<div class="editor-overlay" id="editorOverlay"></div>
+
+<div class="code-editor-panel" id="codeEditorPanel">
+    <button class="close-editor-btn" id="closeEditorBtn">
+        <i class="fas fa-times"></i>
+    </button>
+    <div class="editor-container">
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <span class="toolbar-label">File</span>
+                <button class="toolbar-btn" id="newBtn"><i class="fas fa-file"></i> New</button>
+                <button class="toolbar-btn" id="saveBtn"><i class="fas fa-save"></i> Save</button>
+                <button class="toolbar-btn" id="loadBtn"><i class="fas fa-folder-open"></i> Open</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <span class="toolbar-label">Edit</span>
+                <button class="toolbar-btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
+                <button class="toolbar-btn" id="redoBtn"><i class="fas fa-redo"></i> Redo</button>
+                <button class="toolbar-btn" id="findBtn"><i class="fas fa-search"></i> Find</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <span class="toolbar-label">Format</span>
+                <select class="toolbar-btn" id="headingSelect">
+                    <option value="">Heading</option>
+                    <option value="<h1>">Heading 1</option>
+                    <option value="<h2>">Heading 2</option>
+                    <option value="<h3>">Heading 3</option>
+                </select>
+                <button class="toolbar-btn" id="boldBtn"><i class="fas fa-bold"></i></button>
+                <button class="toolbar-btn" id="italicBtn"><i class="fas fa-italic"></i></button>
+                <button class="toolbar-btn" id="linkBtn"><i class="fas fa-link"></i></button>
+            </div>
+            
+            <div class="toolbar-group">
+                <span class="toolbar-label">Insert</span>
+                <button class="toolbar-btn" id="imageBtn"><i class="fas fa-image"></i> Image</button>
+                <button class="toolbar-btn" id="tableBtn"><i class="fas fa-table"></i> Table</button>
+                <button class="toolbar-btn" id="listBtn"><i class="fas fa-list-ul"></i> List</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="editor-wrapper">
+                <div class="editor-header">
+                    <span>HTML Editor</span>
+                    <div>
+                        <button class="action-btn btn-run" id="runBtn">
+                            <i class="fas fa-play"></i> Run
+                        </button>
+                    </div>
+                </div>
+                <textarea id="editor" class="editor-area" spellcheck="false"><!DOCTYPE html>
 <script>
     // 3D Earth Implementation
     let scene, camera, renderer, earth, controls;
@@ -696,8 +859,8 @@
                     locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Unable to retrieve location. Using default.";
                     
                     // Fallback to a default location (Jakarta)
-                    const defaultLat = 2.6449927;
-                    const defaultLon = 98.0165205;
+                    const defaultLat = -6.2088;
+                    const defaultLon = 106.8456;
                     initMap(defaultLat, defaultLon);
                 },
                 { 
@@ -710,8 +873,8 @@
             locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Geolocation is not supported by this browser.";
             
             // Fallback to a default location (Jakarta)
-            const defaultLat = 2.6449927;
-            const defaultLon = 98.0165205;
+            const defaultLat = -6.2088;
+            const defaultLon = 106.8456;
             initMap(defaultLat, defaultLon);
         }
     }
@@ -748,9 +911,292 @@
             supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
         }
     });
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        sessionStorage.removeItem('loggedInUser');
-        window.location.href = 'index.html';
+</script>
+
+<script>
+    // Code Editor Panel Toggle
+    const codeEditorBtn = document.getElementById('codeEditorBtn');
+    const codeEditorPanel = document.getElementById('codeEditorPanel');
+    const editorOverlay = document.getElementById('editorOverlay');
+    const closeEditorBtn = document.getElementById('closeEditorBtn');
+    
+    codeEditorBtn.addEventListener('click', function() {
+        codeEditorPanel.classList.add('active');
+        editorOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+    
+    closeEditorBtn.addEventListener('click', closeEditor);
+    editorOverlay.addEventListener('click', closeEditor);
+    
+    function closeEditor() {
+        codeEditorPanel.classList.remove('active');
+        editorOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    // HTML Editor Pro Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
+        const runBtn = document.getElementById('runBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const loadBtn = document.getElementById('loadBtn');
+        const newBtn = document.getElementById('newBtn');
+        const resizeHandle = document.getElementById('resizeHandle');
+        const tabSizeSelector = document.getElementById('tabSize');
+        
+        // Formatting buttons
+        const boldBtn = document.getElementById('boldBtn');
+        const italicBtn = document.getElementById('italicBtn');
+        const linkBtn = document.getElementById('linkBtn');
+        const imageBtn = document.getElementById('imageBtn');
+        const tableBtn = document.getElementById('tableBtn');
+        const listBtn = document.getElementById('listBtn');
+        const headingSelect = document.getElementById('headingSelect');
+        
+        // Status bar elements
+        const lineNumber = document.getElementById('lineNumber');
+        const colNumber = document.getElementById('colNumber');
+        
+        // Initial render
+        updatePreview();
+        
+        // Run button click handler
+        runBtn.addEventListener('click', updatePreview);
+        
+        // Clear button click handler
+        clearBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear the editor?')) {
+                editor.value = '';
+                updatePreview();
+            }
+        });
+        
+        // New button click handler
+        newBtn.addEventListener('click', function() {
+            if (editor.value && !confirm('Current content will be lost. Continue?')) {
+                return;
+            }
+            editor.value = `<!DOCTYPE html>
+<html>
+<head>
+    <title>New Document</title>
+</head>
+<body>
+    <h1>New Document</h1>
+    <p>Start editing here...</p>
+</body>
+</html>`;
+            updatePreview();
+        });
+        
+        // Save button click handler
+        saveBtn.addEventListener('click', function() {
+            const blob = new Blob([editor.value], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Load button click handler
+        loadBtn.addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.html,.htm,.txt';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function() {
+                    editor.value = reader.result;
+                    updatePreview();
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        });
+        
+        // Formatting buttons
+        boldBtn.addEventListener('click', function() {
+            insertAtCursor('<strong>', '</strong>');
+        });
+        
+        italicBtn.addEventListener('click', function() {
+            insertAtCursor('<em>', '</em>');
+        });
+        
+        linkBtn.addEventListener('click', function() {
+            const url = prompt('Enter URL:', 'https://');
+            if (url) {
+                insertAtCursor(`<a href="${url}">`, '</a>');
+            }
+        });
+        
+        imageBtn.addEventListener('click', function() {
+            const url = prompt('Enter image URL:', 'https://');
+            if (url) {
+                insertAtCursor(`<img src="${url}" alt="Image">`, '');
+            }
+        });
+        
+        tableBtn.addEventListener('click', function() {
+            const rows = prompt('Number of rows:', '3');
+            const cols = prompt('Number of columns:', '3');
+            
+            if (rows && cols) {
+                let tableHtml = '<table border="1">\n';
+                for (let i = 0; i < parseInt(rows); i++) {
+                    tableHtml += '  <tr>\n';
+                    for (let j = 0; j < parseInt(cols); j++) {
+                        tableHtml += '    <td>Cell</td>\n';
+                    }
+                    tableHtml += '  </tr>\n';
+                }
+                tableHtml += '</table>';
+                
+                insertAtCursor(tableHtml, '');
+            }
+        });
+        
+        listBtn.addEventListener('click', function() {
+            const type = prompt('List type (ul/ol):', 'ul');
+            const items = prompt('Number of items:', '3');
+            
+            if (type && items) {
+                let listHtml = `<${type}>\n`;
+                for (let i = 0; i < parseInt(items); i++) {
+                    listHtml += `  <li>Item ${i+1}</li>\n`;
+                }
+                listHtml += `</${type}>`;
+                
+                insertAtCursor(listHtml, '');
+            }
+        });
+        
+        headingSelect.addEventListener('change', function() {
+            if (this.value) {
+                insertAtCursor(this.value, this.value.replace('<', '</'));
+                this.value = '';
+            }
+        });
+        
+        // Tab size selector
+        tabSizeSelector.addEventListener('change', function() {
+            editor.style.tabSize = this.value;
+        });
+        
+        // Editor cursor position tracking
+        editor.addEventListener('keyup', updateCursorPosition);
+        editor.addEventListener('click', updateCursorPosition);
+        editor.addEventListener('scroll', updateCursorPosition);
+        
+        // Resize handle functionality
+        let isResizing = false;
+        resizeHandle.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            document.body.style.cursor = window.innerWidth > 768 ? 'col-resize' : 'row-resize';
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+        });
+        
+        function resize(e) {
+            if (!isResizing) return;
+            
+            const editorWrapper = document.querySelector('.editor-wrapper');
+            const previewWrapper = document.querySelector('.preview-wrapper');
+            
+            if (window.innerWidth > 768) {
+                // Horizontal resize
+                const totalWidth = editorWrapper.offsetWidth + previewWrapper.offsetWidth;
+                const editorWidth = e.clientX - editorWrapper.getBoundingClientRect().left;
+                const editorPercent = (editorWidth / totalWidth) * 100;
+                
+                editorWrapper.style.flex = `0 0 ${editorPercent}%`;
+                previewWrapper.style.flex = `0 0 ${100 - editorPercent}%`;
+            } else {
+                // Vertical resize
+                const totalHeight = editorWrapper.offsetHeight + previewWrapper.offsetHeight;
+                const editorHeight = e.clientY - editorWrapper.getBoundingClientRect().top;
+                const editorPercent = (editorHeight / totalHeight) * 100;
+                
+                editorWrapper.style.flex = `0 0 ${editorPercent}%`;
+                previewWrapper.style.flex = `0 0 ${100 - editorPercent}%`;
+            }
+        }
+        
+        function stopResize() {
+            isResizing = false;
+            document.body.style.cursor = '';
+            document.removeEventListener('mousemove', resize);
+        }
+        
+        // Helper function to insert text at cursor
+        function insertAtCursor(openTag, closeTag) {
+            const startPos = editor.selectionStart;
+            const endPos = editor.selectionEnd;
+            const selectedText = editor.value.substring(startPos, endPos);
+            const beforeText = editor.value.substring(0, startPos);
+            const afterText = editor.value.substring(endPos);
+            
+            editor.value = beforeText + openTag + selectedText + closeTag + afterText;
+            
+            // Set cursor position
+            const newCursorPos = startPos + openTag.length + selectedText.length + closeTag.length;
+            editor.selectionStart = newCursorPos;
+            editor.selectionEnd = newCursorPos;
+            editor.focus();
+            
+            updatePreview();
+        }
+        
+        // Update preview frame
+        function updatePreview() {
+            const html = editor.value;
+            preview.srcdoc = html;
+        }
+        
+        // Update cursor position in status bar
+        function updateCursorPosition() {
+            const cursorPos = editor.selectionStart;
+            const textUpToCursor = editor.value.substring(0, cursorPos);
+            const lineNum = textUpToCursor.split('\n').length;
+            const colNum = cursorPos - textUpToCursor.lastIndexOf('\n') - 1;
+            
+            lineNumber.textContent = lineNum;
+            colNumber.textContent = colNum;
+        }
+        
+        // Add tab key support
+        editor.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const tabSize = parseInt(tabSizeSelector.value);
+                const tab = ' '.repeat(tabSize);
+                
+                this.value = this.value.substring(0, start) + tab + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + tab.length;
+            }
+        });
+        
+        // Auto-update preview when typing (with debounce)
+        let previewTimeout;
+        editor.addEventListener('input', function() {
+            clearTimeout(previewTimeout);
+            previewTimeout = setTimeout(updatePreview, 500);
+            updateCursorPosition();
+        });
     });
 </script>
 </body>
