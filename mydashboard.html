@@ -3,18 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hacker Attack Map Dashboard</title>
+<title>Dashboard</title>
 <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
-
-<!-- Three.js for 3D Earth -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
-
-<!-- Leaflet CSS and JS for map -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -336,7 +330,6 @@
         box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
     }
     
-    /* Attack line styles */
     .attack-line {
         position: absolute;
         background: linear-gradient(90deg, var(--hacker-red), var(--hacker-purple));
@@ -346,29 +339,6 @@
         border-radius: 2px;
     }
     
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        header {
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1rem;
-        }
-        
-        .header-controls {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        main {
-            padding: 1rem;
-            grid-template-columns: 1fr;
-        }
-        
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    /* Floating Code Editor Button */
     .floating-code-btn {
         position: fixed;
         bottom: 30px;
@@ -394,7 +364,6 @@
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
     
-    /* Code Editor Panel */
     .code-editor-panel {
         position: fixed;
         top: 0;
@@ -431,27 +400,101 @@
         pointer-events: all;
     }
     
-    /* Adjust the editor styles for the panel */
-    .code-editor-panel .editor-container {
+    .editor-container {
+        display: flex;
+        flex-direction: column;
         height: 100%;
-        background: #1e1e2f;
     }
     
-    .code-editor-panel .toolbar {
+    .toolbar {
         background: #2d2d44;
+        padding: 10px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
     }
     
-    .code-editor-panel .editor-area {
+    .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-right: 15px;
+    }
+    
+    .toolbar-label {
+        color: var(--light);
+        margin-right: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .toolbar-btn {
+        background: rgba(108, 92, 231, 0.2);
+        color: white;
+        border: 1px solid var(--primary);
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .toolbar-btn:hover {
+        background: var(--primary);
+    }
+    
+    .main-content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+    
+    .editor-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    
+    .editor-header {
+        background: #2d2d44;
+        padding: 8px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .editor-area {
+        flex: 1;
         background: #1e1e2f;
         color: #f8f9fa;
+        border: none;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        resize: none;
+        outline: none;
+        tab-size: 4;
     }
     
-    .code-editor-panel .preview-frame {
+    .preview-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid #444;
+    }
+    
+    .preview-frame {
+        flex: 1;
+        border: none;
         background: white;
     }
     
-    .code-editor-panel .status-bar {
+    .status-bar {
         background: #2d2d44;
+        padding: 5px 10px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
     }
     
     .close-editor-btn {
@@ -472,17 +515,43 @@
     }
     
     @media (max-width: 768px) {
+        header {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .header-controls {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        main {
+            padding: 1rem;
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
         .code-editor-panel {
             width: 100%;
+        }
+        
+        .main-content {
+            flex-direction: column;
+        }
+        
+        .preview-wrapper {
+            border-left: none;
+            border-top: 1px solid #444;
         }
     }
 </style>
 </head>
 <body>
-    <!-- 3D Earth Container -->
     <div id="earth-container"></div>
-    
-    <!-- Attack lines will be added here by JavaScript -->
     
     <div id="content">
         <header>
@@ -583,621 +652,584 @@
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
     </div>
-    <button class="floating-code-btn" id="codeEditorBtn">CODE</button>
 
-<div class="editor-overlay" id="editorOverlay"></div>
-
-<div class="code-editor-panel" id="codeEditorPanel">
-    <button class="close-editor-btn" id="closeEditorBtn">
-        <i class="fas fa-times"></i>
+    <button class="floating-code-btn" id="codeEditorBtn">
+        <i class="fas fa-code"></i>
     </button>
-    <div class="editor-container">
-        <div class="toolbar">
-            <div class="toolbar-group">
-                <span class="toolbar-label">File</span>
-                <button class="toolbar-btn" id="newBtn"><i class="fas fa-file"></i> New</button>
-                <button class="toolbar-btn" id="saveBtn"><i class="fas fa-save"></i> Save</button>
-                <button class="toolbar-btn" id="loadBtn"><i class="fas fa-folder-open"></i> Open</button>
-            </div>
-            
-            <div class="toolbar-group">
-                <span class="toolbar-label">Edit</span>
-                <button class="toolbar-btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
-                <button class="toolbar-btn" id="redoBtn"><i class="fas fa-redo"></i> Redo</button>
-                <button class="toolbar-btn" id="findBtn"><i class="fas fa-search"></i> Find</button>
-            </div>
-            
-            <div class="toolbar-group">
-                <span class="toolbar-label">Format</span>
-                <select class="toolbar-btn" id="headingSelect">
-                    <option value="">Heading</option>
-                    <option value="<h1>">Heading 1</option>
-                    <option value="<h2>">Heading 2</option>
-                    <option value="<h3>">Heading 3</option>
-                </select>
-                <button class="toolbar-btn" id="boldBtn"><i class="fas fa-bold"></i></button>
-                <button class="toolbar-btn" id="italicBtn"><i class="fas fa-italic"></i></button>
-                <button class="toolbar-btn" id="linkBtn"><i class="fas fa-link"></i></button>
-            </div>
-            
-            <div class="toolbar-group">
-                <span class="toolbar-label">Insert</span>
-                <button class="toolbar-btn" id="imageBtn"><i class="fas fa-image"></i> Image</button>
-                <button class="toolbar-btn" id="tableBtn"><i class="fas fa-table"></i> Table</button>
-                <button class="toolbar-btn" id="listBtn"><i class="fas fa-list-ul"></i> List</button>
-            </div>
-        </div>
-        
-        <div class="main-content">
-            <div class="editor-wrapper">
-                <div class="editor-header">
-                    <span>HTML Editor</span>
-                    <div>
-                        <button class="action-btn btn-run" id="runBtn">
-                            <i class="fas fa-play"></i> Run
-                        </button>
-                    </div>
-                </div>
-                <textarea id="editor" class="editor-area" spellcheck="false"><!DOCTYPE html>
-<script>
-    // 3D Earth Implementation
-    let scene, camera, renderer, earth, controls;
-    let myLatitude = 0;
-    let myLongitude = 0;
-    
-    function init3DEarth() {
-        // Scene setup
-        scene = new THREE.Scene();
-        
-        // Camera setup
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 2.5;
-        
-        // Renderer setup
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.getElementById('earth-container').appendChild(renderer.domElement);
-        
-        // Controls for rotating the Earth
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableZoom = false;
-        controls.enablePan = false;
-        controls.rotateSpeed = 0.5;
-        controls.minDistance = 2;
-        controls.maxDistance = 2;
-        
-        // Earth geometry
-        const geometry = new THREE.SphereGeometry(1, 64, 64);
-        
-        // Earth texture
-        const textureLoader = new THREE.TextureLoader();
-        const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
-        const bumpMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_normal_2048.jpg');
-        const specularMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg');
-        
-        // Earth material
-        const material = new THREE.MeshPhongMaterial({
-            map: earthTexture,
-            bumpMap: bumpMap,
-            bumpScale: 0.05,
-            specularMap: specularMap,
-            specular: new THREE.Color('grey'),
-            shininess: 5
-        });
-        
-        // Create Earth mesh
-        earth = new THREE.Mesh(geometry, material);
-        scene.add(earth);
-        
-        // Add ambient light
-        const ambientLight = new THREE.AmbientLight(0x333333);
-        scene.add(ambientLight);
-        
-        // Add directional light (sun)
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 3, 5);
-        scene.add(directionalLight);
-        
-        // Add stars
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsMaterial = new THREE.PointsMaterial({
-            color: 0xffffff,
-            size: 0.05,
-            transparent: true
-        });
-        
-        const starsVertices = [];
-        for (let i = 0; i < 10000; i++) {
-            const x = (Math.random() - 0.5) * 2000;
-            const y = (Math.random() - 0.5) * 2000;
-            const z = (Math.random() - 0.5) * 2000;
-            starsVertices.push(x, y, z);
-        }
-        
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
-        
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            earth.rotation.y += 0.0005;
-            controls.update();
-            renderer.render(scene, camera);
-            
-            // Update stats randomly for demo
-            updateStats();
-        }
-        
-        animate();
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    }
-    
-    // Update stats randomly for demo
-    function updateStats() {
-        const attackCount = document.getElementById('attackCount');
-        const blockedCount = document.getElementById('blockedCount');
-        const severity = document.getElementById('severity');
-        const responseTime = document.getElementById('responseTime');
-        
-        // Random fluctuations for demo purposes
-        attackCount.textContent = Math.floor(20 + Math.random() * 10);
-        blockedCount.textContent = Math.floor(140 + Math.random() * 20);
-        severity.textContent = (3.5 + Math.random() * 1).toFixed(1);
-        responseTime.textContent = (0.1 + Math.random() * 0.2).toFixed(1) + 's';
-    }
-    
-    // Convert latitude/longitude to 3D vector
-    function latLongToVector3(lat, lon, radius) {
-        const phi = (90 - lat) * (Math.PI / 180);
-        const theta = (lon + 180) * (Math.PI / 180);
-        
-        return new THREE.Vector3(
-            -radius * Math.sin(phi) * Math.cos(theta),
-            radius * Math.cos(phi),
-            radius * Math.sin(phi) * Math.sin(theta)
-        );
-    }
-    
-    // Initialize 3D Earth
-    init3DEarth();
-    
-    // Geolocation with Google Maps
-    const mapDiv = document.getElementById('map');
-    const locationInfo = document.getElementById('locationInfo');
-    let map, marker;
-    
-    function initMap(lat, lon) {
-        if (!map) {
-            map = L.map('map').setView([lat, lon], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-            
-            // Custom red marker
-            const redIcon = new L.Icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            });
-            
-            marker = L.marker([lat, lon], {icon: redIcon}).addTo(map);
-            
-            // Add circle to show accuracy
-            L.circle([lat, lon], {
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.2,
-                radius: 100 // Default radius, will be updated
-            }).addTo(map);
-            
-            // Reverse geocode to get address
-            reverseGeocode(lat, lon);
-        } else {
-            map.setView([lat, lon], 13);
-            marker.setLatLng([lat, lon]);
-        }
-    }
-    
-    function reverseGeocode(lat, lon) {
-        // Using Nominatim (OpenStreetMap's geocoding service)
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-            .then(response => response.json())
-            .then(data => {
-                let address = "<i class='fas fa-map-pin'></i> Your location: ";
-                
-                if (data.address) {
-                    if (data.address.road) address += data.address.road + ', ';
-                    if (data.address.city) address += data.address.city + ', ';
-                    if (data.address.state) address += data.address.state + ', ';
-                    if (data.address.country) address += data.address.country;
-                    
-                    // Remove trailing comma if exists
-                    address = address.replace(/, $/, '');
-                } else {
-                    address += `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-                }
-                
-                locationInfo.innerHTML = address;
-                marker.bindPopup(address.replace("<i class='fas fa-map-pin'></i> ", "")).openPopup();
-                
-                // Update your location
-                myLatitude = lat;
-                myLongitude = lon;
-            })
-            .catch(error => {
-                console.error('Geocoding error:', error);
-                locationInfo.innerHTML = "<i class='fas fa-map-marker-alt'></i> Coordinates: " + `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-                marker.bindPopup(`Your location`).openPopup();
-                
-                // Update your location
-                myLatitude = lat;
-                myLongitude = lon;
-            });
-    }
-    
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                position => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    initMap(lat, lon);
-                },
-                error => {
-                    console.error('Geolocation error:', error);
-                    locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Unable to retrieve location. Using default.";
-                    
-                    // Fallback to a default location (Jakarta)
-                    const defaultLat = -6.2088;
-                    const defaultLon = 106.8456;
-                    initMap(defaultLat, defaultLon);
-                },
-                { 
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                           }
-            );
-        } else {
-            locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Geolocation is not supported by this browser.";
-            
-            // Fallback to a default location (Jakarta)
-            const defaultLat = -6.2088;
-            const defaultLon = 106.8456;
-            initMap(defaultLat, defaultLon);
-        }
-    }
-    
-    getLocation();
-    
-    const supportForm = document.getElementById('supportForm');
-    const supportMsg = document.getElementById('supportMsg');
-    
-    supportForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const text = document.getElementById('supportText').value.trim();
-        
-        if (text.length === 0) {
-            supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
-            return;
-        }
-        
-        supportMsg.textContent = "Mengirim pesan...";
-        
-        try {
-            await fetch('https://script.google.com/macros/s/AKfycbxL7jegUbHu29NbLReafEdc4ZNiY8kYeN3P0I3XqUfHbSpRWhwuO1WXoO1-PfyPDUuX/exec', {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `message=${encodeURIComponent(text)}`
-            });
-            supportMsg.textContent = "Pesan terkirim";
-            supportForm.reset();
-        } catch (error) {
-            console.error('Error:', error);
-            supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
-        }
-    });
-</script>
 
-<script>
-    // Code Editor Panel Toggle
-    const codeEditorBtn = document.getElementById('codeEditorBtn');
-    const codeEditorPanel = document.getElementById('codeEditorPanel');
-    const editorOverlay = document.getElementById('editorOverlay');
-    const closeEditorBtn = document.getElementById('closeEditorBtn');
-    
-    codeEditorBtn.addEventListener('click', function() {
-        codeEditorPanel.classList.add('active');
-        editorOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    });
-    
-    closeEditorBtn.addEventListener('click', closeEditor);
-    editorOverlay.addEventListener('click', closeEditor);
-    
-    function closeEditor() {
-        codeEditorPanel.classList.remove('active');
-        editorOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    
-    // HTML Editor Pro Functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const editor = document.getElementById('editor');
-        const preview = document.getElementById('preview');
-        const runBtn = document.getElementById('runBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const loadBtn = document.getElementById('loadBtn');
-        const newBtn = document.getElementById('newBtn');
-        const resizeHandle = document.getElementById('resizeHandle');
-        const tabSizeSelector = document.getElementById('tabSize');
+    <div class="editor-overlay" id="editorOverlay"></div>
+
+    <div class="code-editor-panel" id="codeEditorPanel">
+        <button class="close-editor-btn" id="closeEditorBtn">
+            <i class="fas fa-times"></i>
+        </button>
         
-        // Formatting buttons
-        const boldBtn = document.getElementById('boldBtn');
-        const italicBtn = document.getElementById('italicBtn');
-        const linkBtn = document.getElementById('linkBtn');
-        const imageBtn = document.getElementById('imageBtn');
-        const tableBtn = document.getElementById('tableBtn');
-        const listBtn = document.getElementById('listBtn');
-        const headingSelect = document.getElementById('headingSelect');
-        
-        // Status bar elements
-        const lineNumber = document.getElementById('lineNumber');
-        const colNumber = document.getElementById('colNumber');
-        
-        // Initial render
-        updatePreview();
-        
-        // Run button click handler
-        runBtn.addEventListener('click', updatePreview);
-        
-        // Clear button click handler
-        clearBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to clear the editor?')) {
-                editor.value = '';
-                updatePreview();
-            }
-        });
-        
-        // New button click handler
-        newBtn.addEventListener('click', function() {
-            if (editor.value && !confirm('Current content will be lost. Continue?')) {
-                return;
-            }
-            editor.value = `<!DOCTYPE html>
+        <div class="editor-container">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <span class="toolbar-label">File</span>
+                    <button class="toolbar-btn" id="newBtn"><i class="fas fa-file"></i> New</button>
+                    <button class="toolbar-btn" id="saveBtn"><i class="fas fa-save"></i> Save</button>
+                    <button class="toolbar-btn" id="loadBtn"><i class="fas fa-folder-open"></i> Open</button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Edit</span>
+                    <button class="toolbar-btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
+                    <button class="toolbar-btn" id="redoBtn"><i class="fas fa-redo"></i> Redo</button>
+                    <button class="toolbar-btn" id="findBtn"><i class="fas fa-search"></i> Find</button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Format</span>
+                    <select class="toolbar-btn" id="headingSelect">
+                        <option value="">Heading</option>
+                        <option value="<h1>">Heading 1</option>
+                        <option value="<h2>">Heading 2</option>
+                        <option value="<h3>">Heading 3</option>
+                    </select>
+                    <button class="toolbar-btn" id="boldBtn"><i class="fas fa-bold"></i></button>
+                    <button class="toolbar-btn" id="italicBtn"><i class="fas fa-italic"></i></button>
+                    <button class="toolbar-btn" id="linkBtn"><i class="fas fa-link"></i></button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Insert</span>
+                    <button class="toolbar-btn" id="imageBtn"><i class="fas fa-image"></i> Image</button>
+                    <button class="toolbar-btn" id="tableBtn"><i class="fas fa-table"></i> Table</button>
+                    <button class="toolbar-btn" id="listBtn"><i class="fas fa-list-ul"></i> List</button>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <div class="editor-wrapper">
+                    <div class="editor-header">
+                        <span>HTML Editor</span>
+                        <div>
+                            <button class="toolbar-btn btn-run" id="runBtn">
+                                <i class="fas fa-play"></i> Run
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="editor" class="editor-area" spellcheck="false"><!DOCTYPE html>
 <html>
 <head>
     <title>New Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #6c5ce7;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to HTML Editor</h1>
+    <p>Start editing here...</p>
+</body>
+</html></textarea>
+                </div>
+                
+                <div class="preview-wrapper">
+                    <div class="editor-header">
+                        <span>Preview</span>
+                    </div>
+                    <iframe id="preview" class="preview-frame"></iframe>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <div>
+                    <span>Line: <span id="lineNumber">1</span></span>
+                    <span>Col: <span id="colNumber">1</span></span>
+                </div>
+                <div>
+                    <span>Tab Size: </span>
+                    <select id="tabSize">
+                        <option value="2">2</option>
+                        <option value="4" selected>4</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, earth, controls;
+        let myLatitude = 0;
+        let myLongitude = 0;
+        
+        function init3DEarth
+            scene = new THREE.Scene();
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 2.5;
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('earth-container').appendChild(renderer.domElement);
+            
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableZoom = false;
+            controls.enablePan = false;
+            controls.rotateSpeed = 0.5;
+            controls.minDistance = 2;
+            controls.maxDistance = 2;
+            
+            const geometry = new THREE.SphereGeometry(1, 64, 64);
+            
+            const textureLoader = new THREE.TextureLoader();
+            const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
+            const bumpMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_normal_2048.jpg');
+            const specularMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg');
+            
+            const material = new THREE.MeshPhongMaterial({
+                map: earthTexture,
+                bumpMap: bumpMap,
+                bumpScale: 0.05,
+                specularMap: specularMap,
+                specular: new THREE.Color('grey'),
+                shininess: 5
+            });
+            
+            earth = new THREE.Mesh(geometry, material);
+            scene.add(earth);
+            
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 3, 5);
+            scene.add(directionalLight);
+            
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.05,
+                transparent: true
+            });
+            
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starsVertices.push(x, y, z);
+            }
+            
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const stars = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(stars);
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                earth.rotation.y += 0.0005;
+                controls.update();
+                renderer.render(scene, camera);
+                
+                updateStats();
+            }
+            
+            animate();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+        
+        function updateStats() {
+            const attackCount = document.getElementById('attackCount');
+            const blockedCount = document.getElementById('blockedCount');
+            const severity = document.getElementById('severity');
+            const responseTime = document.getElementById('responseTime');
+            
+            attackCount.textContent = Math.floor(20 + Math.random() * 10);
+            blockedCount.textContent = Math.floor(140 + Math.random() * 20);
+            severity.textContent = (3.5 + Math.random() * 1).toFixed(1);
+            responseTime.textContent = (0.1 + Math.random() * 0.2).toFixed(1) + 's';
+        }
+        
+        function latLongToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            
+            return new THREE.Vector3(
+                -radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+        
+        init3DEarth();
+        
+        const mapDiv = document.getElementById('map');
+        const locationInfo = document.getElementById('locationInfo');
+        let map, marker;
+        
+        function initMap(lat, lon) {
+            if (!map) {
+                map = L.map('map').setView([lat, lon], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+                
+                const redIcon = new L.Icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
+                
+                marker = L.marker([lat, lon], {icon: redIcon}).addTo(map);
+                
+                L.circle([lat, lon], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.2,
+                    radius: 100
+                }).addTo(map);
+                
+                reverseGeocode(lat, lon);
+            } else {
+                map.setView([lat, lon], 13);
+                marker.setLatLng([lat, lon]);
+            }
+        }
+        
+        function reverseGeocode(lat, lon) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(response => response.json())
+                .then(data => {
+                    let address = "<i class='fas fa-map-pin'></i> Your location: ";
+                    
+                    if (data.address) {
+                        if (data.address.road) address += data.address.road + ', ';
+                        if (data.address.city) address += data.address.city + ', ';
+                        if (data.address.state) address += data.address.state + ', ';
+                        if (data.address.country) address += data.address.country;
+                        
+                        address = address.replace(/, $/, '');
+                    } else {
+                        address += `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                    }
+                    
+                    locationInfo.innerHTML = address;
+                    marker.bindPopup(address.replace("<i class='fas fa-map-pin'></i> ", "")).openPopup();
+                    
+                    myLatitude = lat;
+                    myLongitude = lon;
+                })
+                .catch(error => {
+                    console.error('Geocoding error:', error);
+                    locationInfo.innerHTML = "<i class='fas fa-map-marker-alt'></i> Coordinates: " + `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                    marker.bindPopup(`Your location`).openPopup();
+                    
+                    myLatitude = lat;
+                    myLongitude = lon;
+                });
+        }
+        
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        initMap(lat, lon);
+                    },
+                    error => {
+                        console.error('Geolocation error:', error);
+                        locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Unable to retrieve location. Using default.";
+                        
+                        const defaultLat = 2.6928351;
+                        const defaultLon = 97.8503951;
+                        initMap(defaultLat, defaultLon);
+                    },
+                    { 
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Geolocation is not supported by this browser.";
+                
+                const defaultLat = 2.6928351;
+                const defaultLon = 97.8503951;
+                initMap(defaultLat, defaultLon);
+            }
+        }
+        
+        getLocation();
+        
+        const supportForm = document.getElementById('supportForm');
+        const supportMsg = document.getElementById('supportMsg');
+        
+        supportForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const text = document.getElementById('supportText').value.trim();
+            
+            if (text.length === 0) {
+                supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
+                return;
+            }
+            
+            supportMsg.textContent = "Mengirim pesan...";
+            
+            try {
+                await fetch('https://script.google.com/macros/s/AKfycbxL7jegUbHu29NbLReafEdc4ZNiY8kYeN3P0I3XqUfHbSpRWhwuO1WXoO1-PfyPDUuX/exec', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `message=${encodeURIComponent(text)}`
+                });
+                supportMsg.textContent = "Pesan terkirim";
+                supportForm.reset();
+            } catch (error) {
+                console.error('Error:', error);
+                supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
+            }
+        });
+        
+        const codeEditorBtn = document.getElementById('codeEditorBtn');
+        const codeEditorPanel = document.getElementById('codeEditorPanel');
+        const editorOverlay = document.getElementById('editorOverlay');
+        const closeEditorBtn = document.getElementById('closeEditorBtn');
+        
+        codeEditorBtn.addEventListener('click', function() {
+            codeEditorPanel.classList.add('active');
+            editorOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        
+        closeEditorBtn.addEventListener('click', closeEditor);
+        editorOverlay.addEventListener('click', closeEditor);
+        
+        function closeEditor() {
+            codeEditorPanel.classList.remove('active');
+            editorOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('editor');
+            const preview = document.getElementById('preview');
+            const runBtn = document.getElementById('runBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const loadBtn = document.getElementById('loadBtn');
+            const newBtn = document.getElementById('newBtn');
+            const tabSizeSelector = document.getElementById('tabSize');
+            
+            const boldBtn = document.getElementById('boldBtn');
+            const italicBtn = document.getElementById('italicBtn');
+            const linkBtn = document.getElementById('linkBtn');
+            const imageBtn = document.getElementById('imageBtn');
+            const tableBtn = document.getElementById('tableBtn');
+            const listBtn = document.getElementById('listBtn');
+            const headingSelect = document.getElementById('headingSelect');
+            
+            const lineNumber = document.getElementById('lineNumber');
+            const colNumber = document.getElementById('colNumber');
+            
+            updatePreview();
+            
+            runBtn.addEventListener('click', updatePreview);
+            
+            newBtn.addEventListener('click', function() {
+                if (editor.value && !confirm('Current content will be lost. Continue?')) {
+                    return;
+                }
+                editor.value = `<!DOCTYPE html>
+<html>
+<head>
+    <title>New Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #6c5ce7;
+        }
+    </style>
 </head>
 <body>
     <h1>New Document</h1>
     <p>Start editing here...</p>
 </body>
 </html>`;
-            updatePreview();
-        });
-        
-        // Save button click handler
-        saveBtn.addEventListener('click', function() {
-            const blob = new Blob([editor.value], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'document.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-        
-        // Load button click handler
-        loadBtn.addEventListener('click', function() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.html,.htm,.txt';
+                updatePreview();
+            });
             
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
+            saveBtn.addEventListener('click', function() {
+                const blob = new Blob([editor.value], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'document.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            loadBtn.addEventListener('click', function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.html,.htm,.txt';
                 
-                reader.onload = function() {
-                    editor.value = reader.result;
-                    updatePreview();
+                input.onchange = e => {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function() {
+                        editor.value = reader.result;
+                        updatePreview();
+                    };
+                    
+                    reader.readAsText(file);
                 };
                 
-                reader.readAsText(file);
-            };
+                input.click();
+            });
             
-            input.click();
-        });
-        
-        // Formatting buttons
-        boldBtn.addEventListener('click', function() {
-            insertAtCursor('<strong>', '</strong>');
-        });
-        
-        italicBtn.addEventListener('click', function() {
-            insertAtCursor('<em>', '</em>');
-        });
-        
-        linkBtn.addEventListener('click', function() {
-            const url = prompt('Enter URL:', 'https://');
-            if (url) {
-                insertAtCursor(`<a href="${url}">`, '</a>');
-            }
-        });
-        
-        imageBtn.addEventListener('click', function() {
-            const url = prompt('Enter image URL:', 'https://');
-            if (url) {
-                insertAtCursor(`<img src="${url}" alt="Image">`, '');
-            }
-        });
-        
-        tableBtn.addEventListener('click', function() {
-            const rows = prompt('Number of rows:', '3');
-            const cols = prompt('Number of columns:', '3');
+            boldBtn.addEventListener('click', function() {
+                insertAtCursor('<strong>', '</strong>');
+            });
             
-            if (rows && cols) {
-                let tableHtml = '<table border="1">\n';
-                for (let i = 0; i < parseInt(rows); i++) {
-                    tableHtml += '  <tr>\n';
-                    for (let j = 0; j < parseInt(cols); j++) {
-                        tableHtml += '    <td>Cell</td>\n';
+            italicBtn.addEventListener('click', function() {
+                insertAtCursor('<em>', '</em>');
+            });
+            
+            linkBtn.addEventListener('click', function() {
+                const url = prompt('Enter URL:', 'https://');
+                if (url) {
+                    insertAtCursor(`<a href="${url}">`, '</a>');
+                }
+            });
+            
+            imageBtn.addEventListener('click', function() {
+                const url = prompt('Enter image URL:', 'https://');
+                if (url) {
+                    insertAtCursor(`<img src="${url}" alt="Image">`, '');
+                }
+            });
+            
+            tableBtn.addEventListener('click', function() {
+                const rows = prompt('Number of rows:', '3');
+                const cols = prompt('Number of columns:', '3');
+                
+                if (rows && cols) {
+                    let tableHtml = '<table border="1">\n';
+                    for (let i = 0; i < parseInt(rows); i++) {
+                        tableHtml += '  <tr>\n';
+                        for (let j = 0; j < parseInt(cols); j++) {
+                            tableHtml += '    <td>Cell</td>\n';
+                        }
+                        tableHtml += '  </tr>\n';
                     }
-                    tableHtml += '  </tr>\n';
+                    tableHtml += '</table>';
+                    
+                    insertAtCursor(tableHtml, '');
                 }
-                tableHtml += '</table>';
-                
-                insertAtCursor(tableHtml, '');
-            }
-        });
-        
-        listBtn.addEventListener('click', function() {
-            const type = prompt('List type (ul/ol):', 'ul');
-            const items = prompt('Number of items:', '3');
+            });
             
-            if (type && items) {
-                let listHtml = `<${type}>\n`;
-                for (let i = 0; i < parseInt(items); i++) {
-                    listHtml += `  <li>Item ${i+1}</li>\n`;
+            listBtn.addEventListener('click', function() {
+                const type = prompt('List type (ul/ol):', 'ul');
+                const items = prompt('Number of items:', '3');
+                
+                if (type && items) {
+                    let listHtml = `<${type}>\n`;
+                    for (let i = 0; i < parseInt(items); i++) {
+                        listHtml += `  <li>Item ${i+1}</li>\n`;
+                    }
+                    listHtml += `</${type}>`;
+                    
+                    insertAtCursor(listHtml, '');
                 }
-                listHtml += `</${type}>`;
+            });
+            
+            headingSelect.addEventListener('change', function() {
+                if (this.value) {
+                    insertAtCursor(this.value, this.value.replace('<', '</'));
+                    this.value = '';
+                }
+            });
+            
+            tabSizeSelector.addEventListener('change', function() {
+                editor.style.tabSize = this.value;
+            });
+            
+            editor.addEventListener('keyup', updateCursorPosition);
+            editor.addEventListener('click', updateCursorPosition);
+            editor.addEventListener('scroll', updateCursorPosition);
+            
+            function insertAtCursor(openTag, closeTag) {
+                const startPos = editor.selectionStart;
+                const endPos = editor.selectionEnd;
+                const selectedText = editor.value.substring(startPos, endPos);
+                const beforeText = editor.value.substring(0, startPos);
+                const afterText = editor.value.substring(endPos);
                 
-                insertAtCursor(listHtml, '');
-            }
-        });
-        
-        headingSelect.addEventListener('change', function() {
-            if (this.value) {
-                insertAtCursor(this.value, this.value.replace('<', '</'));
-                this.value = '';
-            }
-        });
-        
-        // Tab size selector
-        tabSizeSelector.addEventListener('change', function() {
-            editor.style.tabSize = this.value;
-        });
-        
-        // Editor cursor position tracking
-        editor.addEventListener('keyup', updateCursorPosition);
-        editor.addEventListener('click', updateCursorPosition);
-        editor.addEventListener('scroll', updateCursorPosition);
-        
-        // Resize handle functionality
-        let isResizing = false;
-        resizeHandle.addEventListener('mousedown', function(e) {
-            isResizing = true;
-            document.body.style.cursor = window.innerWidth > 768 ? 'col-resize' : 'row-resize';
-            document.addEventListener('mousemove', resize);
-            document.addEventListener('mouseup', stopResize);
-        });
-        
-        function resize(e) {
-            if (!isResizing) return;
-            
-            const editorWrapper = document.querySelector('.editor-wrapper');
-            const previewWrapper = document.querySelector('.preview-wrapper');
-            
-            if (window.innerWidth > 768) {
-                // Horizontal resize
-                const totalWidth = editorWrapper.offsetWidth + previewWrapper.offsetWidth;
-                const editorWidth = e.clientX - editorWrapper.getBoundingClientRect().left;
-                const editorPercent = (editorWidth / totalWidth) * 100;
+                editor.value = beforeText + openTag + selectedText + closeTag + afterText;
                 
-                editorWrapper.style.flex = `0 0 ${editorPercent}%`;
-                previewWrapper.style.flex = `0 0 ${100 - editorPercent}%`;
-            } else {
-                // Vertical resize
-                const totalHeight = editorWrapper.offsetHeight + previewWrapper.offsetHeight;
-                const editorHeight = e.clientY - editorWrapper.getBoundingClientRect().top;
-                const editorPercent = (editorHeight / totalHeight) * 100;
+                const newCursorPos = startPos + openTag.length + selectedText.length + closeTag.length;
+                editor.selectionStart = newCursorPos;
+                editor.selectionEnd = newCursorPos;
+                editor.focus();
                 
-                editorWrapper.style.flex = `0 0 ${editorPercent}%`;
-                previewWrapper.style.flex = `0 0 ${100 - editorPercent}%`;
+                updatePreview();
             }
-        }
-        
-        function stopResize() {
-            isResizing = false;
-            document.body.style.cursor = '';
-            document.removeEventListener('mousemove', resize);
-        }
-        
-        // Helper function to insert text at cursor
-        function insertAtCursor(openTag, closeTag) {
-            const startPos = editor.selectionStart;
-            const endPos = editor.selectionEnd;
-            const selectedText = editor.value.substring(startPos, endPos);
-            const beforeText = editor.value.substring(0, startPos);
-            const afterText = editor.value.substring(endPos);
             
-            editor.value = beforeText + openTag + selectedText + closeTag + afterText;
+            function updatePreview() {
+                const html = editor.value;
+                preview.srcdoc = html;
+            }
             
-            // Set cursor position
-            const newCursorPos = startPos + openTag.length + selectedText.length + closeTag.length;
-            editor.selectionStart = newCursorPos;
-            editor.selectionEnd = newCursorPos;
-            editor.focus();
-            
-            updatePreview();
-        }
-        
-        // Update preview frame
-        function updatePreview() {
-            const html = editor.value;
-            preview.srcdoc = html;
-        }
-        
-        // Update cursor position in status bar
-        function updateCursorPosition() {
-            const cursorPos = editor.selectionStart;
-            const textUpToCursor = editor.value.substring(0, cursorPos);
-            const lineNum = textUpToCursor.split('\n').length;
-            const colNum = cursorPos - textUpToCursor.lastIndexOf('\n') - 1;
-            
-            lineNumber.textContent = lineNum;
-            colNumber.textContent = colNum;
-        }
-        
-        // Add tab key support
-        editor.addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                const tabSize = parseInt(tabSizeSelector.value);
-                const tab = ' '.repeat(tabSize);
+            function updateCursorPosition() {
+                const cursorPos = editor.selectionStart;
+                const textUpToCursor = editor.value.substring(0, cursorPos);
+                const lineNum = textUpToCursor.split('\n').length;
+                const colNum = cursorPos - textUpToCursor.lastIndexOf('\n') - 1;
                 
-                this.value = this.value.substring(0, start) + tab + this.value.substring(end);
-                this.selectionStart = this.selectionEnd = start + tab.length;
+                lineNumber.textContent = lineNum;
+                colNumber.textContent = colNum;
             }
+            
+            editor.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    const tabSize = parseInt(tabSizeSelector.value);
+                    const tab = ' '.repeat(tabSize);
+                    
+                    this.value = this.value.substring(0, start) + tab + this.value.substring(end);
+                    this.selectionStart = this.selectionEnd = start + tab.length;
+                }
+            });
+            
+            let previewTimeout;
+            editor.addEventListener('input', function() {
+                clearTimeout(previewTimeout);
+                previewTimeout = setTimeout(updatePreview, 500);
+                updateCursorPosition();
+            });
         });
-        
-        // Auto-update preview when typing (with debounce)
-        let previewTimeout;
-        editor.addEventListener('input', function() {
-            clearTimeout(previewTimeout);
-            previewTimeout = setTimeout(updatePreview, 500);
-            updateCursorPosition();
-        });
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+        sessionStorage.removeItem('loggedInUser');
+        window.location.href = 'index.html';
     });
-</script>
+    </script>
 </body>
 </html>
