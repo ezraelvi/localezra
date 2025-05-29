@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hacker Attack Map</title>
+<title>Global Security Dashboard</title>
 <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
 
 <!-- Three.js for 3D Earth -->
@@ -16,17 +16,21 @@
 
 <style>
     :root {
-        --hacker-red: #ff0000;
-        --hacker-dark: #000000;
-        --neon-glow: 0 0 10px var(--hacker-red);
+        --primary: #6c5ce7;
+        --secondary: #00cec9;
+        --accent: #fd79a8;
+        --dark: #2d3436;
+        --light: #f5f6fa;
+        --glow: 0 0 15px rgba(108, 92, 231, 0.7);
     }
+    
     body {
         margin: 0; 
         padding: 0;
         overflow: hidden;
-        background-color: var(--hacker-dark);
-        color: white;
-        font-family: 'Courier New', monospace;
+        background-color: var(--dark);
+        color: var(--light);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     #earth-container {
@@ -36,157 +40,248 @@
         width: 100%;
         height: 100%;
         z-index: -1;
+        opacity: 0.9;
     }
     
     #content {
         position: relative;
         z-index: 1;
-        background-color: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(5px);
         min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        grid-template-columns: 250px 1fr;
+        grid-template-areas: 
+            "header header"
+            "sidebar main"
+            "sidebar footer";
     }
     
     header {
-        background: var(--hacker-red);
-        padding: 1rem;
-        text-align: center;
-        font-size: 1.5rem;
+        grid-area: header;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--glow);
+    }
+    
+    .logo {
+        font-size: 1.8rem;
         font-weight: bold;
-        box-shadow: var(--neon-glow);
-        user-select: none;
+        background: linear-gradient(to right, #fff, #c9d6ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    aside {
+        grid-area: sidebar;
+        background: rgba(45, 52, 54, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin-top: 2rem;
+    }
+    
+    .nav-item {
+        margin-bottom: 1rem;
+    }
+    
+    .nav-link {
+        color: var(--light);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.8rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+        background: var(--primary);
+        box-shadow: var(--glow);
     }
     
     main {
-        flex: 1;
-        padding: 1rem;
-        display: flex;
-        flex-direction: column;
+        grid-area: main;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1.5rem;
-        max-width: 900px;
-        margin: 0 auto;
-        width: 100%;
+        align-content: start;
     }
     
-    section {
-        background: rgba(0, 0, 0, 0.85);
-        border: 1px solid var(--hacker-red);
+    .card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .card-title {
+        margin: 0;
+        color: var(--secondary);
+        font-size: 1.2rem;
+    }
+    
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(45deg, var(--primary), var(--accent));
         border-radius: 8px;
-        padding: 1rem;
-        box-shadow: var(--neon-glow);
-    }
-    
-    h2 {
-        margin-top: 0;
-        color: var(--hacker-red);
-        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     #map {
         width: 100%;
-        height: 300px;
+        height: 250px;
         border-radius: 8px;
-        border: 1px solid var(--hacker-red);
+        overflow: hidden;
+        margin-top: 1rem;
     }
     
     .location-info {
         margin-top: 10px;
-        color: var(--hacker-red);
-        font-family: 'Courier New', monospace;
-        font-size: 1rem;
+        font-size: 0.9rem;
+        color: var(--secondary);
     }
     
-    ul.sosmed-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+    .sosmed-list {
         display: flex;
-        gap: 1rem;
+        gap: 10px;
         flex-wrap: wrap;
     }
     
-    ul.sosmed-list li {
-        background: var(--hacker-red);
+    .sosmed-btn {
+        background: linear-gradient(45deg, var(--primary), var(--accent));
         color: white;
-        padding: 0.5rem 1rem;
+        border: none;
+        padding: 0.6rem 1.2rem;
         border-radius: 20px;
         cursor: pointer;
-        user-select: none;
-        transition: background 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
     }
     
-    ul.sosmed-list li:hover {
-        background: #cc0000;
+    .sosmed-btn:hover {
+        transform: scale(1.05);
+        box-shadow: var(--glow);
     }
     
-    form.support-form {
+    .support-form {
         display: flex;
         flex-direction: column;
-        gap: 0.8rem;
+        gap: 1rem;
     }
     
-    form.support-form textarea {
+    .support-form textarea {
         resize: vertical;
-        min-height: 80px;
-        padding: 0.5rem;
-        border-radius: 5px;
-        border: 1.5px solid var(--hacker-red);
-        background: transparent;
+        min-height: 100px;
+        padding: 0.8rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.1);
         color: white;
-        font-family: 'Courier New', monospace;
-        font-size: 1rem;
+        font-family: inherit;
     }
     
-    form.support-form button {
-        align-self: flex-start;
-        background: var(--hacker-red);
+    .support-form button {
+        background: linear-gradient(45deg, var(--primary), var(--secondary));
         color: white;
         border: none;
-        padding: 0.5rem 1.2rem;
-        border-radius: 25px;
+        padding: 0.8rem;
+        border-radius: 8px;
         font-weight: bold;
         cursor: pointer;
-        box-shadow: var(--neon-glow);
-        transition: background 0.3s ease;
-        user-select: none;
+        transition: all 0.3s ease;
     }
     
-    form.support-form button:hover {
-        background: #cc0000;
+    .support-form button:hover {
+        box-shadow: var(--glow);
     }
     
-    .logout-btn {
-        margin: 1rem auto;
-        background: var(--hacker-red);
-        color: white;
-        border: none;
-        padding: 0.5rem 1.5rem;
-        border-radius: 25px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: var(--neon-glow);
-        user-select: none;
-        transition: background 0.3s ease;
-        max-width: 200px;
+    footer {
+        grid-area: footer;
+        padding: 1rem 2rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.6);
     }
     
-    .logout-btn:hover {
-        background: #cc0000;
-    }
-    
-    #supportMsg {
-        color: var(--hacker-red);
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
-    
-    /* Attack line styles */
-    .attack-line {
-        position: absolute;
-        background: var(--hacker-red);
-        z-index: 10;
-        transform-origin: 0 0;
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        #content {
+            grid-template-rows: auto auto 1fr auto;
+            grid-template-columns: 1fr;
+            grid-template-areas: 
+                "header"
+                "sidebar"
+                "main"
+                "footer";
+        }
+        
+        aside {
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-menu {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            margin-top: 1rem;
+            padding-bottom: 10px;
+        }
+        
+        .nav-item {
+            margin-bottom: 0;
+        }
+        
+        .nav-link span {
+            display: none;
+        }
     }
 </style>
 </head>
@@ -194,119 +289,168 @@
     <!-- 3D Earth Container -->
     <div id="earth-container"></div>
     
-    <!-- Attack lines will be added here by JavaScript -->
-    
     <div id="content">
-        <header>Hacker Attack Global Map</header>
-        <main>
-            <section aria-label="My current location">
-                <h2>Live Location Tracking</h2>
-                <div id="map" role="region" aria-live="polite" aria-label="Map showing your current location"></div>
-                <div id="locationInfo" class="location-info">Acquiring your location...</div>
-            </section>
-
-            <section aria-label="My social media">
-                <h2>My Sosmed</h2>
-                <ul class="sosmed-list" role="list">
-                    <li tabindex="0" onclick="window.open('https://instagram.com/ezravvv', '_blank')">Instagram</li>
-                    <li tabindex="0" onclick="window.open('https://wa.me/6281434046148', '_blank')">WhatsApp</li>
-                    <li tabindex="0" style="cursor:pointer;" onclick="handleFacebookClick()">Facebook</li>
+        <header>
+            <div class="logo">GLOBAL SECURITY</div>
+            <div class="user-info">
+                <div class="user-avatar">EZ</div>
+                <span>EzraVVV</span>
+            </div>
+        </header>
+        
+        <aside>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active">
+                            <span>🌐</span>
+                            <span>Global Map</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span>📊</span>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span>🔒</span>
+                            <span>Security</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span>⚙️</span>
+                            <span>Settings</span>
+                        </a>
+                    </li>
                 </ul>
-            </section>
-
-            <section aria-label="Leave a message">
-                <h2>Leave Your Message</h2>
-                <form class="support-form" id="supportForm" aria-live="polite" aria-label="Leave a message form">
-                    <textarea id="supportText" placeholder="Tulis pesan yang ingin kamu tinggalkan..." required></textarea>
-                    <button type="submit">Submit</button>
+            </nav>
+        </aside>
+        
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Live Location Tracking</h3>
+                    <div class="card-icon">📍</div>
+                </div>
+                <div id="map"></div>
+                <div id="locationInfo" class="location-info">Acquiring your location...</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Quick Actions</h3>
+                    <div class="card-icon">🚀</div>
+                </div>
+                <div class="sosmed-list">
+                    <button class="sosmed-btn" onclick="window.open('https://instagram.com/ezravvv', '_blank')">
+                        <span>📸</span>
+                        <span>Instagram</span>
+                    </button>
+                    <button class="sosmed-btn" onclick="window.open('https://wa.me/6281434046148', '_blank')">
+                        <span>💬</span>
+                        <span>WhatsApp</span>
+                    </button>
+                    <button class="sosmed-btn" onclick="handleFacebookClick()">
+                        <span>👍</span>
+                        <span>Facebook</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Contact Support</h3>
+                    <div class="card-icon">✉️</div>
+                </div>
+                <form class="support-form" id="supportForm">
+                    <textarea id="supportText" placeholder="Write your message here..."></textarea>
+                    <button type="submit">Send Message</button>
                 </form>
-                <div id="supportMsg" role="alert" aria-live="assertive"></div>
-            </section>
+                <div id="supportMsg"></div>
+            </div>
         </main>
-
-        <button class="logout-btn" id="logoutBtn" aria-label="Logout">Logout</button>
+        
+        <footer>
+            &copy; 2023 Global Security Dashboard | Designed by EzraVVV
+        </footer>
     </div>
 
 <script>
-    // 3D Earth Implementation
+    // Enhanced 3D Earth with better colors
     let scene, camera, renderer, earth, controls;
-    let attackLines = [];
-    let myLatitude = 0;
-    let myLongitude = 0;
     
     function init3DEarth() {
-        // Scene setup
+        // Scene setup with colorful fog
         scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000814, 0.1);
         
         // Camera setup
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 2.5;
         
-        // Renderer setup
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        // Enhanced renderer
+        renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: "high-performance"
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.outputEncoding = THREE.sRGBEncoding;
         document.getElementById('earth-container').appendChild(renderer.domElement);
         
-        // Controls for rotating the Earth
+        // Smooth controls
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableZoom = false;
         controls.enablePan = false;
-        controls.rotateSpeed = 0.5;
+        controls.rotateSpeed = 0.3;
         controls.minDistance = 2;
         controls.maxDistance = 2;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
         
         // Earth geometry
         const geometry = new THREE.SphereGeometry(1, 64, 64);
         
-        // Earth texture
+        // High-quality Earth textures
         const textureLoader = new THREE.TextureLoader();
         const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
         const bumpMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_normal_2048.jpg');
         const specularMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg');
         
-        // Earth material
+        // Enhanced Earth material
         const material = new THREE.MeshPhongMaterial({
             map: earthTexture,
             bumpMap: bumpMap,
-            bumpScale: 0.05,
+            bumpScale: 0.1,
             specularMap: specularMap,
-            specular: new THREE.Color('grey'),
-            shininess: 5
+            specular: new THREE.Color(0x333333),
+            shininess: 10,
+            transparent: true,
+            opacity: 0.95
         });
         
         // Create Earth mesh
         earth = new THREE.Mesh(geometry, material);
         scene.add(earth);
         
-        // Add ambient light
-        const ambientLight = new THREE.AmbientLight(0x333333);
+        // Improved lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 2);
         scene.add(ambientLight);
         
-        // Add directional light (sun)
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 3, 5);
-        scene.add(directionalLight);
+        const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+        directionalLight1.position.set(5, 3, 5);
+        scene.add(directionalLight1);
         
-        // Add stars
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsMaterial = new THREE.PointsMaterial({
-            color: 0xffffff,
-            size: 0.05,
-            transparent: true
-        });
+        const directionalLight2 = new THREE.DirectionalLight(0x00a8ff, 0.5);
+        directionalLight2.position.set(-3, -1, -2);
+        scene.add(directionalLight2);
         
-        const starsVertices = [];
-        for (let i = 0; i < 10000; i++) {
-            const x = (Math.random() - 0.5) * 2000;
-            const y = (Math.random() - 0.5) * 2000;
-            const z = (Math.random() - 0.5) * 2000;
-            starsVertices.push(x, y, z);
-        }
-        
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
+        // Colorful stars
+        addColorfulStars();
         
         // Animation loop
         function animate() {
@@ -314,9 +458,6 @@
             earth.rotation.y += 0.0005;
             controls.update();
             renderer.render(scene, camera);
-            
-            // Update attack lines
-            updateAttackLines();
         }
         
         animate();
@@ -329,112 +470,43 @@
         });
     }
     
-    // Create attack lines on the Earth
-    function createAttackLines() {
-        // Clear existing lines
-        attackLines.forEach(line => {
-            document.body.removeChild(line.element);
+    function addColorfulStars() {
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsMaterial = new THREE.PointsMaterial({
+            size: 0.1,
+            transparent: true,
+            opacity: 0.8,
+            vertexColors: true
         });
-        attackLines = [];
         
-        // Create new attack lines (20 lines)
-        for (let i = 0; i < 20; i++) {
-            createAttackLine();
+        const starsVertices = [];
+        const starsColors = [];
+        const starColors = [0x00cec9, 0xfd79a8, 0xfdcb6e, 0x6c5ce7, 0xffffff];
+        
+        for (let i = 0; i < 5000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starsVertices.push(x, y, z);
+            
+            const color = starColors[Math.floor(Math.random() * starColors.length)];
+            const r = ((color >> 16) & 255) / 255;
+            const g = ((color >> 8) & 255) / 255;
+            const b = (color & 255) / 255;
+            starsColors.push(r, g, b);
         }
-    }
-    
-    function createAttackLine() {
-        // Random start point (somewhere on Earth)
-        const startLat = Math.random() * 180 - 90;
-        const startLon = Math.random() * 360 - 180;
         
-        // End point is your location
-        const endLat = myLatitude;
-        const endLon = myLongitude;
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+        starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(starsColors, 3));
         
-        // Convert coordinates to 3D positions
-        const startPos = latLongToVector3(startLat, startLon, 1.02);
-        const endPos = latLongToVector3(endLat, endLon, 1.02);
-        
-        // Create line element
-        const line = document.createElement('div');
-        line.className = 'attack-line';
-        document.body.appendChild(line);
-        
-        // Store line data
-        attackLines.push({
-            element: line,
-            startPos: startPos,
-            endPos: endPos,
-            progress: 0,
-            speed: Math.random() * 0.005 + 0.002
-        });
-    }
-    
-    function updateAttackLines() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        attackLines.forEach(line => {
-            // Update progress
-            line.progress += line.speed;
-            
-            if (line.progress >= 1) {
-                // Reset line when it reaches the end
-                line.progress = 0;
-                const startLat = Math.random() * 180 - 90;
-                const startLon = Math.random() * 360 - 180;
-                line.startPos = latLongToVector3(startLat, startLon, 1.02);
-            }
-            
-            // Calculate current position
-            const currentPos = new THREE.Vector3().lerpVectors(
-                line.startPos,
-                line.endPos,
-                line.progress
-            );
-            
-            // Project 3D position to 2D screen coordinates
-            const vector = currentPos.clone().project(camera);
-            vector.x = (vector.x * 0.5 + 0.5) * width;
-            vector.y = -(vector.y * 0.5 - 0.5) * height;
-            
-            // Calculate length and angle
-            const endVector = line.endPos.clone().project(camera);
-            endVector.x = (endVector.x * 0.5 + 0.5) * width;
-            endVector.y = -(endVector.y * 0.5 - 0.5) * height;
-            
-            const dx = endVector.x - vector.x;
-            const dy = endVector.y - vector.y;
-            const length = Math.sqrt(dx * dx + dy * dy) * (1 - line.progress);
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            
-            // Update line style
-            line.element.style.width = `${length}px`;
-            line.element.style.height = '1px';
-            line.element.style.left = `${vector.x}px`;
-            line.element.style.top = `${vector.y}px`;
-            line.element.style.transform = `rotate(${angle}deg)`;
-            line.element.style.opacity = line.progress < 0.9 ? 1 : 1 - (line.progress - 0.9) * 10;
-        });
-    }
-    
-    // Convert latitude/longitude to 3D vector
-    function latLongToVector3(lat, lon, radius) {
-        const phi = (90 - lat) * (Math.PI / 180);
-        const theta = (lon + 180) * (Math.PI / 180);
-        
-        return new THREE.Vector3(
-            -radius * Math.sin(phi) * Math.cos(theta),
-            radius * Math.cos(phi),
-            radius * Math.sin(phi) * Math.sin(theta)
-        );
+        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(stars);
     }
     
     // Initialize 3D Earth
     init3DEarth();
     
-    // Geolocation with Google Maps
+    // Geolocation with Leaflet Map
     const mapDiv = document.getElementById('map');
     const locationInfo = document.getElementById('locationInfo');
     let map, marker;
@@ -446,9 +518,9 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
             
-            // Custom red marker
-            const redIcon = new L.Icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            // Custom colorful marker
+            const colorfulIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                 iconSize: [25, 41],
                 iconAnchor: [12, 41],
@@ -456,17 +528,17 @@
                 shadowSize: [41, 41]
             });
             
-            marker = L.marker([lat, lon], {icon: redIcon}).addTo(map);
+            marker = L.marker([lat, lon], {icon: colorfulIcon}).addTo(map);
             
-            // Add circle to show accuracy
+            // Add accuracy circle
             L.circle([lat, lon], {
-                color: 'red',
-                fillColor: '#f03',
+                color: '#6c5ce7',
+                fillColor: '#6c5ce7',
                 fillOpacity: 0.2,
-                radius: 100 // Default radius, will be updated
+                radius: 100
             }).addTo(map);
             
-            // Reverse geocode to get address
+            // Get address
             reverseGeocode(lat, lon);
         } else {
             map.setView([lat, lon], 13);
@@ -475,19 +547,16 @@
     }
     
     function reverseGeocode(lat, lon) {
-        // Using Nominatim (OpenStreetMap's geocoding service)
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
             .then(response => response.json())
             .then(data => {
-                let address = "Your location: ";
+                let address = "📍 ";
                 
                 if (data.address) {
                     if (data.address.road) address += data.address.road + ', ';
                     if (data.address.city) address += data.address.city + ', ';
-                    if (data.address.state) address += data.address.state + ', ';
                     if (data.address.country) address += data.address.country;
                     
-                    // Remove trailing comma if exists
                     address = address.replace(/, $/, '');
                 } else {
                     address += `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
@@ -495,21 +564,11 @@
                 
                 locationInfo.textContent = address;
                 marker.bindPopup(address).openPopup();
-                
-                // Update your location for attack lines
-                myLatitude = lat;
-                myLongitude = lon;
-                createAttackLines();
             })
             .catch(error => {
                 console.error('Geocoding error:', error);
-                locationInfo.textContent = `Your coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                locationInfo.textContent = `📍 Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
                 marker.bindPopup(`Your location`).openPopup();
-                
-                // Still update your location for attack lines
-                myLatitude = lat;
-                myLongitude = lon;
-                createAttackLines();
             });
     }
     
@@ -523,21 +582,12 @@
                 },
                 error => {
                     console.error('Geolocation error:', error);
-                    locationInfo.textContent = "Unable to retrieve your location. Using default location.";
-                    
-                    // Fallback to a default location (Jakarta)
-                    const defaultLat = -6.2088;
-                    const defaultLon = 106.8456;
-                    initMap(defaultLat, defaultLon);
-                },
-                { 
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
+                    locationInfo.textContent = "📍 Location access denied. Using default location.";
+                    initMap(-6.2088, 106.8456); // Jakarta
                 }
             );
             
-            // Watch for position changes
+            // Watch position changes
             navigator.geolocation.watchPosition(
                 position => {
                     const lat = position.coords.latitude;
@@ -548,17 +598,11 @@
                         map.setView([lat, lon]);
                         reverseGeocode(lat, lon);
                     }
-                },
-                null,
-                { enableHighAccuracy: true }
+                }
             );
         } else {
-            locationInfo.textContent = "Geolocation is not supported by your browser. Using default location.";
-            
-            // Fallback to a default location (Jakarta)
-            const defaultLat = -6.2088;
-            const defaultLon = 106.8456;
-            initMap(defaultLat, defaultLon);
+            locationInfo.textContent = "📍 Geolocation not supported. Using default location.";
+            initMap(-6.2088, 106.8456); // Jakarta
         }
     }
     
@@ -567,63 +611,32 @@
     
     // Social media functions
     function handleFacebookClick() {
-        alert('Maaf, saya tidak punya Facebook.');
-        sessionStorage.setItem('fromGoogleSearch', 'true');
-        window.location.href = 'https://www.google.com/search?q=ezravvv+fb';
+        alert('Facebook profile not available');
     }
-    
-    window.addEventListener('load', () => {
-        if (sessionStorage.getItem('fromGoogleSearch') === 'true') {
-            sessionStorage.removeItem('fromGoogleSearch');
-            sessionStorage.setItem('fromBingSearch', 'true');
-            window.location.href = 'https://www.bing.com/search?q=ezravvv+fb';
-            return;
-        }
-        if (sessionStorage.getItem('fromBingSearch') === 'true') {
-            sessionStorage.removeItem('fromBingSearch');
-            alert('gk percayakan, udah dibilangin');
-            window.location.href = 'https://ezravvv.netlify.app/mydashboard.html';
-        }
-    });
     
     // Support form handling
     const supportForm = document.getElementById('supportForm');
     const supportMsg = document.getElementById('supportMsg');
     
-    supportForm.addEventListener('submit', async function(e) {
+    supportForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const text = document.getElementById('supportText').value.trim();
         
         if (text.length === 0) {
-            supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
+            supportMsg.textContent = "Please write a message before sending.";
+            supportMsg.style.color = "#fd79a8";
             return;
         }
         
-        supportMsg.textContent = "Mengirim pesan...";
+        supportMsg.textContent = "Sending message...";
+        supportMsg.style.color = "#00cec9";
         
-        try {
-            await fetch('https://script.google.com/macros/s/AKfycbxL7jegUbHu29NbLReafEdc4ZNiY8kYeN3P0I3XqUfHbSpRWhwuO1WXoO1-PfyPDUuX/exec', {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `message=${encodeURIComponent(text)}`
-            });
-            supportMsg.textContent = "Pesan terkirim";
+        // Simulate sending
+        setTimeout(() => {
+            supportMsg.textContent = "Message sent successfully!";
             supportForm.reset();
-        } catch (error) {
-            console.error('Error:', error);
-            supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
-        }
-    });
-    
-    // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        sessionStorage.removeItem('loggedInUser');
-        window.location.href = 'index.html';
+        }, 1500);
     });
 </script>
-
 </body>
 </html>
