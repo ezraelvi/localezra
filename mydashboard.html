@@ -3,12 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dashboard</title>
+<title>Hacker Attack Map Dashboard</title>
 <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
+
+<!-- Three.js for 3D Earth -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+
+<!-- Leaflet CSS and JS for map -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -330,6 +336,7 @@
         box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
     }
     
+    /* Attack line styles */
     .attack-line {
         position: absolute;
         background: linear-gradient(90deg, var(--hacker-red), var(--hacker-purple));
@@ -339,6 +346,7 @@
         border-radius: 2px;
     }
     
+    /* Floating Code Editor Button */
     .floating-code-btn {
         position: fixed;
         bottom: 30px;
@@ -364,6 +372,7 @@
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
     
+    /* Code Editor Panel */
     .code-editor-panel {
         position: fixed;
         top: 0;
@@ -400,6 +409,7 @@
         pointer-events: all;
     }
     
+    /* Editor Styles */
     .editor-container {
         display: flex;
         flex-direction: column;
@@ -514,6 +524,7 @@
         z-index: 1001;
     }
     
+    /* Responsive adjustments */
     @media (max-width: 768px) {
         header {
             flex-direction: column;
@@ -551,7 +562,10 @@
 </style>
 </head>
 <body>
+    <!-- 3D Earth Container -->
     <div id="earth-container"></div>
+    
+    <!-- Attack lines will be added here by JavaScript -->
     
     <div id="content">
         <header>
@@ -653,12 +667,15 @@
         </button>
     </div>
 
+    <!-- Floating Code Editor Button -->
     <button class="floating-code-btn" id="codeEditorBtn">
         <i class="fas fa-code"></i>
     </button>
 
+    <!-- Editor Overlay -->
     <div class="editor-overlay" id="editorOverlay"></div>
 
+    <!-- Code Editor Panel -->
     <div class="code-editor-panel" id="codeEditorPanel">
         <button class="close-editor-btn" id="closeEditorBtn">
             <i class="fas fa-times"></i>
@@ -758,21 +775,26 @@
     </div>
 
     <script>
+        // 3D Earth Implementation
         let scene, camera, renderer, earth, controls;
         let myLatitude = 0;
         let myLongitude = 0;
         
-        function init3DEarth
+        function init3DEarth() {
+            // Scene setup
             scene = new THREE.Scene();
             
+            // Camera setup
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 2.5;
             
+            // Renderer setup
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             document.getElementById('earth-container').appendChild(renderer.domElement);
             
+            // Controls for rotating the Earth
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableZoom = false;
             controls.enablePan = false;
@@ -780,13 +802,16 @@
             controls.minDistance = 2;
             controls.maxDistance = 2;
             
+            // Earth geometry
             const geometry = new THREE.SphereGeometry(1, 64, 64);
             
+            // Earth texture
             const textureLoader = new THREE.TextureLoader();
             const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
             const bumpMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_normal_2048.jpg');
             const specularMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg');
             
+            // Earth material
             const material = new THREE.MeshPhongMaterial({
                 map: earthTexture,
                 bumpMap: bumpMap,
@@ -796,16 +821,20 @@
                 shininess: 5
             });
             
+            // Create Earth mesh
             earth = new THREE.Mesh(geometry, material);
             scene.add(earth);
             
+            // Add ambient light
             const ambientLight = new THREE.AmbientLight(0x333333);
             scene.add(ambientLight);
             
+            // Add directional light (sun)
             const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
             directionalLight.position.set(5, 3, 5);
             scene.add(directionalLight);
             
+            // Add stars
             const starsGeometry = new THREE.BufferGeometry();
             const starsMaterial = new THREE.PointsMaterial({
                 color: 0xffffff,
@@ -825,17 +854,20 @@
             const stars = new THREE.Points(starsGeometry, starsMaterial);
             scene.add(stars);
             
+            // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
                 earth.rotation.y += 0.0005;
                 controls.update();
                 renderer.render(scene, camera);
                 
+                // Update stats randomly for demo
                 updateStats();
             }
             
             animate();
             
+            // Handle window resize
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
@@ -843,18 +875,21 @@
             });
         }
         
+        // Update stats randomly for demo
         function updateStats() {
             const attackCount = document.getElementById('attackCount');
             const blockedCount = document.getElementById('blockedCount');
             const severity = document.getElementById('severity');
             const responseTime = document.getElementById('responseTime');
             
+            // Random fluctuations for demo purposes
             attackCount.textContent = Math.floor(20 + Math.random() * 10);
             blockedCount.textContent = Math.floor(140 + Math.random() * 20);
             severity.textContent = (3.5 + Math.random() * 1).toFixed(1);
             responseTime.textContent = (0.1 + Math.random() * 0.2).toFixed(1) + 's';
         }
         
+        // Convert latitude/longitude to 3D vector
         function latLongToVector3(lat, lon, radius) {
             const phi = (90 - lat) * (Math.PI / 180);
             const theta = (lon + 180) * (Math.PI / 180);
@@ -866,8 +901,10 @@
             );
         }
         
+        // Initialize 3D Earth
         init3DEarth();
         
+        // Geolocation with Google Maps
         const mapDiv = document.getElementById('map');
         const locationInfo = document.getElementById('locationInfo');
         let map, marker;
@@ -879,6 +916,7 @@
                     attribution: '&copy; OpenStreetMap contributors'
                 }).addTo(map);
                 
+                // Custom red marker
                 const redIcon = new L.Icon({
                     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
                     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -890,13 +928,15 @@
                 
                 marker = L.marker([lat, lon], {icon: redIcon}).addTo(map);
                 
+                // Add circle to show accuracy
                 L.circle([lat, lon], {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.2,
-                    radius: 100
+                    radius: 100 // Default radius, will be updated
                 }).addTo(map);
                 
+                // Reverse geocode to get address
                 reverseGeocode(lat, lon);
             } else {
                 map.setView([lat, lon], 13);
@@ -905,6 +945,7 @@
         }
         
         function reverseGeocode(lat, lon) {
+            // Using Nominatim (OpenStreetMap's geocoding service)
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
                 .then(response => response.json())
                 .then(data => {
@@ -916,6 +957,7 @@
                         if (data.address.state) address += data.address.state + ', ';
                         if (data.address.country) address += data.address.country;
                         
+                        // Remove trailing comma if exists
                         address = address.replace(/, $/, '');
                     } else {
                         address += `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
@@ -924,6 +966,7 @@
                     locationInfo.innerHTML = address;
                     marker.bindPopup(address.replace("<i class='fas fa-map-pin'></i> ", "")).openPopup();
                     
+                    // Update your location
                     myLatitude = lat;
                     myLongitude = lon;
                 })
@@ -932,6 +975,7 @@
                     locationInfo.innerHTML = "<i class='fas fa-map-marker-alt'></i> Coordinates: " + `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
                     marker.bindPopup(`Your location`).openPopup();
                     
+                    // Update your location
                     myLatitude = lat;
                     myLongitude = lon;
                 });
@@ -949,8 +993,9 @@
                         console.error('Geolocation error:', error);
                         locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Unable to retrieve location. Using default.";
                         
-                        const defaultLat = 2.6928351;
-                        const defaultLon = 97.8503951;
+                        // Fallback to a default location (Jakarta)
+                        const defaultLat = -6.2088;
+                        const defaultLon = 106.8456;
                         initMap(defaultLat, defaultLon);
                     },
                     { 
@@ -962,8 +1007,9 @@
             } else {
                 locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Geolocation is not supported by this browser.";
                 
-                const defaultLat = 2.6928351;
-                const defaultLon = 97.8503951;
+                // Fallback to a default location (Jakarta)
+                const defaultLat = -6.2088;
+                const defaultLon = 106.8456;
                 initMap(defaultLat, defaultLon);
             }
         }
@@ -1001,6 +1047,7 @@
             }
         });
         
+        // Code Editor Panel Toggle
         const codeEditorBtn = document.getElementById('codeEditorBtn');
         const codeEditorPanel = document.getElementById('codeEditorPanel');
         const editorOverlay = document.getElementById('editorOverlay');
@@ -1021,6 +1068,7 @@
             document.body.style.overflow = '';
         }
         
+        // HTML Editor Pro Functionality
         document.addEventListener('DOMContentLoaded', function() {
             const editor = document.getElementById('editor');
             const preview = document.getElementById('preview');
@@ -1030,6 +1078,7 @@
             const newBtn = document.getElementById('newBtn');
             const tabSizeSelector = document.getElementById('tabSize');
             
+            // Formatting buttons
             const boldBtn = document.getElementById('boldBtn');
             const italicBtn = document.getElementById('italicBtn');
             const linkBtn = document.getElementById('linkBtn');
@@ -1038,13 +1087,17 @@
             const listBtn = document.getElementById('listBtn');
             const headingSelect = document.getElementById('headingSelect');
             
+            // Status bar elements
             const lineNumber = document.getElementById('lineNumber');
             const colNumber = document.getElementById('colNumber');
             
+            // Initial render
             updatePreview();
             
+            // Run button click handler
             runBtn.addEventListener('click', updatePreview);
             
+            // New button click handler
             newBtn.addEventListener('click', function() {
                 if (editor.value && !confirm('Current content will be lost. Continue?')) {
                     return;
@@ -1071,6 +1124,7 @@
                 updatePreview();
             });
             
+            // Save button click handler
             saveBtn.addEventListener('click', function() {
                 const blob = new Blob([editor.value], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
@@ -1083,6 +1137,7 @@
                 URL.revokeObjectURL(url);
             });
             
+            // Load button click handler
             loadBtn.addEventListener('click', function() {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -1103,6 +1158,7 @@
                 input.click();
             });
             
+            // Formatting buttons
             boldBtn.addEventListener('click', function() {
                 insertAtCursor('<strong>', '</strong>');
             });
@@ -1166,14 +1222,17 @@
                 }
             });
             
+            // Tab size selector
             tabSizeSelector.addEventListener('change', function() {
                 editor.style.tabSize = this.value;
             });
             
+            // Editor cursor position tracking
             editor.addEventListener('keyup', updateCursorPosition);
             editor.addEventListener('click', updateCursorPosition);
             editor.addEventListener('scroll', updateCursorPosition);
             
+            // Helper function to insert text at cursor
             function insertAtCursor(openTag, closeTag) {
                 const startPos = editor.selectionStart;
                 const endPos = editor.selectionEnd;
@@ -1183,6 +1242,7 @@
                 
                 editor.value = beforeText + openTag + selectedText + closeTag + afterText;
                 
+                // Set cursor position
                 const newCursorPos = startPos + openTag.length + selectedText.length + closeTag.length;
                 editor.selectionStart = newCursorPos;
                 editor.selectionEnd = newCursorPos;
@@ -1191,11 +1251,13 @@
                 updatePreview();
             }
             
+            // Update preview frame
             function updatePreview() {
                 const html = editor.value;
                 preview.srcdoc = html;
             }
             
+            // Update cursor position in status bar
             function updateCursorPosition() {
                 const cursorPos = editor.selectionStart;
                 const textUpToCursor = editor.value.substring(0, cursorPos);
@@ -1206,6 +1268,7 @@
                 colNumber.textContent = colNum;
             }
             
+            // Add tab key support
             editor.addEventListener('keydown', function(e) {
                 if (e.key === 'Tab') {
                     e.preventDefault();
@@ -1219,6 +1282,7 @@
                 }
             });
             
+            // Auto-update preview when typing (with debounce)
             let previewTimeout;
             editor.addEventListener('input', function() {
                 clearTimeout(previewTimeout);
@@ -1226,7 +1290,7 @@
                 updateCursorPosition();
             });
         });
-        document.getElementById('logoutBtn').addEventListener('click', () => {
+            document.getElementById('logoutBtn').addEventListener('click', () => {
         sessionStorage.removeItem('loggedInUser');
         window.location.href = 'index.html';
     });
