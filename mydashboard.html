@@ -748,6 +748,10 @@
             supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
         }
     });
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        sessionStorage.removeItem('loggedInUser');
+        window.location.href = 'index.html';
+    });
 </script>
 </body>
 </html>
