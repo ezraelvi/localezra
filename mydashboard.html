@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Global Security Dashboard</title>
+<title>Hacker Attack Map Dashboard</title>
 <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
 
 <!-- Three.js for 3D Earth -->
@@ -14,21 +14,34 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
     :root {
         --primary: #6c5ce7;
         --secondary: #00cec9;
         --accent: #fd79a8;
+        --danger: #ff7675;
+        --warning: #fdcb6e;
+        --success: #00b894;
         --dark: #2d3436;
         --light: #f5f6fa;
-        --glow: 0 0 15px rgba(108, 92, 231, 0.7);
+        
+        --hacker-red: #ff4757;
+        --hacker-blue: #70a1ff;
+        --hacker-green: #2ed573;
+        --hacker-purple: #7d5fff;
+        
+        --neon-glow: 0 0 15px rgba(108, 92, 231, 0.7);
+        --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
     
     body {
         margin: 0; 
         padding: 0;
-        overflow: hidden;
-        background-color: var(--dark);
+        overflow-x: hidden;
+        background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
         color: var(--light);
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -40,175 +53,177 @@
         width: 100%;
         height: 100%;
         z-index: -1;
-        opacity: 0.9;
+        opacity: 0.3;
     }
     
     #content {
         position: relative;
         z-index: 1;
         min-height: 100vh;
-        display: grid;
-        grid-template-rows: auto 1fr auto;
-        grid-template-columns: 250px 1fr;
-        grid-template-areas: 
-            "header header"
-            "sidebar main"
-            "sidebar footer";
+        display: flex;
+        flex-direction: column;
     }
     
     header {
-        grid-area: header;
-        background: linear-gradient(90deg, var(--primary), var(--secondary));
-        padding: 1rem 2rem;
+        background: rgba(44, 44, 66, 0.8);
+        padding: 1.5rem;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: bold;
+        box-shadow: var(--neon-glow);
+        user-select: none;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid var(--primary);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: var(--glow);
     }
     
     .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .logo i {
+        color: var(--accent);
         font-size: 1.8rem;
-        font-weight: bold;
-        background: linear-gradient(to right, #fff, #c9d6ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
     }
     
-    .user-info {
+    .header-controls {
         display: flex;
-        align-items: center;
-        gap: 10px;
+        gap: 15px;
     }
     
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: var(--accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-    }
-    
-    aside {
-        grid-area: sidebar;
-        background: rgba(45, 52, 54, 0.8);
-        backdrop-filter: blur(10px);
-        padding: 1.5rem;
-        border-right: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .nav-menu {
-        list-style: none;
-        padding: 0;
-        margin-top: 2rem;
-    }
-    
-    .nav-item {
-        margin-bottom: 1rem;
-    }
-    
-    .nav-link {
+    .header-btn {
+        background: rgba(108, 92, 231, 0.2);
         color: var(--light);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 0.8rem;
-        border-radius: 8px;
+        border: 1px solid var(--primary);
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
         transition: all 0.3s ease;
     }
     
-    .nav-link:hover, .nav-link.active {
+    .header-btn:hover {
         background: var(--primary);
-        box-shadow: var(--glow);
+        transform: translateY(-2px);
     }
     
     main {
-        grid-area: main;
+        flex: 1;
         padding: 2rem;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        align-content: start;
+        gap: 2rem;
+        max-width: 1500px;
+        margin: 0 auto;
+        width: 100%;
     }
     
-    .card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(5px);
-        border-radius: 12px;
+    .dashboard-card {
+        background: rgba(44, 44, 66, 0.7);
+        border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: transform 0.3s ease;
+        box-shadow: var(--card-shadow);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
-    .card:hover {
+    .dashboard-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        border-color: var(--primary);
     }
     
     .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .card-title {
         margin: 0;
-        color: var(--secondary);
-        font-size: 1.2rem;
-    }
-    
-    .card-icon {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(45deg, var(--primary), var(--accent));
-        border-radius: 8px;
+        font-size: 1.3rem;
+        color: var(--primary);
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: 10px;
+    }
+    
+    .card-title i {
+        font-size: 1.1rem;
+        color: var(--accent);
+    }
+    
+    .card-badge {
+        background: var(--danger);
+        color: white;
+        padding: 0.3rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
     }
     
     #map {
         width: 100%;
-        height: 250px;
-        border-radius: 8px;
+        height: 300px;
+        border-radius: 10px;
+        border: 2px solid var(--primary);
         overflow: hidden;
-        margin-top: 1rem;
     }
     
     .location-info {
-        margin-top: 10px;
-        font-size: 0.9rem;
+        margin-top: 15px;
         color: var(--secondary);
+        font-size: 1rem;
+        line-height: 1.5;
     }
     
-    .sosmed-list {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+    .location-info i {
+        margin-right: 8px;
+        color: var(--accent);
+    }
+    
+    .sosmed-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
     }
     
     .sosmed-btn {
-        background: linear-gradient(45deg, var(--primary), var(--accent));
+        background: rgba(108, 92, 231, 0.1);
         color: white;
-        border: none;
-        padding: 0.6rem 1.2rem;
-        border-radius: 20px;
+        padding: 0.8rem;
+        border-radius: 10px;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
         transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border: 1px solid rgba(108, 92, 231, 0.3);
     }
     
     .sosmed-btn:hover {
-        transform: scale(1.05);
-        box-shadow: var(--glow);
+        background: var(--primary);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
     }
+    
+    .sosmed-btn i {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+    
+    .instagram { color: #e1306c; }
+    .whatsapp { color: #25D366; }
+    .facebook { color: #1877F2; }
     
     .support-form {
         display: flex;
@@ -218,69 +233,139 @@
     
     .support-form textarea {
         resize: vertical;
-        min-height: 100px;
-        padding: 0.8rem;
-        border-radius: 8px;
-        border: 1px solid rgba(255,255,255,0.2);
-        background: rgba(255,255,255,0.1);
+        min-height: 120px;
+        padding: 1rem;
+        border-radius: 10px;
+        border: 2px solid var(--primary);
+        background: rgba(44, 44, 66, 0.5);
         color: white;
         font-family: inherit;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .support-form textarea:focus {
+        outline: none;
+        border-color: var(--accent);
     }
     
     .support-form button {
-        background: linear-gradient(45deg, var(--primary), var(--secondary));
+        align-self: flex-start;
+        background: var(--primary);
         color: white;
         border: none;
-        padding: 0.8rem;
+        padding: 0.8rem 1.8rem;
         border-radius: 8px;
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     
     .support-form button:hover {
-        box-shadow: var(--glow);
+        background: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(253, 121, 168, 0.3);
     }
     
-    footer {
-        grid-area: footer;
-        padding: 1rem 2rem;
+    #supportMsg {
+        margin-top: 1rem;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .success-msg {
+        background: rgba(0, 184, 148, 0.2);
+        color: var(--success);
+        border: 1px solid var(--success);
+    }
+    
+    .error-msg {
+        background: rgba(255, 118, 117, 0.2);
+        color: var(--danger);
+        border: 1px solid var(--danger);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        background: rgba(44, 44, 66, 0.5);
+        border-radius: 10px;
+        padding: 1rem;
         text-align: center;
-        font-size: 0.8rem;
-        color: rgba(255,255,255,0.6);
+        border-left: 4px solid var(--primary);
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+        color: var(--secondary);
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .logout-btn {
+        margin: 2rem auto;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+    }
+    
+    .logout-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+    }
+    
+    /* Attack line styles */
+    .attack-line {
+        position: absolute;
+        background: linear-gradient(90deg, var(--hacker-red), var(--hacker-purple));
+        z-index: 10;
+        transform-origin: 0 0;
+        height: 2px;
+        border-radius: 2px;
     }
     
     /* Responsive adjustments */
     @media (max-width: 768px) {
-        #content {
-            grid-template-rows: auto auto 1fr auto;
+        header {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .header-controls {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        main {
+            padding: 1rem;
             grid-template-columns: 1fr;
-            grid-template-areas: 
-                "header"
-                "sidebar"
-                "main"
-                "footer";
         }
         
-        aside {
-            border-right: none;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .nav-menu {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            margin-top: 1rem;
-            padding-bottom: 10px;
-        }
-        
-        .nav-item {
-            margin-bottom: 0;
-        }
-        
-        .nav-link span {
-            display: none;
+        .stats-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -289,168 +374,187 @@
     <!-- 3D Earth Container -->
     <div id="earth-container"></div>
     
+    <!-- Attack lines will be added here by JavaScript -->
+    
     <div id="content">
         <header>
-            <div class="logo">GLOBAL SECURITY</div>
-            <div class="user-info">
-                <div class="user-avatar">EZ</div>
-                <span>EzraVVV</span>
+            <div class="logo">
+                <i class="fas fa-globe-americas"></i>
+                <span>Hacker Attack Dashboard</span>
+            </div>
+            <div class="header-controls">
+                <button class="header-btn">
+                    <i class="fas fa-shield-alt"></i> Defense
+                </button>
+                <button class="header-btn">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </button>
             </div>
         </header>
         
-        <aside>
-            <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link active">
-                            <span>🌐</span>
-                            <span>Global Map</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <span>📊</span>
-                            <span>Analytics</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <span>🔒</span>
-                            <span>Security</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <span>⚙️</span>
-                            <span>Settings</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-        
         <main>
-            <div class="card">
+            <section class="dashboard-card" aria-label="Live tracking">
                 <div class="card-header">
-                    <h3 class="card-title">Live Location Tracking</h3>
-                    <div class="card-icon">📍</div>
+                    <h2 class="card-title">
+                        <i class="fas fa-map-marker-alt"></i> Live Location
+                    </h2>
+                    <span class="card-badge">ACTIVE</span>
                 </div>
-                <div id="map"></div>
-                <div id="locationInfo" class="location-info">Acquiring your location...</div>
-            </div>
-            
-            <div class="card">
+                <div id="map" role="region" aria-live="polite" aria-label="Map showing your current location"></div>
+                <div id="locationInfo" class="location-info">
+                    <i class="fas fa-sync-alt fa-spin"></i> Acquiring your location...
+                </div>
+            </section>
+
+            <section class="dashboard-card" aria-label="Threat statistics">
                 <div class="card-header">
-                    <h3 class="card-title">Quick Actions</h3>
-                    <div class="card-icon">🚀</div>
+                    <h2 class="card-title">
+                        <i class="fas fa-bolt"></i> Threat Stats
+                    </h2>
+                    <span class="card-badge">LIVE</span>
                 </div>
-                <div class="sosmed-list">
-                    <button class="sosmed-btn" onclick="window.open('https://instagram.com/ezravvv', '_blank')">
-                        <span>📸</span>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="attackCount">24</div>
+                        <div class="stat-label">Active Attacks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="blockedCount">142</div>
+                        <div class="stat-label">Blocked Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="severity">3.8</div>
+                        <div class="stat-label">Avg Severity</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="responseTime">0.2s</div>
+                        <div class="stat-label">Avg Response</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-card" aria-label="Social media">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-share-alt"></i> My Socials
+                    </h2>
+                </div>
+                <div class="sosmed-grid">
+                    <div class="sosmed-btn instagram" onclick="window.open('https://instagram.com/ezravvv', '_blank')">
+                        <i class="fab fa-instagram"></i>
                         <span>Instagram</span>
-                    </button>
-                    <button class="sosmed-btn" onclick="window.open('https://wa.me/6281434046148', '_blank')">
-                        <span>💬</span>
+                    </div>
+                    <div class="sosmed-btn whatsapp" onclick="window.open('https://wa.me/6281434046148', '_blank')">
+                        <i class="fab fa-whatsapp"></i>
                         <span>WhatsApp</span>
-                    </button>
-                    <button class="sosmed-btn" onclick="handleFacebookClick()">
-                        <span>👍</span>
+                    </div>
+                    <div class="sosmed-btn facebook" onclick="handleFacebookClick()">
+                        <i class="fab fa-facebook"></i>
                         <span>Facebook</span>
-                    </button>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="card">
+            </section>
+
+            <section class="dashboard-card" aria-label="Support form">
                 <div class="card-header">
-                    <h3 class="card-title">Contact Support</h3>
-                    <div class="card-icon">✉️</div>
+                    <h2 class="card-title">
+                        <i class="fas fa-envelope"></i> Contact Me
+                    </h2>
                 </div>
-                <form class="support-form" id="supportForm">
-                    <textarea id="supportText" placeholder="Write your message here..."></textarea>
-                    <button type="submit">Send Message</button>
+                <form class="support-form" id="supportForm" aria-live="polite">
+                    <textarea id="supportText" placeholder="Write your message here..." required></textarea>
+                    <button type="submit">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
                 </form>
                 <div id="supportMsg"></div>
-            </div>
+            </section>
         </main>
-        
-        <footer>
-            &copy; 2023 Global Security Dashboard | Designed by EzraVVV
-        </footer>
+
+        <button class="logout-btn" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
     </div>
 
 <script>
-    // Enhanced 3D Earth with better colors
+    // 3D Earth Implementation
     let scene, camera, renderer, earth, controls;
+    let myLatitude = 0;
+    let myLongitude = 0;
     
     function init3DEarth() {
-        // Scene setup with colorful fog
+        // Scene setup
         scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000814, 0.1);
         
         // Camera setup
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 2.5;
         
-        // Enhanced renderer
-        renderer = new THREE.WebGLRenderer({ 
-            antialias: true, 
-            alpha: true,
-            powerPreference: "high-performance"
-        });
+        // Renderer setup
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('earth-container').appendChild(renderer.domElement);
         
-        // Smooth controls
+        // Controls for rotating the Earth
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableZoom = false;
         controls.enablePan = false;
-        controls.rotateSpeed = 0.3;
+        controls.rotateSpeed = 0.5;
         controls.minDistance = 2;
         controls.maxDistance = 2;
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
         
         // Earth geometry
         const geometry = new THREE.SphereGeometry(1, 64, 64);
         
-        // High-quality Earth textures
+        // Earth texture
         const textureLoader = new THREE.TextureLoader();
         const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
         const bumpMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_normal_2048.jpg');
         const specularMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg');
         
-        // Enhanced Earth material
+        // Earth material
         const material = new THREE.MeshPhongMaterial({
             map: earthTexture,
             bumpMap: bumpMap,
-            bumpScale: 0.1,
+            bumpScale: 0.05,
             specularMap: specularMap,
-            specular: new THREE.Color(0x333333),
-            shininess: 10,
-            transparent: true,
-            opacity: 0.95
+            specular: new THREE.Color('grey'),
+            shininess: 5
         });
         
         // Create Earth mesh
         earth = new THREE.Mesh(geometry, material);
         scene.add(earth);
         
-        // Improved lighting
-        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        // Add ambient light
+        const ambientLight = new THREE.AmbientLight(0x333333);
         scene.add(ambientLight);
         
-        const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
-        directionalLight1.position.set(5, 3, 5);
-        scene.add(directionalLight1);
+        // Add directional light (sun)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 3, 5);
+        scene.add(directionalLight);
         
-        const directionalLight2 = new THREE.DirectionalLight(0x00a8ff, 0.5);
-        directionalLight2.position.set(-3, -1, -2);
-        scene.add(directionalLight2);
+        // Add stars
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.05,
+            transparent: true
+        });
         
-        // Colorful stars
-        addColorfulStars();
+        const starsVertices = [];
+        for (let i = 0; i < 10000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starsVertices.push(x, y, z);
+        }
+        
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(stars);
         
         // Animation loop
         function animate() {
@@ -458,6 +562,9 @@
             earth.rotation.y += 0.0005;
             controls.update();
             renderer.render(scene, camera);
+            
+            // Update stats randomly for demo
+            updateStats();
         }
         
         animate();
@@ -470,43 +577,36 @@
         });
     }
     
-    function addColorfulStars() {
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsMaterial = new THREE.PointsMaterial({
-            size: 0.1,
-            transparent: true,
-            opacity: 0.8,
-            vertexColors: true
-        });
+    // Update stats randomly for demo
+    function updateStats() {
+        const attackCount = document.getElementById('attackCount');
+        const blockedCount = document.getElementById('blockedCount');
+        const severity = document.getElementById('severity');
+        const responseTime = document.getElementById('responseTime');
         
-        const starsVertices = [];
-        const starsColors = [];
-        const starColors = [0x00cec9, 0xfd79a8, 0xfdcb6e, 0x6c5ce7, 0xffffff];
+        // Random fluctuations for demo purposes
+        attackCount.textContent = Math.floor(20 + Math.random() * 10);
+        blockedCount.textContent = Math.floor(140 + Math.random() * 20);
+        severity.textContent = (3.5 + Math.random() * 1).toFixed(1);
+        responseTime.textContent = (0.1 + Math.random() * 0.2).toFixed(1) + 's';
+    }
+    
+    // Convert latitude/longitude to 3D vector
+    function latLongToVector3(lat, lon, radius) {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
         
-        for (let i = 0; i < 5000; i++) {
-            const x = (Math.random() - 0.5) * 2000;
-            const y = (Math.random() - 0.5) * 2000;
-            const z = (Math.random() - 0.5) * 2000;
-            starsVertices.push(x, y, z);
-            
-            const color = starColors[Math.floor(Math.random() * starColors.length)];
-            const r = ((color >> 16) & 255) / 255;
-            const g = ((color >> 8) & 255) / 255;
-            const b = (color & 255) / 255;
-            starsColors.push(r, g, b);
-        }
-        
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-        starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(starsColors, 3));
-        
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
+        return new THREE.Vector3(
+            -radius * Math.sin(phi) * Math.cos(theta),
+            radius * Math.cos(phi),
+            radius * Math.sin(phi) * Math.sin(theta)
+        );
     }
     
     // Initialize 3D Earth
     init3DEarth();
     
-    // Geolocation with Leaflet Map
+    // Geolocation with Google Maps
     const mapDiv = document.getElementById('map');
     const locationInfo = document.getElementById('locationInfo');
     let map, marker;
@@ -518,9 +618,9 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
             
-            // Custom colorful marker
-            const colorfulIcon = new L.Icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+            // Custom red marker
+            const redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                 iconSize: [25, 41],
                 iconAnchor: [12, 41],
@@ -528,17 +628,17 @@
                 shadowSize: [41, 41]
             });
             
-            marker = L.marker([lat, lon], {icon: colorfulIcon}).addTo(map);
+            marker = L.marker([lat, lon], {icon: redIcon}).addTo(map);
             
-            // Add accuracy circle
+            // Add circle to show accuracy
             L.circle([lat, lon], {
-                color: '#6c5ce7',
-                fillColor: '#6c5ce7',
+                color: 'red',
+                fillColor: '#f03',
                 fillOpacity: 0.2,
-                radius: 100
+                radius: 100 // Default radius, will be updated
             }).addTo(map);
             
-            // Get address
+            // Reverse geocode to get address
             reverseGeocode(lat, lon);
         } else {
             map.setView([lat, lon], 13);
@@ -547,28 +647,39 @@
     }
     
     function reverseGeocode(lat, lon) {
+        // Using Nominatim (OpenStreetMap's geocoding service)
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
             .then(response => response.json())
             .then(data => {
-                let address = "📍 ";
+                let address = "<i class='fas fa-map-pin'></i> Your location: ";
                 
                 if (data.address) {
                     if (data.address.road) address += data.address.road + ', ';
                     if (data.address.city) address += data.address.city + ', ';
+                    if (data.address.state) address += data.address.state + ', ';
                     if (data.address.country) address += data.address.country;
                     
+                    // Remove trailing comma if exists
                     address = address.replace(/, $/, '');
                 } else {
                     address += `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
                 }
                 
-                locationInfo.textContent = address;
-                marker.bindPopup(address).openPopup();
+                locationInfo.innerHTML = address;
+                marker.bindPopup(address.replace("<i class='fas fa-map-pin'></i> ", "")).openPopup();
+                
+                // Update your location
+                myLatitude = lat;
+                myLongitude = lon;
             })
             .catch(error => {
                 console.error('Geocoding error:', error);
-                locationInfo.textContent = `📍 Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                locationInfo.innerHTML = "<i class='fas fa-map-marker-alt'></i> Coordinates: " + `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
                 marker.bindPopup(`Your location`).openPopup();
+                
+                // Update your location
+                myLatitude = lat;
+                myLongitude = lon;
             });
     }
     
@@ -582,60 +693,60 @@
                 },
                 error => {
                     console.error('Geolocation error:', error);
-                    locationInfo.textContent = "📍 Location access denied. Using default location.";
-                    initMap(-6.2088, 106.8456); // Jakarta
-                }
-            );
-            
-            // Watch position changes
-            navigator.geolocation.watchPosition(
-                position => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
+                    locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Unable to retrieve location. Using default.";
                     
-                    if (marker) {
-                        marker.setLatLng([lat, lon]);
-                        map.setView([lat, lon]);
-                        reverseGeocode(lat, lon);
-                    }
-                }
+                    // Fallback to a default location (Jakarta)
+                    const defaultLat = -6.2088;
+                    const defaultLon = 106.8456;
+                    initMap(defaultLat, defaultLon);
+                },
+                { 
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                           }
             );
         } else {
-            locationInfo.textContent = "📍 Geolocation not supported. Using default location.";
-            initMap(-6.2088, 106.8456); // Jakarta
+            locationInfo.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Geolocation is not supported by this browser.";
+            
+            // Fallback to a default location (Jakarta)
+            const defaultLat = -6.2088;
+            const defaultLon = 106.8456;
+            initMap(defaultLat, defaultLon);
         }
     }
     
-    // Initialize location tracking
     getLocation();
     
-    // Social media functions
-    function handleFacebookClick() {
-        alert('Facebook profile not available');
-    }
-    
-    // Support form handling
     const supportForm = document.getElementById('supportForm');
     const supportMsg = document.getElementById('supportMsg');
     
-    supportForm.addEventListener('submit', function(e) {
+    supportForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const text = document.getElementById('supportText').value.trim();
         
         if (text.length === 0) {
-            supportMsg.textContent = "Please write a message before sending.";
-            supportMsg.style.color = "#fd79a8";
+            supportMsg.textContent = "Silakan tulis pesan sebelum mengirim.";
             return;
         }
         
-        supportMsg.textContent = "Sending message...";
-        supportMsg.style.color = "#00cec9";
+        supportMsg.textContent = "Mengirim pesan...";
         
-        // Simulate sending
-        setTimeout(() => {
-            supportMsg.textContent = "Message sent successfully!";
+        try {
+            await fetch('https://script.google.com/macros/s/AKfycbxL7jegUbHu29NbLReafEdc4ZNiY8kYeN3P0I3XqUfHbSpRWhwuO1WXoO1-PfyPDUuX/exec', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `message=${encodeURIComponent(text)}`
+            });
+            supportMsg.textContent = "Pesan terkirim";
             supportForm.reset();
-        }, 1500);
+        } catch (error) {
+            console.error('Error:', error);
+            supportMsg.textContent = "Pesan mungkin terkirim. Cek spreadsheet untuk memastikan.";
+        }
     });
 </script>
 </body>
