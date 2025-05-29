@@ -9,7 +9,7 @@
         }
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>V Area</title>
     <link rel="icon" type="image/png" href="/imgvidaud/downloadicon.png">
     <style>
@@ -17,8 +17,9 @@
             --neon-green: #0f0;
             --bg-color: #000;
             --scanline-opacity: 0.05;
-            --btn-width: min(250px, 80vw);
-            --base-font-size: clamp(1rem, 2vw, 1.2rem);
+            --btn-width: 280px;
+            --base-font-size: 1.1rem;
+            --heading-font-size: 2rem;
         }
 
         * {
@@ -29,7 +30,7 @@
 
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             font-family: 'Courier New', monospace;
             background-color: var(--bg-color);
             color: var(--neon-green);
@@ -41,6 +42,7 @@
             align-items: center;
             font-size: var(--base-font-size);
             line-height: 1.5;
+            zoom: 1.2;
         }
 
         body::after {
@@ -62,8 +64,9 @@
 
         .center-content {
             text-align: center;
-            width: min(90%, 800px);
-            padding: 2rem 1rem;
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -72,26 +75,27 @@
         h1 {
             margin-bottom: 1.5rem;
             text-shadow: 0 0 5px var(--neon-green);
-            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-size: var(--heading-font-size);
         }
 
         p {
             margin-bottom: 2rem;
+            font-size: 1.2rem;
         }
 
         .btn {
             background: transparent;
             color: var(--neon-green);
             border: 2px solid var(--neon-green);
-            padding: 0.75rem 1.5rem;
-            margin: 0.75rem;
+            padding: 12px 24px;
+            margin: 15px;
             font-family: inherit;
             cursor: pointer;
             transition: all 0.3s ease;
             width: var(--btn-width);
             text-align: center;
             animation: pulse 2s infinite;
-            font-size: var(--base-font-size);
+            font-size: 1.1rem;
             position: relative;
             overflow: hidden;
         }
@@ -156,15 +160,54 @@
             }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            body {
+                zoom: 1;
+                padding: 10px;
+            }
+            
             .center-content {
-                width: 95%;
-                padding: 1rem 0.5rem;
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            p {
+                font-size: 1.1rem;
             }
             
             .btn {
                 width: 90%;
-                margin: 0.5rem auto;
+                max-width: 300px;
+                margin: 10px auto;
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .center-content {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            p {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .btn {
+                font-size: 1rem;
+                padding: 8px 16px;
             }
         }
     </style>
@@ -188,7 +231,6 @@
     </div>
 
     <script>
-        // Check authentication first
         (function checkAuth() {
             const user = sessionStorage.getItem('loggedInUser');
             if (user !== 'elvi') {
@@ -197,12 +239,10 @@
                 return;
             }
             
-            // Load other scripts only if authenticated
             initMainScripts();
         })();
 
         function initMainScripts() {
-            // Optimized force download function
             function forceDownload(url, filename) {
                 return new Promise((resolve, reject) => {
                     try {
@@ -213,7 +253,6 @@
                         document.body.appendChild(a);
                         a.click();
                         
-                        // Cleanup after a short delay
                         setTimeout(() => {
                             document.body.removeChild(a);
                             resolve();
@@ -224,7 +263,6 @@
                 });
             }
 
-            // Download button with loading state
             document.getElementById('downloadBtn').addEventListener('click', async () => {
                 const btn = document.getElementById('downloadBtn');
                 const originalText = btn.textContent;
@@ -246,32 +284,6 @@
                 }
             });
 
-            // Responsive scaling
-            function maintainAspectRatio() {
-                const content = document.querySelector('.center-content');
-                const aspectRatio = 16 / 9;
-                const windowRatio = window.innerWidth / window.innerHeight;
-                
-                if (windowRatio > aspectRatio) {
-                    const scale = Math.min(1, window.innerHeight / 900);
-                    content.style.transform = `scale(${scale})`;
-                } else {
-                    const scale = Math.min(1, window.innerWidth / 1600);
-                    content.style.transform = `scale(${scale})`;
-                }
-            }
-
-            // Debounced resize handler
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(maintainAspectRatio, 100);
-            });
-
-            // Initial setup
-            maintainAspectRatio();
-            
-            // Preload resources
             if ('requestIdleCallback' in window) {
                 window.requestIdleCallback(() => {
                     const links = [
