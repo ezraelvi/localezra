@@ -770,35 +770,7 @@
         </div>
     </div>
 
-    <script>
-        // 3D Earth Implementation
-        let scene, camera, controls;
-        let myLatitude = 0;
-        let myLongitude = 0;     
-            // Add ambient light            
-            const starsVertices = [];
-            for (let i = 0; i < 10000; i++) {
-                const x = (Math.random() - 0.5) * 2000;
-                const y = (Math.random() - 0.5) * 2000;
-                const z = (Math.random() - 0.5) * 2000;
-                starsVertices.push(x, y, z);
-            } 
-            // Animation loop
-            function animate() {
-                controls.update();
-                // Update stats randomly for demo
-                updateStats();
-            }
-            
-            animate();
-            
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        
+    <script> 
         // Update stats randomly for demo
         function updateStats() {
             const attackCount = document.getElementById('attackCount');
