@@ -775,10 +775,6 @@
         let scene, camera, renderer, earth, controls;
         let myLatitude = 0;
         let myLongitude = 0;     
-            // Create Earth mesh
-            earth = new THREE.Mesh(geometry, material);
-            scene.add(earth);
-            
             // Add ambient light
             const ambientLight = new THREE.AmbientLight(0x333333);
             scene.add(ambientLight);
