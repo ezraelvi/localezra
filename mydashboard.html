@@ -1294,6 +1294,14 @@
         sessionStorage.removeItem('loggedInUser');
         window.location.href = 'index.html';
     });
-    </script>
+        // Hapus variabel global terkait Three.js jika ada
+if (typeof scene !== 'undefined') {
+    scene = null;
+    camera = null;
+    renderer = null;
+    earth = null;
+    controls = null;
+}
+</script>
 </body>
 </html>
