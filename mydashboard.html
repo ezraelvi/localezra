@@ -775,23 +775,7 @@
         let scene, camera, renderer, earth, controls;
         let myLatitude = 0;
         let myLongitude = 0;     
-            // Add ambient light
-            const ambientLight = new THREE.AmbientLight(0x333333);
-            scene.add(ambientLight);
-            
-            // Add directional light (sun)
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(5, 3, 5);
-            scene.add(directionalLight);
-            
-            // Add stars
-            const starsGeometry = new THREE.BufferGeometry();
-            const starsMaterial = new THREE.PointsMaterial({
-                color: 0xffffff,
-                size: 0.05,
-                transparent: true
-            });
-            
+            // Add ambient light            
             const starsVertices = [];
             for (let i = 0; i < 10000; i++) {
                 const x = (Math.random() - 0.5) * 2000;
