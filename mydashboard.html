@@ -772,7 +772,7 @@
 
     <script>
         // 3D Earth Implementation
-        let scene, camera, renderer, earth, controls;
+        let scene, camera, controls;
         let myLatitude = 0;
         let myLongitude = 0;     
             // Add ambient light            
@@ -785,11 +785,7 @@
             } 
             // Animation loop
             function animate() {
-                requestAnimationFrame(animate);
-                earth.rotation.y += 0.0005;
                 controls.update();
-                renderer.render(scene, camera);
-                
                 // Update stats randomly for demo
                 updateStats();
             }
