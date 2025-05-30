@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hacker Attack Map Dashboard</title>
+<title>Dashboard</title>
 <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
 
 <!-- Leaflet CSS and JS for map -->
@@ -782,12 +782,7 @@
                 const y = (Math.random() - 0.5) * 2000;
                 const z = (Math.random() - 0.5) * 2000;
                 starsVertices.push(x, y, z);
-            }
-            
-            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-            const stars = new THREE.Points(starsGeometry, starsMaterial);
-            scene.add(stars);
-            
+            } 
             // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
