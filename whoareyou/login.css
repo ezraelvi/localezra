@@ -42,22 +42,18 @@ body {
     border: none;
 }
 
+/* Ganti border panel */
 .panel-info {
-    border-color: #009efb;
+    border: 1px solid #009efb;
+    border-top: none; /* Hilangkan border atas */
+    border-radius: 0 0 4px 4px; /* Radius hanya di pojok bawah */
 }
 
-.panel-info > .panel-heading {
-    color: #fff;
-    background-color: #009efb;
-    border-color: #009efb;
-    font-weight: 600;
-    text-align: center;
-    font-size: 18px;
-    padding: 12px 15px;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
+/* Sesuaikan header */
+.panel-heading {
+    border-radius: 4px 4px 0 0 !important; /* Radius hanya di pojok atas */
+    border-bottom: none; /* Hilangkan border bawah header */
 }
-
 .panel-body {
     padding: 30px;
     background-color: #fff;
