@@ -1,201 +1,337 @@
 <!DOCTYPE html>
-<html lang="id">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="title" content="Local Life">
-        <meta name="description" content="Selamat datang di Local Life - Layanan terbaik untuk Anda">
-        <title>Local Life | Login</title>
-        <link rel="dns-prefetch" href="//fonts.googleapis.com">
-        <meta name="msapplication-TileColor" content="#ffffff">
-        <meta name="msapplication-TileImage" content="#ffffff">
-        <meta name="theme-color" content="#009efb">
-        <meta name="msapplication-navbutton-color" content="#009efb">
-        <meta name="apple-mobile-web-app-status-bar-style" content="#009efb">
-        <!-- Styles -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
-        <link rel="stylesheet" href="whoareyou/login.css">
-        <link rel="icon" type="image/png"  href="/whoareyou/indexicon.png">
-        <style>
-            body {
-                background-color: #000000;
-            }
+<html>
+<head>
+  <title>LOCAL LIFE SECURE VAULT</title>
+     <link rel="icon" type="image/png"  href="/whoareyou/indexicon.png">
+  <style>
+    /* 🎨 WARNA KHUSUS UNTUKMU */
+    :root {
+      --glow: #00ff88;
+      --dark: #0a0a12;
+      --error: #ff0033;
+      --scan-speed: 3s;
+    }
 
-            .fa-btn {
-                margin-right: 6px;
-            }
+    /* 🖥️ TAMPILAN UTAMA */
+    body {
+      background: radial-gradient(circle at center, #0a0a20, #000000);
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Courier New', monospace;
+      color: var(--glow);
+      overflow: hidden;
+    }
 
-            .footer {
-                text-align: center;
-                font-size: smaller;
-                padding: 5px;
-                color: white;
-                background-color: #000;
-                bottom: 0px;
-                width: 100%;
-                position: fixed;
-            }
+    .vault {
+      width: 320px;
+      height: 420px;
+      background: rgba(10,10,20,0.9);
+      border-radius: 16px;
+      border: 1px solid var(--glow);
+      box-shadow: 
+        0 0 30px rgba(0,255,136,0.2),
+        inset 0 0 20px rgba(0,255,136,0.1);
+      position: relative;
+      overflow: hidden;
+    }
 
-            .navbar-inverse .navbar-brand,.navbar-inverse .navbar-nav>li>a {
-                color: #fff;
-            }
-            
-            .separator {
-                display: flex;
-                align-items: center;
-                text-align: center;
-                color: #aaa;
-                margin: 20px 0;
-            }
+    /* 🖐️ FINGERPRINT SCANNER */
+    .fingerprint {
+      width: 160px;
+      height: 200px;
+      margin: 30px auto;
+      background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat;
+      position: relative;
+      filter: drop-shadow(0 0 5px var(--glow));
+    }
 
-            .separator::before, .separator::after {
-                content: '';
-                flex: 1;
-                border-bottom: 1px solid #eee;
-            }
+    .ridges {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M10,15 Q50,-5 90,15 Q100,35 90,55 Q80,75 50,85 Q20,75 10,55 Q0,35 10,15" fill="none" stroke="%2300ff8833" stroke-width="0.3"/></svg>') center/contain no-repeat;
+    }
 
-            .separator:not(:empty)::before {
-                margin-right: .25em;
-            }
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to bottom, transparent, var(--glow), transparent);
+      animation: scan var(--scan-speed) linear infinite;
+      opacity: 0;
+    }
 
-            .separator:not(:empty)::after {
-                margin-left: .25em;
-            }
+    /* 🚨 DARURAT MODE */
+    .under-attack {
+      animation: attack-pulse 0.8s infinite;
+    }
 
-            .google-login {
-                margin: 40px 0px;
-            }
-            
-            .panel-info {
-                border-color: #009efb;
-            }
-            
-            .panel-info > .panel-heading {
-                color: #fff;
-                background-color: #009efb;
-                border-color: #009efb;
-            }
-        </style>
-    </head>
-    <body id="app-layout">
-        <nav class="navbar navbar-inverse navbar-static-top">
-            <div class="container">
-                <div class="navbar-header">
-    <a class="navbar-brand" href="#">
-        <img width="160px" src="assets/images/logo.png" alt="Local Life"/>
-    </a>
-    <button type="button" class="navbar-toggle" style="
-        float: right;
-        margin: 8px 0;
-        padding: 9px 10px;
-        background: transparent;
-        border: none;
-    ">
-        <span class="icon-bar" style="background: white;"></span>
-        <span class="icon-bar" style="background: white;"></span>
-        <span class="icon-bar" style="background: white;"></span>
-    </button>
-</div>
-                    <a class="navbar-brand" href="#">
-                        <img width="160px" src="whoareyou/topezra.png" class="img-responsive" alt="Local Life Logo"/>
-                    </a>
-                </div>
-                <div class="collapse navbar-collapse" id="app-navbar-collapse">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="nav navbar-nav"></ul>
-                    <!-- Right Side Of Navbar -->
-                    <ul class="nav navbar-nav navbar-right">
-                        <!-- Authentication Links -->
-                        <li>
-                            <a href="dashboard.html">Beranda</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        
-        <div class="container">
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="panel panel-info">
-                        <div class="panel-heading">Login ke Local Life</div>
-                        <div class="panel-body">
-                            <center>
-                                <img class="img-responsive" src="whoareyou/responsiv.png" width="130px" alt="Local Life Icon"/>
-                            </center>
-                            <br/>
-                            <br/>
-                            <form class="form-horizontal" role="form" method="POST" action="auth/login">
-                                <input type="hidden" name="_token" value="">
-                                <div class="form-group">
-                                    <label for="email" class="col-md-4 control-label">Username</label>
-                                    <div class="col-md-6">
-                                        <input id="email" placeholder="username/email" type="text" class="form-control" name="email" value="" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password" class="col-md-4 control-label">Password</label>
-                                    <div class="col-md-6">
-                                        <input id="password" placeholder="Masukkan password" autocomplete="off" type="password" style="font-family:'Courier New', Courier, monospace;" class="form-control" name="password" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-6 col-md-offset-4">
-                                        <div class="checkbox" style="display: flex; align-items: center;">
-                                            <input id="sp" type="checkbox" onclick="showpswrd()" style="margin: 0 5px 0 0;">
-                                            <label for="sp" style="margin: 0;">Tampilkan Password</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-6 col-md-offset-4">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fa fa-btn fa-sign-in"></i>
-                                            Login
-                                        </button>
-                                        <a class="btn btn-link" href="auth/forgot-password">Lupa Password?</a>
-                                    </div>
-                                </div>
-                            </form>
-                            <div class="text-center google-login">
-                                <div class="separator">ATAU</div>
-                                <a class="btn btn-danger" href="auth/google">
-                                    <i class='fa fa-google'></i>
-                                    Login dengan Google
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer">&copy;2025 - 2030 Local Life | SRV-1748559791 | Your IP: 140.213.28.49</div>
-        
-        <!-- JavaScripts -->
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"></script>
-        <script>
-            $(function() {
-                if ($(window).width() < 500) {
-                    var title = $('.app-title-name').html();
-                    var limit = 25;
-                    if (title > limit) {
-                        title = title.substring(0, limit);
-                        $('.app-title-name').html(title);
-                    }
-                }
-            });
-            
-            function showpswrd() {
-                var x = document.getElementById("password");
-                if (x.type === "password") {
-                    x.type = "text";
-                } else {
-                    x.type = "password";
-                }
-            }
-        </script>
-    </body>
+    /* 📟 STATUS & KODE */
+    .status {
+      text-align: center;
+      margin-top: 20px;
+      height: 20px;
+      font-size: 14px;
+      text-shadow: 0 0 5px var(--glow);
+    }
+
+    .code-display {
+      position: absolute;
+      bottom: 70px;
+      width: 90%;
+      left: 5%;
+      height: 60px;
+      background: rgba(0,0,0,0.5);
+      border: 1px dashed var(--glow);
+      font-size: 10px;
+      padding: 5px;
+      overflow: hidden;
+      display: none;
+    }
+
+    /* 🎮 TOMBOL INTERAKSI */
+    .auth-btn {
+      background: transparent;
+      border: 1px solid var(--glow);
+      color: var(--glow);
+      padding: 10px 25px;
+      border-radius: 20px;
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+    }
+
+    .auth-btn:hover {
+      box-shadow: 0 0 15px var(--glow);
+      letter-spacing: 1px;
+    }
+
+    /* ✨ ANIMASI KHUSUS */
+    @keyframes scan {
+      0% { top: 0; opacity: 0; }
+      5% { opacity: 1; }
+      95% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    @keyframes attack-pulse {
+      0%, 100% { box-shadow: 0 0 10px var(--error); }
+      50% { box-shadow: 0 0 30px var(--error); }
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="vault" id="vault">
+    <div class="fingerprint" id="scanner">
+      <div class="ridges"></div>
+      <div class="scan-line" id="scanLine"></div>
+    </div>
+    
+    <div class="status" id="status">READY FOR SCAN</div>
+    
+    <div class="code-display" id="codeDisplay"></div>
+    
+    <button class="auth-btn" id="authBtn">START SCAN</button>
+  </div>
+
+  <script>
+    // ======================
+    // 🧩 KONFIGURASI UTAMA
+    // ======================
+    const config = {
+      maxAttempts: 3,
+      lockDuration: 5000,
+      scanDuration: 3000,
+      secretCode: "LOCALLIFE"
+    };
+
+    // ======================
+    // 🎛️ INISIALISASI SISTEM
+    // ======================
+    const vault = document.getElementById('vault');
+    const scanner = document.getElementById('scanner');
+    const scanLine = document.getElementById('scanLine');
+    const status = document.getElementById('status');
+    const authBtn = document.getElementById('authBtn');
+    const codeDisplay = document.getElementById('codeDisplay');
+
+    let isScanning = false;
+    let isLocked = false;
+    let attemptCount = 0;
+    let audioCtx;
+
+    // ======================
+    // 🔊 SISTEM AUDIO
+    // ======================
+    function initAudio() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playBeep(freq, dur, type='sine') {
+      if (!audioCtx) initAudio();
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = type;
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      osc.start();
+      
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001, 
+        audioCtx.currentTime + dur
+      );
+      
+      osc.stop(audioCtx.currentTime + dur);
+    }
+
+    // ======================
+    // 🔒 PROSES AUTHENTIKASI
+    // ======================
+    authBtn.addEventListener('click', () => {
+      if (isScanning || isLocked) return;
+      startScan();
+    });
+
+    function startScan() {
+      isScanning = true;
+      status.textContent = "SCANNING...";
+      scanLine.style.opacity = "1";
+      playBeep(800, 0.3);
+      
+      // Highlight ridges based on mouse position
+      scanner.addEventListener('mousemove', highlightRidges);
+      
+      setTimeout(() => {
+        finishScan();
+      }, config.scanDuration);
+    }
+
+    function highlightRidges(e) {
+      const rect = scanner.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      scanner.style.background = 
+        `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat, 
+        radial-gradient(circle at ${x}px ${y}px, rgba(0,255,136,0.3) 0%, transparent 70%)`;
+    }
+
+    function finishScan() {
+      isScanning = false;
+      scanLine.style.opacity = "0";
+      scanner.removeEventListener('mousemove', highlightRidges);
+      attemptCount++;
+      
+      if (attemptCount % config.maxAttempts === 0) {
+        triggerLockdown();
+      } else {
+        status.textContent = `SCAN FAILED (${attemptCount}/${config.maxAttempts})`;
+        playBeep(400, 0.2);
+        setTimeout(() => status.textContent = "READY FOR SCAN", 1500);
+      }
+    }
+
+    // ======================
+    // 🚨 LOCKDOWN SYSTEM
+    // ======================
+    function triggerLockdown() {
+      isLocked = true;
+      status.textContent = "SECURITY LOCKDOWN";
+      vault.classList.add('under-attack');
+      
+      // Play error sequence
+      playBeep(200, 0.2, 'square');
+      setTimeout(() => playBeep(150, 0.3, 'square'), 100);
+      setTimeout(() => playBeep(100, 0.4, 'square'), 200);
+      
+      // Show encryption code
+      showEncryptionCode();
+      
+      // Auto reset
+      setTimeout(resetSystem, config.lockDuration);
+    }
+
+    function showEncryptionCode() {
+      codeDisplay.style.display = "block";
+      codeDisplay.innerHTML = 
+        `<span style="color:#ff5555">// ENCRYPTION ACTIVATED</span>\n` +
+        `<span style="color:#00ff88">void</span> secure_decrypt() {\n` +
+        `  <span style="color:#00ff88">if</span> (auth_attempts >= ${config.maxAttempts}) {\n` +
+        `    <span style="color:#ff5555">firewall</span>(0x${Math.random().toString(16).substr(2,8)});\n` +
+        `    <span style="color:#00ff88">return</span> <span style="color:#ff5555">LOCKDOWN</span>;\n` +
+        `  }\n` +
+        `}`;
+    }
+
+    function resetSystem() {
+      isLocked = false;
+      attemptCount = 0;
+      vault.classList.remove('under-attack');
+      codeDisplay.style.display = "none";
+      status.textContent = "SYSTEM RESET";
+      playBeep(600, 0.5);
+      
+      setTimeout(() => {
+        status.textContent = "READY FOR SCAN";
+      }, 2000);
+    }
+
+    // ======================
+    // 🎮 BACKDOOR & EASTER EGGS
+    // ======================
+    // Secret code: Ketik "LOCALLIFE" untuk bypass
+    let keyBuffer = [];
+    document.addEventListener('keydown', (e) => {
+      keyBuffer.push(e.key.toUpperCase());
+      if (keyBuffer.length > config.secretCode.length) {
+        keyBuffer.shift();
+      }
+      
+      if (keyBuffer.join('') === config.secretCode) {
+        status.textContent = "DEVELOPER MODE ACTIVATED";
+        vault.style.borderColor = "#ff00ff";
+        playBeep(1000, 0.5);
+      }
+    });
+
+    // Triple click emergency override
+    scanner.addEventListener('click', () => {
+      if (isLocked) {
+        attemptCount = 0;
+        resetSystem();
+      }
+    });
+
+    // ======================
+    // 🚀 INISIALISASI AWAL
+    // ======================
+    // Aktifkan audio setelah interaksi pertama
+    authBtn.addEventListener('click', initAudio, { once: true });
+  </script>
+</body>
 </html>
