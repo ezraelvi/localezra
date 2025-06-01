@@ -19,12 +19,10 @@
   
   <script>
     let minutes = 0;
-    let seconds = 30;
-    
+    let seconds = 30;    
     function updateTimer() {
       document.getElementById('countdown').textContent = 
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;      
       if (seconds === 0) {
         if (minutes === 0) {
           document.cookie = 'blocked=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -35,11 +33,9 @@
         seconds = 29;
       } else {
         seconds--;
-      }
-      
+      }      
       setTimeout(updateTimer, 1000);
-    }
-    
+    }    
     updateTimer();
   </script>
 </body>
