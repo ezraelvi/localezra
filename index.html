@@ -188,6 +188,7 @@
       maxAttempts: 3,
       lockDuration: 1000,
       scanDuration: 3000,
+      pressDuration: 300, // Time needed to hold for scan (ms)
       secretCode: "LOCALLIFE",
       attemptCookieExpiry: 10 // minutes
     };
@@ -199,7 +200,6 @@
     const scanner = document.getElementById('scanner');
     const scanLine = document.getElementById('scanLine');
     const status = document.getElementById('status');
-    const authBtn = document.getElementById('authBtn');
     const bypassBtn = document.getElementById('bypassBtn');
     const codeDisplay = document.getElementById('codeDisplay');
     const ipDisplay = document.getElementById('ipDisplay');
@@ -207,6 +207,7 @@
     let isScanning = false;
     let isLocked = false;
     let audioCtx;
+    let pressTimer;
 
     // ======================
     // 🍪 COOKIE MANAGEMENT
@@ -275,13 +276,34 @@
     }
 
     // ======================
+    // 🖐️ TOUCH/PRESS HANDLING
+    // ======================
+    scanner.addEventListener('mousedown', handlePressStart);
+    scanner.addEventListener('touchstart', handlePressStart);
+    
+    scanner.addEventListener('mouseup', handlePressEnd);
+    scanner.addEventListener('mouseleave', handlePressEnd);
+    scanner.addEventListener('touchend', handlePressEnd);
+
+    function handlePressStart(e) {
+        if (isScanning || isLocked) return;
+        if (e.type === 'touchstart') e.preventDefault();
+        
+        pressTimer = setTimeout(() => {
+            startScan();
+        }, config.pressDuration);
+    }
+
+    function handlePressEnd() {
+        clearTimeout(pressTimer);
+        if (!isScanning) {
+            scanLine.style.opacity = "0";
+        }
+    }
+
+    // ======================
     // 🔒 AUTHENTICATION PROCESS
     // ======================
-    authBtn.addEventListener('click', () => {
-      if (isScanning || isLocked) return;
-      startScan();
-    });
-
     function startScan() {
       isScanning = true;
       status.textContent = "SCANNING...";
@@ -327,11 +349,9 @@
       status.textContent = "SECURITY LOCKDOWN";
       vault.classList.add('under-attack');
       
-      // Set block cookie for 5 minutes
       setCookie('blocked', 'true', 1);
       resetAttempts();
       
-      // Error sound sequence
       playBeep(200, 0.2, 'square');
       setTimeout(() => playBeep(150, 0.3, 'square'), 100);
       setTimeout(() => playBeep(100, 0.4, 'square'), 200);
@@ -355,7 +375,6 @@
     // ======================
     // 🎮 SPECIAL FEATURES
     // ======================
-    // Secret code bypass
     let keyBuffer = [];
     document.addEventListener('keydown', (e) => {
       keyBuffer.push(e.key.toUpperCase());
@@ -371,7 +390,6 @@
       }
     });
 
-    // Emergency override
     scanner.addEventListener('dblclick', () => {
       if (isLocked) {
         deleteCookie('blocked');
@@ -379,7 +397,6 @@
       }
     });
 
-    // Bypass to dashboard
     bypassBtn.addEventListener('click', () => {
       resetAttempts();
       window.location.href = 'dashboard/index.html';
@@ -388,20 +405,16 @@
     // ======================
     // 🚀 INITIALIZATION
     // ======================
-    // Initialize system
     function init() {
-      // Check if blocked
       if (getCookie('blocked')) {
         window.location.href = 'whoareyou/index.html';
         return;
       }
 
-      // Show bypass button if previous attempts exist
       if (getAttemptCount() > 0) {
         bypassBtn.style.display = 'block';
       }
 
-      // Get IP address
       fetch('https://api.ipify.org?format=json')
         .then(res => res.json())
         .then(data => {
@@ -412,10 +425,10 @@
         });
 
       // Initialize audio on first interaction
-      authBtn.addEventListener('click', initAudio, { once: true });
+      scanner.addEventListener('mousedown', initAudio, { once: true });
+      scanner.addEventListener('touchstart', initAudio, { once: true });
     }
 
-    // Start the system
     init();
 </script>
 </body>
