@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LOCAL LIFE SECURE VAULT</title>
+  <title>SECURE V LOCAL</title>
   <link rel="icon" type="image/png"  href="/whoareyou/indexicon.png">
   <style>
     /* 🎨 WARNA KHUSUS UNTUKMU */
@@ -317,7 +317,7 @@
       if (attemptCount >= config.maxAttempts) {
         triggerLockdown();
       } else {
-        status.textContent = `SCAN FAILED (${attemptCount}/${config.maxAttempts})`;
+        status.textContent = `UNKNOWN FINGERPRINT  (${attemptCount}/${config.maxAttempts})`;
         playBeep(400, 0.2);
         bypassBtn.style.display = 'block';
         setTimeout(() => status.textContent = "READY FOR SCAN", 1500);
