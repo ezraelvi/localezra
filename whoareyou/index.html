@@ -1,1 +1,46 @@
-1
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ACCESS BLOCKED</title>
+  <style>
+    body {
+      background: black;
+      color: red;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>SYSTEM LOCKED</h1>
+  <p>Too many failed attempts. Please wait 5 minutes.</p>
+  <p id="countdown">05:00</p>
+  
+  <script>
+    let minutes = 5;
+    let seconds = 0;
+    
+    function updateTimer() {
+      document.getElementById('countdown').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (seconds === 0) {
+        if (minutes === 0) {
+          document.cookie = 'blocked=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          window.location.href = 'index.html';
+          return;
+        }
+        minutes--;
+        seconds = 59;
+      } else {
+        seconds--;
+      }
+      
+      setTimeout(updateTimer, 1000);
+    }
+    
+    updateTimer();
+  </script>
+</body>
+</html>
