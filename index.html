@@ -168,41 +168,85 @@
     Your IP: Loading...
   </div>
 
-  <script>
+<script>
     // ======================
-    // 🧩 KONFIGURASI UTAMA
+    // 🧩 MAIN CONFIGURATION
     // ======================
     const config = {
       maxAttempts: 3,
       lockDuration: 5000,
       scanDuration: 3000,
-      secretCode: "LOCALLIFE"
+      secretCode: "LOCALLIFE",
+      attemptCookieExpiry: 10 // minutes
     };
 
     // ======================
-    // 🎛️ INISIALISASI SISTEM
+    // 🎛️ SYSTEM INITIALIZATION
     // ======================
     const vault = document.getElementById('vault');
     const scanner = document.getElementById('scanner');
     const scanLine = document.getElementById('scanLine');
     const status = document.getElementById('status');
     const authBtn = document.getElementById('authBtn');
+    const bypassBtn = document.getElementById('bypassBtn');
     const codeDisplay = document.getElementById('codeDisplay');
+    const ipDisplay = document.getElementById('ipDisplay');
 
     let isScanning = false;
     let isLocked = false;
-    let attemptCount = 0;
     let audioCtx;
 
     // ======================
-    // 🔊 SISTEM AUDIO
+    // 🍪 COOKIE MANAGEMENT
+    // ======================
+    function setCookie(name, value, minutes) {
+        const date = new Date();
+        date.setTime(date.getTime() + (minutes * 60 * 1000));
+        document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [cookieName, cookieValue] = cookie.trim().split('=');
+            if (cookieName === name) return cookieValue;
+        }
+        return null;
+    }
+
+    function deleteCookie(name) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+    }
+
+    // ======================
+    // 🔄 ATTEMPT MANAGEMENT
+    // ======================
+    function getAttemptCount() {
+        const attempts = getCookie('login_attempts');
+        return attempts ? parseInt(attempts) : 0;
+    }
+
+    function updateAttemptCount() {
+        const newCount = getAttemptCount() + 1;
+        setCookie('login_attempts', newCount, config.attemptCookieExpiry);
+        return newCount;
+    }
+
+    function resetAttempts() {
+        deleteCookie('login_attempts');
+    }
+
+    // ======================
+    // 🔊 AUDIO SYSTEM
     // ======================
     function initAudio() {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
     }
 
     function playBeep(freq, dur, type='sine') {
-      if (!audioCtx) initAudio();
+      initAudio();
       
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -214,17 +258,12 @@
       
       gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
       osc.start();
-      
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001, 
-        audioCtx.currentTime + dur
-      );
-      
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
       osc.stop(audioCtx.currentTime + dur);
     }
 
     // ======================
-    // 🔒 PROSES AUTHENTIKASI
+    // 🔒 AUTHENTICATION PROCESS
     // ======================
     authBtn.addEventListener('click', () => {
       if (isScanning || isLocked) return;
@@ -237,12 +276,8 @@
       scanLine.style.opacity = "1";
       playBeep(800, 0.3);
       
-      // Highlight ridges based on mouse position
       scanner.addEventListener('mousemove', highlightRidges);
-      
-      setTimeout(() => {
-        finishScan();
-      }, config.scanDuration);
+      setTimeout(finishScan, config.scanDuration);
     }
 
     function highlightRidges(e) {
@@ -259,13 +294,15 @@
       isScanning = false;
       scanLine.style.opacity = "0";
       scanner.removeEventListener('mousemove', highlightRidges);
-      attemptCount++;
       
-      if (attemptCount % config.maxAttempts === 0) {
+      const attemptCount = updateAttemptCount();
+      
+      if (attemptCount >= config.maxAttempts) {
         triggerLockdown();
       } else {
         status.textContent = `SCAN FAILED (${attemptCount}/${config.maxAttempts})`;
         playBeep(400, 0.2);
+        bypassBtn.style.display = 'block';
         setTimeout(() => status.textContent = "READY FOR SCAN", 1500);
       }
     }
@@ -278,16 +315,17 @@
       status.textContent = "SECURITY LOCKDOWN";
       vault.classList.add('under-attack');
       
-      // Play error sequence
+      // Set block cookie for 5 minutes
+      setCookie('blocked', 'true', 5);
+      resetAttempts();
+      
+      // Error sound sequence
       playBeep(200, 0.2, 'square');
       setTimeout(() => playBeep(150, 0.3, 'square'), 100);
       setTimeout(() => playBeep(100, 0.4, 'square'), 200);
       
-      // Show encryption code
       showEncryptionCode();
-      
-      // Auto reset
-      setTimeout(resetSystem, config.lockDuration);
+      setTimeout(() => window.location.href = 'blocked.html', 2000);
     }
 
     function showEncryptionCode() {
@@ -296,29 +334,16 @@
         `<span style="color:#ff5555">// ENCRYPTION ACTIVATED</span>\n` +
         `<span style="color:#00ff88">void</span> secure_decrypt() {\n` +
         `  <span style="color:#00ff88">if</span> (auth_attempts >= ${config.maxAttempts}) {\n` +
-        `    <span style="color:#ff5555">firewall</span>(0x${Math.random().toString(16).substr(2,8)});\n` +
+        `    <span style="color:#ff5555">firewall</span>(0x${Math.random().toString(16).slice(2,10)});\n` +
         `    <span style="color:#00ff88">return</span> <span style="color:#ff5555">LOCKDOWN</span>;\n` +
         `  }\n` +
         `}`;
     }
 
-    function resetSystem() {
-      isLocked = false;
-      attemptCount = 0;
-      vault.classList.remove('under-attack');
-      codeDisplay.style.display = "none";
-      status.textContent = "SYSTEM RESET";
-      playBeep(600, 0.5);
-      
-      setTimeout(() => {
-        status.textContent = "READY FOR SCAN";
-      }, 2000);
-    }
-
     // ======================
-    // 🎮 BACKDOOR & EASTER EGGS
+    // 🎮 SPECIAL FEATURES
     // ======================
-    // Secret code: Ketik "LOCALLIFE" untuk bypass
+    // Secret code bypass
     let keyBuffer = [];
     document.addEventListener('keydown', (e) => {
       keyBuffer.push(e.key.toUpperCase());
@@ -330,172 +355,56 @@
         status.textContent = "DEVELOPER MODE ACTIVATED";
         vault.style.borderColor = "#ff00ff";
         playBeep(1000, 0.5);
+        resetAttempts();
       }
     });
 
-    // Triple click emergency override
-    scanner.addEventListener('click', () => {
+    // Emergency override
+    scanner.addEventListener('dblclick', () => {
       if (isLocked) {
-        attemptCount = 0;
-        resetSystem();
+        deleteCookie('blocked');
+        window.location.reload();
       }
     });
 
-    // ======================
-    // 🚀 INISIALISASI AWAL
-    // ======================
-    // Aktifkan audio setelah interaksi pertama
-    authBtn.addEventListener('click', initAudio, { once: true });
-    if (document.cookie.includes('blocked=true')) {
-      window.location.href = 'blocked.html';
-    }
-
-    // 📡 Dapatkan IP User via Cloudflare
-    fetch('https://cloudflare-worker-url.workers.dev/get-ip')
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('ipDisplay').textContent = `Your IP: ${data.ip}`;
-      });
-
-    // 🖐️ Simulasi Fingerprint Scan
-    let attemptCount = 0;
-    const fingerprintBtn = document.getElementById('fingerprintBtn');
-    const bypassBtn = document.getElementById('bypassBtn');
-
-    fingerprintBtn.addEventListener('click', () => {
-      attemptCount++;
-      
-      // Simulasi gagal pertama
-      if (attemptCount === 1) {
-        alert('Fingerprint not recognized');
-        bypassBtn.style.display = 'inline';
-        return;
-      }
-      // Blokir setelah 3x gagal
-      if (attemptCount >= 3) {
-        document.cookie = 'blocked=true; max-age=300; path=/'; // Blokir 5 menit
-        window.location.href = 'blocked.html';
-        return;
-      }
-    });
-
-    // 🚪 Bypass ke dashboard
+    // Bypass to dashboard
     bypassBtn.addEventListener('click', () => {
+      resetAttempts();
       window.location.href = 'dashboard.html';
     });
-    
-    // ======================
-    // 🍪 COOKIE MANAGEMENT
-    // ======================
-    function setCookie(name, value, minutes) {
-        const date = new Date();
-        date.setTime(date.getTime() + (minutes * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = name + "=" + value + ";" + expires + ";path=/";
-    }
-
-    function getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) == ' ') c = c.substring(1);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length);
-        }
-        return null;
-    }
-
-    function deleteCookie(name) {
-        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    }
-
-    // ======================
-    // 🧩 INITIALIZE ATTEMPTS
-    // ======================
-    function initializeAttempts() {
-        const attemptsCookie = getCookie('login_attempts');
-        if (attemptsCookie) {
-            attemptCount = parseInt(attemptsCookie);
-            // Show bypass button if already failed once
-            if (attemptCount >= 1) {
-                bypassBtn.style.display = 'block';
-            }
-        }
-    }
-
-    // ======================
-    // 🔄 UPDATE ATTEMPT COUNT
-    // ======================
-    function updateAttemptCount() {
-        attemptCount++;
-        setCookie('login_attempts', attemptCount, 10); // 10 minutes expiration
-        
-        // Show bypass button after first failed attempt
-        if (attemptCount === 1) {
-            bypassBtn.style.display = 'block';
-        }
-    }
 
     // ======================
     // 🚀 INITIALIZATION
     // ======================
-    // Initialize attempt count from cookie
-    initializeAttempts();
-
-    // Check if blocked
-    if (getCookie('blocked')) {
+    // Initialize system
+    function init() {
+      // Check if blocked
+      if (getCookie('blocked')) {
         window.location.href = 'blocked.html';
+        return;
+      }
+
+      // Show bypass button if previous attempts exist
+      if (getAttemptCount() > 0) {
+        bypassBtn.style.display = 'block';
+      }
+
+      // Get IP address
+      fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => {
+          ipDisplay.textContent = `Your IP: ${data.ip}`;
+        })
+        .catch(() => {
+          ipDisplay.textContent = 'Your IP: Unknown';
+        });
+
+      // Initialize audio on first interaction
+      authBtn.addEventListener('click', initAudio, { once: true });
     }
 
-    // In your existing finishScan() function, replace attemptCount++ with:
-    function finishScan() {
-        isScanning = false;
-        scanLine.style.opacity = "0";
-        scanner.removeEventListener('mousemove', highlightRidges);
-        
-        updateAttemptCount(); // Instead of attemptCount++
-        
-        if (attemptCount >= config.maxAttempts) {
-            triggerLockdown();
-        } else {
-            status.textContent = `SCAN FAILED (${attemptCount}/${config.maxAttempts})`;
-            playBeep(400, 0.2);
-            setTimeout(() => status.textContent = "READY FOR SCAN", 1500);
-        }
-    }
-
-    // Modified triggerLockdown() function:
-    function triggerLockdown() {
-        isLocked = true;
-        status.textContent = "SECURITY LOCKDOWN";
-        vault.classList.add('under-attack');
-        
-        // Set block cookie for 5 minutes
-        setCookie('blocked', 'true', 5);
-        
-        // Clear attempt count
-        deleteCookie('login_attempts');
-        
-        // Play error sequence
-        playBeep(200, 0.2, 'square');
-        setTimeout(() => playBeep(150, 0.3, 'square'), 100);
-        setTimeout(() => playBeep(100, 0.4, 'square'), 200);
-        
-        // Show encryption code
-        showEncryptionCode();
-        
-        // Redirect to blocked page
-        setTimeout(() => {
-            window.location.href = 'blocked.html';
-        }, 2000);
-    }
-
-    // In your reset function (when successful login or timeout):
-    function resetAttempts() {
-        attemptCount = 0;
-        deleteCookie('login_attempts');
-        bypassBtn.style.display = 'none';
-    }
-  </script>
+    // Start the system
+    init();
+</script>
 </body>
 </html>
