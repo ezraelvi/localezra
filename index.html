@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>LOCAL LIFE SECURE VAULT</title>
-  <link rel="icon" type="image/png" href="/whoareyou/indexicon.png">
+  <link rel="icon" type="image/png"  href="/whoareyou/indexicon.png">
   <style>
     /* 🎨 WARNA KHUSUS UNTUKMU */
     :root {
@@ -117,19 +117,6 @@
       letter-spacing: 1px;
     }
 
-    .bypass-btn {
-      background: transparent;
-      border: none;
-      color: #2196F3;
-      cursor: pointer;
-      text-decoration: underline;
-      position: absolute;
-      bottom: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-    }
-
     /* ✨ ANIMASI KHUSUS */
     @keyframes scan {
       0% { top: 0; opacity: 0; }
@@ -143,6 +130,14 @@
       50% { box-shadow: 0 0 30px var(--error); }
     }
 
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
     .ip-display {
       position: fixed;
       bottom: 10px;
@@ -164,10 +159,12 @@
     <div class="code-display" id="codeDisplay"></div>
     
     <button class="auth-btn" id="authBtn">START SCAN</button>
-    <button class="bypass-btn" id="bypassBtn">VISITING</button>
   </div>
-
-  <div class="ip-display" id="ipDisplay">
+   <button class="bypass-btn" id="bypassBtn" style="display:none">
+      VISITING
+   </button>
+  </div>
+    <div class="ip-display" id="ipDisplay">
     Your IP: Loading...
   </div>
 
@@ -177,7 +174,7 @@
     // ======================
     const config = {
       maxAttempts: 3,
-      lockDuration: 1000,
+      lockDuration: 5000,
       scanDuration: 3000,
       secretCode: "LOCALLIFE"
     };
@@ -190,9 +187,7 @@
     const scanLine = document.getElementById('scanLine');
     const status = document.getElementById('status');
     const authBtn = document.getElementById('authBtn');
-    const bypassBtn = document.getElementById('bypassBtn');
     const codeDisplay = document.getElementById('codeDisplay');
-    const ipDisplay = document.getElementById('ipDisplay');
 
     let isScanning = false;
     let isLocked = false;
@@ -271,7 +266,6 @@
       } else {
         status.textContent = `SCAN FAILED (${attemptCount}/${config.maxAttempts})`;
         playBeep(400, 0.2);
-        bypassBtn.style.display = 'block';
         setTimeout(() => status.textContent = "READY FOR SCAN", 1500);
       }
     }
@@ -292,13 +286,8 @@
       // Show encryption code
       showEncryptionCode();
       
-      // Set cookie for 5 minute block
-      document.cookie = 'blocked=true; max-age=300; path=/';
-      
       // Auto reset
-      setTimeout(() => {
-        window.location.href = '/whoareyou/index.html';
-      }, 1000);
+      setTimeout(resetSystem, config.lockDuration);
     }
 
     function showEncryptionCode() {
@@ -311,6 +300,19 @@
         `    <span style="color:#00ff88">return</span> <span style="color:#ff5555">LOCKDOWN</span>;\n` +
         `  }\n` +
         `}`;
+    }
+
+    function resetSystem() {
+      isLocked = false;
+      attemptCount = 0;
+      vault.classList.remove('under-attack');
+      codeDisplay.style.display = "none";
+      status.textContent = "SYSTEM RESET";
+      playBeep(600, 0.5);
+      
+      setTimeout(() => {
+        status.textContent = "READY FOR SCAN";
+      }, 2000);
     }
 
     // ======================
@@ -334,36 +336,166 @@
     // Triple click emergency override
     scanner.addEventListener('click', () => {
       if (isLocked) {
-        document.cookie = 'blocked=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        window.location.reload();
+        attemptCount = 0;
+        resetSystem();
       }
-    });
-
-    // Bypass to dashboard
-    bypassBtn.addEventListener('click', () => {
-      window.location.href = 'dashboard/index.html';
     });
 
     // ======================
     // 🚀 INISIALISASI AWAL
     // ======================
-    // Check if blocked
-    if (document.cookie.includes('blocked=true')) {
-      window.location.href = 'whoareyou/index.html';
-    }
-
-    // Get IP address
-    fetch('https://api.ipify.org?format=json')
-      .then(res => res.json())
-      .then(data => {
-        ipDisplay.textContent = `Your IP: ${data.ip}`;
-      })
-      .catch(() => {
-        ipDisplay.textContent = 'Your IP: Unknown';
-      });
-
     // Aktifkan audio setelah interaksi pertama
     authBtn.addEventListener('click', initAudio, { once: true });
+    if (document.cookie.includes('blocked=true')) {
+      window.location.href = 'blocked.html';
+    }
+
+    // 📡 Dapatkan IP User via Cloudflare
+    fetch('https://cloudflare-worker-url.workers.dev/get-ip')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('ipDisplay').textContent = `Your IP: ${data.ip}`;
+      });
+
+    // 🖐️ Simulasi Fingerprint Scan
+    let attemptCount = 0;
+    const fingerprintBtn = document.getElementById('fingerprintBtn');
+    const bypassBtn = document.getElementById('bypassBtn');
+
+    fingerprintBtn.addEventListener('click', () => {
+      attemptCount++;
+      
+      // Simulasi gagal pertama
+      if (attemptCount === 1) {
+        alert('Fingerprint not recognized');
+        bypassBtn.style.display = 'inline';
+        return;
+      }
+      // Blokir setelah 3x gagal
+      if (attemptCount >= 3) {
+        document.cookie = 'blocked=true; max-age=300; path=/'; // Blokir 5 menit
+        window.location.href = 'blocked.html';
+        return;
+      }
+    });
+
+    // 🚪 Bypass ke dashboard
+    bypassBtn.addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+    
+    // ======================
+    // 🍪 COOKIE MANAGEMENT
+    // ======================
+    function setCookie(name, value, minutes) {
+        const date = new Date();
+        date.setTime(date.getTime() + (minutes * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length);
+        }
+        return null;
+    }
+
+    function deleteCookie(name) {
+        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
+
+    // ======================
+    // 🧩 INITIALIZE ATTEMPTS
+    // ======================
+    function initializeAttempts() {
+        const attemptsCookie = getCookie('login_attempts');
+        if (attemptsCookie) {
+            attemptCount = parseInt(attemptsCookie);
+            // Show bypass button if already failed once
+            if (attemptCount >= 1) {
+                bypassBtn.style.display = 'block';
+            }
+        }
+    }
+
+    // ======================
+    // 🔄 UPDATE ATTEMPT COUNT
+    // ======================
+    function updateAttemptCount() {
+        attemptCount++;
+        setCookie('login_attempts', attemptCount, 10); // 10 minutes expiration
+        
+        // Show bypass button after first failed attempt
+        if (attemptCount === 1) {
+            bypassBtn.style.display = 'block';
+        }
+    }
+
+    // ======================
+    // 🚀 INITIALIZATION
+    // ======================
+    // Initialize attempt count from cookie
+    initializeAttempts();
+
+    // Check if blocked
+    if (getCookie('blocked')) {
+        window.location.href = 'blocked.html';
+    }
+
+    // In your existing finishScan() function, replace attemptCount++ with:
+    function finishScan() {
+        isScanning = false;
+        scanLine.style.opacity = "0";
+        scanner.removeEventListener('mousemove', highlightRidges);
+        
+        updateAttemptCount(); // Instead of attemptCount++
+        
+        if (attemptCount >= config.maxAttempts) {
+            triggerLockdown();
+        } else {
+            status.textContent = `SCAN FAILED (${attemptCount}/${config.maxAttempts})`;
+            playBeep(400, 0.2);
+            setTimeout(() => status.textContent = "READY FOR SCAN", 1500);
+        }
+    }
+
+    // Modified triggerLockdown() function:
+    function triggerLockdown() {
+        isLocked = true;
+        status.textContent = "SECURITY LOCKDOWN";
+        vault.classList.add('under-attack');
+        
+        // Set block cookie for 5 minutes
+        setCookie('blocked', 'true', 5);
+        
+        // Clear attempt count
+        deleteCookie('login_attempts');
+        
+        // Play error sequence
+        playBeep(200, 0.2, 'square');
+        setTimeout(() => playBeep(150, 0.3, 'square'), 100);
+        setTimeout(() => playBeep(100, 0.4, 'square'), 200);
+        
+        // Show encryption code
+        showEncryptionCode();
+        
+        // Redirect to blocked page
+        setTimeout(() => {
+            window.location.href = 'blocked.html';
+        }, 2000);
+    }
+
+    // In your reset function (when successful login or timeout):
+    function resetAttempts() {
+        attemptCount = 0;
+        deleteCookie('login_attempts');
+        bypassBtn.style.display = 'none';
+    }
   </script>
 </body>
 </html>
