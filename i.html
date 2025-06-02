@@ -3,392 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Player</title>
+    <title>Dark Music Player</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #121212;
             color: #e0e0e0;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
             min-height: 100vh;
         }
-
-        .container {
-            width: 90%;
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
+        
+        header {
             background-color: #1e1e1e;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-
-        h1 {
-            color: #bb86fc;
+            padding: 20px;
             text-align: center;
-            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
-
-        .player-container {
-            background-color: #252525;
-            padding: 1.5rem;
+        
+        h1 {
+            margin: 0;
+            color: #bb86fc;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #1e1e1e;
             border-radius: 8px;
-            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            flex: 1;
         }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        
+        .music-player {
+            background-color: #252525;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
-
-        button {
-            background-color: #bb86fc;
-            color: #121212;
-            border: none;
-            padding: 0.5rem 1rem;
+        
+        .song-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .song-item {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background-color: #333;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
             transition: background-color 0.3s;
         }
-
-        button:hover {
-            background-color: #9a67ea;
+        
+        .song-item:hover {
+            background-color: #424242;
         }
-
-        select {
-            background-color: #333;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 0.5rem;
-            border-radius: 4px;
-            width: 70%;
-        }
-
-        .progress-container {
-            width: 100%;
-            background-color: #333;
-            height: 6px;
-            border-radius: 3px;
-            margin-top: 1rem;
-            cursor: pointer;
-        }
-
-        .progress-bar {
-            height: 100%;
+        
+        .song-item.active {
             background-color: #bb86fc;
-            border-radius: 3px;
-            width: 0%;
+            color: #121212;
+            font-weight: bold;
         }
-
-        .time-display {
+        
+        .player-controls {
             display: flex;
-            justify-content: space-between;
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: #aaa;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
         }
-
+        
+        .player-info {
+            margin-top: 15px;
+            text-align: center;
+            font-style: italic;
+            color: #9e9e9e;
+        }
+        
+        footer {
+            background-color: #1e1e1e;
+            text-align: center;
+            padding: 15px;
+            margin-top: auto;
+        }
+        
+        /* Volume slider */
         .volume-control {
             display: flex;
             align-items: center;
-            margin-top: 1rem;
+            margin-top: 15px;
         }
-
+        
+        .volume-control label {
+            margin-right: 10px;
+        }
+        
         .volume-control input {
             width: 100px;
-            margin-left: 0.5rem;
-        }
-
-        .status {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #aaa;
-            text-align: center;
-        }
-
-        .cookie-notice {
-            background-color: #333;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-top: 1rem;
-            display: none;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Dark Music Player</h1>
+    </header>
+    
     <div class="container">
-        <h1>Background Music Player</h1>
-        
-        <div class="player-container">
-            <div class="controls">
-                <select id="song-selector">
-                    <option value="/where we are.mp3">Where We Are</option>
-                    <option value="/wish you were here.mp3">Wish You Were Here</option>
-                    <option value="/hero.mp3">Hero</option>
-                    <option value="/friend.mp3">Friend</option>
-                    <option value="/fanny meriang.mp3">Fanny Meriang</option>
-                </select>
-                <button id="play-btn">Play</button>
-            </div>
+        <div class="music-player">
+            <h2>Select a Song</h2>
+            <ul class="song-list">
+                <li class="song-item" data-src="/where we are.mp3">Where We Are</li>
+                <li class="song-item" data-src="/wish you were here.mp3">Wish You Were Here</li>
+                <li class="song-item" data-src="/hero.mp3">Hero</li>
+                <li class="song-item" data-src="/friend.mp3">Friend</li>
+                <li class="song-item" data-src="/fanny meriang.mp3">Fanny Meriang</li>
+            </ul>
             
-            <div class="progress-container" id="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
-            
-            <div class="time-display">
-                <span id="current-time">0:00</span>
-                <span id="duration">0:00</span>
+            <div class="player-controls">
+                <audio id="audio-player" loop></audio>
             </div>
             
             <div class="volume-control">
-                <span>Volume:</span>
-                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+                <label for="volume">Volume:</label>
+                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.7">
             </div>
             
-            <div class="status" id="status">
-                Music will play automatically when a song is selected
+            <div class="player-info">
+                <p id="now-playing">No song selected</p>
             </div>
         </div>
-        
-        <div class="cookie-notice" id="cookie-notice">
-            <p>This website uses cookies to store your music preferences and cache songs for offline playback.</p>
-            <button id="accept-cookies">Accept</button>
-        </div>
     </div>
-
-    <audio id="audio-player"></audio>
+    
+    <footer>
+        <p>Music Player &copy; 2023 | Songs will be cached for offline playback</p>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Elements
             const audioPlayer = document.getElementById('audio-player');
-            const playBtn = document.getElementById('play-btn');
-            const songSelector = document.getElementById('song-selector');
-            const progressBar = document.getElementById('progress-bar');
-            const progressContainer = document.getElementById('progress-container');
-            const currentTimeEl = document.getElementById('current-time');
-            const durationEl = document.getElementById('duration');
+            const songItems = document.querySelectorAll('.song-item');
+            const nowPlaying = document.getElementById('now-playing');
             const volumeControl = document.getElementById('volume');
-            const statusEl = document.getElementById('status');
-            const cookieNotice = document.getElementById('cookie-notice');
-            const acceptCookiesBtn = document.getElementById('accept-cookies');
             
-            // Check if cookies are accepted
-            const cookiesAccepted = localStorage.getItem('cookiesAccepted') === 'true';
+            // Set default volume
+            audioPlayer.volume = volumeControl.value;
             
-            if (!cookiesAccepted) {
-                cookieNotice.style.display = 'block';
-            }
-            
-            // Accept cookies
-            acceptCookiesBtn.addEventListener('click', function() {
-                localStorage.setItem('cookiesAccepted', 'true');
-                cookieNotice.style.display = 'none';
-                statusEl.textContent = 'Cookies accepted. Songs will be cached for offline playback.';
-                setTimeout(() => {
-                    statusEl.textContent = 'Music will play automatically when a song is selected';
-                }, 3000);
+            // Volume control
+            volumeControl.addEventListener('input', function() {
+                audioPlayer.volume = this.value;
             });
             
-            // Song data
-            const songs = [
-                { title: 'Where We Are', url: '/where we are.mp3' },
-                { title: 'Wish You Were Here', url: '/wish you were here.mp3' },
-                { title: 'Hero', url: '/hero.mp3' },
-                { title: 'Friend', url: '/friend.mp3' },
-                { title: 'Fanny Meriang', url: '/fanny meriang.mp3' }
-            ];
+            // Song selection
+            songItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const songSrc = this.getAttribute('data-src');
+                    const songName = this.textContent;
+                    
+                    // Check if song is cached
+                    const cachedAudio = localStorage.getItem(songSrc);
+                    
+                    if (cachedAudio) {
+                        // Create blob from cached data
+                        const blob = new Blob([new Uint8Array(JSON.parse(cachedAudio).data)], { type: 'audio/mp3' });
+                        const url = URL.createObjectURL(blob);
+                        audioPlayer.src = url;
+                    } else {
+                        // Set audio source and cache it when loaded
+                        audioPlayer.src = songSrc;
+                        
+                        // Fetch and cache the audio file
+                        fetch(songSrc)
+                            .then(response => response.arrayBuffer())
+                            .then(arrayBuffer => {
+                                const audioData = {
+                                    data: Array.from(new Uint8Array(arrayBuffer))
+                                };
+                                localStorage.setItem(songSrc, JSON.stringify(audioData));
+                            })
+                            .catch(error => {
+                                console.error('Error caching audio:', error);
+                            });
+                    }
+                    
+                    // Update UI
+                    songItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    nowPlaying.textContent = `Now Playing: ${songName}`;
+                    
+                    // Play the audio
+                    audioPlayer.play().catch(e => console.log('Auto-play prevented:', e));
+                });
+            });
             
-            // Load last played song from localStorage if available
-            let currentSongIndex = 0;
+            // Try to resume playback when page is reloaded
             const lastPlayedSong = localStorage.getItem('lastPlayedSong');
             if (lastPlayedSong) {
-                const foundIndex = songs.findIndex(song => song.url === lastPlayedSong);
-                if (foundIndex !== -1) {
-                    currentSongIndex = foundIndex;
-                    songSelector.selectedIndex = currentSongIndex;
+                const songElement = document.querySelector(`.song-item[data-src="${lastPlayedSong}"]`);
+                if (songElement) {
+                    songElement.click();
                 }
             }
             
-            // Play/pause toggle
-            let isPlaying = false;
-            
-            function togglePlay() {
-                if (isPlaying) {
-                    pauseSong();
-                } else {
-                    playSong();
-                }
-            }
-            
-            function playSong() {
-                const selectedSong = songs[songSelector.selectedIndex];
-                
-                // Check if song is cached
-                if (cookiesAccepted) {
-                    checkCache(selectedSong.url)
-                        .then(cached => {
-                            if (cached) {
-                                statusEl.textContent = `Playing from cache: ${selectedSong.title}`;
-                                audioPlayer.src = selectedSong.url;
-                                audioPlayer.play();
-                                isPlaying = false;
-                                playBtn.textContent = 'Pause';
-                                localStorage.setItem('lastPlayedSong', selectedSong.url);
-                            } else {
-                                // Not cached, fetch and cache it
-                                statusEl.textContent = `Downloading and caching: ${selectedSong.title}`;
-                                cacheSong(selectedSong.url)
-                                    .then(() => {
-                                        audioPlayer.src = selectedSong.url;
-                                        audioPlayer.play();
-                                        isPlaying = true;
-                                        playBtn.textContent = 'Pause';
-                                        localStorage.setItem('lastPlayedSong', selectedSong.url);
-                                        statusEl.textContent = `Playing: ${selectedSong.title}`;
-                                    })
-                                    .catch(err => {
-                                        console.error('Error caching song:', err);
-                                        statusEl.textContent = `Error caching song. Playing without caching.`;
-                                        audioPlayer.src = selectedSong.url;
-                                        audioPlayer.play();
-                                        isPlaying = true;
-                                        playBtn.textContent = 'Pause';
-                                        localStorage.setItem('lastPlayedSong', selectedSong.url);
-                                    });
-                            }
-                        })
-                        .catch(err => {
-                            console.error('Error checking cache:', err);
-                            statusEl.textContent = `Error checking cache. Playing without caching.`;
-                            audioPlayer.src = selectedSong.url;
-                            audioPlayer.play();
-                            isPlaying = true;
-                            playBtn.textContent = 'Pause';
-                            localStorage.setItem('lastPlayedSong', selectedSong.url);
-                        });
-                } else {
-                    // Cookies not accepted, play without caching
-                    statusEl.textContent = `Playing: ${selectedSong.title}`;
-                    audioPlayer.src = selectedSong.url;
-                    audioPlayer.play();
-                    isPlaying = true;
-                    playBtn.textContent = 'Pause';
-                    localStorage.setItem('lastPlayedSong', selectedSong.url);
-                }
-            }
-            
-            function pauseSong() {
-                audioPlayer.pause();
-                isPlaying = false;
-                playBtn.textContent = 'Play';
-                statusEl.textContent = `Paused: ${songs[songSelector.selectedIndex].title}`;
-            }
-            
-            // Cache management
-            function cacheSong(url) {
-                return new Promise((resolve, reject) => {
-                    if (!('caches' in window)) {
-                        reject('Cache API not supported');
-                        return;
-                    }
-                    
-                    caches.open('music-cache')
-                        .then(cache => {
-                            return fetch(url)
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error('Network response was not ok');
-                                    }
-                                    return cache.put(url, response.clone());
-                                })
-                                .then(() => resolve())
-                                .catch(err => reject(err));
-                        })
-                        .catch(err => reject(err));
-                });
-            }
-            
-            function checkCache(url) {
-                return new Promise((resolve, reject) => {
-                    if (!('caches' in window)) {
-                        resolve(false);
-                        return;
-                    }
-                    
-                    caches.open('music-cache')
-                        .then(cache => {
-                            cache.match(url)
-                                .then(response => {
-                                    resolve(!!response);
-                                })
-                                .catch(err => reject(err));
-                        })
-                        .catch(err => reject(err));
-                });
-            }
-            
-            // Event listeners
-            playBtn.addEventListener('click', togglePlay);
-            
-            songSelector.addEventListener('change', function() {
-                if (isPlaying) {
-                    playSong();
-                }
+            // Store last played song
+            audioPlayer.addEventListener('play', function() {
+                localStorage.setItem('lastPlayedSong', audioPlayer.src);
             });
-            
-            audioPlayer.addEventListener('timeupdate', updateProgress);
-            
-            audioPlayer.addEventListener('ended', function() {
-                isPlaying = false;
-                playBtn.textContent = 'Play';
-                statusEl.textContent = `Song ended: ${songs[songSelector.selectedIndex].title}`;
-            });
-            
-            progressContainer.addEventListener('click', setProgress);
-            
-            volumeControl.addEventListener('input', function() {
-                audioPlayer.volume = volumeControl.value;
-            });
-            
-            // Auto-play first song if cookies are accepted
-            if (cookiesAccepted && lastPlayedSong) {
-                playSong();
-            }
-            
-            // Helper functions
-            function updateProgress() {
-                const { duration, currentTime } = audioPlayer;
-                const progressPercent = (currentTime / duration) * 100;
-                progressBar.style.width = `${progressPercent}%`;
-                
-                // Update time display
-                currentTimeEl.textContent = formatTime(currentTime);
-                
-                if (!isNaN(duration)) {
-                    durationEl.textContent = formatTime(duration);
-                }
-            }
-            
-            function setProgress(e) {
-                const width = this.clientWidth;
-                const clickX = e.offsetX;
-                const duration = audioPlayer.duration;
-                audioPlayer.currentTime = (clickX / width) * duration;
-            }
-            
-            function formatTime(seconds) {
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            }
         });
     </script>
 </body>
