@@ -21,28 +21,26 @@
 </head>
 <body>
 
-<div class="message">Sentuh layar untuk memulai musik latar...</div>
+<div class="message" id="msg">Sentuh layar untuk memulai musik latar...</div>
 
 <audio id="bgMusic" src="/where we are.mp3" loop></audio>
 
 <script>
   const audio = document.getElementById('bgMusic');
-  const message = document.querySelector('.message');
+  const msg = document.getElementById('msg');
 
-  function startMusic() {
+  function startAudio() {
     audio.play().then(() => {
-      message.textContent = 'Musik latar sedang diputar...';
-    }).catch(err => {
-      message.textContent = 'Gagal memutar musik: ' + err;
+      msg.textContent = 'Musik latar sedang diputar...';
+    }).catch(() => {
+      msg.textContent = 'Tidak dapat memutar musik, silakan coba lagi.';
     });
-    // Hapus event listener setelah musik mulai
-    window.removeEventListener('touchstart', startMusic);
-    window.removeEventListener('click', startMusic);
+    window.removeEventListener('touchstart', startAudio);
+    window.removeEventListener('click', startAudio);
   }
 
-  // Tunggu sentuhan layar atau klik untuk mulai musik (karena autoplay dibatasi)
-  window.addEventListener('touchstart', startMusic, { once: true });
-  window.addEventListener('click', startMusic, { once: true });
+  window.addEventListener('touchstart', startAudio, { once: true });
+  window.addEventListener('click', startAudio, { once: true });
 </script>
 
 </body>
