@@ -16,28 +16,39 @@
     text-align: center;
     font-size: 1.2rem;
     opacity: 0.7;
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
   }
 </style>
 </head>
 <body>
 
-<div class="message">Sentuh layar untuk memulai musik latar...</div>
-
 <audio id="bgMusic" src="/where we are.mp3" loop></audio>
+<div class="message" id="msg">Memutar musik latar...</div>
 
 <script>
   const audio = document.getElementById('bgMusic');
-  const message = document.querySelector('.message');
+  const msg = document.getElementById('msg');
 
-  function playMusic() {
-    audio.play();
-    message.style.display = 'none';
-    window.removeEventListener('touchstart', playMusic);
-    window.removeEventListener('click', playMusic);
+  function startAudio() {
+    audio.play().then(() => {
+      msg.style.display = 'none';
+    }).catch(() => {
+      // Jika gagal, tunggu interaksi pengguna
+      msg.textContent = 'Sentuh layar untuk memulai musik latar...';
+      window.addEventListener('touchstart', userInteract, { once: true });
+      window.addEventListener('click', userInteract, { once: true });
+    });
   }
 
-  window.addEventListener('touchstart', playMusic, { once: true });
-  window.addEventListener('click', playMusic, { once: true });
+  function userInteract() {
+    audio.play();
+    msg.style.display = 'none';
+  }
+
+  // Coba langsung putar saat load
+  window.addEventListener('load', startAudio);
 </script>
 
 </body>
