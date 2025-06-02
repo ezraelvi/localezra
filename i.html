@@ -239,7 +239,7 @@
                                 statusEl.textContent = `Playing from cache: ${selectedSong.title}`;
                                 audioPlayer.src = selectedSong.url;
                                 audioPlayer.play();
-                                isPlaying = true;
+                                isPlaying = false;
                                 playBtn.textContent = 'Pause';
                                 localStorage.setItem('lastPlayedSong', selectedSong.url);
                             } else {
