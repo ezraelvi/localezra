@@ -1,55 +1,121 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Background Music</title>
-<style>
-  body {
-    margin: 0; height: 100vh;
-    background-color: #121212;
-    display: flex; justify-content: center; align-items: center;
-    color: #eee; font-family: Arial, sans-serif;
-    user-select: none;
-  }
-  .message {
-    text-align: center;
-    font-size: 1.2rem;
-    opacity: 0.7;
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Music Website</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #bb86fc;
+            margin-bottom: 30px;
+        }
+        
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .music-control {
+            margin-top: 30px;
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #9a67cc;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Welcome to Dark Music</h1>
+        <p>Background music is playing automatically. You can control it using the buttons below.</p>
+        
+        <div class="music-control">
+            <button id="playBtn">Pause</button>
+            <div class="volume-control">
+                <span>Volume:</span>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.7">
+            </div>
+        </div>
+    </div>
 
-<audio id="bgMusic" src="/where we are.mp3" loop></audio>
-<div class="message" id="msg">Memutar musik latar...</div>
+    <audio id="bgMusic" autoplay loop>
+        <source src="/where we are.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
-<script>
-  const audio = document.getElementById('bgMusic');
-  const msg = document.getElementById('msg');
-
-  function startAudio() {
-    audio.play().then(() => {
-      msg.style.display = 'none';
-    }).catch(() => {
-      // Jika gagal, tunggu interaksi pengguna
-      msg.textContent = 'Sentuh layar untuk memulai musik latar...';
-      window.addEventListener('touchstart', userInteract, { once: true });
-      window.addEventListener('click', userInteract, { once: true });
-    });
-  }
-
-  function userInteract() {
-    audio.play();
-    msg.style.display = 'none';
-  }
-
-  // Coba langsung putar saat load
-  window.addEventListener('load', startAudio);
-</script>
-
+    <script>
+        const bgMusic = document.getElementById('bgMusic');
+        const playBtn = document.getElementById('playBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        
+        // Set initial volume
+        bgMusic.volume = volumeSlider.value;
+        
+        // Play/pause button functionality
+        playBtn.addEventListener('click', function() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                playBtn.textContent = 'Pause';
+            } else {
+                bgMusic.pause();
+                playBtn.textContent = 'Play';
+            }
+        });
+        
+        // Volume control
+        volumeSlider.addEventListener('input', function() {
+            bgMusic.volume = this.value;
+        });
+        
+        // Autoplay handling for browsers that block autoplay
+        document.addEventListener('click', function() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                playBtn.textContent = 'Pause';
+            }
+        }, { once: true });
+    </script>
 </body>
 </html>
