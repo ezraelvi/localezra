@@ -21,26 +21,23 @@
 </head>
 <body>
 
-<div class="message" id="msg">Sentuh layar untuk memulai musik latar...</div>
+<div class="message">Sentuh layar untuk memulai musik latar...</div>
 
 <audio id="bgMusic" src="/where we are.mp3" loop></audio>
 
 <script>
   const audio = document.getElementById('bgMusic');
-  const msg = document.getElementById('msg');
+  const message = document.querySelector('.message');
 
-  function startAudio() {
-    audio.play().then(() => {
-      msg.textContent = 'Musik latar sedang diputar...';
-    }).catch(() => {
-      msg.textContent = 'Tidak dapat memutar musik, silakan coba lagi.';
-    });
-    window.removeEventListener('touchstart', startAudio);
-    window.removeEventListener('click', startAudio);
+  function playMusic() {
+    audio.play();
+    message.style.display = 'none';
+    window.removeEventListener('touchstart', playMusic);
+    window.removeEventListener('click', playMusic);
   }
 
-  window.addEventListener('touchstart', startAudio, { once: true });
-  window.addEventListener('click', startAudio, { once: true });
+  window.addEventListener('touchstart', playMusic, { once: true });
+  window.addEventListener('click', playMusic, { once: true });
 </script>
 
 </body>
