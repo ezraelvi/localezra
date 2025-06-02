@@ -413,14 +413,14 @@
                     audioPlayer.currentTime = 0;
                     audioPlayer.play();
                     statusEl.textContent = `Looping: ${songs[songSelector.selectedIndex].title}`;
-                } else {
+                }
+                
+                else {
                     isPlaying = false;
                     playBtn.textContent = 'Play';
                     statusEl.textContent = `Song ended: ${songs[songSelector.selectedIndex].title}`;
                 }
             });
-            
-            // Kode lainnya tetap sama
     </script>
 </body>
 </html>
