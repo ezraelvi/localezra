@@ -1,35 +1,29 @@
 <!DOCTYPE html>
 <html>
-<body>
-  <button onclick="register()">Daftar Sidik Jari</button>
-  <button onclick="login()">Pakai Sidik Jari</button>
-
+<head>
+  <!-- Load Supabase JS dulu -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = createClient(
-      'https://hjmosjvfrycamxowfurq.supabase.co', 
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM'
+    // Inisialisasi client SETELAH library dimuat
+    const supabase = supabase.createClient(
+      'https://hjmosjvfrycamxowfurq.supabase.co',  // Ganti dengan URL projectmu
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM'             // Ganti dengan anon key
     );
 
     async function register() {
-      // 1. Daftarin email dulu
       const email = prompt("Masukkan email");
-      await supabase.from('users').insert({ email });
-
-      // 2. Scan sidik jari
-      const { data } = await supabase.functions.invoke('webauthn-register', {
-        body: { email }
-      });
-      alert("Berhasil daftar!");
-    }
-
-    async function login() {
-      const email = prompt("Email kamu?");
-      const { data } = await supabase.functions.invoke('webauthn-login', {
-        body: { email }
-      });
-      alert("Login berhasil!");
+      const { data, error } = await supabase.from('users').insert({ email });
+      
+      if (error) {
+        alert("Error: " + error.message);
+        return;
+      }
+      
+      alert("Berhasil daftar! Sekarang scan sidik jari");
     }
   </script>
+</head>
+<body>
+  <button onclick="register()">Daftar Sidik Jari</button>
 </body>
 </html>
