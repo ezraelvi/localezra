@@ -1,1095 +1,192 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Code Editor with Live Preview</title>
-    <!-- CodeMirror CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #4a6fa5;
-            --secondary-color: #166088;
-            --dark-color: #0a1128;
-            --light-color: #f8f9fa;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --editor-bg: #f8f9fa;
-            --preview-bg: #ffffff;
-            --header-bg: #0a1128;
-            --status-bg: #0a1128;
-        }
-
-        .dark-mode {
-            --editor-bg: #282a36;
-            --preview-bg: #1e1f29;
-            --header-bg: #1a1a2e;
-            --status-bg: #1a1a2e;
-            --light-color: #f8f8f2;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Fira Code', 'Courier New', monospace;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background-color: var(--editor-bg);
-            color: var(--dark-color);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        body.dark-mode {
-            color: var(--light-color);
-        }
-
-        header {
-            background-color: var(--header-bg);
-            color: white;
-            padding: 0.8rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .logo {
-            font-size: 1.3rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-
-        .logo i {
-            margin-right: 10px;
-            color: var(--primary-color);
-        }
-
-        .controls {
-            display: flex;
-            gap: 12px;
-        }
-
-        button {
-            padding: 7px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-        }
-
-        button:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .btn-run {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-save {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-reset {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .btn-theme {
-            background-color: var(--warning-color);
-            color: var(--dark-color);
-        }
-
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .editor-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--editor-bg);
-            transition: background-color 0.3s;
-        }
-
-        .editor-tabs {
-            display: flex;
-            background-color: var(--editor-bg);
-            border-bottom: 1px solid #444;
-            overflow-x: auto;
-            flex-shrink: 0;
-        }
-
-        .editor-tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-right: 1px solid #444;
-            background-color: var(--editor-bg);
-            position: relative;
-            white-space: nowrap;
-            color: var(--dark-color);
-            transition: all 0.2s;
-        }
-
-        .dark-mode .editor-tab {
-            color: var(--light-color);
-        }
-
-        .editor-tab.active {
-            background-color: var(--preview-bg);
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .editor-tab:hover:not(.active) {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .dark-mode .editor-tab:hover:not(.active) {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .editor-tab .close-tab {
-            margin-left: 8px;
-            color: #999;
-            font-size: 0.9rem;
-        }
-
-        .editor-tab .close-tab:hover {
-            color: var(--danger-color);
-        }
-
-        .editor-wrapper {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .CodeMirror {
-            height: 100% !important;
-            font-size: 14px;
-            line-height: 1.5;
-            background-color: var(--preview-bg);
-            color: var(--dark-color);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .dark-mode .CodeMirror {
-            color: var(--light-color);
-        }
-
-        .CodeMirror-gutters {
-            background-color: var(--preview-bg) !important;
-            border-right: 1px solid #444 !important;
-        }
-
-        .preview-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--preview-bg);
-            transition: background-color 0.3s;
-        }
-
-        .preview-header {
-            padding: 10px 15px;
-            background-color: var(--editor-bg);
-            border-bottom: 1px solid #444;
-            font-weight: bold;
-            color: var(--dark-color);
-            transition: all 0.3s;
-        }
-
-        .dark-mode .preview-header {
-            color: var(--light-color);
-        }
-
-        .preview-frame {
-            flex: 1;
-            border: none;
-            background-color: var(--preview-bg);
-        }
-
-        .status-bar {
-            padding: 8px 15px;
-            background-color: var(--status-bg);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .resize-handle {
-            width: 8px;
-            background-color: #555;
-            cursor: col-resize;
-            transition: background-color 0.2s;
-            flex-shrink: 0;
-        }
-
-        .resize-handle:hover {
-            background-color: var(--primary-color);
-        }
-
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: var(--preview-bg);
-            min-width: 180px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 10;
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid #444;
-        }
-
-        .dropdown-content a {
-            color: var(--dark-color);
-            padding: 10px 16px;
-            text-decoration: none;
-            display: block;
-            transition: background-color 0.2s;
-            font-size: 0.9rem;
-        }
-
-        .dark-mode .dropdown-content a {
-            color: var(--light-color);
-        }
-
-        .dropdown-content a:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .dark-mode .dropdown-content a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 18px;
-            background-color: var(--success-color);
-            color: white;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transform: translateX(200%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.error {
-            background-color: var(--danger-color);
-        }
-
-        .notification.warning {
-            background-color: var(--warning-color);
-            color: var(--dark-color);
-        }
-
-        @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column;
-            }
-            
-            .editor-container {
-                border-right: none;
-                border-bottom: 1px solid #444;
-            }
-            
-            .resize-handle {
-                width: 100%;
-                height: 8px;
-                cursor: row-resize;
-            }
-
-            .controls {
-                gap: 8px;
-            }
-
-            button {
-                padding: 6px 8px;
-                font-size: 0.8rem;
-            }
-
-            .logo {
-                font-size: 1.1rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">
-            <i class="fas fa-code"></i>
-            <span>CodePlayground</span>
-        </div>
-        <div class="controls">
-            <button class="btn-run" id="runBtn" title="Run Code (Ctrl+Enter)">
-                <i class="fas fa-play"></i>
-                <span class="desktop-text">Run</span>
-            </button>
-            <div class="dropdown">
-                <button class="btn-save" title="Save Options">
-                    <i class="fas fa-save"></i>
-                    <span class="desktop-text">Save</span>
-                    <i class="fas fa-caret-down"></i>
-                </button>
-                <div class="dropdown-content">
-                    <a href="#" id="saveLocal"><i class="fas fa-database"></i> Save to Browser</a>
-                    <a href="#" id="exportFile"><i class="fas fa-file-export"></i> Export as File</a>
-                    <a href="#" id="shareLink"><i class="fas fa-share-alt"></i> Share Project</a>
-                </div>
-            </div>
-            <button class="btn-reset" id="resetBtn" title="Reset All Code">
-                <i class="fas fa-trash"></i>
-                <span class="desktop-text">Reset</span>
-            </button>
-            <button class="btn-theme" id="themeBtn" title="Toggle Dark Mode">
-                <i class="fas fa-moon"></i>
-                <span class="desktop-text">Dark Mode</span>
-            </button>
-        </div>
-    </header>
-    
-    <div class="main-container">
-        <div class="editor-container">
-            <div class="editor-tabs">
-                <div class="editor-tab active" data-language="html">
-                    <span>index.html</span>
-                    <span class="close-tab">&times;</span>
-                </div>
-                <div class="editor-tab" data-language="css">
-                    <span>style.css</span>
-                    <span class="close-tab">&times;</span>
-                </div>
-                <div class="editor-tab" data-language="javascript">
-                    <span>script.js</span>
-                    <span class="close-tab">&times;</span>
-                </div>
-            </div>
-            <div class="editor-wrapper">
-                <textarea id="htmlEditor">&lt;!DOCTYPE html&gt;
-&lt;html lang="en"&gt;
-&lt;head&gt;
-    &lt;meta charset="UTF-8"&gt;
-    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-    &lt;title&gt;My Playground&lt;/title&gt;
-    &lt;link rel="stylesheet" href="style.css"&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;div class="container"&gt;
-        &lt;h1&gt;Welcome to CodePlayground!&lt;/h1&gt;
-        &lt;p&gt;Edit this code and see live preview.&lt;/p&gt;
-        &lt;button id="demoBtn"&gt;Click Me&lt;/button&gt;
-        &lt;div id="output"&gt;&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;script src="script.js"&gt;&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;</textarea>
-                <textarea id="cssEditor">body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 20px;
-    background-color: #f5f5f5;
-    color: #333;
-}
-
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-h1 {
-    color: #4a6fa5;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
-#demoBtn {
-    background-color: #4a6fa5;
-    color: white;
-    border: none;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Code Editor dengan Live Preview</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #eee;
+    display: flex; flex-direction: column; height: 100vh;
+  }
+  header {
+    background: #1f1f1f;
     padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-#demoBtn:hover {
-    background-color: #166088;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-#output {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px dashed #ccc;
-    border-radius: 4px;
-    min-height: 50px;
-    background-color: #f9f9f9;
-}</textarea>
-                <textarea id="jsEditor">document.addEventListener('DOMContentLoaded', function() {
-    const demoBtn = document.getElementById('demoBtn');
-    const output = document.getElementById('output');
-    
-    demoBtn.addEventListener('click', function() {
-        // Display current time
-        const now = new Date();
-        output.innerHTML = `
-            <p>Button clicked at: <strong>${now.toLocaleTimeString()}</strong></p>
-            <p>Today is: <strong>${now.toLocaleDateString()}</strong></p>
-        `;
-        
-        // Create rainbow effect
-        const colors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'];
-        let colorIndex = 0;
-        
-        const interval = setInterval(() => {
-            output.style.color = colors[colorIndex];
-            colorIndex = (colorIndex + 1) % colors.length;
-        }, 200);
-        
-        // Stop after 2 seconds
-        setTimeout(() => {
-            clearInterval(interval);
-            output.style.color = '';
-        }, 2000);
-    });
-});</textarea>
-            </div>
-        </div>
-        
-        <div class="resize-handle" id="resizeHandle"></div>
-        
-        <div class="preview-container">
-            <div class="preview-header">
-                Live Preview
-                <span id="previewStatus" style="float: right; font-weight: normal; font-size: 0.8rem;"></span>
-            </div>
-            <iframe class="preview-frame" id="previewFrame"></iframe>
-        </div>
-    </div>
-    
-    <div class="status-bar">
-        <div class="status-item">
-            <i class="fas fa-file-code"></i>
-            <span id="currentFile">index.html</span>
-        </div>
-        <div class="status-item">
-            <i class="fas fa-keyboard"></i>
-            <span id="lineCol">Ln 1, Col 1</span>
-        </div>
-        <div class="status-item">
-            <i class="fas fa-code-branch"></i>
-            <span>HTML5, CSS3, ES6</span>
-        </div>
-    </div>
-
-    <div class="notification" id="notification"></div>
-
-    <!-- CodeMirror and other JS libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closetag.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/html-hint.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/css-hint.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/javascript-hint.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/comment/comment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/xml-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/indent-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/comment-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/searchcursor.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/jump-to-line.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
-    
-    <script>
-        // Main application
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize variables
-            let htmlEditor, cssEditor, jsEditor;
-            let currentEditor = 'html';
-            let isDarkMode = false;
-            let isResizing = false;
-            let lastX, lastY;
-            
-            // Initialize notification system
-            function showNotification(message, type = 'success', duration = 3000) {
-                const notification = document.getElementById('notification');
-                notification.textContent = message;
-                notification.className = 'notification show ' + type;
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, duration);
-            }
-            
-            // Initialize editors
-            function initEditors() {
-                // HTML Editor
-                htmlEditor = CodeMirror.fromTextArea(document.getElementById('htmlEditor'), {
-                    mode: 'htmlmixed',
-                    theme: 'default',
-                    lineNumbers: true,
-                    autoCloseTags: true,
-                    autoCloseBrackets: true,
-                    foldGutter: true,
-                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
-                    indentUnit: 4,
-                    tabSize: 4,
-                    lineWrapping: true,
-                    extraKeys: {
-                        'Ctrl-Enter': runCode,
-                        'Ctrl-Space': 'autocomplete',
-                        'Ctrl-/': 'toggleComment',
-                        'Shift-Tab': 'indentLess',
-                        'Tab': 'indentMore',
-                        'F11': function(cm) {
-                            cm.setOption('fullScreen', !cm.getOption('fullScreen'));
-                        },
-                        'Esc': function(cm) {
-                            if (cm.getOption('fullScreen')) cm.setOption('fullScreen', false);
-                        }
-                    }
-                });
-                
-                // CSS Editor
-                cssEditor = CodeMirror.fromTextArea(document.getElementById('cssEditor'), {
-                    mode: 'css',
-                    theme: 'default',
-                    lineNumbers: true,
-                    autoCloseBrackets: true,
-                    foldGutter: true,
-                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
-                    indentUnit: 4,
-                    tabSize: 4,
-                    lineWrapping: true,
-                    extraKeys: {
-                        'Ctrl-Enter': runCode,
-                        'Ctrl-Space': 'autocomplete',
-                        'Ctrl-/': 'toggleComment',
-                        'Shift-Tab': 'indentLess',
-                        'Tab': 'indentMore',
-                        'F11': function(cm) {
-                            cm.setOption('fullScreen', !cm.getOption('fullScreen'));
-                        },
-                        'Esc': function(cm) {
-                            if (cm.getOption('fullScreen')) cm.setOption('fullScreen', false);
-                        }
-                    }
-                });
-                
-                // JavaScript Editor
-                jsEditor = CodeMirror.fromTextArea(document.getElementById('jsEditor'), {
-                    mode: 'javascript',
-                    theme: 'default',
-                    lineNumbers: true,
-                    autoCloseBrackets: true,
-                    foldGutter: true,
-                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
-                    indentUnit: 4,
-                    tabSize: 4,
-                    lineWrapping: true,
-                    extraKeys: {
-                        'Ctrl-Enter': runCode,
-                        'Ctrl-Space': 'autocomplete',
-                        'Ctrl-/': 'toggleComment',
-                        'Shift-Tab': 'indentLess',
-                        'Tab': 'indentMore',
-                        'F11': function(cm) {
-                            cm.setOption('fullScreen', !cm.getOption('fullScreen'));
-                        },
-                        'Esc': function(cm) {
-                            if (cm.getOption('fullScreen')) cm.setOption('fullScreen', false);
-                        }
-                    }
-                });
-                
-                // Set active editor
-                setActiveEditor('html');
-                cssEditor.getWrapperElement().style.display = 'none';
-                jsEditor.getWrapperElement().style.display = 'none';
-                
-                // Add cursor activity listeners
-                htmlEditor.on('cursorActivity', updateCursorPosition);
-                cssEditor.on('cursorActivity', updateCursorPosition);
-                jsEditor.on('cursorActivity', updateCursorPosition);
-                
-                // Load from localStorage if available
-                loadFromLocalStorage();
-                
-                // Run initial code
-                setTimeout(runCode, 100);
-            }
-            
-            // Set active editor
-            function setActiveEditor(language) {
-                currentEditor = language;
-                document.getElementById('currentFile').textContent = 
-                    language === 'html' ? 'index.html' : 
-                    language === 'css' ? 'style.css' : 'script.js';
-                
-                // Update tab styling
-                document.querySelectorAll('.editor-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                    if (tab.dataset.language === language) {
-                        tab.classList.add('active');
-                    }
-                });
-                
-                // Show the correct editor
-                htmlEditor.getWrapperElement().style.display = language === 'html' ? '' : 'none';
-                cssEditor.getWrapperElement().style.display = language === 'css' ? '' : 'none';
-                jsEditor.getWrapperElement().style.display = language === 'javascript' ? '' : 'none';
-                
-                // Refresh the editor to prevent rendering issues
-                setTimeout(() => {
-                    if (language === 'html') htmlEditor.refresh();
-                    if (language === 'css') cssEditor.refresh();
-                    if (language === 'javascript') jsEditor.refresh();
-                    updateCursorPosition();
-                }, 0);
-            }
-            
-            // Run the code and update preview
-            function runCode() {
-                try {
-                    const html = htmlEditor.getValue();
-                    const css = cssEditor.getValue();
-                    const js = jsEditor.getValue();
-                    
-                    const previewFrame = document.getElementById('previewFrame');
-                    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-                    
-                    previewDoc.open();
-                    previewDoc.write(`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <style>${css}</style>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        </head>
-                        <body>
-                            ${html}
-                            <script>
-                                try {
-                                    ${js}
-                                } catch(e) {
-                                    console.error(e);
-                                }
-                            <\/script>
-                        </body>
-                        </html>
-                    `);
-                    previewDoc.close();
-                    
-                    // Update status
-                    document.getElementById('previewStatus').textContent = 
-                        'Last run: ' + new Date().toLocaleTimeString();
-                    
-                    showNotification('Code executed successfully!');
-                } catch (error) {
-                    console.error('Error running code:', error);
-                    showNotification('Error executing code: ' + error.message, 'error');
-                }
-            }
-            
-            // Toggle dark mode
-            function toggleDarkMode() {
-                isDarkMode = !isDarkMode;
-                document.body.classList.toggle('dark-mode', isDarkMode);
-                
-                if (isDarkMode) {
-                    htmlEditor.setOption('theme', 'dracula');
-                    cssEditor.setOption('theme', 'dracula');
-                    jsEditor.setOption('theme', 'dracula');
-                    document.getElementById('themeBtn').innerHTML = 
-                        '<i class="fas fa-sun"></i> <span class="desktop-text">Light Mode</span>';
-                    localStorage.setItem('codePlaygroundDarkMode', 'true');
-                } else {
-                    htmlEditor.setOption('theme', 'default');
-                    cssEditor.setOption('theme', 'default');
-                    jsEditor.setOption('theme', 'default');
-                    document.getElementById('themeBtn').innerHTML = 
-                        '<i class="fas fa-moon"></i> <span class="desktop-text">Dark Mode</span>';
-                    localStorage.setItem('codePlaygroundDarkMode', 'false');
-                }
-            }
-            
-            // Update cursor position in status bar
-            function updateCursorPosition() {
-                let cursor;
-                if (currentEditor === 'html') cursor = htmlEditor.getCursor();
-                if (currentEditor === 'css') cursor = cssEditor.getCursor();
-                if (currentEditor === 'javascript') cursor = jsEditor.getCursor();
-                
-                if (cursor) {
-                    document.getElementById('lineCol').textContent = 
-                        `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
-                }
-            }
-            
-            // Save to localStorage
-            function saveToLocalStorage() {
-                try {
-                    const project = {
-                        html: htmlEditor.getValue(),
-                        css: cssEditor.getValue(),
-                        js: jsEditor.getValue(),
-                        timestamp: new Date().getTime()
-                    };
-                    
-                    localStorage.setItem('codePlaygroundProject', JSON.stringify(project));
-                    showNotification('Project saved to browser storage!');
-                } catch (error) {
-                    console.error('Error saving to localStorage:', error);
-                    showNotification('Error saving project: ' + error.message, 'error');
-                }
-            }
-            
-            // Load from localStorage
-            function loadFromLocalStorage() {
-                try {
-                    // Load theme preference
-                    const darkModePref = localStorage.getItem('codePlaygroundDarkMode');
-                    if (darkModePref === 'true') {
-                        toggleDarkMode();
-                    }
-                    
-                    // Load saved project
-                    const savedProject = localStorage.getItem('codePlaygroundProject');
-                    if (savedProject) {
-                        const project = JSON.parse(savedProject);
-                        if (project.html) htmlEditor.setValue(project.html);
-                        if (project.css) cssEditor.setValue(project.css);
-                        if (project.js) jsEditor.setValue(project.js);
-                        
-                        showNotification('Project loaded from browser storage');
-                        runCode();
-                    }
-                } catch (error) {
-                    console.error('Error loading from localStorage:', error);
-                }
-            }
-            
-            // Export as downloadable file
-            function exportAsFile() {
-                try {
-                    const html = htmlEditor.getValue();
-                    const css = cssEditor.getValue();
-                    const js = jsEditor.getValue();
-                    
-                    const fullHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exported Project</title>
-    <style>${css}</style>
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #333;
+  }
+  header h1 {
+    margin: 0; font-weight: 600; font-size: 1.2rem;
+  }
+  button {
+    background: #333; border: none; color: #eee; padding: 6px 12px;
+    border-radius: 4px; cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: #555;
+  }
+  main {
+    flex: 1; display: flex; overflow: hidden;
+  }
+  .editor-section {
+    width: 50%; display: flex; flex-direction: column;
+    background: #1e1e1e;
+  }
+  .tabs {
+    display: flex; background: #2a2a2a; border-bottom: 1px solid #444;
+  }
+  .tab {
+    flex: 1; text-align: center; padding: 10px 0;
+    cursor: pointer; user-select: none;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.3s;
+  }
+  .tab.active {
+    border-bottom: 3px solid #4caf50;
+    font-weight: bold;
+  }
+  textarea {
+    flex: 1; background: #121212; border: none; color: #eee;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1rem; padding: 10px;
+    resize: none;
+    outline: none;
+  }
+  .preview-section {
+    width: 50%; background: #000;
+    border-left: 1px solid #333;
+    display: flex; flex-direction: column;
+  }
+  iframe {
+    flex: 1; border: none; background: white;
+  }
+  .footer {
+    background: #1f1f1f; padding: 8px 20px; text-align: center;
+    font-size: 0.9rem; color: #666;
+  }
+</style>
 </head>
 <body>
-    ${html}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            ${js}
-        });
-    </script>
-</body>
-</html>`;
-                    
-                    const blob = new Blob([fullHTML], { type: 'text/html' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'codeplayground-export.html';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    showNotification('Project exported as HTML file!');
-                } catch (error) {
-                    console.error('Error exporting file:', error);
-                    showNotification('Error exporting project: ' + error.message, 'error');
-                }
-            }
-            
-            // Reset all editors
-            function resetEditors() {
-                if (confirm('Are you sure you want to reset all code? This cannot be undone.')) {
-                    htmlEditor.setValue(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Playground</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Welcome to CodePlayground!</h1>
-        <p>Edit this code and see live preview.</p>
-        <button id="demoBtn">Click Me</button>
-        <div id="output"></div>
+
+<header>
+  <h1>Code Editor Dark Mode</h1>
+  <button id="toggleThemeBtn">Toggle Dark Mode</button>
+</header>
+
+<main>
+  <section class="editor-section">
+    <div class="tabs">
+      <div class="tab active" data-lang="html">HTML</div>
+      <div class="tab" data-lang="css">CSS</div>
+      <div class="tab" data-lang="js">JavaScript</div>
     </div>
-    <script src="script.js"></script>
-</body>
-</html>`);
-                    
-                    cssEditor.setValue(`body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 20px;
-    background-color: #f5f5f5;
-    color: #333;
-}
+    <textarea id="codeEditor" spellcheck="false"></textarea>
+  </section>
+  <section class="preview-section">
+    <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+  </section>
+</main>
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+<div class="footer">Tekan Ctrl+Enter untuk menjalankan kode</div>
 
-h1 {
-    color: #4a6fa5;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const editor = document.getElementById('codeEditor');
+  const preview = document.getElementById('preview');
+  const toggleThemeBtn = document.getElementById('toggleThemeBtn');
 
-#demoBtn {
-    background-color: #4a6fa5;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
+  // Simpan kode per tab
+  const code = {
+    html: '<!-- Tulis HTML di sini -->\n',
+    css: '/* Tulis CSS di sini */\n',
+    js: '// Tulis JavaScript di sini\n'
+  };
 
-#demoBtn:hover {
-    background-color: #166088;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+  let currentLang = 'html';
 
-#output {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px dashed #ccc;
-    border-radius: 4px;
-    min-height: 50px;
-    background-color: #f9f9f9;
-}`);
-                    
-                    jsEditor.setValue(`document.addEventListener('DOMContentLoaded', function() {
-    const demoBtn = document.getElementById('demoBtn');
-    const output = document.getElementById('output');
-    
-    demoBtn.addEventListener('click', function() {
-        // Display current time
-        const now = new Date();
-        output.innerHTML = \`
-            <p>Button clicked at: <strong>\${now.toLocaleTimeString()}</strong></p>
-            <p>Today is: <strong>\${now.toLocaleDateString()}</strong></p>
-        \`;
-        
-        // Create rainbow effect
-        const colors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'];
-        let colorIndex = 0;
-        
-        const interval = setInterval(() => {
-            output.style.color = colors[colorIndex];
-            colorIndex = (colorIndex + 1) % colors.length;
-        }, 200);
-        
-        // Stop after 2 seconds
-        setTimeout(() => {
-            clearInterval(interval);
-            output.style.color = '';
-        }, 2000);
+  function updateEditor() {
+    editor.value = code[currentLang];
+    editor.focus();
+  }
+
+  function updatePreview() {
+    const srcDoc = `
+      <html>
+        <head>
+          <style>${code.css}</style>
+        </head>
+        <body>
+          ${code.html}
+          <script>${code.js}<\/script>
+        </body>
+      </html>
+    `;
+    preview.srcdoc = srcDoc;
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Simpan dulu kode yang sedang diedit
+      code[currentLang] = editor.value;
+
+      // Ganti tab aktif
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      currentLang = tab.dataset.lang;
+      updateEditor();
     });
-});`);
-                    
-                    runCode();
-                    showNotification('Editors reset to default code', 'warning');
-                }
-            }
-            
-            // Handle resizing of editor/preview panels
-            function startResize(e) {
-                isResizing = true;
-                lastX = e.clientX;
-                lastY = e.clientY;
-                document.addEventListener('mousemove', resize);
-                document.addEventListener('mouseup', stopResize);
-                document.body.style.cursor = window.innerWidth > 768 ? 'col-resize' : 'row-resize';
-                document.body.style.userSelect = 'none';
-            }
-            
-            function resize(e) {
-                if (!isResizing) return;
-                
-                const mainContainer = document.querySelector('.main-container');
-const editorContainer = document.querySelector('.editor-container');
-const previewContainer = document.querySelector('.preview-container');
-const resizeHandle = document.getElementById('resizeHandle');
+  });
 
-            if (window.innerWidth > 768) {
-                // Horizontal resize
-                const dx = e.clientX - lastX;
-                lastX = e.clientX;
-                
-                const newEditorWidth = editorContainer.offsetWidth + dx;
-                const minWidth = 200;
-                const maxWidth = mainContainer.offsetWidth - minWidth - resizeHandle.offsetWidth;
-                
-                if (newEditorWidth >= minWidth && newEditorWidth <= maxWidth) {
-                    editorContainer.style.flex = 'none';
-                    editorContainer.style.width = newEditorWidth + 'px';
-                    previewContainer.style.flex = '1';
-                }
-            } else {
-                // Vertical resize
-                const dy = e.clientY - lastY;
-                lastY = e.clientY;
-                
-                const newEditorHeight = editorContainer.offsetHeight + dy;
-                const minHeight = 100;
-                const maxHeight = mainContainer.offsetHeight - minHeight - resizeHandle.offsetHeight;
-                
-                if (newEditorHeight >= minHeight && newEditorHeight <= maxHeight) {
-                    editorContainer.style.flex = 'none';
-                    editorContainer.style.height = newEditorHeight + 'px';
-                    previewContainer.style.flex = '1';
-                }
-            }
-        }
-        
-        function stopResize() {
-            isResizing = false;
-            document.removeEventListener('mousemove', resize);
-            document.removeEventListener('mouseup', stopResize);
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-        }
-        
-        // Handle tab switching
-        document.querySelectorAll('.editor-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                setActiveEditor(tab.dataset.language);
-            });
-            
-            // Close tab functionality (optional: prevent closing all tabs)
-            tab.querySelector('.close-tab').addEventListener('click', (e) => {
-                e.stopPropagation();
-                // For simplicity, do not allow closing tabs in this version
-                showNotification('Closing tabs is disabled in this version.', 'warning');
-            });
-        });
-        
-        // Button event listeners
-        document.getElementById('runBtn').addEventListener('click', runCode);
-        document.getElementById('themeBtn').addEventListener('click', toggleDarkMode);
-        document.getElementById('saveLocal').addEventListener('click', (e) => {
-            e.preventDefault();
-            saveToLocalStorage();
-        });
-        document.getElementById('exportFile').addEventListener('click', (e) => {
-            e.preventDefault();
-            exportAsFile();
-        });
-        document.getElementById('shareLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            showNotification('Share feature coming soon!', 'warning');
-        });
-        document.getElementById('resetBtn').addEventListener('click', resetEditors);
-        
-        // Resize handle event
-        document.getElementById('resizeHandle').addEventListener('mousedown', startResize);
-        
-        // Keyboard shortcut for running code (Ctrl+Enter)
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
-                e.preventDefault();
-                runCode();
-            }
-        });
-        
-        // Initialize editors on page load
-        initEditors();
-    });
+  editor.addEventListener('input', () => {
+    code[currentLang] = editor.value;
+  });
+
+  // Jalankan kode ke preview
+  function runCode() {
+    updatePreview();
+  }
+
+  // Shortcut Ctrl+Enter untuk run
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key === 'Enter') {
+      e.preventDefault();
+      runCode();
+    }
+  });
+
+  // Dark mode toggle
+  let darkMode = true;
+  toggleThemeBtn.addEventListener('click', () => {
+    darkMode = !darkMode;
+    if (darkMode) {
+      document.body.style.backgroundColor = '#121212';
+      document.body.style.color = '#eee';
+      document.querySelector('.editor-section').style.backgroundColor = '#1e1e1e';
+      document.querySelector('.preview-section').style.backgroundColor = '#000';
+      tabs.forEach(t => t.style.backgroundColor = '#2a2a2a');
+      toggleThemeBtn.textContent = 'Toggle Dark Mode';
+    } else {
+      document.body.style.backgroundColor = '#fff';
+      document.body.style.color = '#000';
+      document.querySelector('.editor-section').style.backgroundColor = '#f0f0f0';
+      document.querySelector('.preview-section').style.backgroundColor = '#fff';
+      tabs.forEach(t => t.style.backgroundColor = '#ddd');
+      toggleThemeBtn.textContent = 'Toggle Light Mode';
+    }
+  });
+
+  // Inisialisasi editor dengan tab html
+  updateEditor();
+  runCode();
 </script>
-                </body> 
-                </html>
+
+</body>
+</html>
