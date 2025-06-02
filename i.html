@@ -120,7 +120,7 @@
             margin-top: 1rem;
             display: none;
         }
-        /* CSS sebelumnya tetap sama, tambahkan ini di bagian bawah */
+
         .loop-info {
             text-align: center;
             margin-top: 1rem;
@@ -158,6 +158,7 @@
                 <span>Volume:</span>
                 <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
             </div>
+            
             <div class="loop-info">Mode: Loop Otomatis (Default)</div>
             
             <div class="status" id="status">
@@ -187,6 +188,9 @@
             const statusEl = document.getElementById('status');
             const cookieNotice = document.getElementById('cookie-notice');
             const acceptCookiesBtn = document.getElementById('accept-cookies');
+            
+            // Set loop default ke true
+            audioPlayer.loop = true;
             
             // Check if cookies are accepted
             const cookiesAccepted = localStorage.getItem('cookiesAccepted') === 'true';
@@ -246,7 +250,10 @@
                             if (cached) {
                                 statusEl.textContent = `Playing from cache: ${selectedSong.title}`;
                                 audioPlayer.src = selectedSong.url;
-                                audioPlayer.play();
+                                audioPlayer.play().catch(e => {
+                                    console.error('Playback failed:', e);
+                                    statusEl.textContent = `Playback error: ${e.message}`;
+                                });
                                 isPlaying = true;
                                 playBtn.textContent = 'Pause';
                                 localStorage.setItem('lastPlayedSong', selectedSong.url);
@@ -256,7 +263,10 @@
                                 cacheSong(selectedSong.url)
                                     .then(() => {
                                         audioPlayer.src = selectedSong.url;
-                                        audioPlayer.play();
+                                        audioPlayer.play().catch(e => {
+                                            console.error('Playback failed:', e);
+                                            statusEl.textContent = `Playback error: ${e.message}`;
+                                        });
                                         isPlaying = true;
                                         playBtn.textContent = 'Pause';
                                         localStorage.setItem('lastPlayedSong', selectedSong.url);
@@ -266,7 +276,10 @@
                                         console.error('Error caching song:', err);
                                         statusEl.textContent = `Error caching song. Playing without caching.`;
                                         audioPlayer.src = selectedSong.url;
-                                        audioPlayer.play();
+                                        audioPlayer.play().catch(e => {
+                                            console.error('Playback failed:', e);
+                                            statusEl.textContent = `Playback error: ${e.message}`;
+                                        });
                                         isPlaying = true;
                                         playBtn.textContent = 'Pause';
                                         localStorage.setItem('lastPlayedSong', selectedSong.url);
@@ -277,7 +290,10 @@
                             console.error('Error checking cache:', err);
                             statusEl.textContent = `Error checking cache. Playing without caching.`;
                             audioPlayer.src = selectedSong.url;
-                            audioPlayer.play();
+                            audioPlayer.play().catch(e => {
+                                console.error('Playback failed:', e);
+                                statusEl.textContent = `Playback error: ${e.message}`;
+                            });
                             isPlaying = true;
                             playBtn.textContent = 'Pause';
                             localStorage.setItem('lastPlayedSong', selectedSong.url);
@@ -286,7 +302,10 @@
                     // Cookies not accepted, play without caching
                     statusEl.textContent = `Playing: ${selectedSong.title}`;
                     audioPlayer.src = selectedSong.url;
-                    audioPlayer.play();
+                    audioPlayer.play().catch(e => {
+                        console.error('Playback failed:', e);
+                        statusEl.textContent = `Playback error: ${e.message}`;
+                    });
                     isPlaying = true;
                     playBtn.textContent = 'Pause';
                     localStorage.setItem('lastPlayedSong', selectedSong.url);
@@ -355,9 +374,19 @@
             audioPlayer.addEventListener('timeupdate', updateProgress);
             
             audioPlayer.addEventListener('ended', function() {
-                isPlaying = false;
-                playBtn.textContent = 'Play';
-                statusEl.textContent = `Song ended: ${songs[songSelector.selectedIndex].title}`;
+                if (audioPlayer.loop) {
+                    // Untuk loop, kita reset waktu dan play lagi
+                    audioPlayer.currentTime = 0;
+                    audioPlayer.play().catch(e => {
+                        console.error('Playback failed:', e);
+                        statusEl.textContent = `Playback error: ${e.message}`;
+                    });
+                    statusEl.textContent = `Looping: ${songs[songSelector.selectedIndex].title}`;
+                } else {
+                    isPlaying = false;
+                    playBtn.textContent = 'Play';
+                    statusEl.textContent = `Song ended: ${songs[songSelector.selectedIndex].title}`;
+                }
             });
             
             progressContainer.addEventListener('click', setProgress);
@@ -398,29 +427,6 @@
                 return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             }
         });
-        document.addEventListener('DOMContentLoaded', function() {
-            // Kode sebelumnya tetap sama
-            
-            // Set loop default ke true
-            audioPlayer.loop = true;
-            
-            // Kode event listener lainnya tetap sama
-            
-            // Modifikasi event listener ended untuk loop
-            audioPlayer.addEventListener('ended', function() {
-                if (audioPlayer.loop) {
-                    // Untuk loop, kita reset waktu dan play lagi
-                    audioPlayer.currentTime = 0;
-                    audioPlayer.play();
-                    statusEl.textContent = `Looping: ${songs[songSelector.selectedIndex].title}`;
-                }
-                
-                else {
-                    isPlaying = false;
-                    playBtn.textContent = 'Play';
-                    statusEl.textContent = `Song ended: ${songs[songSelector.selectedIndex].title}`;
-                }
-            });
     </script>
 </body>
 </html>
