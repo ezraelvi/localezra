@@ -18,33 +18,29 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-    :root {
-        --primary: #6c5ce7;
-        --secondary: #00cec9;
-        --accent: #fd79a8;
-        --danger: #ff7675;
-        --warning: #fdcb6e;
-        --success: #00b894;
-        --dark: #2d3436;
-        --light: #f5f6fa;
+   :root {
+    --bg-dark: #1e1e2f;
+    --bg-light: #2d2d44;
+    --grid-color: rgba(255,255,255,0.05);
+}
+
+body {
+    background: 
+        /* Base color */
+        var(--bg-dark),
         
-        --hacker-red: #ff4757;
-        --hacker-blue: #70a1ff;
-        --hacker-green: #2ed573;
-        --hacker-purple: #7d5fff;
+        /* Grid pattern */
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px),
         
-        --neon-glow: 0 0 15px rgba(108, 92, 231, 0.7);
-        --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
+        /* Gradient overlay */
+        linear-gradient(135deg, var(--bg-light) 0%, var(--bg-dark) 100%);
     
-    body {
-        margin: 0; 
-        padding: 0;
-        overflow-x: hidden;
-        background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
-        color: var(--light);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    background-size: 
+        100% 100%,
+        40px 40px,
+        40px 40px;
+}
     
     #earth-container {
         position: fixed;
@@ -1290,6 +1286,14 @@
                 updateCursorPosition();
             });
         });
+        // Hapus variabel global terkait Three.js jika ada
+if (typeof scene !== 'undefined') {
+    scene = null;
+    camera = null;
+    renderer = null;
+    earth = null;
+    controls = null;
+}
     </script>
 </body>
 </html>
