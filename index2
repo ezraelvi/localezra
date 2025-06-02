@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Biometrik</title>
+  <style>
+    .biometric-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .biometric-btn i {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+    .biometric-btn:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div id="login-container">
+    <h2>Login dengan Sidik Jari</h2>
+    <button id="biometric-btn" class="biometric-btn" onclick="startBiometricAuth()">
+      <i>🔒</i> Autentikasi Biometrik
+    </button>
+    <p id="status-message"></p>
+  </div>
+
+  <script>
+    // Cek dukungan browser
+    function isWebAuthnSupported() {
+      return window.PublicKeyCredential && 
+             typeof PublicKeyCredential === 'function' &&
+             typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function';
+    }
+
+    // Tampilkan status dukungan
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('biometric-btn');
+      const status = document.getElementById('status-message');
+      
+      if (!isWebAuthnSupported()) {
+        btn.disabled = true;
+        status.textContent = 'Browser Anda tidak mendukung autentikasi biometrik.';
+        status.style.color = 'red';
+        return;
+      }
+      
+      // Cek apakah perangkat memiliki autentikator biometrik
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        .then(available => {
+          if (!available) {
+            btn.disabled = true;
+            status.textContent = 'Perangkat Anda tidak memiliki sensor biometrik atau tidak dikonfigurasi.';
+            status.style.color = 'red';
+          }
+        });
+    });
+
+    // Fungsi untuk memulai registrasi
+    async function registerBiometric() {
+      try {
+        const status = document.getElementById('status-message');
+        status.textContent = 'Mempersiapkan pendaftaran...';
+        status.style.color = 'black';
+
+        // Dapatkan challenge dari server
+        const response = await fetch('/webauthn/register/start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        const options = await response.json();
+        
+        // Modifikasi options untuk lebih user friendly
+        options.publicKey.challenge = base64urlToBuffer(options.publicKey.challenge);
+        options.publicKey.user.id = base64urlToBuffer(options.publicKey.user.id);
+        
+        if (options.publicKey.excludeCredentials) {
+          options.publicKey.excludeCredentials = options.publicKey.excludeCredentials.map(cred => {
+            return {
+              ...cred,
+              id: base64urlToBuffer(cred.id)
+            };
+          });
+        }
+        
+        // Panggil WebAuthn API
+        const credential = await navigator.credentials.create(options);
+        
+        // Kirim credential ke server
+        const verificationResponse = await fetch('/webauthn/register/finish', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: credential.id,
+            rawId: bufferToBase64url(credential.rawId),
+            type: credential.type,
+            response: {
+              attestationObject: bufferToBase64url(credential.response.attestationObject),
+              clientDataJSON: bufferToBase64url(credential.response.clientDataJSON)
+            }
+          }),
+          credentials: 'include'
+        });
+        
+        const result = await verificationResponse.json();
+        
+        if (result.success) {
+          status.textContent = 'Pendaftaran biometrik berhasil!';
+          status.style.color = 'green';
+        } else {
+          throw new Error(result.message || 'Pendaftaran gagal');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        const status = document.getElementById('status-message');
+        status.textContent = 'Error: ' + error.message;
+        status.style.color = 'red';
+      }
+    }
+
+    // Fungsi untuk login biometrik
+    async function startBiometricAuth() {
+      try {
+        const status = document.getElementById('status-message');
+        status.textContent = 'Mempersiapkan autentikasi...';
+        status.style.color = 'black';
+
+        // Dapatkan challenge dari server
+        const response = await fetch('/webauthn/login/start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        const options = await response.json();
+        
+        // Konversi base64url ke ArrayBuffer
+        options.publicKey.challenge = base64urlToBuffer(options.publicKey.challenge);
+        
+        if (options.publicKey.allowCredentials) {
+          options.publicKey.allowCredentials = options.publicKey.allowCredentials.map(cred => {
+            return {
+              ...cred,
+              id: base64urlToBuffer(cred.id)
+            };
+          });
+        }
+        
+        // Panggil WebAuthn API
+        const assertion = await navigator.credentials.get(options);
+        
+        // Kirim assertion ke server
+        const verificationResponse = await fetch('/webauthn/login/finish', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: assertion.id,
+            rawId: bufferToBase64url(assertion.rawId),
+            type: assertion.type,
+            response: {
+              authenticatorData: bufferToBase64url(assertion.response.authenticatorData),
+              clientDataJSON: bufferToBase64url(assertion.response.clientDataJSON),
+              signature: bufferToBase64url(assertion.response.signature),
+              userHandle: assertion.response.userHandle ? 
+                bufferToBase64url(assertion.response.userHandle) : null
+            }
+          }),
+          credentials: 'include'
+        });
+        
+        const result = await verificationResponse.json();
+        
+        if (result.success) {
+          status.textContent = 'Autentikasi berhasil! Mengarahkan...';
+          status.style.color = 'green';
+          window.location.href = '/dashboard'; // Redirect setelah login sukses
+        } else {
+          throw new Error(result.message || 'Autentikasi gagal');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        const status = document.getElementById('status-message');
+        status.textContent = 'Error: ' + error.message;
+        status.style.color = 'red';
+      }
+    }
+
+    // Helper functions
+    function bufferToBase64url(buffer) {
+      const bytes = new Uint8Array(buffer);
+      let str = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        str += String.fromCharCode(bytes[i]);
+      }
+      return btoa(str)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+    }
+
+    function base64urlToBuffer(base64url) {
+      const base64 = base64url
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+      const padLength = (4 - (base64.length % 4)) % 4;
+      const padded = base64.padEnd(base64.length + padLength, '=');
+      const binary = atob(padded);
+      const buffer = new ArrayBuffer(binary.length);
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return buffer;
+    }
+  </script>
+</body>
+</html>
