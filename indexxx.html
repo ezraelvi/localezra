@@ -1,32 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>🛡️Secure V Local</title>
-  <link rel="icon" type="image/png" href="/whoareyou/indexicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Fingerprint Auth</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="vault" id="vault">
-    <div class="fingerprint" id="scanner">
-      <div class="ridges"></div>
-      <div class="scan-highlight" id="scanHighlight"></div>
-      <div class="scan-dots" id="scanDots"></div>
+  <div class="container">
+    <div class="fingerprint-scanner" id="scanner">
+      <div class="fingerprint-pattern"></div>
       <div class="scan-line" id="scanLine"></div>
       <div class="progress-bar" id="progressBar"></div>
     </div>
     
-    <div class="status" id="status">FINGERPRINT AUTHENTICATION</div>
+    <div class="status-text" id="status">PLACE YOUR FINGER</div>
     
-    <div class="code-display" id="codeDisplay"></div>
+    <button class="visit-btn" id="visitBtn">VISIT DASHBOARD</button>
     
-    <button class="register-btn" id="registerBtn">REGISTER FINGERPRINT</button>
-  </div>
-  
-  <div class="ip-display" id="ipDisplay">
-    Your IP: Loading...
+    <div class="ip-info" id="ipDisplay">Detecting IP...</div>
   </div>
 
-  <!-- Include Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
