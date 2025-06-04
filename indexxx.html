@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secure Fingerprint Auth</title>
+  <title>Secure Biometric Authentication</title>
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <div class="fingerprint-scanner" id="scanner">
-      <div class="fingerprint-pattern"></div>
-      <div class="scan-line" id="scanLine"></div>
-      <div class="progress-bar" id="progressBar"></div>
+    <div class="fingerprint-container">
+      <div class="fingerprint">
+        <div class="fingerprint-lines"></div>
+        <div class="scan-line" id="scanLine"></div>
+      </div>
+      <div class="status" id="status">WAITING FOR FINGERPRINT...</div>
     </div>
     
-    <div class="status-text" id="status">PLACE YOUR FINGER</div>
+    <div class="ip-display" id="ipDisplay">Detecting your IP...</div>
     
     <button class="visit-btn" id="visitBtn">VISIT DASHBOARD</button>
-    
-    <div class="ip-info" id="ipDisplay">Detecting IP...</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
