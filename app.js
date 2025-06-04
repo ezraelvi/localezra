@@ -4,8 +4,8 @@ const config = {
   scanDuration: 3000,
   secretCode: "LOCALLIFE",
   attemptCookieExpiry: 10, // minutes
-  supabaseUrl: 'YOUR_SUPABASE_URL',
-  supabaseKey: 'YOUR_SUPABASE_ANON_KEY'
+  supabaseUrl: 'https://hjmosjvfrycamxowfurq.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM'
 };
 
 // DOM ELEMENTS
@@ -238,3 +238,117 @@ function playBeep(freq, dur, type='sine') {
 
 // INITIALIZE APP
 document.addEventListener('DOMContentLoaded', init);
+
+function getPublicKeyCredentialOptions(userId) {
+  return {
+    challenge: Uint8Array.from(
+      window.crypto.getRandomValues(new Uint8Array(32))).buffer,
+    rp: {
+      name: "Secure V Local",
+      id: window.location.hostname,
+    },
+    user: {
+      id: Uint8Array.from(userId, c => c.charCodeAt(0)),
+      name: userId,
+      displayName: "Secure User",
+    },
+    pubKeyCredParams: [
+      { type: "public-key", alg: -7 },  // ES256
+      { type: "public-key", alg: -257 }, // RS256
+    ],
+    authenticatorSelection: {
+      authenticatorAttachment: "platform",
+      userVerification: "required",
+    },
+    timeout: 60000,
+    attestation: "direct"
+  };
+}
+
+async function saveCredentialToSupabase(credential, userId) {
+  const attestationObject = new Uint8Array(credential.response.attestationObject);
+  const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
+  const rawId = new Uint8Array(credential.rawId);
+  
+  const { data, error } = await supabaseClient
+    .from('user_credentials')
+    .insert([{
+      user_id: userId,
+      credential_id: rawId,
+      public_key: credential.id,
+      attestation_object: attestationObject,
+      client_data_json: clientDataJSON,
+      device_type: getDeviceType()
+    }]);
+  
+  if (error) throw error;
+  return data;
+}
+
+function getAuthOptions(credentials) {
+  const allowedCredentials = credentials.map(cred => ({
+    id: Uint8Array.from(cred.credential_id),
+    type: 'public-key',
+    transports: ['internal']
+  }));
+
+  return {
+    challenge: Uint8Array.from(
+      window.crypto.getRandomValues(new Uint8Array(32))).buffer,
+    allowCredentials: allowedCredentials,
+    userVerification: "required",
+    timeout: 60000
+  };
+}
+
+async function verifyAssertion(assertion) {
+  const { data, error } = await supabaseClient
+    .from('user_credentials')
+    .select('user_id')
+    .eq('credential_id', Array.from(new Uint8Array(assertion.rawId)))
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+function handleAuthError(error) {
+  finishScan(false);
+  const attemptCount = updateAttemptCount();
+  
+  if (attemptCount >= config.maxAttempts) {
+    triggerLockdown();
+  } else {
+    status.textContent = `AUTH FAILED (${attemptCount}/${config.maxAttempts})`;
+    setTimeout(() => {
+      status.textContent = "READY FOR AUTHENTICATION";
+      registerBtn.style.display = 'block';
+    }, 1500);
+  }
+}
+
+function resetScanElements() {
+  scanLine.style.opacity = "0";
+  scanHighlight.style.opacity = "0";
+  scanHighlight.style.animation = "none";
+  scanDots.style.opacity = "0";
+  scanDots.style.animation = "none";
+  progressBar.style.width = "0%";
+  scanner.style.background = `url('data:image/svg+xml;utf8,...') center/contain no-repeat`;
+}
+
+function getRandomScanPoint() {
+  const points = [
+    {x: 30, y: 20},
+    {x: 70, y: 40},
+    {x: 20, y: 60},
+    {x: 80, y: 80},
+    {x: 50, y: 50}
+  ];
+  return points[Math.floor(Math.random() * points.length)];
+}
+
+function getFingerprintBackground(point) {
+  return `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat, 
+          radial-gradient(circle at ${point.x}% ${point.y}%, rgba(0,255,136,0.3) 0%, transparent 70%)`;
+}
