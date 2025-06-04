@@ -27,7 +27,80 @@ let audioCtx;
 let scanProgress = 0;
 let supabaseClient;
 
-// INITIALIZATION
+// ======================
+// 🍪 COOKIE MANAGEMENT
+// ======================
+function setCookie(name, value, minutes) {
+  const date = new Date();
+  date.setTime(date.getTime() + (minutes * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+}
+
+function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.trim().split('=');
+    if (cookieName === name) return cookieValue;
+  }
+  return null;
+}
+
+function deleteCookie(name) {
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+}
+
+// ======================
+// 🔄 ATTEMPT MANAGEMENT
+// ======================
+function getAttemptCount() {
+  const attempts = getCookie('login_attempts');
+  return attempts ? parseInt(attempts) : 0;
+}
+
+function updateAttemptCount() {
+  const newCount = getAttemptCount() + 1;
+  setCookie('login_attempts', newCount, config.attemptCookieExpiry);
+  return newCount;
+}
+
+function resetAttempts() {
+  deleteCookie('login_attempts');
+}
+
+// ======================
+// 🚨 LOCKDOWN SYSTEM
+// ======================
+function triggerLockdown() {
+  isLocked = true;
+  status.textContent = "SECURITY LOCKDOWN";
+  vault.classList.add('under-attack');
+  
+  setCookie('blocked', 'true', 1);
+  resetAttempts();
+  
+  playBeep(200, 0.2, 'square');
+  setTimeout(() => playBeep(150, 0.3, 'square'), 100);
+  setTimeout(() => playBeep(100, 0.4, 'square'), 200);
+  
+  showEncryptionCode();
+  setTimeout(() => window.location.href = 'whoareyou/index.html', 1000);
+}
+
+function showEncryptionCode() {
+  codeDisplay.style.display = "block";
+  codeDisplay.innerHTML = 
+    `<span style="color:#ff5555">// ENCRYPTION ACTIVATED</span>\n` +
+    `<span style="color:#00ff88">void</span> secure_decrypt() {\n` +
+    `  <span style="color:#00ff88">if</span> (auth_attempts >= ${config.maxAttempts}) {\n` +
+    `    <span style="color:#ff5555">firewall</span>(0x${Math.random().toString(16).slice(2,10)});\n` +
+    `    <span style="color:#00ff88">return</span> <span style="color:#ff5555">LOCKDOWN</span>;\n` +
+    `  }\n` +
+    `}`;
+}
+
+// ======================
+// 🚀 INITIALIZATION
+// ======================
 function init() {
   if (getCookie('blocked')) {
     window.location.href = 'whoareyou/index.html';
@@ -40,7 +113,9 @@ function init() {
   fetchIPAddress();
 }
 
-// SUPABASE FUNCTIONS
+// ======================
+// 🗄️ SUPABASE FUNCTIONS
+// ======================
 function initSupabase() {
   supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseKey);
   checkUserRegistration();
@@ -59,7 +134,9 @@ async function checkUserRegistration() {
   }
 }
 
-// WEBAUTHN FUNCTIONS
+// ======================
+# 🖐️ WEBAUTHN FUNCTIONS
+// ======================
 async function registerFingerprint() {
   try {
     startScan();
@@ -122,7 +199,9 @@ async function authenticateFingerprint() {
   }
 }
 
-// HELPER FUNCTIONS
+// ======================
+// 🛠️ HELPER FUNCTIONS
+// ======================
 function setupEventListeners() {
   scanner.addEventListener('click', () => {
     if (!isScanning && !isLocked) {
@@ -170,7 +249,21 @@ function fetchIPAddress() {
     });
 }
 
-// SCAN ANIMATION FUNCTIONS
+function generateUserId() {
+  return 'user_' + Math.random().toString(36).substring(2, 15);
+}
+
+function getDeviceType() {
+  const ua = navigator.userAgent;
+  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry/.test(ua)) {
+    return 'mobile';
+  }
+  return 'desktop';
+}
+
+// ======================
+// 🔍 SCAN ANIMATION FUNCTIONS
+// ======================
 function startScan() {
   isScanning = true;
   scanProgress = 0;
@@ -212,7 +305,35 @@ function finishScan(success) {
   }
 }
 
-// AUDIO FUNCTIONS
+function resetScanElements() {
+  scanLine.style.opacity = "0";
+  scanHighlight.style.opacity = "0";
+  scanHighlight.style.animation = "none";
+  scanDots.style.opacity = "0";
+  scanDots.style.animation = "none";
+  progressBar.style.width = "0%";
+  scanner.style.background = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat`;
+}
+
+function getRandomScanPoint() {
+  const points = [
+    {x: 30, y: 20},
+    {x: 70, y: 40},
+    {x: 20, y: 60},
+    {x: 80, y: 80},
+    {x: 50, y: 50}
+  ];
+  return points[Math.floor(Math.random() * points.length)];
+}
+
+function getFingerprintBackground(point) {
+  return `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat, 
+          radial-gradient(circle at ${point.x}% ${point.y}%, rgba(0,255,136,0.3) 0%, transparent 70%)`;
+}
+
+// ======================
+// 🔊 AUDIO FUNCTIONS
+// ======================
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -236,9 +357,9 @@ function playBeep(freq, dur, type='sine') {
   osc.stop(audioCtx.currentTime + dur);
 }
 
-// INITIALIZE APP
-document.addEventListener('DOMContentLoaded', init);
-
+// ======================
+// WEBAUTHN HELPER FUNCTIONS
+// ======================
 function getPublicKeyCredentialOptions(userId) {
   return {
     challenge: Uint8Array.from(
@@ -327,28 +448,5 @@ function handleAuthError(error) {
   }
 }
 
-function resetScanElements() {
-  scanLine.style.opacity = "0";
-  scanHighlight.style.opacity = "0";
-  scanHighlight.style.animation = "none";
-  scanDots.style.opacity = "0";
-  scanDots.style.animation = "none";
-  progressBar.style.width = "0%";
-  scanner.style.background = `url('data:image/svg+xml;utf8,...') center/contain no-repeat`;
-}
-
-function getRandomScanPoint() {
-  const points = [
-    {x: 30, y: 20},
-    {x: 70, y: 40},
-    {x: 20, y: 60},
-    {x: 80, y: 80},
-    {x: 50, y: 50}
-  ];
-  return points[Math.floor(Math.random() * points.length)];
-}
-
-function getFingerprintBackground(point) {
-  return `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat, 
-          radial-gradient(circle at ${point.x}% ${point.y}%, rgba(0,255,136,0.3) 0%, transparent 70%)`;
-}
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
