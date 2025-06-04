@@ -1,0 +1,185 @@
+/* 🎨 WARNA KHUSUS UNTUKMU */
+:root {
+  --glow: #00ff88;
+  --dark: #0a0a12;
+  --error: #ff0033;
+  --success: #00ff88;
+  --scan-speed: 3s;
+}
+
+/* 🖥️ TAMPILAN UTAMA */
+body {
+  background: radial-gradient(circle at center, #0a0a20, #000000);
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Courier New', monospace;
+  color: var(--glow);
+  overflow: hidden;
+}
+
+.vault {
+  width: 320px;
+  height: 420px;
+  background: rgba(10,10,20,0.9);
+  border-radius: 16px;
+  border: 1px solid var(--glow);
+  box-shadow: 
+    0 0 30px rgba(0,255,136,0.2),
+    inset 0 0 20px rgba(0,255,136,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 🖐️ FINGERPRINT SCANNER */
+.fingerprint {
+  width: 160px;
+  height: 200px;
+  margin: 30px auto;
+  background: 
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat;
+  position: relative;
+  filter: drop-shadow(0 0 5px var(--glow));
+  cursor: pointer;
+}
+
+.ridges {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: 
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M10,15 Q50,-5 90,15 Q100,35 90,55 Q80,75 50,85 Q20,75 10,55 Q0,35 10,15" fill="none" stroke="%2300ff8833" stroke-width="0.3"/></svg>') center/contain no-repeat;
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to bottom, transparent, var(--glow), transparent);
+  animation: scan var(--scan-speed) linear infinite;
+  opacity: 0;
+  z-index: 2;
+}
+
+.scan-highlight {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, transparent 70%, rgba(0,255,136,0.1) 100%);
+  opacity: 0;
+  z-index: 1;
+}
+
+.scan-dots {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 30% 20%, var(--glow) 1px, transparent 1px),
+    radial-gradient(circle at 70% 40%, var(--glow) 1px, transparent 1px),
+    radial-gradient(circle at 20% 60%, var(--glow) 1px, transparent 1px),
+    radial-gradient(circle at 80% 80%, var(--glow) 1px, transparent 1px);
+  background-size: 100% 100%;
+  opacity: 0;
+  z-index: 3;
+}
+
+/* 🚨 DARURAT MODE */
+.under-attack {
+  animation: attack-pulse 0.8s infinite;
+}
+
+/* 📟 STATUS & KODE */
+.status {
+  text-align: center;
+  margin-top: 20px;
+  height: 20px;
+  font-size: 14px;
+  text-shadow: 0 0 5px var(--glow);
+}
+
+.code-display {
+  position: absolute;
+  bottom: 70px;
+  width: 90%;
+  left: 5%;
+  height: 60px;
+  background: rgba(0,0,0,0.5);
+  border: 1px dashed var(--glow);
+  font-size: 10px;
+  padding: 5px;
+  overflow: hidden;
+  display: none;
+}
+
+.ip-display {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0,255,136,0.7);
+}
+
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--glow);
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.register-btn {
+  background: transparent;
+  border: 1px solid var(--glow);
+  color: var(--glow);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  font-family: 'Courier New', monospace;
+  transition: all 0.3s;
+}
+
+.register-btn:hover {
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 10px var(--glow);
+}
+
+/* ✨ ANIMASI KHUSUS */
+@keyframes scan {
+  0% { top: 0; opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes highlight-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes dots-pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes attack-pulse {
+  0%, 100% { box-shadow: 0 0 10px var(--error); }
+  50% { box-shadow: 0 0 30px var(--error); }
+}
+
+@keyframes success-pulse {
+  0%, 100% { box-shadow: 0 0 10px var(--success); }
+  50% { box-shadow: 0 0 30px var(--success); }
+}
