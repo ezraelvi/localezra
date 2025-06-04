@@ -135,7 +135,7 @@ async function checkUserRegistration() {
 }
 
 // ======================
-# 🖐️ WEBAUTHN FUNCTIONS
+//🖐️ WEBAUTHN FUNCTIONS
 // ======================
 async function registerFingerprint() {
   try {
