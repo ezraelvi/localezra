@@ -1,9 +1,9 @@
 // Configuration
 const config = {
-  supabaseUrl: 'YOUR_SUPABASE_URL',
-  supabaseKey: 'YOUR_SUPABASE_KEY',
+  supabaseUrl: 'https://hjmosjvfrycamxowfurq.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM',
   maxAttempts: 3,
-  cloudflareEndpoint: 'YOUR_CLOUDFLARE_WORKER_ENDPOINT',
+  cloudflareEndpoint: 'https://auth-logs.ezvvel.workers.dev/',
   dashboardUrl: 'dashboard.html',
   lockdownUrl: 'whoareyou/index.html'
 };
