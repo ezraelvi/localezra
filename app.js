@@ -1,197 +1,73 @@
-// CONFIGURATION
+// Configuration
 const config = {
   maxAttempts: 3,
   scanDuration: 3000,
-  secretCode: "LOCALLIFE",
-  attemptCookieExpiry: 10, // minutes
   supabaseUrl: 'https://hjmosjvfrycamxowfurq.supabase.co',
-  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM'
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM',
+  cloudflareEndpoint: 'https://your-cloudflare-worker.endpoint'
 };
 
-// DOM ELEMENTS
-const vault = document.getElementById('vault');
+// DOM Elements
 const scanner = document.getElementById('scanner');
 const scanLine = document.getElementById('scanLine');
-const scanHighlight = document.getElementById('scanHighlight');
-const scanDots = document.getElementById('scanDots');
 const progressBar = document.getElementById('progressBar');
 const status = document.getElementById('status');
-const registerBtn = document.getElementById('registerBtn');
-const codeDisplay = document.getElementById('codeDisplay');
+const visitBtn = document.getElementById('visitBtn');
 const ipDisplay = document.getElementById('ipDisplay');
 
-// STATE VARIABLES
+// State Variables
 let isScanning = false;
 let isLocked = false;
 let audioCtx;
 let scanProgress = 0;
 let supabaseClient;
+let failedAttempts = 0;
 
-// ======================
-// 🍪 COOKIE MANAGEMENT
-// ======================
-function setCookie(name, value, minutes) {
-  const date = new Date();
-  date.setTime(date.getTime() + (minutes * 60 * 1000));
-  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
-}
-
-function getCookie(name) {
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    const [cookieName, cookieValue] = cookie.trim().split('=');
-    if (cookieName === name) return cookieValue;
-  }
-  return null;
-}
-
-function deleteCookie(name) {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
-}
-
-// ======================
-// 🔄 ATTEMPT MANAGEMENT
-// ======================
-function getAttemptCount() {
-  const attempts = getCookie('login_attempts');
-  return attempts ? parseInt(attempts) : 0;
-}
-
-function updateAttemptCount() {
-  const newCount = getAttemptCount() + 1;
-  setCookie('login_attempts', newCount, config.attemptCookieExpiry);
-  return newCount;
-}
-
-function resetAttempts() {
-  deleteCookie('login_attempts');
-}
-
-// ======================
-// 🚨 LOCKDOWN SYSTEM
-// ======================
-function triggerLockdown() {
-  isLocked = true;
-  status.textContent = "SECURITY LOCKDOWN";
-  vault.classList.add('under-attack');
-  
-  setCookie('blocked', 'true', 1);
-  resetAttempts();
-  
-  playBeep(200, 0.2, 'square');
-  setTimeout(() => playBeep(150, 0.3, 'square'), 100);
-  setTimeout(() => playBeep(100, 0.4, 'square'), 200);
-  
-  showEncryptionCode();
-  setTimeout(() => window.location.href = 'whoareyou/index.html', 1000);
-}
-
-function showEncryptionCode() {
-  codeDisplay.style.display = "block";
-  codeDisplay.innerHTML = 
-    `<span style="color:#ff5555">// ENCRYPTION ACTIVATED</span>\n` +
-    `<span style="color:#00ff88">void</span> secure_decrypt() {\n` +
-    `  <span style="color:#00ff88">if</span> (auth_attempts >= ${config.maxAttempts}) {\n` +
-    `    <span style="color:#ff5555">firewall</span>(0x${Math.random().toString(16).slice(2,10)});\n` +
-    `    <span style="color:#00ff88">return</span> <span style="color:#ff5555">LOCKDOWN</span>;\n` +
-    `  }\n` +
-    `}`;
-}
-
-// ======================
-// 🚀 INITIALIZATION
-// ======================
-function init() {
-  if (getCookie('blocked')) {
-    window.location.href = 'whoareyou/index.html';
-    return;
-  }
-
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
   initSupabase();
-  setupEventListeners();
   checkDeviceCapabilities();
   fetchIPAddress();
-}
+  setupEventListeners();
+});
 
-// ======================
-// 🗄️ SUPABASE FUNCTIONS
-// ======================
+// Supabase Initialization
 function initSupabase() {
   supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseKey);
-  checkUserRegistration();
 }
 
-async function checkUserRegistration() {
-  const { data, error } = await supabaseClient
-    .from('user_credentials')
-    .select('*');
+// Event Listeners
+function setupEventListeners() {
+  scanner.addEventListener('click', handleFingerprintAuth);
+  visitBtn.addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+  });
+}
+
+// Fingerprint Authentication
+async function handleFingerprintAuth() {
+  if (isScanning || isLocked) return;
   
-  if (!error && data && data.length > 0) {
-    status.textContent = "READY FOR AUTHENTICATION";
-  } else {
-    status.textContent = "REGISTER FINGERPRINT";
-    registerBtn.style.display = 'block';
-  }
-}
-
-// ======================
-//🖐️ WEBAUTHN FUNCTIONS
-// ======================
-async function registerFingerprint() {
-  try {
-    startScan();
-    status.textContent = "READY TO REGISTER FINGERPRINT...";
-    
-    const userId = generateUserId();
-    const publicKeyOptions = getPublicKeyCredentialOptions(userId);
-    
-    const credential = await navigator.credentials.create({
-      publicKey: publicKeyOptions
-    });
-    
-    await saveCredentialToSupabase(credential, userId);
-    
-    finishScan(true);
-    status.textContent = "FINGERPRINT REGISTERED!";
-    vault.classList.add('success-pulse');
-    setTimeout(() => {
-      vault.classList.remove('success-pulse');
-      status.textContent = "READY FOR AUTHENTICATION";
-    }, 2000);
-    
-  } catch (error) {
-    console.error("Registration error:", error);
-    handleAuthError(error);
-  }
-}
-
-async function authenticateFingerprint() {
   try {
     startScan();
     
-    const { data: credentials, error } = await supabaseClient
-      .from('user_credentials')
-      .select('*');
-    
-    if (error) throw error;
-    if (!credentials || credentials.length === 0) {
-      registerBtn.style.display = 'block';
-      throw new Error("No credentials found");
+    if (!window.PublicKeyCredential) {
+      throw new Error("Biometric authentication not supported");
     }
-    
+
+    const credentials = await getStoredCredentials();
+    if (!credentials || credentials.length === 0) {
+      throw new Error("No registered fingerprints");
+    }
+
     const assertion = await navigator.credentials.get({
       publicKey: getAuthOptions(credentials)
     });
-    
+
     await verifyAssertion(assertion);
-    
     finishScan(true);
-    status.textContent = "AUTHENTICATION SUCCESS!";
-    vault.classList.add('success-pulse');
-    
-    setTimeout(() => {
-      window.location.href = 'dashboard/index.html';
-    }, 1000);
+    status.textContent = "AUTHENTICATION SUCCESS";
+    setTimeout(() => window.location.href = 'dashboard.html', 1000);
     
   } catch (error) {
     console.error("Authentication error:", error);
@@ -199,42 +75,126 @@ async function authenticateFingerprint() {
   }
 }
 
-// ======================
-// 🛠️ HELPER FUNCTIONS
-// ======================
-function setupEventListeners() {
-  scanner.addEventListener('click', () => {
-    if (!isScanning && !isLocked) {
-      authenticateFingerprint();
-    }
-  });
+// Helper Functions
+async function getStoredCredentials() {
+  const { data, error } = await supabaseClient
+    .from('user_credentials')
+    .select('credential_id');
   
-  registerBtn.addEventListener('click', registerFingerprint);
-  
-  // Developer mode secret code
-  let keyBuffer = [];
-  document.addEventListener('keydown', (e) => {
-    keyBuffer.push(e.key.toUpperCase());
-    if (keyBuffer.length > config.secretCode.length) {
-      keyBuffer.shift();
-    }
-    
-    if (keyBuffer.join('') === config.secretCode) {
-      status.textContent = "DEVELOPER MODE ACTIVATED";
-      vault.style.borderColor = "#ff00ff";
-      playBeep(1000, 0.5);
-      resetAttempts();
-    }
-  });
-  
-  // Initialize audio on first interaction
-  scanner.addEventListener('mousedown', initAudio, { once: true });
+  if (error) throw error;
+  return data;
 }
 
+function getAuthOptions(credentials) {
+  return {
+    challenge: Uint8Array.from(
+      window.crypto.getRandomValues(new Uint8Array(32))).buffer,
+    allowCredentials: credentials.map(cred => ({
+      id: Uint8Array.from(cred.credential_id),
+      type: 'public-key',
+      transports: ['internal']
+    })),
+    userVerification: "required",
+    timeout: 60000
+  };
+}
+
+async function verifyAssertion(assertion) {
+  const { data, error } = await supabaseClient
+    .from('user_credentials')
+    .select('user_id')
+    .eq('credential_id', Array.from(new Uint8Array(assertion.rawId)))
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+// Scan Animation
+function startScan() {
+  isScanning = true;
+  scanProgress = 0;
+  status.textContent = "SCANNING FINGERPRINT...";
+  scanLine.style.opacity = "1";
+  playBeep(800, 0.2);
+  
+  const progressInterval = setInterval(() => {
+    scanProgress += 1;
+    progressBar.style.width = `${scanProgress}%`;
+    
+    if (scanProgress >= 100) {
+      clearInterval(progressInterval);
+    }
+  }, config.scanDuration / 100);
+}
+
+function finishScan(success) {
+  isScanning = false;
+  scanLine.style.opacity = "0";
+  progressBar.style.width = "0%";
+  
+  if (success) {
+    playBeep(1200, 0.3);
+    resetFailedAttempts();
+  } else {
+    playBeep(400, 0.5);
+  }
+}
+
+// Error Handling
+function handleAuthError(error) {
+  finishScan(false);
+  failedAttempts++;
+  
+  // Send failed attempt to Supabase
+  supabaseClient
+    .from('login_attempts')
+    .insert([{
+      ip: ipDisplay.textContent.replace('IP: ', ''),
+      success: false,
+      timestamp: new Date().toISOString()
+    }]);
+  
+  if (failedAttempts >= config.maxAttempts) {
+    lockSystem();
+  } else {
+    status.textContent = `AUTH FAILED (${failedAttempts}/${config.maxAttempts})`;
+    if (failedAttempts === 1) {
+      visitBtn.style.display = 'inline-block';
+    }
+    setTimeout(() => {
+      status.textContent = "TRY AGAIN";
+    }, 1500);
+  }
+}
+
+function lockSystem() {
+  isLocked = true;
+  status.textContent = "SYSTEM LOCKED";
+  
+  // Send to Cloudflare
+  sendToCloudflare({
+    ip: ipDisplay.textContent.replace('IP: ', ''),
+    userAgent: navigator.userAgent,
+    timestamp: new Date().toISOString(),
+    reason: "Too many failed attempts"
+  });
+  
+  setTimeout(() => {
+    window.location.href = 'whoareyou/index.html';
+  }, 2000);
+}
+
+function resetFailedAttempts() {
+  failedAttempts = 0;
+  visitBtn.style.display = 'none';
+}
+
+// Device and Network Info
 function checkDeviceCapabilities() {
   if (!window.PublicKeyCredential) {
-    status.textContent = "FINGERPRINT AUTH NOT SUPPORTED";
-    return;
+    status.textContent = "BIOMETRICS NOT SUPPORTED";
+    visitBtn.style.display = 'inline-block';
   }
 }
 
@@ -242,98 +202,28 @@ function fetchIPAddress() {
   fetch('https://api.ipify.org?format=json')
     .then(res => res.json())
     .then(data => {
-      ipDisplay.textContent = `Your IP: ${data.ip}`;
+      ipDisplay.textContent = `IP: ${data.ip}`;
     })
     .catch(() => {
-      ipDisplay.textContent = 'Your IP: Unknown';
+      ipDisplay.textContent = 'IP: Unknown';
     });
 }
 
-function generateUserId() {
-  return 'user_' + Math.random().toString(36).substring(2, 15);
-}
-
-function getDeviceType() {
-  const ua = navigator.userAgent;
-  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry/.test(ua)) {
-    return 'mobile';
-  }
-  return 'desktop';
-}
-
-// ======================
-// 🔍 SCAN ANIMATION FUNCTIONS
-// ======================
-function startScan() {
-  isScanning = true;
-  scanProgress = 0;
-  status.textContent = "SCANNING...";
-  scanLine.style.opacity = "1";
-  scanHighlight.style.opacity = "0.3";
-  scanHighlight.style.animation = "highlight-pulse 0.5s infinite";
-  scanDots.style.opacity = "0.2";
-  scanDots.style.animation = "dots-pulse 0.7s infinite";
-  playBeep(800, 0.3);
-  
-  const progressInterval = setInterval(updateScanProgress, config.scanDuration / 100);
-  
-  return {
-    stop: () => {
-      clearInterval(progressInterval);
-    }
-  };
-}
-
-function updateScanProgress() {
-  scanProgress += 1;
-  progressBar.style.width = `${scanProgress}%`;
-  
-  if (Math.random() > 0.7) {
-    const point = getRandomScanPoint();
-    scanner.style.background = getFingerprintBackground(point);
+async function sendToCloudflare(data) {
+  try {
+    await fetch(config.cloudflareEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+  } catch (error) {
+    console.error("Failed to send data to Cloudflare:", error);
   }
 }
 
-function finishScan(success) {
-  isScanning = false;
-  resetScanElements();
-  
-  if (success) {
-    playBeep(1000, 0.5);
-  } else {
-    playBeep(400, 0.2);
-  }
-}
-
-function resetScanElements() {
-  scanLine.style.opacity = "0";
-  scanHighlight.style.opacity = "0";
-  scanHighlight.style.animation = "none";
-  scanDots.style.opacity = "0";
-  scanDots.style.animation = "none";
-  progressBar.style.width = "0%";
-  scanner.style.background = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat`;
-}
-
-function getRandomScanPoint() {
-  const points = [
-    {x: 30, y: 20},
-    {x: 70, y: 40},
-    {x: 20, y: 60},
-    {x: 80, y: 80},
-    {x: 50, y: 50}
-  ];
-  return points[Math.floor(Math.random() * points.length)];
-}
-
-function getFingerprintBackground(point) {
-  return `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat, 
-          radial-gradient(circle at ${point.x}% ${point.y}%, rgba(0,255,136,0.3) 0%, transparent 70%)`;
-}
-
-// ======================
-// 🔊 AUDIO FUNCTIONS
-// ======================
+// Audio Functions
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -357,96 +247,5 @@ function playBeep(freq, dur, type='sine') {
   osc.stop(audioCtx.currentTime + dur);
 }
 
-// ======================
-// WEBAUTHN HELPER FUNCTIONS
-// ======================
-function getPublicKeyCredentialOptions(userId) {
-  return {
-    challenge: Uint8Array.from(
-      window.crypto.getRandomValues(new Uint8Array(32))).buffer,
-    rp: {
-      name: "Secure V Local",
-      id: window.location.hostname,
-    },
-    user: {
-      id: Uint8Array.from(userId, c => c.charCodeAt(0)),
-      name: userId,
-      displayName: "Secure User",
-    },
-    pubKeyCredParams: [
-      { type: "public-key", alg: -7 },  // ES256
-      { type: "public-key", alg: -257 }, // RS256
-    ],
-    authenticatorSelection: {
-      authenticatorAttachment: "platform",
-      userVerification: "required",
-    },
-    timeout: 60000,
-    attestation: "direct"
-  };
-}
-
-async function saveCredentialToSupabase(credential, userId) {
-  const attestationObject = new Uint8Array(credential.response.attestationObject);
-  const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
-  const rawId = new Uint8Array(credential.rawId);
-  
-  const { data, error } = await supabaseClient
-    .from('user_credentials')
-    .insert([{
-      user_id: userId,
-      credential_id: rawId,
-      public_key: credential.id,
-      attestation_object: attestationObject,
-      client_data_json: clientDataJSON,
-      device_type: getDeviceType()
-    }]);
-  
-  if (error) throw error;
-  return data;
-}
-
-function getAuthOptions(credentials) {
-  const allowedCredentials = credentials.map(cred => ({
-    id: Uint8Array.from(cred.credential_id),
-    type: 'public-key',
-    transports: ['internal']
-  }));
-
-  return {
-    challenge: Uint8Array.from(
-      window.crypto.getRandomValues(new Uint8Array(32))).buffer,
-    allowCredentials: allowedCredentials,
-    userVerification: "required",
-    timeout: 60000
-  };
-}
-
-async function verifyAssertion(assertion) {
-  const { data, error } = await supabaseClient
-    .from('user_credentials')
-    .select('user_id')
-    .eq('credential_id', Array.from(new Uint8Array(assertion.rawId)))
-    .single();
-  
-  if (error) throw error;
-  return data;
-}
-
-function handleAuthError(error) {
-  finishScan(false);
-  const attemptCount = updateAttemptCount();
-  
-  if (attemptCount >= config.maxAttempts) {
-    triggerLockdown();
-  } else {
-    status.textContent = `AUTH FAILED (${attemptCount}/${config.maxAttempts})`;
-    setTimeout(() => {
-      status.textContent = "READY FOR AUTHENTICATION";
-      registerBtn.style.display = 'block';
-    }, 1500);
-  }
-}
-
-// Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', init);
+// Initialize audio on first interaction
+document.addEventListener('mousedown', initAudio, { once: true });
