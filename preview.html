@@ -154,7 +154,7 @@
         const challenge = new Uint8Array(32);
         window.crypto.getRandomValues(challenge);
 
-        // Construct opsi pendaftaran WebAuthn
+        // Construct opsi pendaftaran WebAuthn (update pubKeyCredParams)
         const publicKey = {
           challenge: challenge.buffer,
           rp: { name: "Website Sidik Jari Kamu" },
@@ -163,7 +163,10 @@
             name: email,
             displayName: email,
           },
-          pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+          pubKeyCredParams: [
+            { type: "public-key", alg: -7 },   // ES256
+            { type: "public-key", alg: -257 }  // RS256
+          ],
           timeout: 60000,
           attestation: "direct",
           authenticatorSelection: {
@@ -270,3 +273,4 @@
   </script>
 </body>
 </html>
+
