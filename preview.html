@@ -1,158 +1,272 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Interstellar Blackhole with Gravitational Lensing</title>
+<title>Login Sidik Jari - Restricted Access</title>
 <style>
   body {
-    margin: 0;
-    background: radial-gradient(ellipse at center, #000000 0%, #000000 100%);
-    overflow: hidden;
-    height: 100vh;
+    background: radial-gradient(circle at center, #0a0a20, #000);
+    color: #00ff88;
+    font-family: 'Courier New', monospace;
+    margin: 0; padding: 0;
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
   }
-  svg {
-    width: 600px;
-    height: 600px;
-    display: block;
+  .container {
+    background: rgba(10,10,20,0.9);
+    border: 1px solid #00ff88;
+    border-radius: 16px;
+    box-shadow: 0 0 30px #00ff88aa inset;
+    max-width: 400px;
+    padding: 24px;
+    margin: 12px;
   }
-  .star {
-    fill: white;
-    opacity: 0.8;
-    filter: drop-shadow(0 0 2px #fff);
+  input, button {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 1em;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #00ff88;
+    border-radius: 6px;
+    color: #00ff88;
+    font-family: monospace;
   }
-  .glow-ring {
-    fill: none;
-    stroke-width: 6;
-    stroke-linecap: round;
-    filter: drop-shadow(0 0 10px #88ccff);
+  button {
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
   }
-  .lens-arc {
-    fill: none;
-    stroke: #66bbff;
-    stroke-width: 3;
-    stroke-linecap: round;
-    opacity: 0.3;
-    filter: drop-shadow(0 0 6px #66bbff);
+  button:hover {
+    background-color: #00cc6a;
+    color: black;
   }
-  .particle {
-    fill: #aaddff;
-    filter: drop-shadow(0 0 4px #aaddff);
+  #status {
+    margin-top: 12px;
+    min-height: 24px;
+    font-weight: bold;
+    text-align: center;
   }
+  small { color: #555; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
-<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" >
-  <defs>
-    <radialGradient id="blackholeGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#000000" stop-opacity="1"/>
-      <stop offset="60%" stop-color="#001122" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#004488" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="lightRing" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#88ccff" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#004488" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="blurGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#88ccff" flood-opacity="0.7"/>
-    </filter>
-  </defs>
+  <h1 style="margin-bottom: 0;">Login Sidik Jari</h1>
+  <small>(Hanya kamu yang bisa akses pendaftaran)</small>
 
-  <!-- Background stars -->
-  <g>
-    <circle class="star" cx="50" cy="80" r="1.5"/>
-    <circle class="star" cx="120" cy="150" r="1"/>
-    <circle class="star" cx="200" cy="40" r="1.2"/>
-    <circle class="star" cx="280" cy="100" r="1"/>
-    <circle class="star" cx="350" cy="70" r="1.3"/>
-    <circle class="star" cx="420" cy="120" r="1"/>
-    <circle class="star" cx="480" cy="50" r="1.1"/>
-    <circle class="star" cx="530" cy="210" r="1"/>
-    <circle class="star" cx="580" cy="190" r="1.4"/>
-    <circle class="star" cx="100" cy="220" r="1"/>
-    <circle class="star" cx="160" cy="200" r="1.2"/>
-    <circle class="star" cx="220" cy="250" r="1"/>
-    <circle class="star" cx="300" cy="230" r="1.3"/>
-    <circle class="star" cx="360" cy="270" r="1"/>
-  </g>
+  <!-- Form akses pendaftaran dengan password khusus -->
+  <div class="container" id="access-register">
+    <h2>Masuk untuk Daftar Sidik Jari</h2>
+    <input type="password" id="accessPassword" placeholder="Masukkan password rahasia" />
+    <button id="accessBtn">Masuk</button>
+    <div id="accessStatus"></div>
+  </div>
 
-  <!-- Blackhole center -->
-  <circle cx="300" cy="300" r="80" fill="url(#blackholeGlow)" />
+  <!-- Form pendaftaran sidik jari (hanya terlihat setelah akses diberikan) -->
+  <div class="container hidden" id="registerContainer">
+    <h2>Registrasi Sidik Jari</h2>
+    <input type="email" id="userEmail" placeholder="Email kamu" />
+    <button id="registerFingerprintBtn">Daftar Sidik Jari</button>
+    <div id="registerStatus"></div>
+  </div>
 
-  <!-- Light rings group -->
-  <g id="rings" transform="translate(300 300)">
-    <circle class="glow-ring" r="90" stroke="url(#lightRing)" opacity="0.7"/>
-    <circle class="glow-ring" r="110" stroke="url(#lightRing)" opacity="0.5"/>
-    <circle class="glow-ring" r="130" stroke="url(#lightRing)" opacity="0.3"/>
-    <circle class="glow-ring" r="150" stroke="url(#lightRing)" opacity="0.2"/>
-  </g>
+  <!-- Form login sidik jari -->
+  <div class="container" id="loginContainer">
+    <h2>Login Sidik Jari</h2>
+    <input type="email" id="loginEmail" placeholder="Email kamu" />
+    <button id="loginFingerprintBtn">Login dengan Sidik Jari</button>
+    <div id="loginStatus"></div>
+  </div>
 
-  <!-- Gravitational lensing arcs -->
-  <g id="lensArcs" transform="translate(300 300)">
-    <path class="lens-arc" d="M 90 0 A 90 90 0 0 1 0 90" />
-    <path class="lens-arc" d="M -90 0 A 90 90 0 0 1 0 -90" />
-    <path class="lens-arc" d="M 110 0 A 110 110 0 0 0 0 110" />
-    <path class="lens-arc" d="M -110 0 A 110 110 0 0 0 0 -110" />
-    <path class="lens-arc" d="M 130 0 A 130 130 0 0 1 0 130" />
-    <path class="lens-arc" d="M -130 0 A 130 130 0 0 1 0 -130" />
-  </g>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-  <!-- Particles group -->
-  <g id="particles" transform="translate(300 300)">
-    <!-- Particles will be created by JS -->
-  </g>
-</svg>
+    // Ganti sesuai project Supabase-mu
+    const SUPABASE_URL = "https://hjmosjvfrycamxowfurq.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM";
 
-<script>
-  const rings = document.getElementById('rings');
-  const lensArcs = document.getElementById('lensArcs');
-  const particlesGroup = document.getElementById('particles');
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  let angleRings = 0;
-  let angleLens = 0;
+    const SECRET_ACCESS_PASSWORD = "v"; // Ubah password rahasiamu di sini
 
-  // Create particles
-  const particleCount = 30;
-  const particles = [];
+    // Elemen DOM akses pendaftaran
+    const accessRegisterDiv = document.getElementById("access-register");
+    const accessPasswordInput = document.getElementById("accessPassword");
+    const accessBtn = document.getElementById("accessBtn");
+    const accessStatus = document.getElementById("accessStatus");
 
-  for (let i = 0; i < particleCount; i++) {
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("class", "particle");
-    circle.setAttribute("r", 2);
-    particlesGroup.appendChild(circle);
+    // Elemen DOM pendaftaran sidik jari
+    const registerContainer = document.getElementById("registerContainer");
+    const registerEmailInput = document.getElementById("userEmail");
+    const registerFingerprintBtn = document.getElementById("registerFingerprintBtn");
+    const registerStatus = document.getElementById("registerStatus");
 
-    // Each particle has radius and initial angle
-    particles.push({
-      el: circle,
-      radius: 90 + Math.random() * 60, // between 90 and 150
-      angle: Math.random() * 360,
-      speed: 0.3 + Math.random() * 0.4 // speed in degrees per frame
-    });
-  }
+    // Elemen DOM login sidik jari
+    const loginEmailInput = document.getElementById("loginEmail");
+    const loginFingerprintBtn = document.getElementById("loginFingerprintBtn");
+    const loginStatus = document.getElementById("loginStatus");
 
-  function animate() {
-    angleRings = (angleRings + 0.4) % 360;
-    angleLens = (angleLens - 0.6) % 360;
+    // Fungsi konversi ArrayBuffer <-> Base64
+    function arrayBufferToBase64(buffer) {
+      let binary = "";
+      const bytes = new Uint8Array(buffer);
+      bytes.forEach((b) => (binary += String.fromCharCode(b)));
+      return window.btoa(binary);
+    }
+    function base64ToArrayBuffer(base64) {
+      const binary = window.atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes.buffer;
+    }
 
-    rings.setAttribute('transform', `translate(300 300) rotate(${angleRings})`);
-    lensArcs.setAttribute('transform', `translate(300 300) rotate(${angleLens})`);
-
-    // Animate particles
-    particles.forEach(p => {
-      p.angle = (p.angle + p.speed) % 360;
-      const rad = p.angle * Math.PI / 180;
-      const x = p.radius * Math.cos(rad);
-      const y = p.radius * Math.sin(rad);
-      p.el.setAttribute('cx', x);
-      p.el.setAttribute('cy', y);
+    // Validasi akses password
+    accessBtn.addEventListener("click", () => {
+      const val = accessPasswordInput.value.trim();
+      if (val === SECRET_ACCESS_PASSWORD) {
+        accessStatus.textContent = "Akses diterima. Silakan daftar sidik jari.";
+        accessRegisterDiv.classList.add("hidden");
+        registerContainer.classList.remove("hidden");
+      } else {
+        accessStatus.textContent = "Password salah!";
+      }
     });
 
-    requestAnimationFrame(animate);
-  }
-  animate();
-</script>
+    // Daftar sidik jari
+    registerFingerprintBtn.addEventListener("click", async () => {
+      const email = registerEmailInput.value.trim().toLowerCase();
+      registerStatus.textContent = "";
+
+      if (!email) {
+        registerStatus.textContent = "Masukkan email dulu.";
+        return;
+      }
+
+      try {
+        registerStatus.textContent = "Mempersiapkan pendaftaran sidik jari...";
+
+        // Generate challenge dan options register
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        // Construct opsi pendaftaran WebAuthn
+        const publicKey = {
+          challenge: challenge.buffer,
+          rp: { name: "Website Sidik Jari Kamu" },
+          user: {
+            id: new TextEncoder().encode(email),
+            name: email,
+            displayName: email,
+          },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+          timeout: 60000,
+          attestation: "direct",
+          authenticatorSelection: {
+            userVerification: "required",
+          },
+        };
+
+        // Buat credential via WebAuthn API
+        const credential = await navigator.credentials.create({ publicKey });
+
+        if (!credential) throw new Error("Gagal membuat credential.");
+
+        // Ambil data credential untuk disimpan ke Supabase
+        const rawIdBase64 = arrayBufferToBase64(credential.rawId);
+        // Response diubah ke base64 utk bagian yg penting
+        const attestationObject = arrayBufferToBase64(
+          credential.response.attestationObject
+        );
+        const clientDataJSON = arrayBufferToBase64(
+          credential.response.clientDataJSON
+        );
+
+        // Simpan credential ke Supabase (tabel user_credentials)
+        const { data, error } = await supabase.from("user_credentials").insert([
+          {
+            user_id: email,
+            credential_id: rawIdBase64,
+            public_key: attestationObject,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+        if (error) throw error;
+
+        registerStatus.textContent =
+          "Sidik jari berhasil didaftarkan. Halaman pendaftaran sekarang disembunyikan.";
+
+        // Sembunyikan form pendaftaran supaya tidak bisa dipakai orang lain
+        registerContainer.classList.add("hidden");
+      } catch (err) {
+        registerStatus.textContent = "Error: " + err.message;
+      }
+    });
+
+    // Login sidik jari
+    loginFingerprintBtn.addEventListener("click", async () => {
+      const email = loginEmailInput.value.trim().toLowerCase();
+      loginStatus.textContent = "";
+
+      if (!email) {
+        loginStatus.textContent = "Masukkan email dulu.";
+        return;
+      }
+
+      try {
+        loginStatus.textContent = "Mengecek credential sidik jari...";
+
+        // Ambil credential yang sudah tersimpan untuk email ini di Supabase
+        const { data: creds, error } = await supabase
+          .from("user_credentials")
+          .select("*")
+          .eq("user_id", email);
+
+        if (error) throw error;
+        if (!creds || creds.length === 0) {
+          loginStatus.textContent =
+            "Tidak ada sidik jari terdaftar untuk email ini.";
+          return;
+        }
+
+        // Buat daftar credential untuk allowCredentials
+        const allowCredentials = creds.map((c) => ({
+          id: base64ToArrayBuffer(c.credential_id),
+          type: "public-key",
+          transports: ["internal"],
+        }));
+
+        // Buat challenge login
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        // Opsi login WebAuthn
+        const publicKey = {
+          challenge: challenge.buffer,
+          allowCredentials,
+          timeout: 60000,
+          userVerification: "required",
+        };
+
+        // Panggil API autentikasi WebAuthn
+        const assertion = await navigator.credentials.get({ publicKey });
+
+        if (!assertion) throw new Error("Gagal autentikasi sidik jari.");
+
+        // Biasanya kamu harus verifikasi signature assertion di server.
+        // Untuk demo ini, anggap autentikasi sukses jika sampai sini.
+        loginStatus.textContent = "Login sukses! Selamat datang.";
+
+        // TODO: Redirect atau muat halaman setelah login berhasil
+      } catch (err) {
+        loginStatus.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
