@@ -6,7 +6,6 @@ const config = {
   webauthnSupportUrl: 'https://webauthn.me/browser-support',
   authTimeout: 30000 // 30 seconds
 };
-
 const elements = {
   scanLine: document.getElementById('scanLine'),
   status: document.getElementById('status'),
@@ -107,6 +106,59 @@ async function isFingerprintSupported() {
   } catch (error) {
     console.error('WebAuthn check failed:', error);
     return false;
+  }
+}
+
+async function submitLogin() {
+  const email = elements.emailInput.value.trim();
+  const password = elements.passwordInput.value;
+  
+  if (!email || !password) {
+    elements.status.textContent = "PLEASE ENTER BOTH EMAIL AND PASSWORD";
+    playBeep('error');
+    return;
+  }
+  
+  elements.status.textContent = "VERIFYING CREDENTIALS...";
+  
+  try {
+    // Send credentials to Cloudflare Worker for verification
+    const response = await fetch(config.cloudflareEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        deviceInfo: collectDeviceInfo(),
+        browserId: state.browserId
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Store user info in localStorage for the next page
+      localStorage.setItem('authData', JSON.stringify({
+        email,
+        userType: result.userType,
+        ip: state.userIp,
+        timestamp: new Date().toISOString(),
+        deviceInfo: state.deviceInfo
+      }));
+      
+      // Redirect to the appropriate page
+      window.location.href = result.redirectUrl;
+    } else {
+      elements.status.textContent = result.message || "INVALID CREDENTIALS";
+      playBeep('fail');
+      handleAuthFailure();
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    elements.status.textContent = "LOGIN SERVICE UNAVAILABLE";
+    playBeep('error');
   }
 }
 
