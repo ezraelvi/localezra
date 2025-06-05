@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-        
+<head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website ezVel</title>
     <link rel="icon" type="image/png" href="/elvi/img/iconelvi.png">
     <style>
-        
         body {
     margin: 0;
     padding: 0;
@@ -19,26 +17,20 @@
     background-position: center;
     color: yellow;
     text-shadow: 2px 2px 4px #000;
-    }
-               
+    }           
         .social-container {
             position: fixed;
             left: 10px;
             transform: translateY(-50%);
             width: 160px;
             z-index: 100;
-        }
-
-        
+        }        
         .tiktok-container {
             top: 40%;
-        }
-
-        
+        }    
         .instagram-container {
             top: 65%;
         }
-
         .check-btn {
             width: 100%;
             padding: 8px;
@@ -51,32 +43,25 @@
             margin-bottom: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
-        }
-
-        
+        }      
         .tiktok-btn {
             border-color: #00a8ff;
             color: #00a8ff;
             box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
         }
-
         .tiktok-btn:hover {
             background: #00a8ff;
             color: #0d1b2a;
-        }
-
-        
+        }  
         .instagram-btn {
             border-color: #E1306C;
             color: #E1306C;
             box-shadow: 0 0 10px rgba(225, 48, 108, 0.5);
         }
-
-        .instagram-btn:hover {
+       .instagram-btn:hover {
             background: #E1306C;
             color: white;
         }
-
         .social-tab {
             width: 100%;
             height: 200px;
@@ -93,27 +78,20 @@
             text-align: center;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        
+        }    
         .tiktok-tab {
             border-color: #00a8ff;
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
         }
-
-        
         .instagram-tab {
             border-color: #E1306C;
             box-shadow: 0 0 15px rgba(225, 48, 108, 0.7);
         }
-
         .tab-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
-        
         #video-container {
             position: fixed;
             top: 0px;
@@ -123,7 +101,6 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        
         #video-middle-right {
             position: fixed;
             top: 47%;
@@ -132,8 +109,7 @@
             border: 3px solid red;
             border-radius: 10px;
             width: 175px;
-        }
-        
+        } 
         #video-bottom-right {
             position: fixed;
             bottom: 0px;
@@ -142,8 +118,6 @@
             border: 3px solid green;
             border-radius: 10px;
         }
-
-        
         .btn {
             background: rgba(0, 123, 255, 0.7);
             position: fixed;
@@ -158,7 +132,6 @@
             transition: 0.1s;
             animation: pulse 3s infinite;
         }
-        
         .btn:hover {
             background: rgba(0, 86, 179, 0.9);
             transform: scale(1.05);
@@ -168,7 +141,6 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-
         footer {
             position: fixed;
             bottom: 0;
@@ -180,42 +152,64 @@
     </style>
 </head>
 <body>
-    
     <div id="video-middle-right">
         <video width="100%" autoplay loop muted>
             <source src="Video Elvi/FDownloader.Net_13.mp4" type="audio/mpeg" />
         </video>
     </div>
-
     <div id="video-container">
         <video width="100%" autoplay loop muted>
           <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
         </video>
     </div>
-    
     <div id="video-bottom-right">
         <video width="100%" autoplay loop muted>
             <source src="Video Elvi/FDownloader.Net 4.mp4" type="audio/mpeg" />
         </video>
     </div>
-   
     <div class="social-container tiktok-container">
         <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
         <div class="social-tab tiktok-tab">
             <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        </div>
     </div>
- 
     <div class="social-container instagram-container">
         <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
         <div class="social-tab instagram-tab">
             <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        </div>
     </div>
-
     <script>
+        function checkLogin() {
+            const authData = getCookie('authData');
+            if (!authData) {
+                window.location.href = 'whoareyou/index.html';
+            } else {
+                const user = JSON.parse(authData);
+                if (user.username === 'elvi') {
+                    window.location.href = 'whoareyou/index.html';
+                }
+            }
+        }
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        window.onload = checkLogin;
+        function maintainAspectRatio() {
+            const content = document.querySelector('.verification-box');
+            const aspectRatio = 16 / 9;
+            const windowRatio = window.innerWidth / window.innerHeight;
+            if (windowRatio > aspectRatio) {
+                const scale = window.innerHeight / 900;
+                content.style.transform = `scale(${scale})`;
+            } else {
+                const scale = window.innerWidth / 1600;
+                content.style.transform = `scale(${scale})`;
+            }
+        }
         function openTikTok() {
             window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
         }
-        
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
@@ -223,7 +217,6 @@
         const content = document.querySelector('.verification-box');
         const aspectRatio = 16 / 9;
         const windowRatio = window.innerWidth / window.innerHeight;
-        
         if (windowRatio > aspectRatio) {
             const scale = window.innerHeight / 900;
             content.style.transform = `scale(${scale})`;
@@ -235,11 +228,9 @@
     window.addEventListener('resize', maintainAspectRatio);
     maintainAspectRatio();
     </script>
-    
     <div style="padding: 20px; margin-bottom: 50px;">
         <h1>Welcome</h1>
     </div>
-
     <footer>
     <img src="Advanced Files Elvi/October 25, 2024 at 8.11 AM.png">
     <p> 2025 Dibuat dengan ❤ oleh Kamu</p>
