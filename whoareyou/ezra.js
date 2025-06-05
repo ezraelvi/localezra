@@ -6,6 +6,7 @@ const config = {
   webauthnSupportUrl: 'https://webauthn.me/browser-support',
   authTimeout: 30000 // 30 seconds
 };
+
 const elements = {
   scanLine: document.getElementById('scanLine'),
   status: document.getElementById('status'),
@@ -95,14 +96,14 @@ function collectDeviceInfo() {
 function isWebAuthnSupported() {
   return window.PublicKeyCredential !== undefined && 
          typeof PublicKeyCredential === 'function' &&
-         typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function';
+         typeof PublicKeyCredential.isUser VerifyingPlatformAuthenticatorAvailable === 'function';
 }
 
 async function isFingerprintSupported() {
   if (!isWebAuthnSupported()) return false;
   
   try {
-    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    return await PublicKeyCredential.isUser VerifyingPlatformAuthenticatorAvailable();
   } catch (error) {
     console.error('WebAuthn check failed:', error);
     return false;
@@ -159,59 +160,6 @@ async function submitLogin() {
     console.error('Login error:', error);
     elements.status.textContent = "LOGIN SERVICE UNAVAILABLE";
     playBeep('error');
-  }
-}
-
-async function startFingerprintDetection() {
-  if (state.isLocked) return;
-  
-  clearTimeout(state.authTimeout);
-  state.authTimeout = setTimeout(() => {
-    handleAuthTimeout();
-  }, config.authTimeout);
-  
-  elements.status.textContent = "SCANNING FINGERPRINT...";
-  elements.scanLine.style.opacity = '1';
-  state.isScanning = true;
-  playBeep('scan');
-  
-  try {
-    const supported = await isFingerprintSupported();
-    if (!supported) {
-      handleFingerprintUnsupported();
-      return;
-    }
-    
-    await authenticateWithFingerprint();
-  } catch (error) {
-    console.error('Fingerprint authentication error:', error);
-    handleAuthFailure();
-  }
-}
-
-async function authenticateWithFingerprint() {
-  try {
-    // Prepare WebAuthn options
-    const challenge = new Uint8Array(32);
-    crypto.getRandomValues(challenge);
-    
-    const publicKeyCredentialRequestOptions = {
-      challenge: challenge,
-      allowCredentials: [],
-      userVerification: 'required',
-      timeout: 60000
-    };
-    
-    // Start WebAuthn authentication
-    const assertion = await navigator.credentials.get({
-      publicKey: publicKeyCredentialRequestOptions
-    });
-    
-    // In a real implementation, you would verify the assertion with your server
-    handleAuthSuccess();
-  } catch (error) {
-    console.error('WebAuthn authentication failed:', error);
-    handleAuthFailure();
   }
 }
 
@@ -303,49 +251,6 @@ function showLoginForm() {
   elements.loginForm.style.display = 'block';
   elements.btnContainer.style.display = 'none';
   elements.status.textContent = "PLEASE ENTER YOUR CREDENTIALS";
-}
-
-async function submitLogin() {
-  const email = elements.emailInput.value.trim();
-  const password = elements.passwordInput.value;
-  
-  if (!email || !password) {
-    elements.status.textContent = "PLEASE ENTER BOTH EMAIL AND PASSWORD";
-    playBeep('error');
-    return;
-  }
-  
-  elements.status.textContent = "VERIFYING CREDENTIALS...";
-  
-  try {
-    // Send credentials to Cloudflare Worker for verification
-    const response = await fetch(config.cloudflareEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        deviceInfo: collectDeviceInfo(),
-        browserId: state.browserId
-      })
-    });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      handleAuthSuccess();
-    } else {
-      elements.status.textContent = result.message || "INVALID CREDENTIALS";
-      playBeep('fail');
-      handleAuthFailure();
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    elements.status.textContent = "LOGIN SERVICE UNAVAILABLE";
-    playBeep('error');
-  }
 }
 
 // Utility functions
