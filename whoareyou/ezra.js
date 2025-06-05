@@ -1,4 +1,6 @@
 const config = {
+  supabaseUrl: 'https://hjmosjvfrycamxowfurq.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM',
   maxAttempts: 3,
   cloudflareEndpoint: 'https://auth-logs.ezvvel.workers.dev/',
   dashboardUrl: 'dashboard/index.html',
@@ -27,11 +29,17 @@ let state = {
   isLocked: false,
   attemptCount: 0,
   audioCtx: null,
+  supabase: null,
   userIp: null,
   browserId: null,
   deviceInfo: null,
   authTimeout: null
 };
+
+// Initialize Supabase client
+function initSupabase() {
+  state.supabase = supabase.createClient(config.supabaseUrl, config.supabaseKey);
+}
 
 // Audio feedback functions
 function initAudio() {
@@ -96,70 +104,102 @@ function collectDeviceInfo() {
 function isWebAuthnSupported() {
   return window.PublicKeyCredential !== undefined && 
          typeof PublicKeyCredential === 'function' &&
-         typeof PublicKeyCredential.isUser VerifyingPlatformAuthenticatorAvailable === 'function';
+         typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function';
 }
 
 async function isFingerprintSupported() {
   if (!isWebAuthnSupported()) return false;
   
   try {
-    return await PublicKeyCredential.isUser VerifyingPlatformAuthenticatorAvailable();
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   } catch (error) {
     console.error('WebAuthn check failed:', error);
     return false;
   }
 }
 
-async function submitLogin() {
-  const email = elements.emailInput.value.trim();
-  const password = elements.passwordInput.value;
+async function startFingerprintDetection() {
+  if (state.isLocked) return;
   
-  if (!email || !password) {
-    elements.status.textContent = "PLEASE ENTER BOTH EMAIL AND PASSWORD";
-    playBeep('error');
-    return;
-  }
+  clearTimeout(state.authTimeout);
+  state.authTimeout = setTimeout(() => {
+    handleAuthTimeout();
+  }, config.authTimeout);
   
-  elements.status.textContent = "VERIFYING CREDENTIALS...";
+  elements.status.textContent = "SCANNING FINGERPRINT...";
+  elements.scanLine.style.opacity = '1';
+  state.isScanning = true;
+  playBeep('scan');
   
   try {
-    // Send credentials to Cloudflare Worker for verification
-    const response = await fetch(config.cloudflareEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        deviceInfo: collectDeviceInfo(),
-        browserId: state.browserId
-      })
+    const supported = await isFingerprintSupported();
+    if (!supported) {
+      handleFingerprintUnsupported();
+      return;
+    }
+    
+    await authenticateWithFingerprint();
+  } catch (error) {
+    console.error('Fingerprint authentication error:', error);
+    handleAuthFailure();
+  }
+}
+
+async function authenticateWithFingerprint() {
+  try {
+    // Prepare WebAuthn options
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+    
+    const publicKeyCredentialRequestOptions = {
+      challenge: challenge,
+      allowCredentials: [],
+      userVerification: 'required',
+      timeout: 60000
+    };
+    
+    // Start WebAuthn authentication
+    const assertion = await navigator.credentials.get({
+      publicKey: publicKeyCredentialRequestOptions
     });
     
-    const result = await response.json();
+    // Verify the assertion with your server (in this case, we'll log to Supabase)
+    const authResult = await verifyWebAuthnAssertion(assertion);
     
-    if (result.success) {
-      // Store user info in localStorage for the next page
-      localStorage.setItem('authData', JSON.stringify({
-        email,
-        userType: result.userType,
-        ip: state.userIp,
-        timestamp: new Date().toISOString(),
-        deviceInfo: state.deviceInfo
-      }));
-      
-      // Redirect to the appropriate page
-      window.location.href = result.redirectUrl;
+    if (authResult.success) {
+      handleAuthSuccess();
     } else {
-      elements.status.textContent = result.message || "INVALID CREDENTIALS";
-      playBeep('fail');
       handleAuthFailure();
     }
   } catch (error) {
-    console.error('Login error:', error);
-    elements.status.textContent = "LOGIN SERVICE UNAVAILABLE";
-    playBeep('error');
+    console.error('WebAuthn authentication failed:', error);
+    handleAuthFailure();
+  }
+}
+
+async function verifyWebAuthnAssertion(assertion) {
+  // In a real implementation, you would send this to your backend for verification
+  // For this example, we'll log to Supabase and return success
+  
+  const authData = {
+    type: 'webauthn',
+    browserId: state.browserId,
+    deviceInfo: collectDeviceInfo(),
+    timestamp: new Date().toISOString(),
+    success: true
+  };
+  
+  try {
+    const { error } = await state.supabase
+      .from('auth_logs')
+      .insert([authData]);
+    
+    if (error) throw error;
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Supabase log error:', error);
+    return { success: false };
   }
 }
 
@@ -204,11 +244,7 @@ function handleAuthFailure() {
   elements.visitBtn.style.display = 'none';
   elements.webauthnBtn.style.display = 'inline-block';
   
-  setTimeout(() => {
-    if (!state.isLocked) {
-      startFingerprintDetection();
-    }
-  }, 2000);
+  logAuthAttempt(false);
 }
 
 function handleAuthTimeout() {
@@ -253,6 +289,63 @@ function showLoginForm() {
   elements.status.textContent = "PLEASE ENTER YOUR CREDENTIALS";
 }
 
+async function submitLogin() {
+  const email = elements.emailInput.value.trim();
+  const password = elements.passwordInput.value;
+  
+  if (!email || !password) {
+    elements.status.textContent = "PLEASE ENTER BOTH EMAIL AND PASSWORD";
+    playBeep('error');
+    return;
+  }
+  
+  elements.status.textContent = "VERIFYING CREDENTIALS...";
+  
+  try {
+    // Send credentials to Cloudflare Worker for verification
+    const response = await fetch(config.cloudflareEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        deviceInfo: collectDeviceInfo(),
+        browserId: state.browserId
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Log successful auth to Supabase
+      const authData = {
+        type: 'email',
+        email: email,
+        browserId: state.browserId,
+        deviceInfo: collectDeviceInfo(),
+        timestamp: new Date().toISOString(),
+        success: true
+      };
+      
+      await state.supabase
+        .from('auth_logs')
+        .insert([authData]);
+      
+      handleAuthSuccess();
+    } else {
+      elements.status.textContent = result.message || "INVALID CREDENTIALS";
+      playBeep('fail');
+      handleAuthFailure();
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    elements.status.textContent = "LOGIN SERVICE UNAVAILABLE";
+    playBeep('error');
+  }
+}
+
 // Utility functions
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -269,6 +362,24 @@ async function detectIp() {
   } catch (error) {
     console.error('IP detection failed:', error);
     elements.ipDisplay.textContent = 'IP: Unknown | ' + new Date().toLocaleString();
+  }
+}
+
+async function logAuthAttempt(success) {
+  const authData = {
+    type: success ? 'success' : 'failed',
+    browserId: state.browserId,
+    deviceInfo: collectDeviceInfo(),
+    timestamp: new Date().toISOString(),
+    success
+  };
+  
+  try {
+    await state.supabase
+      .from('auth_logs')
+      .insert([authData]);
+  } catch (error) {
+    console.error('Failed to log auth attempt:', error);
   }
 }
 
@@ -300,13 +411,14 @@ async function init() {
     
     // Initialize systems
     initAudio();
+    initSupabase();
     await detectIp();
     generateBrowserId();
     collectDeviceInfo();
     
     // Check WebAuthn support
     if (!isWebAuthnSupported()) {
-      handleFingerprintUnsupported();
+      handleWebAuthnUnsupported();
       return;
     }
     
