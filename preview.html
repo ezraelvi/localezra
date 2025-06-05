@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Interstellar Blackhole Infinity Animation</title>
+<title>Interstellar Blackhole with Gravitational Lensing</title>
 <style>
   body {
     margin: 0;
@@ -29,6 +29,18 @@
     stroke-width: 6;
     stroke-linecap: round;
     filter: drop-shadow(0 0 10px #88ccff);
+  }
+  .lens-arc {
+    fill: none;
+    stroke: #66bbff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.3;
+    filter: drop-shadow(0 0 6px #66bbff);
+  }
+  .particle {
+    fill: #aaddff;
+    filter: drop-shadow(0 0 4px #aaddff);
   }
 </style>
 </head>
@@ -72,21 +84,72 @@
 
   <!-- Light rings group -->
   <g id="rings" transform="translate(300 300)">
-    <!-- Multiple rings with different radii and stroke opacity -->
     <circle class="glow-ring" r="90" stroke="url(#lightRing)" opacity="0.7"/>
     <circle class="glow-ring" r="110" stroke="url(#lightRing)" opacity="0.5"/>
     <circle class="glow-ring" r="130" stroke="url(#lightRing)" opacity="0.3"/>
     <circle class="glow-ring" r="150" stroke="url(#lightRing)" opacity="0.2"/>
   </g>
+
+  <!-- Gravitational lensing arcs -->
+  <g id="lensArcs" transform="translate(300 300)">
+    <path class="lens-arc" d="M 90 0 A 90 90 0 0 1 0 90" />
+    <path class="lens-arc" d="M -90 0 A 90 90 0 0 1 0 -90" />
+    <path class="lens-arc" d="M 110 0 A 110 110 0 0 0 0 110" />
+    <path class="lens-arc" d="M -110 0 A 110 110 0 0 0 0 -110" />
+    <path class="lens-arc" d="M 130 0 A 130 130 0 0 1 0 130" />
+    <path class="lens-arc" d="M -130 0 A 130 130 0 0 1 0 -130" />
+  </g>
+
+  <!-- Particles group -->
+  <g id="particles" transform="translate(300 300)">
+    <!-- Particles will be created by JS -->
+  </g>
 </svg>
 
 <script>
   const rings = document.getElementById('rings');
-  let angle = 0;
+  const lensArcs = document.getElementById('lensArcs');
+  const particlesGroup = document.getElementById('particles');
+
+  let angleRings = 0;
+  let angleLens = 0;
+
+  // Create particles
+  const particleCount = 30;
+  const particles = [];
+
+  for (let i = 0; i < particleCount; i++) {
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("class", "particle");
+    circle.setAttribute("r", 2);
+    particlesGroup.appendChild(circle);
+
+    // Each particle has radius and initial angle
+    particles.push({
+      el: circle,
+      radius: 90 + Math.random() * 60, // between 90 and 150
+      angle: Math.random() * 360,
+      speed: 0.3 + Math.random() * 0.4 // speed in degrees per frame
+    });
+  }
 
   function animate() {
-    angle = (angle + 0.4) % 360;
-    rings.setAttribute('transform', `translate(300 300) rotate(${angle})`);
+    angleRings = (angleRings + 0.4) % 360;
+    angleLens = (angleLens - 0.6) % 360;
+
+    rings.setAttribute('transform', `translate(300 300) rotate(${angleRings})`);
+    lensArcs.setAttribute('transform', `translate(300 300) rotate(${angleLens})`);
+
+    // Animate particles
+    particles.forEach(p => {
+      p.angle = (p.angle + p.speed) % 360;
+      const rad = p.angle * Math.PI / 180;
+      const x = p.radius * Math.cos(rad);
+      const y = p.radius * Math.sin(rad);
+      p.el.setAttribute('cx', x);
+      p.el.setAttribute('cy', y);
+    });
+
     requestAnimationFrame(animate);
   }
   animate();
