@@ -1,1 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ezra's Data Dashboard</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background-color: #0a0a12;
+      color: #00ff88;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #00ff88;
+      text-shadow: 0 0 5px #00ff88;
+    }
+    .data-container {
+      border: 1px solid #00ff88;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    .message-box {
+      margin-top: 30px;
+    }
+    textarea {
+      width: 100%;
+      background-color: #000;
+      color: #00ff88;
+      border: 1px solid #00ff88;
+      padding: 10px;
+    }
+    button {
+      background-color: transparent;
+      color: #00ff88;
+      border: 1px solid #00ff88;
+      padding: 8px 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: rgba(0, 255, 136, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Ezra's Secure Dashboard</h1>
+  
+  <div class="data-container">
+    <h2>Your Session Data:</h2>
+    <div id="sessionData">Loading...</div>
+  </div>
+  
+  <div class="message-box">
+    <h2>Leave a Message:</h2>
+    <textarea id="messageInput" rows="4"></textarea>
+    <button id="saveMessage">Save Message</button>
+    <div id="savedMessages"></div>
+  </div>
 
+  <script>
+    // Ambil data session dari cookie
+    function getSessionData() {
+      const cookies = document.cookie.split(';').map(c => c.trim())
+      const sessionCookie = cookies.find(c => c.startsWith('session='))
+      
+      if (!sessionCookie) {
+        window.location.href = '/';
+        return;
+      }
+      
+      // Dalam production, ambil dari API yang diproteksi
+      const sessionId = sessionCookie.split('=')[1]
+      
+      // Tampilkan data (dalam production, ambil dari backend)
+      const sessionData = {
+        authMethod: localStorage.getItem('authMethod') || 'email',
+        browserId: localStorage.getItem('browserId') || 'N/A',
+        timestamp: new Date().toLocaleString(),
+        ip: localStorage.getItem('userIp') || 'N/A'
+      }
+      
+      document.getElementById('sessionData').innerHTML = `
+        <p><strong>Authentication Method:</strong> ${sessionData.authMethod}</p>
+        <p><strong>Browser ID:</strong> ${sessionData.browserId}</p>
+        <p><strong>Login Time:</strong> ${sessionData.timestamp}</p>
+        <p><strong>IP Address:</strong> ${sessionData.ip}</p>
+      `
+    }
+    
+    // Handle messages
+    document.getElementById('saveMessage').addEventListener('click', () => {
+      const message = document.getElementById('messageInput').value
+      if (message) {
+        const messages = JSON.parse(localStorage.getItem('ezraMessages') || []
+        messages.push({
+          text: message,
+          timestamp: new Date().toLocaleString()
+        })
+        localStorage.setItem('ezraMessages', JSON.stringify(messages))
+        displayMessages()
+        document.getElementById('messageInput').value = ''
+      }
+    })
+    
+    function displayMessages() {
+      const messages = JSON.parse(localStorage.getItem('ezraMessages') || []
+      const container = document.getElementById('savedMessages')
+      container.innerHTML = '<h3>Saved Messages:</h3>'
+      
+      if (messages.length === 0) {
+        container.innerHTML += '<p>No messages yet</p>'
+        return
+      }
+      
+      messages.forEach(msg => {
+        container.innerHTML += `
+          <div style="margin-bottom: 10px; border-bottom: 1px dashed #00ff88; padding-bottom: 10px;">
+            <p>${msg.text}</p>
+            <small>${msg.timestamp}</small>
+          </div>
+        `
+      })
+    }
+    
+    // Initialize
+    getSessionData()
+    displayMessages()
+  </script>
+</body>
+</html>
