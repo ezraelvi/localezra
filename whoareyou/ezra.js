@@ -228,7 +228,7 @@ function handleFingerprintUnsupported() {
   elements.btnContainer.style.display = 'block';
   elements.fallbackBtn.style.display = 'inline-block';
   elements.webauthnBtn.style.display = 'inline-block';
-  elements.visitBtn.style.display = 'none';
+  elements.visitBtn.style.display = 'block';
 }
 
 function handleLockout() {
@@ -289,7 +289,8 @@ async function submitLogin() {
       playBeep('fail');
       handleAuthFailure();
     }
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Login error:', error);
     elements.status.textContent = "LOGIN SERVICE UNAVAILABLE";
     playBeep('error');
