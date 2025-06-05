@@ -11,28 +11,96 @@
       color: #00ff00;
       margin: 0;
       padding: 20px;
+      line-height: 1.6;
     }
     .info-panel {
       background-color: #1a1a1a;
       padding: 15px;
       border: 1px solid #00ff00;
       margin-bottom: 20px;
+      position: relative;
     }
     .file-list {
       border: 1px dashed #00ff00;
       padding: 10px;
+      min-height: 200px;
+    }
+    .editor-tools {
+      display: none;
+      background-color: #1a1a1a;
+      padding: 10px;
+      border: 1px solid #00ff00;
+      margin-bottom: 10px;
+    }
+    .editor-tools.active {
+      display: block;
+    }
+    button {
+      background-color: #121212;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 5px 10px;
+      margin: 5px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+    }
+    button:hover {
+      background-color: #00ff00;
+      color: #121212;
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      background-color: #121212;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      font-family: 'Courier New', monospace;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .edit-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .content-editable {
+      min-height: 20px;
+      padding: 5px;
+      border: 1px dashed transparent;
+    }
+    .content-editable:hover {
+      border-color: #00ff00;
+    }
+    .editing {
+      border: 1px dashed #00ff00;
+      background-color: #1a1a1a;
     }
   </style>
 </head>
 <body>
+  <button id="toggleEditor" class="edit-btn">EDIT MODE</button>
+  
+  <div id="editorTools" class="editor-tools">
+    <h3>EDITOR TOOLS</h3>
+    <button id="addText">Add Text</button>
+    <button id="addImage">Add Image</button>
+    <button id="addVideo">Add Video</button>
+    <button id="saveChanges">Save Changes</button>
+    <button id="cancelEdit">Cancel</button>
+    <div id="mediaInput" style="display:none;">
+      <input type="text" id="mediaUrl" placeholder="Enter URL">
+      <button id="insertMedia">Insert</button>
+    </div>
+  </div>
+
   <div class="info-panel">
-    <h2>ACCESS INFORMATION</h2>
-    <div id="userInfo"></div>
-    <div id="accessInfo"></div>
+    <h2 class="content-editable">ACCESS INFORMATION</h2>
+    <div id="userInfo" class="content-editable"></div>
+    <div id="accessInfo" class="content-editable"></div>
   </div>
   
   <div class="file-list">
-    <h3>AVAILABLE FILES</h3>
+    <h3 class="content-editable">AVAILABLE FILES</h3>
     <ul id="fileList"></ul>
   </div>
 
@@ -42,6 +110,16 @@
       const userInfo = document.getElementById('userInfo');
       const accessInfo = document.getElementById('accessInfo');
       const fileList = document.getElementById('fileList');
+      const toggleEditor = document.getElementById('toggleEditor');
+      const editorTools = document.getElementById('editorTools');
+      const addText = document.getElementById('addText');
+      const addImage = document.getElementById('addImage');
+      const addVideo = document.getElementById('addVideo');
+      const saveChanges = document.getElementById('saveChanges');
+      const cancelEdit = document.getElementById('cancelEdit');
+      const mediaInput = document.getElementById('mediaInput');
+      const mediaUrl = document.getElementById('mediaUrl');
+      const insertMedia = document.getElementById('insertMedia');
       
       if (!authData) {
         window.location.href = '../whoareyou/index.html';
@@ -70,7 +148,83 @@
       files.forEach(file => {
         const li = document.createElement('li');
         li.textContent = file;
+        li.className = 'content-editable';
         fileList.appendChild(li);
+      });
+      
+      // Editor functionality
+      let editMode = false;
+      let currentMediaType = '';
+      
+      toggleEditor.addEventListener('click', () => {
+        editMode = !editMode;
+        toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
+        editorTools.classList.toggle('active', editMode);
+        
+        document.querySelectorAll('.content-editable').forEach(el => {
+          el.contentEditable = editMode;
+          el.classList.toggle('editing', editMode);
+        });
+      });
+      
+      addText.addEventListener('click', () => {
+        const newText = document.createElement('div');
+        newText.className = 'content-editable';
+        newText.contentEditable = true;
+        newText.textContent = 'New text block - click to edit';
+        document.body.insertBefore(newText, document.querySelector('.info-panel'));
+        newText.focus();
+      });
+      
+      addImage.addEventListener('click', () => {
+        currentMediaType = 'image';
+        mediaInput.style.display = 'block';
+        mediaUrl.placeholder = 'Enter image URL';
+        mediaUrl.focus();
+      });
+      
+      addVideo.addEventListener('click', () => {
+        currentMediaType = 'video';
+        mediaInput.style.display = 'block';
+        mediaUrl.placeholder = 'Enter video URL';
+        mediaUrl.focus();
+      });
+      
+      insertMedia.addEventListener('click', () => {
+        const url = mediaUrl.value.trim();
+        if (url) {
+          let mediaElement;
+          
+          if (currentMediaType === 'image') {
+            mediaElement = document.createElement('img');
+            mediaElement.src = url;
+            mediaElement.style.maxWidth = '100%';
+          } else {
+            mediaElement = document.createElement('iframe');
+            mediaElement.src = url;
+            mediaElement.style.width = '100%';
+            mediaElement.style.height = '400px';
+            mediaElement.setAttribute('allowfullscreen', '');
+          }
+          
+          mediaElement.className = 'content-editable';
+          document.body.insertBefore(mediaElement, document.querySelector('.info-panel'));
+        }
+        
+        mediaUrl.value = '';
+        mediaInput.style.display = 'none';
+      });
+      
+      saveChanges.addEventListener('click', () => {
+        // In a real implementation, you would save to a database
+        alert('Changes saved (this would save to database in production)');
+        toggleEditor.click(); // Exit edit mode
+      });
+      
+      cancelEdit.addEventListener('click', () => {
+        if (confirm('Discard all changes?')) {
+          location.reload(); // Reload the page to discard changes
+        }
       });
     });
   </script>
