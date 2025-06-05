@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wormhole Infinity Loop SVG</title>
+<style>
+  body {
+    margin: 0;
+    background: radial-gradient(ellipse at center, #000010 0%, #000000 80%);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  svg {
+    width: 400px;
+    height: 400px;
+  }
+  .wormhole-ring {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    animation: spin infinite linear;
+  }
+  .ring1 {
+    stroke: url(#grad1);
+    animation-duration: 12s;
+  }
+  .ring2 {
+    stroke: url(#grad2);
+    animation-duration: 8s;
+    animation-direction: reverse;
+  }
+  .ring3 {
+    stroke: url(#grad3);
+    animation-duration: 16s;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg);}
+    to { transform: rotate(360deg);}
+  }
+  .stars {
+    fill: white;
+    filter: drop-shadow(0 0 2px #aaf);
+  }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" >
+  <defs>
+    <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#aaf" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#004080" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#88f" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#001020" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ccf" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#000010" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background stars -->
+  <g class="stars">
+    <circle cx="30" cy="50" r="1.5"/>
+    <circle cx="80" cy="120" r="1"/>
+    <circle cx="150" cy="30" r="1.2"/>
+    <circle cx="200" cy="90" r="1"/>
+    <circle cx="250" cy="60" r="1.3"/>
+    <circle cx="320" cy="110" r="1"/>
+    <circle cx="350" cy="40" r="1.1"/>
+    <circle cx="100" cy="200" r="1"/>
+    <circle cx="180" cy="180" r="1.4"/>
+    <circle cx="280" cy="210" r="1"/>
+    <circle cx="350" cy="190" r="1.2"/>
+  </g>
+
+  <!-- Wormhole rings -->
+  <circle class="wormhole-ring ring1" cx="200" cy="200" r="90" />
+  <circle class="wormhole-ring ring2" cx="200" cy="200" r="70" />
+  <circle class="wormhole-ring ring3" cx="200" cy="200" r="50" />
+
+  <!-- Center glow -->
+  <circle cx="200" cy="200" r="20" fill="url(#grad3)" />
+</svg>
+</body>
+</html>
