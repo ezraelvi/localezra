@@ -1,418 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>🛡️Secure V Local</title>
-  <link rel="icon" type="image/png"  href="/whoareyou/indexicon.png">
-  <style>
-    /* 🎨 WARNA KHUSUS UNTUKMU */
-    :root {
-      --glow: #00ff88;
-      --dark: #0a0a12;
-      --error: #ff0033;
-      --scan-speed: 3s;
-    }
-
-    /* 🖥️ TAMPILAN UTAMA */
-    body {
-      background: radial-gradient(circle at center, #0a0a20, #000000);
-      height: 100vh;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Courier New', monospace;
-      color: var(--glow);
-      overflow: hidden;
-    }
-
-    .vault {
-      width: 320px;
-      height: 420px;
-      background: rgba(10,10,20,0.9);
-      border-radius: 16px;
-      border: 1px solid var(--glow);
-      box-shadow: 
-        0 0 30px rgba(0,255,136,0.2),
-        inset 0 0 20px rgba(0,255,136,0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* 🖐️ FINGERPRINT SCANNER */
-    .fingerprint {
-      width: 160px;
-      height: 200px;
-      margin: 30px auto;
-      background: 
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat;
-      position: relative;
-      filter: drop-shadow(0 0 5px var(--glow));
-    }
-
-    .ridges {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: 
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M10,15 Q50,-5 90,15 Q100,35 90,55 Q80,75 50,85 Q20,75 10,55 Q0,35 10,15" fill="none" stroke="%2300ff8833" stroke-width="0.3"/></svg>') center/contain no-repeat;
-    }
-
-    .scan-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(to bottom, transparent, var(--glow), transparent);
-      animation: scan var(--scan-speed) linear infinite;
-      opacity: 0;
-    }
-
-    /* 🚨 DARURAT MODE */
-    .under-attack {
-      animation: attack-pulse 0.8s infinite;
-    }
-
-    /* 📟 STATUS & KODE */
-    .status {
-      text-align: center;
-      margin-top: 20px;
-      height: 20px;
-      font-size: 14px;
-      text-shadow: 0 0 5px var(--glow);
-    }
-
-    .code-display {
-      position: absolute;
-      bottom: 70px;
-      width: 90%;
-      left: 5%;
-      height: 60px;
-      background: rgba(0,0,0,0.5);
-      border: 1px dashed var(--glow);
-      font-size: 10px;
-      padding: 5px;
-      overflow: hidden;
-      display: none;
-    }
-
-    .auth-btn:hover {
-      box-shadow: 0 0 15px var(--glow);
-      letter-spacing: 1px;
-    }
-
-    /* ✨ ANIMASI KHUSUS */
-    @keyframes scan {
-      0% { top: 0; opacity: 0; }
-      5% { opacity: 1; }
-      95% { opacity: 1; }
-      100% { top: 100%; opacity: 0; }
-    }
-
-    @keyframes attack-pulse {
-      0%, 100% { box-shadow: 0 0 10px var(--error); }
-      50% { box-shadow: 0 0 30px var(--error); }
-    }
-
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-2px, 2px); }
-      40% { transform: translate(-2px, -2px); }
-      60% { transform: translate(2px, 2px); }
-      80% { transform: translate(2px, -2px); }
-      100% { transform: translate(0); }
-    }
-    .ip-display {
-      position: absolute;
-      bottom: 10px;
-      width: 100%;
-      text-align: center;
-      font-size: 12px;
-      color: rgba(0,255,136,0.7);
-    }
-    .bypass-btn {
-      background: transparent;
-      border: none;
-      color: #FFFF00;
-      cursor: pointer;
-      position: absolute;
-      bottom: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiometricVAuth</title>
+  <link rel="stylesheet" href="whoareyou/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Courier+New&display=swap" rel="stylesheet">
+  <link rel="apple-touch-icon" sizes="180x180" href="whoareyou/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="whoareyou/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="whoareyou/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
 </head>
 <body>
-  <div class="vault" id="vault">
-    <div class="fingerprint" id="scanner">
-      <div class="ridges"></div>
+  <div class="container">
+    <div class="svg-container">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10 C60 10, 65 20, 60 30 C55 40, 45 40, 40 30 C35 20, 40 10, 50 10 Z" />
+        <path d="M40 30 C35 40, 25 40, 20 30 C15 20, 20 10, 30 10 C40 10, 45 20, 40 30 Z" />
+        <path d="M60 30 C65 40, 75 40, 80 30 C85 20, 80 10, 70 10 C60 10, 55 20, 60 30 Z" />
+        <path d="M30 30 L30 70 C30 80, 40 90, 50 90 C60 90, 70 80, 70 70 L70 30" />
+        <path d="M30 50 L20 50 C10 50, 10 60, 20 60 L30 60" />
+        <path d="M70 50 L80 50 C90 50, 90 60, 80 60 L70 60" />
+      </svg>
       <div class="scan-line" id="scanLine"></div>
     </div>
+    <div class="status" id="status">INITIALIZING BIOMETRIC SYSTEM</div>
     
-    <div class="status" id="status">FINGERPRINT</div>
+    <div class="btn-container" id="btnContainer">
+      <button class="auth-btn" id="fallbackBtn">USE EMAIL LOGIN</button>
+      <button class="auth-btn" id="visitBtn">VISIT DASHBOARD</button>
+      <button class="auth-btn" id="webauthnBtn">CHECK WEBAUTHN SUPPORT</button>
+    </div>
     
-    <div class="code-display" id="codeDisplay"></div>
+    <div class="login-form" id="loginForm">
+      <div class="form-group">
+        <label for="email">EMAIL:</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">PASSWORD:</label>
+        <input type="password" id="password" required>
+      </div>
+      <button class="auth-btn" id="submitLogin">SUBMIT</button>
+    </div>
     
+    <div class="ip-display" id="ipDisplay">Detecting your IP</div>
   </div>
-   <button class="bypass-btn" id="bypassBtn" style="display:none">
-      VISITING
-   </button>
-  </div>
-    <div class="ip-display" id="ipDisplay">
-    Your IP: Loading...
-  </div>
-
-<script>
-    // ======================
-    // 🧩 MAIN CONFIGURATION
-    // ======================
-    const config = {
-      maxAttempts: 3,
-      lockDuration: 1000,
-      scanDuration: 3000,
-      pressDuration: 300, // Time needed to hold for scan (ms)
-      secretCode: "LOCALLIFE",
-      attemptCookieExpiry: 10 // minutes
-    };
-
-    // ======================
-    // 🎛️ SYSTEM INITIALIZATION
-    // ======================
-    const vault = document.getElementById('vault');
-    const scanner = document.getElementById('scanner');
-    const scanLine = document.getElementById('scanLine');
-    const status = document.getElementById('status');
-    const bypassBtn = document.getElementById('bypassBtn');
-    const codeDisplay = document.getElementById('codeDisplay');
-    const ipDisplay = document.getElementById('ipDisplay');
-
-    let isScanning = false;
-    let isLocked = false;
-    let audioCtx;
-    let pressTimer;
-
-    // ======================
-    // 🍪 COOKIE MANAGEMENT
-    // ======================
-    function setCookie(name, value, minutes) {
-        const date = new Date();
-        date.setTime(date.getTime() + (minutes * 60 * 1000));
-        document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
-    }
-
-    function getCookie(name) {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [cookieName, cookieValue] = cookie.trim().split('=');
-            if (cookieName === name) return cookieValue;
-        }
-        return null;
-    }
-
-    function deleteCookie(name) {
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
-    }
-
-    // ======================
-    // 🔄 ATTEMPT MANAGEMENT
-    // ======================
-    function getAttemptCount() {
-        const attempts = getCookie('login_attempts');
-        return attempts ? parseInt(attempts) : 0;
-    }
-
-    function updateAttemptCount() {
-        const newCount = getAttemptCount() + 1;
-        setCookie('login_attempts', newCount, config.attemptCookieExpiry);
-        return newCount;
-    }
-
-    function resetAttempts() {
-        deleteCookie('login_attempts');
-    }
-
-    // ======================
-    // 🔊 AUDIO SYSTEM
-    // ======================
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    }
-
-    function playBeep(freq, dur, type='sine') {
-      initAudio();
-      
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      
-      osc.type = type;
-      osc.frequency.value = freq;
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      osc.start();
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
-      osc.stop(audioCtx.currentTime + dur);
-    }
-
-    // ======================
-    // 🖐️ TOUCH/PRESS HANDLING
-    // ======================
-    scanner.addEventListener('mousedown', handlePressStart);
-    scanner.addEventListener('touchstart', handlePressStart);
-    
-    scanner.addEventListener('mouseup', handlePressEnd);
-    scanner.addEventListener('mouseleave', handlePressEnd);
-    scanner.addEventListener('touchend', handlePressEnd);
-
-    function handlePressStart(e) {
-        if (isScanning || isLocked) return;
-        if (e.type === 'touchstart') e.preventDefault();
-        
-        pressTimer = setTimeout(() => {
-            startScan();
-        }, config.pressDuration);
-    }
-
-    function handlePressEnd() {
-        clearTimeout(pressTimer);
-        if (!isScanning) {
-            scanLine.style.opacity = "0";
-        }
-    }
-
-    // ======================
-    // 🔒 AUTHENTICATION PROCESS
-    // ======================
-    function startScan() {
-      isScanning = true;
-      status.textContent = "SCANNING...";
-      scanLine.style.opacity = "1";
-      playBeep(800, 0.3);
-      
-      scanner.addEventListener('mousemove', highlightRidges);
-      setTimeout(finishScan, config.scanDuration);
-    }
-
-    function highlightRidges(e) {
-      const rect = scanner.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      scanner.style.background = 
-        `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><path d="M15,20 Q50,0 85,20 Q95,40 85,60 Q75,80 50,90 Q25,80 15,60 Q5,40 15,20" fill="none" stroke="%2300ff88" stroke-width="0.5" stroke-dasharray="2,1"/></svg>') center/contain no-repeat, 
-        radial-gradient(circle at ${x}px ${y}px, rgba(0,255,136,0.3) 0%, transparent 70%)`;
-    }
-
-    function finishScan() {
-      isScanning = false;
-      scanLine.style.opacity = "0";
-      scanner.removeEventListener('mousemove', highlightRidges);
-      
-      const attemptCount = updateAttemptCount();
-      
-      if (attemptCount >= config.maxAttempts) {
-        triggerLockdown();
-      } else {
-        status.textContent = `UNKNOWN FINGERPRINT  (${attemptCount}/${config.maxAttempts})`;
-        playBeep(400, 0.2);
-        bypassBtn.style.display = 'block';
-        setTimeout(() => status.textContent = "READY FOR SCAN", 1500);
-      }
-    }
-
-    // ======================
-    // 🚨 LOCKDOWN SYSTEM
-    // ======================
-    function triggerLockdown() {
-      isLocked = true;
-      status.textContent = "SECURITY LOCKDOWN";
-      vault.classList.add('under-attack');
-      
-      setCookie('blocked', 'true', 1);
-      resetAttempts();
-      
-      playBeep(200, 0.2, 'square');
-      setTimeout(() => playBeep(150, 0.3, 'square'), 100);
-      setTimeout(() => playBeep(100, 0.4, 'square'), 200);
-      
-      showEncryptionCode();
-      setTimeout(() => window.location.href = 'whoareyou/index.html', 1000);
-    }
-
-    function showEncryptionCode() {
-      codeDisplay.style.display = "block";
-      codeDisplay.innerHTML = 
-        `<span style="color:#ff5555">// ENCRYPTION ACTIVATED</span>\n` +
-        `<span style="color:#00ff88">void</span> secure_decrypt() {\n` +
-        `  <span style="color:#00ff88">if</span> (auth_attempts >= ${config.maxAttempts}) {\n` +
-        `    <span style="color:#ff5555">firewall</span>(0x${Math.random().toString(16).slice(2,10)});\n` +
-        `    <span style="color:#00ff88">return</span> <span style="color:#ff5555">LOCKDOWN</span>;\n` +
-        `  }\n` +
-        `}`;
-    }
-
-    // ======================
-    // 🎮 SPECIAL FEATURES
-    // ======================
-    let keyBuffer = [];
-    document.addEventListener('keydown', (e) => {
-      keyBuffer.push(e.key.toUpperCase());
-      if (keyBuffer.length > config.secretCode.length) {
-        keyBuffer.shift();
-      }
-      
-      if (keyBuffer.join('') === config.secretCode) {
-        status.textContent = "DEVELOPER MODE ACTIVATED";
-        vault.style.borderColor = "#ff00ff";
-        playBeep(1000, 0.5);
-        resetAttempts();
-      }
-    });
-
-    scanner.addEventListener('dblclick', () => {
-      if (isLocked) {
-        deleteCookie('blocked');
-        window.location.reload();
-      }
-    });
-
-    bypassBtn.addEventListener('click', () => {
-      resetAttempts();
-      window.location.href = 'dashboard/index.html';
-    });
-
-    // ======================
-    // 🚀 INITIALIZATION
-    // ======================
-    function init() {
-      if (getCookie('blocked')) {
-        window.location.href = 'whoareyou/index.html';
-        return;
-      }
-
-      if (getAttemptCount() > 0) {
-        bypassBtn.style.display = 'block';
-      }
-
-      fetch('https://api.ipify.org?format=json')
-        .then(res => res.json())
-        .then(data => {
-          ipDisplay.textContent = `Your IP: ${data.ip}`;
-        })
-        .catch(() => {
-          ipDisplay.textContent = 'Your IP: Unknown';
-        });
-
-      // Initialize audio on first interaction
-      scanner.addEventListener('mousedown', initAudio, { once: true });
-      scanner.addEventListener('touchstart', initAudio, { once: true });
-    }
-
-    init();
-</script>
+  <script src="/whoareyou/app.js"></script>
 </body>
 </html>
