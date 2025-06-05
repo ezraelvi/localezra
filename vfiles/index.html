@@ -121,23 +121,7 @@
       const mediaUrl = document.getElementById('mediaUrl');
       const insertMedia = document.getElementById('insertMedia');
       
-      if (!authData) {
-        window.location.href = '../whoareyou/index.html';
-        return;
-      }
-      
-      // Display user information
-      userInfo.innerHTML = `
-        <p><strong>User:</strong> ${authData.email}</p>
-        <p><strong>IP:</strong> ${authData.ip}</p>
-      `;
-      
-      // Display access information
-      accessInfo.innerHTML = `
-        <p><strong>First Access:</strong> ${new Date(authData.timestamp).toLocaleString()}</p>
-        <p><strong>Device:</strong> ${authData.deviceInfo.platform} (${authData.deviceInfo.screenResolution})</p>
-      `;
-      
+
       // Display sample files (in a real app, you'd fetch these from a server)
       const files = [
         'document1.txt',
