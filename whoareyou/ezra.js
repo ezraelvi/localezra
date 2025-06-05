@@ -228,7 +228,7 @@ function handleFingerprintUnsupported() {
   elements.btnContainer.style.display = 'block';
   elements.fallbackBtn.style.display = 'inline-block';
   elements.webauthnBtn.style.display = 'inline-block';
-  elements.visitBtn.style.display = 'block';
+  elements.visitBtn.style.display = 'inline-block';
 }
 
 function handleLockout() {
