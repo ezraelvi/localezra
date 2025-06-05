@@ -3,132 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ezra's Data Dashboard</title>
+  <title>vFiles</title>
   <style>
     body {
       font-family: 'Courier New', monospace;
-      background-color: #0a0a12;
-      color: #00ff88;
-      max-width: 800px;
-      margin: 0 auto;
+      background-color: #121212;
+      color: #00ff00;
+      margin: 0;
       padding: 20px;
     }
-    h1 {
-      color: #00ff88;
-      text-shadow: 0 0 5px #00ff88;
+    .info-panel {
+      background-color: #1a1a1a;
+      padding: 15px;
+      border: 1px solid #00ff00;
+      margin-bottom: 20px;
     }
-    .data-container {
-      border: 1px solid #00ff88;
-      padding: 20px;
-      margin-top: 20px;
-      border-radius: 5px;
-    }
-    .message-box {
-      margin-top: 30px;
-    }
-    textarea {
-      width: 100%;
-      background-color: #000;
-      color: #00ff88;
-      border: 1px solid #00ff88;
+    .file-list {
+      border: 1px dashed #00ff00;
       padding: 10px;
-    }
-    button {
-      background-color: transparent;
-      color: #00ff88;
-      border: 1px solid #00ff88;
-      padding: 8px 16px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: rgba(0, 255, 136, 0.1);
     }
   </style>
 </head>
 <body>
-  <h1>Ezra's Secure Dashboard</h1>
-  
-  <div class="data-container">
-    <h2>Your Session Data:</h2>
-    <div id="sessionData">Loading...</div>
+  <div class="info-panel">
+    <h2>ACCESS INFORMATION</h2>
+    <div id="userInfo"></div>
+    <div id="accessInfo"></div>
   </div>
   
-  <div class="message-box">
-    <h2>Leave a Message:</h2>
-    <textarea id="messageInput" rows="4"></textarea>
-    <button id="saveMessage">Save Message</button>
-    <div id="savedMessages"></div>
+  <div class="file-list">
+    <h3>AVAILABLE FILES</h3>
+    <ul id="fileList"></ul>
   </div>
 
   <script>
-    // Ambil data session dari cookie
-    function getSessionData() {
-      const cookies = document.cookie.split(';').map(c => c.trim())
-      const sessionCookie = cookies.find(c => c.startsWith('session='))
+    document.addEventListener('DOMContentLoaded', () => {
+      const authData = JSON.parse(localStorage.getItem('authData'));
+      const userInfo = document.getElementById('userInfo');
+      const accessInfo = document.getElementById('accessInfo');
+      const fileList = document.getElementById('fileList');
       
-      if (!sessionCookie) {
-        window.location.href = '/';
+      if (!authData) {
+        window.location.href = '../whoareyou/index.html';
         return;
       }
       
-      // Dalam production, ambil dari API yang diproteksi
-      const sessionId = sessionCookie.split('=')[1]
+      // Display user information
+      userInfo.innerHTML = `
+        <p><strong>User:</strong> ${authData.email}</p>
+        <p><strong>IP:</strong> ${authData.ip}</p>
+      `;
       
-      // Tampilkan data (dalam production, ambil dari backend)
-      const sessionData = {
-        authMethod: localStorage.getItem('authMethod') || 'email',
-        browserId: localStorage.getItem('browserId') || 'N/A',
-        timestamp: new Date().toLocaleString(),
-        ip: localStorage.getItem('userIp') || 'N/A'
-      }
+      // Display access information
+      accessInfo.innerHTML = `
+        <p><strong>First Access:</strong> ${new Date(authData.timestamp).toLocaleString()}</p>
+        <p><strong>Device:</strong> ${authData.deviceInfo.platform} (${authData.deviceInfo.screenResolution})</p>
+      `;
       
-      document.getElementById('sessionData').innerHTML = `
-        <p><strong>Authentication Method:</strong> ${sessionData.authMethod}</p>
-        <p><strong>Browser ID:</strong> ${sessionData.browserId}</p>
-        <p><strong>Login Time:</strong> ${sessionData.timestamp}</p>
-        <p><strong>IP Address:</strong> ${sessionData.ip}</p>
-      `
-    }
-    
-    // Handle messages
-    document.getElementById('saveMessage').addEventListener('click', () => {
-      const message = document.getElementById('messageInput').value
-      if (message) {
-        const messages = JSON.parse(localStorage.getItem('ezraMessages') || []
-        messages.push({
-          text: message,
-          timestamp: new Date().toLocaleString()
-        })
-        localStorage.setItem('ezraMessages', JSON.stringify(messages))
-        displayMessages()
-        document.getElementById('messageInput').value = ''
-      }
-    })
-    
-    function displayMessages() {
-      const messages = JSON.parse(localStorage.getItem('ezraMessages') || []
-      const container = document.getElementById('savedMessages')
-      container.innerHTML = '<h3>Saved Messages:</h3>'
+      // Display sample files (in a real app, you'd fetch these from a server)
+      const files = [
+        'document1.txt',
+        'report.pdf',
+        'data.json'
+      ];
       
-      if (messages.length === 0) {
-        container.innerHTML += '<p>No messages yet</p>'
-        return
-      }
-      
-      messages.forEach(msg => {
-        container.innerHTML += `
-          <div style="margin-bottom: 10px; border-bottom: 1px dashed #00ff88; padding-bottom: 10px;">
-            <p>${msg.text}</p>
-            <small>${msg.timestamp}</small>
-          </div>
-        `
-      })
-    }
-    
-    // Initialize
-    getSessionData()
-    displayMessages()
+      files.forEach(file => {
+        const li = document.createElement('li');
+        li.textContent = file;
+        fileList.appendChild(li);
+      });
+    });
   </script>
 </body>
 </html>
