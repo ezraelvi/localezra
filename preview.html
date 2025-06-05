@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Login Sidik Jari - Restricted Access</title>
+<title>Login Sidik Jari - Debugging Lengkap</title>
 <style>
   body {
     background: radial-gradient(circle at center, #0a0a20, #000);
@@ -92,7 +92,7 @@
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const SECRET_ACCESS_PASSWORD = "v"; // Ubah password rahasiamu di sini
+    const SECRET_ACCESS_PASSWORD = "3"; // Ubah password rahasiamu di sini
 
     // Elemen DOM akses pendaftaran
     const accessRegisterDiv = document.getElementById("access-register");
@@ -125,9 +125,25 @@
       return bytes.buffer;
     }
 
+    // Cek dukungan WebAuthn
+    function isWebAuthnSupported() {
+      return (
+        window.PublicKeyCredential !== undefined &&
+        typeof window.PublicKeyCredential === "function"
+      );
+    }
+
+    if (!isWebAuthnSupported()) {
+      console.error("Web Authentication API tidak didukung di browser ini.");
+      alert(
+        "Web Authentication API tidak didukung di browser ini. Gunakan browser terbaru yang mendukung WebAuthn."
+      );
+    }
+
     // Validasi akses password
     accessBtn.addEventListener("click", () => {
       const val = accessPasswordInput.value.trim();
+      console.log("[Access] Password yang dimasukkan:", val);
       if (val === SECRET_ACCESS_PASSWORD) {
         accessStatus.textContent = "Akses diterima. Silakan daftar sidik jari.";
         accessRegisterDiv.classList.add("hidden");
@@ -141,9 +157,16 @@
     registerFingerprintBtn.addEventListener("click", async () => {
       const email = registerEmailInput.value.trim().toLowerCase();
       registerStatus.textContent = "";
+      console.log("[Register] Start registration for:", email);
 
       if (!email) {
         registerStatus.textContent = "Masukkan email dulu.";
+        return;
+      }
+
+      if (!isWebAuthnSupported()) {
+        registerStatus.textContent =
+          "WebAuthn tidak didukung di browser ini.";
         return;
       }
 
@@ -164,8 +187,8 @@
             displayName: email,
           },
           pubKeyCredParams: [
-            { type: "public-key", alg: -7 },   // ES256
-            { type: "public-key", alg: -257 }  // RS256
+            { type: "public-key", alg: -7 }, // ES256
+            { type: "public-key", alg: -257 }, // RS256
           ],
           timeout: 60000,
           attestation: "direct",
@@ -174,20 +197,24 @@
           },
         };
 
+        console.log("[Register] publicKey options:", publicKey);
+
         // Buat credential via WebAuthn API
         const credential = await navigator.credentials.create({ publicKey });
+        console.log("[Register] Credential created:", credential);
 
         if (!credential) throw new Error("Gagal membuat credential.");
 
         // Ambil data credential untuk disimpan ke Supabase
         const rawIdBase64 = arrayBufferToBase64(credential.rawId);
-        // Response diubah ke base64 utk bagian yg penting
         const attestationObject = arrayBufferToBase64(
           credential.response.attestationObject
         );
         const clientDataJSON = arrayBufferToBase64(
           credential.response.clientDataJSON
         );
+
+        console.log("[Register] Credential data prepared to store");
 
         // Simpan credential ke Supabase (tabel user_credentials)
         const { data, error } = await supabase.from("user_credentials").insert([
@@ -207,6 +234,7 @@
         // Sembunyikan form pendaftaran supaya tidak bisa dipakai orang lain
         registerContainer.classList.add("hidden");
       } catch (err) {
+        console.error("[Register] Error:", err);
         registerStatus.textContent = "Error: " + err.message;
       }
     });
@@ -215,9 +243,15 @@
     loginFingerprintBtn.addEventListener("click", async () => {
       const email = loginEmailInput.value.trim().toLowerCase();
       loginStatus.textContent = "";
+      console.log("[Login] Start login for:", email);
 
       if (!email) {
         loginStatus.textContent = "Masukkan email dulu.";
+        return;
+      }
+
+      if (!isWebAuthnSupported()) {
+        loginStatus.textContent = "WebAuthn tidak didukung di browser ini.";
         return;
       }
 
@@ -256,8 +290,12 @@
           userVerification: "required",
         };
 
+        console.log("[Login] publicKey options:", publicKey);
+
         // Panggil API autentikasi WebAuthn
         const assertion = await navigator.credentials.get({ publicKey });
+
+        console.log("[Login] Assertion received:", assertion);
 
         if (!assertion) throw new Error("Gagal autentikasi sidik jari.");
 
@@ -267,10 +305,10 @@
 
         // TODO: Redirect atau muat halaman setelah login berhasil
       } catch (err) {
+        console.error("[Login] Error:", err);
         loginStatus.textContent = "Error: " + err.message;
       }
     });
   </script>
 </body>
 </html>
-
