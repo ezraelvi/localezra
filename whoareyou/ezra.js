@@ -1,6 +1,4 @@
 const config = {
-  supabaseUrl: 'https://hjmosjvfrycamxowfurq.supabase.co',
-  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM',
   maxAttempts: 3,
   cloudflareEndpoint: 'https://auth-logs.ezvvel.workers.dev/',
   dashboardUrl: 'dashboard/index.html',
@@ -29,17 +27,11 @@ let state = {
   isLocked: false,
   attemptCount: 0,
   audioCtx: null,
-  supabase: null,
   userIp: null,
   browserId: null,
   deviceInfo: null,
   authTimeout: null
 };
-
-// Initialize Supabase client
-function initSupabase() {
-  state.supabase = supabase.createClient(config.supabaseUrl, config.supabaseKey);
-}
 
 // Audio feedback functions
 function initAudio() {
@@ -163,43 +155,11 @@ async function authenticateWithFingerprint() {
       publicKey: publicKeyCredentialRequestOptions
     });
     
-    // Verify the assertion with your server (in this case, we'll log to Supabase)
-    const authResult = await verifyWebAuthnAssertion(assertion);
-    
-    if (authResult.success) {
-      handleAuthSuccess();
-    } else {
-      handleAuthFailure();
-    }
+    // In a real implementation, you would verify the assertion with your server
+    handleAuthSuccess();
   } catch (error) {
     console.error('WebAuthn authentication failed:', error);
     handleAuthFailure();
-  }
-}
-
-async function verifyWebAuthnAssertion(assertion) {
-  // In a real implementation, you would send this to your backend for verification
-  // For this example, we'll log to Supabase and return success
-  
-  const authData = {
-    type: 'webauthn',
-    browserId: state.browserId,
-    deviceInfo: collectDeviceInfo(),
-    timestamp: new Date().toISOString(),
-    success: true
-  };
-  
-  try {
-    const { error } = await state.supabase
-      .from('auth_logs')
-      .insert([authData]);
-    
-    if (error) throw error;
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Supabase log error:', error);
-    return { success: false };
   }
 }
 
@@ -244,7 +204,11 @@ function handleAuthFailure() {
   elements.visitBtn.style.display = 'none';
   elements.webauthnBtn.style.display = 'inline-block';
   
-  logAuthAttempt(false);
+  setTimeout(() => {
+    if (!state.isLocked) {
+      startFingerprintDetection();
+    }
+  }, 2000);
 }
 
 function handleAuthTimeout() {
@@ -319,20 +283,6 @@ async function submitLogin() {
     const result = await response.json();
     
     if (result.success) {
-      // Log successful auth to Supabase
-      const authData = {
-        type: 'email',
-        email: email,
-        browserId: state.browserId,
-        deviceInfo: collectDeviceInfo(),
-        timestamp: new Date().toISOString(),
-        success: true
-      };
-      
-      await state.supabase
-        .from('auth_logs')
-        .insert([authData]);
-      
       handleAuthSuccess();
     } else {
       elements.status.textContent = result.message || "INVALID CREDENTIALS";
@@ -365,24 +315,6 @@ async function detectIp() {
   }
 }
 
-async function logAuthAttempt(success) {
-  const authData = {
-    type: success ? 'success' : 'failed',
-    browserId: state.browserId,
-    deviceInfo: collectDeviceInfo(),
-    timestamp: new Date().toISOString(),
-    success
-  };
-  
-  try {
-    await state.supabase
-      .from('auth_logs')
-      .insert([authData]);
-  } catch (error) {
-    console.error('Failed to log auth attempt:', error);
-  }
-}
-
 // Event listeners
 function setupEventListeners() {
   elements.fallbackBtn.addEventListener('click', showLoginForm);
@@ -411,14 +343,13 @@ async function init() {
     
     // Initialize systems
     initAudio();
-    initSupabase();
     await detectIp();
     generateBrowserId();
     collectDeviceInfo();
     
     // Check WebAuthn support
     if (!isWebAuthnSupported()) {
-      handleWebAuthnUnsupported();
+      handleFingerprintUnsupported();
       return;
     }
     
