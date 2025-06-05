@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BioVAuth</title>
+  <link rel="stylesheet" href="whoareyou/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Courier+New&display=swap" rel="stylesheet">
+  <link rel="apple-touch-icon" sizes="180x180" href="whoareyou/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="whoareyou/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="whoareyou/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+  <div class="container">
+    <div class="svg-container">
+      <img src="whoareyou/platform.svg" alt="Biometric Platform" class="svg-image">
+      <div class="scan-line" id="scanLine"></div>
+    </div>
+    <div class="status" id="status">INITIALIZING BIOMETRIC SYSTEM</div>    
+    <div class="btn-container" id="btnContainer">
+      <button class="auth-btn" id="fallbackBtn">USE EMAIL LOGIN</button>
+      <button class="auth-btn" id="visitBtn">VISIT DASHBOARD</button>
+      <button class="auth-btn" id="webauthnBtn">CHECK WEBAUTHN SUPPORT</button>
+    </div>   
+    <div class="login-form" id="loginForm">
+      <div class="form-group">
+        <label for="email">EMAIL:</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">PASSWORD:</label>
+        <input type="password" id="password" required>
+      </div>
+      <button class="auth-btn" id="submitLogin">SUBMIT</button>
+    </div> 
+    <div class="ip-display" id="ipDisplay">Your IP</div>
+  </div>
+  <script src="/whoareyou/app.js"></script>
+</body>
+</html>
