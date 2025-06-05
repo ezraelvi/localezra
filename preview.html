@@ -1,314 +1,40 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Login Sidik Jari - Debugging Lengkap</title>
-<style>
-  body {
-    background: radial-gradient(circle at center, #0a0a20, #000);
-    color: #00ff88;
-    font-family: 'Courier New', monospace;
-    margin: 0; padding: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .container {
-    background: rgba(10,10,20,0.9);
-    border: 1px solid #00ff88;
-    border-radius: 16px;
-    box-shadow: 0 0 30px #00ff88aa inset;
-    max-width: 400px;
-    padding: 24px;
-    margin: 12px;
-  }
-  input, button {
-    width: 100%;
-    margin-top: 10px;
-    font-size: 1em;
-    padding: 10px;
-    background: #111;
-    border: 1px solid #00ff88;
-    border-radius: 6px;
-    color: #00ff88;
-    font-family: monospace;
-  }
-  button {
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background-color: #00cc6a;
-    color: black;
-  }
-  #status {
-    margin-top: 12px;
-    min-height: 24px;
-    font-weight: bold;
-    text-align: center;
-  }
-  small { color: #555; }
-  .hidden { display: none; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login Sidik Jari - Versi Stabil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>body {
+  background: radial-gradient(circle at center, #0a0a20, #000);
+  color: #00ff88;
+  font-family: 'Share Tech Mono', monospace;
+  margin: 0; 
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-container {
+  background: rgba(10,10,20,0.9);
+  border: 1px solid #00ff88;
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(0,255,136,0.3);
+  width: 90%;
+  max-width: 400px;
+  padding: 2rem;
+  margin: 1rem;
+}
+  </style>
 </head>
 <body>
-  <h1 style="margin-bottom: 0;">Login Sidik Jari</h1>
-  <small>(Hanya kamu yang bisa akses pendaftaran)</small>
-
-  <!-- Form akses pendaftaran dengan password khusus -->
-  <div class="container" id="access-register">
-    <h2>Masuk untuk Daftar Sidik Jari</h2>
-    <input type="password" id="accessPassword" placeholder="Masukkan password rahasia" />
-    <button id="accessBtn">Masuk</button>
-    <div id="accessStatus"></div>
+  <div class="auth-container">
+    <!-- Konten sama seperti sebelumnya -->
   </div>
 
-  <!-- Form pendaftaran sidik jari (hanya terlihat setelah akses diberikan) -->
-  <div class="container hidden" id="registerContainer">
-    <h2>Registrasi Sidik Jari</h2>
-    <input type="email" id="userEmail" placeholder="Email kamu" />
-    <button id="registerFingerprintBtn">Daftar Sidik Jari</button>
-    <div id="registerStatus"></div>
-  </div>
-
-  <!-- Form login sidik jari -->
-  <div class="container" id="loginContainer">
-    <h2>Login Sidik Jari</h2>
-    <input type="email" id="loginEmail" placeholder="Email kamu" />
-    <button id="loginFingerprintBtn">Login dengan Sidik Jari</button>
-    <div id="loginStatus"></div>
-  </div>
-
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-    // Ganti sesuai project Supabase-mu
-    const SUPABASE_URL = "https://hjmosjvfrycamxowfurq.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM";
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const SECRET_ACCESS_PASSWORD = "3"; // Ubah password rahasiamu di sini
-
-    // Elemen DOM akses pendaftaran
-    const accessRegisterDiv = document.getElementById("access-register");
-    const accessPasswordInput = document.getElementById("accessPassword");
-    const accessBtn = document.getElementById("accessBtn");
-    const accessStatus = document.getElementById("accessStatus");
-
-    // Elemen DOM pendaftaran sidik jari
-    const registerContainer = document.getElementById("registerContainer");
-    const registerEmailInput = document.getElementById("userEmail");
-    const registerFingerprintBtn = document.getElementById("registerFingerprintBtn");
-    const registerStatus = document.getElementById("registerStatus");
-
-    // Elemen DOM login sidik jari
-    const loginEmailInput = document.getElementById("loginEmail");
-    const loginFingerprintBtn = document.getElementById("loginFingerprintBtn");
-    const loginStatus = document.getElementById("loginStatus");
-
-    // Fungsi konversi ArrayBuffer <-> Base64
-    function arrayBufferToBase64(buffer) {
-      let binary = "";
-      const bytes = new Uint8Array(buffer);
-      bytes.forEach((b) => (binary += String.fromCharCode(b)));
-      return window.btoa(binary);
-    }
-    function base64ToArrayBuffer(base64) {
-      const binary = window.atob(base64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      return bytes.buffer;
-    }
-
-    // Cek dukungan WebAuthn
-    function isWebAuthnSupported() {
-      return (
-        window.PublicKeyCredential !== undefined &&
-        typeof window.PublicKeyCredential === "function"
-      );
-    }
-
-    if (!isWebAuthnSupported()) {
-      console.error("Web Authentication API tidak didukung di browser ini.");
-      alert(
-        "Web Authentication API tidak didukung di browser ini. Gunakan browser terbaru yang mendukung WebAuthn."
-      );
-    }
-
-    // Validasi akses password
-    accessBtn.addEventListener("click", () => {
-      const val = accessPasswordInput.value.trim();
-      console.log("[Access] Password yang dimasukkan:", val);
-      if (val === SECRET_ACCESS_PASSWORD) {
-        accessStatus.textContent = "Akses diterima. Silakan daftar sidik jari.";
-        accessRegisterDiv.classList.add("hidden");
-        registerContainer.classList.remove("hidden");
-      } else {
-        accessStatus.textContent = "Password salah!";
-      }
-    });
-
-    // Daftar sidik jari
-    registerFingerprintBtn.addEventListener("click", async () => {
-      const email = registerEmailInput.value.trim().toLowerCase();
-      registerStatus.textContent = "";
-      console.log("[Register] Start registration for:", email);
-
-      if (!email) {
-        registerStatus.textContent = "Masukkan email dulu.";
-        return;
-      }
-
-      if (!isWebAuthnSupported()) {
-        registerStatus.textContent =
-          "WebAuthn tidak didukung di browser ini.";
-        return;
-      }
-
-      try {
-        registerStatus.textContent = "Mempersiapkan pendaftaran sidik jari...";
-
-        // Generate challenge dan options register
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-
-        // Construct opsi pendaftaran WebAuthn (update pubKeyCredParams)
-        const publicKey = {
-          challenge: challenge.buffer,
-          rp: { name: "Website Sidik Jari Kamu" },
-          user: {
-            id: new TextEncoder().encode(email),
-            name: email,
-            displayName: email,
-          },
-          pubKeyCredParams: [
-            { type: "public-key", alg: -7 }, // ES256
-            { type: "public-key", alg: -257 }, // RS256
-          ],
-          timeout: 60000,
-          attestation: "direct",
-          authenticatorSelection: {
-            userVerification: "required",
-          },
-        };
-
-        console.log("[Register] publicKey options:", publicKey);
-
-        // Buat credential via WebAuthn API
-        const credential = await navigator.credentials.create({ publicKey });
-        console.log("[Register] Credential created:", credential);
-
-        if (!credential) throw new Error("Gagal membuat credential.");
-
-        // Ambil data credential untuk disimpan ke Supabase
-        const rawIdBase64 = arrayBufferToBase64(credential.rawId);
-        const attestationObject = arrayBufferToBase64(
-          credential.response.attestationObject
-        );
-        const clientDataJSON = arrayBufferToBase64(
-          credential.response.clientDataJSON
-        );
-
-        console.log("[Register] Credential data prepared to store");
-
-        // Simpan credential ke Supabase (tabel user_credentials)
-        const { data, error } = await supabase.from("user_credentials").insert([
-          {
-            user_id: email,
-            credential_id: rawIdBase64,
-            public_key: attestationObject,
-            created_at: new Date().toISOString(),
-          },
-        ]);
-
-        if (error) throw error;
-
-        registerStatus.textContent =
-          "Sidik jari berhasil didaftarkan. Halaman pendaftaran sekarang disembunyikan.";
-
-        // Sembunyikan form pendaftaran supaya tidak bisa dipakai orang lain
-        registerContainer.classList.add("hidden");
-      } catch (err) {
-        console.error("[Register] Error:", err);
-        registerStatus.textContent = "Error: " + err.message;
-      }
-    });
-
-    // Login sidik jari
-    loginFingerprintBtn.addEventListener("click", async () => {
-      const email = loginEmailInput.value.trim().toLowerCase();
-      loginStatus.textContent = "";
-      console.log("[Login] Start login for:", email);
-
-      if (!email) {
-        loginStatus.textContent = "Masukkan email dulu.";
-        return;
-      }
-
-      if (!isWebAuthnSupported()) {
-        loginStatus.textContent = "WebAuthn tidak didukung di browser ini.";
-        return;
-      }
-
-      try {
-        loginStatus.textContent = "Mengecek credential sidik jari...";
-
-        // Ambil credential yang sudah tersimpan untuk email ini di Supabase
-        const { data: creds, error } = await supabase
-          .from("user_credentials")
-          .select("*")
-          .eq("user_id", email);
-
-        if (error) throw error;
-        if (!creds || creds.length === 0) {
-          loginStatus.textContent =
-            "Tidak ada sidik jari terdaftar untuk email ini.";
-          return;
-        }
-
-        // Buat daftar credential untuk allowCredentials
-        const allowCredentials = creds.map((c) => ({
-          id: base64ToArrayBuffer(c.credential_id),
-          type: "public-key",
-          transports: ["internal"],
-        }));
-
-        // Buat challenge login
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-
-        // Opsi login WebAuthn
-        const publicKey = {
-          challenge: challenge.buffer,
-          allowCredentials,
-          timeout: 60000,
-          userVerification: "required",
-        };
-
-        console.log("[Login] publicKey options:", publicKey);
-
-        // Panggil API autentikasi WebAuthn
-        const assertion = await navigator.credentials.get({ publicKey });
-
-        console.log("[Login] Assertion received:", assertion);
-
-        if (!assertion) throw new Error("Gagal autentikasi sidik jari.");
-
-        // Biasanya kamu harus verifikasi signature assertion di server.
-        // Untuk demo ini, anggap autentikasi sukses jika sampai sini.
-        loginStatus.textContent = "Login sukses! Selamat datang.";
-
-        // TODO: Redirect atau muat halaman setelah login berhasil
-      } catch (err) {
-        console.error("[Login] Error:", err);
-        loginStatus.textContent = "Error: " + err.message;
-      }
-    });
-  </script>
+  <script type="module" src="auth.js"></script>
 </body>
 </html>
