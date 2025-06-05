@@ -1,314 +1,618 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login Sidik Jari - Debugging Lengkap</title>
-    <style>
-        body {
-            background: radial-gradient(circle at center, #0a0a20, #000);
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            margin: 0; padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: rgba(10,10,20,0.9);
-            border: 1px solid #00ff88;
-            border-radius: 16px;
-            box-shadow: 0 0 30px #00ff88aa inset;
-            max-width: 400px;
-            padding: 24px;
-            margin: 12px;
-        }
-        input, button {
-            width: 100%;
-            margin-top: 10px;
-            font-size: 1em;
-            padding: 10px;
-            background: #111;
-            border: 1px solid #00ff88;
-            border-radius: 6px;
-            color: #00ff88;
-            font-family: monospace;
-        }
-        button {
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #00cc6a;
-            color: black;
-        }
-        #status {
-            margin-top: 12px;
-            min-height: 24px;
-            font-weight: bold;
-            text-align: center;
-        }
-        small { color: #555; }
-        .hidden { display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Biometric Authentication</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1 style="margin-bottom: 0;">Login Sidik Jari</h1>
-    <small>(Hanya kamu yang bisa akses pendaftaran)</small>
+<style>
+/* Base Styles */
+:root {
+  --primary: #00ff88;
+  --error: #ff0033;
+  --background: #000000;
+  --text: #00ff88;
+  --warning: #ffcc00;
+}
 
-    <!-- Form akses pendaftaran dengan password khusus -->
-    <div class="container" id="access-register">
-        <h2>Masuk untuk Daftar Sidik Jari</h2>
-        <input type="password" id="accessPassword" placeholder="Masukkan password rahasia" />
-        <button id="accessBtn">Masuk</button>
-        <div id="accessStatus"></div>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.container {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  position: relative;
+  padding: 20px;
+}
+
+/* SVG Container Styles */
+.svg-container {
+  position: relative;
+  margin: 0 auto 30px;
+  width: 200px;
+  height: 200px;
+}
+
+.svg-placeholder {
+  width: 100%;
+  height: 100%;
+  fill: var(--primary);
+  opacity: 0.7;
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+  animation: scan 3s linear infinite;
+  opacity: 0;
+  z-index: 2;
+}
+
+@keyframes scan {
+  0% { top: 0; opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Status Text */
+.status {
+  margin-top: 20px;
+  font-size: 14px;
+  text-shadow: 0 0 5px var(--primary);
+  min-height: 20px;
+}
+
+/* IP Display */
+.ip-display {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0, 255, 136, 0.7);
+}
+
+/* Buttons */
+.auth-btn {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin: 10px 5px;
+  display: inline-block;
+}
+
+.auth-btn:hover {
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 10px var(--primary);
+}
+
+.btn-container {
+  margin-top: 20px;
+  display: none;
+}
+
+/* Error State */
+.error-state {
+  animation: error-pulse 0.8s infinite;
+}
+
+@keyframes error-pulse {
+  0%, 100% { box-shadow: 0 0 10px var(--error); }
+  50% { box-shadow: 0 0 30px var(--error); }
+}
+
+.warning-text {
+  color: var(--warning);
+  margin: 15px 0;
+}
+
+/* Login Form */
+.login-form {
+  display: none;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--primary);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Device Info */
+.device-info {
+  font-size: 10px;
+  color: rgba(0, 255, 136, 0.5);
+  margin-top: 30px;
+  text-align: left;
+}
+</style>
+  <div class="container">
+    <div class="svg-container">
+      <!-- SVG placeholder - replace with your own SVG code -->
+      <svg class="svg-placeholder" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Default simple fingerprint icon - replace with your SVG -->
+        <path d="M50 10 A20 20 0 0 1 50 50 A20 20 0 0 1 50 90 M30 30 A20 20 0 0 1 70 30 M30 70 A20 20 0 0 0 70 70"/>
+      </svg>
+      <div class="scan-line" id="scanLine"></div>
     </div>
-
-    <!-- Form pendaftaran sidik jari (hanya terlihat setelah akses diberikan) -->
-    <div class="container hidden" id="registerContainer">
-        <h2>Registrasi Sidik Jari</h2>
-        <input type="email" id="userEmail" placeholder="Email kamu" />
-        <button id="registerFingerprintBtn">Daftar Sidik Jari</button>
-        <div id="registerStatus"></div>
+    
+    <div class="status" id="status">INITIALIZING BIOMETRIC SYSTEM...</div>
+    
+    <div class="btn-container" id="btnContainer">
+      <button class="auth-btn" id="fallbackBtn">USE EMAIL LOGIN</button>
+      <button class="auth-btn" id="retryBtn">RETRY BIOMETRIC</button>
     </div>
-
-    <!-- Form login sidik jari -->
-    <div class="container" id="loginContainer">
-        <h2>Login Sidik Jari</h2>
-        <input type="email" id="loginEmail" placeholder="Email kamu" />
-        <button id="loginFingerprintBtn">Login dengan Sidik Jari</button>
-        <div id="loginStatus"></div>
+    
+    <div class="login-form" id="loginForm">
+      <div class="form-group">
+        <label for="email">EMAIL:</label>
+        <input type="email" id="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label for="password">PASSWORD:</label>
+        <input type="password" id="password" placeholder="••••••••">
+      </div>
+      <button class="auth-btn" id="loginBtn">LOGIN</button>
     </div>
+    
+    <div class="device-info" id="deviceInfo">
+      <!-- Device info will be populated here -->
+    </div>
+    
+    <div class="ip-display" id="ipDisplay">Detecting your IP...</div>
+  </div>
 
-    <script type="module">
-        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+<script>
+// Configuration
+const config = {
+  supabaseUrl: 'https://hjmosjvfrycamxowfurq.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM',
+  maxAttempts: 3,
+  cloudflareEndpoint: 'https://your-worker-name.your-account.workers.dev',
+  dashboardUrl: 'dashboard.html',
+  lockdownUrl: 'whoareyou/index.html',
+  webauthnSupportUrl: 'https://webauthn.me/browser-support'
+};
 
-        // Ganti sesuai project Supabase-mu
-        const SUPABASE_URL = "https://hjmosjvfrycamxowfurq.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM";
+// DOM Elements
+const elements = {
+  scanLine: document.getElementById('scanLine'),
+  status: document.getElementById('status'),
+  ipDisplay: document.getElementById('ipDisplay'),
+  btnContainer: document.getElementById('btnContainer'),
+  fallbackBtn: document.getElementById('fallbackBtn'),
+  retryBtn: document.getElementById('retryBtn'),
+  loginForm: document.getElementById('loginForm'),
+  emailInput: document.getElementById('email'),
+  passwordInput: document.getElementById('password'),
+  loginBtn: document.getElementById('loginBtn'),
+  deviceInfo: document.getElementById('deviceInfo'),
+  container: document.querySelector('.container')
+};
 
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// State
+let state = {
+  isScanning: false,
+  isLocked: false,
+  attemptCount: 0,
+  audioCtx: null,
+  supabase: null,
+  userIp: null,
+  browserId: null,
+  deviceInfo: null,
+  hasFingerprintSupport: false,
+  hasWebAuthnSupport: false
+};
 
-        const SECRET_ACCESS_PASSWORD = "3"; // Ubah password rahasiamu di sini
+// Initialize the application
+async function init() {
+  try {
+    // Check if already locked out
+    if (getCookie('blocked') === 'true') {
+      window.location.href = config.lockdownUrl;
+      return;
+    }
 
-        // Elemen DOM akses pendaftaran
-        const accessRegisterDiv = document.getElementById("access-register");
-        const accessPasswordInput = document.getElementById("accessPassword");
-        const accessBtn = document.getElementById("accessBtn");
-        const accessStatus = document.getElementById("accessStatus");
+    // Initialize services
+    initSupabase();
+    
+    // Check device capabilities
+    state.hasWebAuthnSupport = isWebAuthnSupported();
+    state.hasFingerprintSupport = await checkFingerprintSupport();
+    
+    if (!state.hasWebAuthnSupport) {
+      handleWebAuthnUnsupported();
+      return;
+    }
+    
+    if (!state.hasFingerprintSupport) {
+      handleFingerprintUnsupported();
+      return;
+    }
+    
+    initAudio();
+    await detectIp();
+    generateBrowserId();
+    collectDeviceInfo();
+    updateDeviceInfoDisplay();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Start fingerprint detection
+    startFingerprintDetection();
+    
+  } catch (error) {
+    console.error('Initialization error:', error);
+    handleInitError(error);
+  }
+}
 
-        // Elemen DOM pendaftaran sidik jari
-        const registerContainer = document.getElementById("registerContainer");
-        const registerEmailInput = document.getElementById("userEmail");
-        const registerFingerprintBtn = document.getElementById("registerFingerprintBtn");
-        const registerStatus = document.getElementById("registerStatus");
+function handleInitError(error) {
+  elements.status.textContent = "SYSTEM INITIALIZATION FAILED";
+  showButtons();
+  
+  // Log error to Cloudflare
+  sendToCloudflare('init_error', {
+    error: error.message,
+    stack: error.stack,
+    deviceInfo: state.deviceInfo
+  });
+}
 
-        // Elemen DOM login sidik jari
-        const loginEmailInput = document.getElementById("loginEmail");
-        const loginFingerprintBtn = document.getElementById("loginFingerprintBtn");
-        const loginStatus = document.getElementById("loginStatus");
+function handleWebAuthnUnsupported() {
+  elements.status.innerHTML = `<span class="warning-text">WEB AUTHENTICATION API NOT SUPPORTED</span>`;
+  elements.btnContainer.style.display = 'block';
+  elements.fallbackBtn.style.display = 'none';
+  elements.retryBtn.textContent = "CHECK BROWSER SUPPORT";
+  elements.retryBtn.onclick = () => window.open(config.webauthnSupportUrl, '_blank');
+  
+  sendToCloudflare('webauthn_unsupported', {
+    deviceInfo: state.deviceInfo
+  });
+}
 
-        // Fungsi konversi ArrayBuffer <-> Base64
-        function arrayBufferToBase64(buffer) {
-            let binary = "";
-            const bytes = new Uint8Array(buffer);
-            bytes.forEach((b) => (binary += String.fromCharCode(b)));
-            return window.btoa(binary);
-        }
-        function base64ToArrayBuffer(base64) {
-            const binary = window.atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            return bytes.buffer;
-        }
+function handleFingerprintUnsupported() {
+  elements.status.innerHTML = `<span class="warning-text">FINGERPRINT SENSOR NOT AVAILABLE</span>`;
+  showButtons();
+  
+  sendToCloudflare('fingerprint_unsupported', {
+    deviceInfo: state.deviceInfo
+  });
+}
 
-        // Cek dukungan WebAuthn
-        function isWebAuthnSupported() {
-            return (
-                window.PublicKeyCredential !== undefined &&
-                typeof window.PublicKeyCredential === "function"
-            );
-        }
+function showButtons() {
+  elements.btnContainer.style.display = 'block';
+  elements.fallbackBtn.onclick = showLoginForm;
+  elements.retryBtn.onclick = retryBiometric;
+}
 
-        if (!isWebAuthnSupported()) {
-            console.error("Web Authentication API tidak didukung di browser ini.");
-            alert(
-                "Web Authentication API tidak didukung di browser ini. Gunakan browser terbaru yang mendukung WebAuthn."
-            );
-        }
+function showLoginForm() {
+  elements.loginForm.style.display = 'block';
+  elements.btnContainer.style.display = 'none';
+  elements.status.textContent = "PLEASE ENTER YOUR CREDENTIALS";
+  
+  // Set up login button
+  elements.loginBtn.onclick = handleEmailLogin;
+}
 
-        // Validasi akses password
-        accessBtn.addEventListener("click", () => {
-            const val = accessPasswordInput.value.trim();
-            console.log("[Access] Password yang dimasukkan:", val);
-            if (val === SECRET_ACCESS_PASSWORD) {
-                accessStatus.textContent = "Akses diterima. Silakan daftar sidik jari.";
-                accessRegisterDiv.classList.add("hidden");
-                registerContainer.classList.remove("hidden");
-            } else {
-                accessStatus.textContent = "Password salah!";
-            }
-        });
+function retryBiometric() {
+  elements.loginForm.style.display = 'none';
+  elements.btnContainer.style.display = 'none';
+  elements.status.textContent = "WAITING FOR FINGERPRINT...";
+  startFingerprintDetection();
+}
 
-        // Daftar sidik jari
-        registerFingerprintBtn.addEventListener("click", async () => {
-            const email = registerEmailInput.value.trim().toLowerCase();
-            registerStatus.textContent = "";
-            console.log("[Register] Start registration for:", email);
+async function handleEmailLogin() {
+  const email = elements.emailInput.value;
+  const password = elements.passwordInput.password;
+  
+  if (!email || !password) {
+    elements.status.innerHTML = `<span class="warning-text">PLEASE ENTER BOTH EMAIL AND PASSWORD</span>`;
+    return;
+  }
+  
+  elements.status.textContent = "AUTHENTICATING...";
+  
+  try {
+    // Send credentials to Cloudflare worker
+    const response = await fetch(config.cloudflareEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        deviceInfo: state.deviceInfo,
+        browserId: state.browserId,
+        ip: state.userIp
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Successful login
+      elements.status.textContent = "AUTHENTICATION SUCCESSFUL!";
+      window.location.href = config.dashboardUrl;
+    } else {
+      // Failed login
+      elements.status.innerHTML = `<span class="warning-text">LOGIN FAILED: ${result.message || 'Invalid credentials'}</span>`;
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    elements.status.innerHTML = `<span class="warning-text">LOGIN ERROR: ${error.message}</span>`;
+  }
+}
 
-            if (!email) {
-                registerStatus.textContent = "Masukkan email dulu.";
-                return;
-            }
+function initSupabase() {
+  // Initialize Supabase client
+  state.supabase = supabase.createClient(config.supabaseUrl, config.supabaseKey);
+}
 
-            if (!isWebAuthnSupported()) {
-                registerStatus.textContent =
-                    "WebAuthn tidak didukung di browser ini.";
-                return;
-            }
+async function checkSupabaseConnection() {
+  try {
+    const { data, error } = await state.supabase.from('test').select('*').limit(1);
+    return !error;
+  } catch (e) {
+    return false;
+  }
+}
 
-            try {
-                registerStatus.textContent = "Mempersiapkan pendaftaran sidik jari...";
+function initAudio() {
+  try {
+    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) {
+    console.warn('Web Audio API not supported');
+  }
+}
 
-                // Generate challenge dan options register
-                const challenge = new Uint8Array(32);
-                window.crypto.getRandomValues(challenge);
+async function detectIp() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    state.userIp = data.ip;
+    elements.ipDisplay.textContent = `IP: ${state.userIp}`;
+  } catch (error) {
+    console.error('IP detection failed:', error);
+    state.userIp = 'unknown';
+    elements.ipDisplay.textContent = `IP: Detection failed`;
+  }
+}
 
-                // Construct opsi pendaftaran WebAuthn (update pubKeyCredParams)
-                const publicKey = {
-                    challenge: challenge.buffer,
-                    rp: { name: "Website Sidik Jari Kamu" },
-                    user: {
-                        id: new TextEncoder().encode(email),
-                        name: email,
-                        displayName: email,
-                    },
-                    pubKeyCredParams: [
-                        { type: "public-key", alg: -7 }, // ES256
-                        { type: "public-key", alg: -257 }, // RS256
-                    ],
-                    timeout: 60000,
-                    attestation: "direct",
-                    authenticatorSelection: {
-                        userVerification: "required",
-                    },
-                };
+function generateBrowserId() {
+  // Generate a persistent browser ID using localStorage
+  if (!localStorage.getItem('browserId')) {
+    const id = 'id-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
+    localStorage.setItem('browserId', id);
+  }
+  state.browserId = localStorage.getItem('browserId');
+}
 
-                console.log("[Register] publicKey options:", publicKey);
+function collectDeviceInfo() {
+  state.deviceInfo = {
+    browserId: state.browserId,
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    screenWidth: window.screen.width,
+    screenHeight: window.screen.height,
+    colorDepth: window.screen.colorDepth,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    languages: navigator.languages,
+    cookieEnabled: navigator.cookieEnabled,
+    doNotTrack: navigator.doNotTrack,
+    hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+    deviceMemory: navigator.deviceMemory || 'unknown',
+    touchSupport: 'ontouchstart' in window,
+    webAuthnSupport: state.hasWebAuthnSupport,
+    fingerprintSupport: state.hasFingerprintSupport
+  };
+}
 
-                // Buat credential via WebAuthn API
-                const credential = await navigator.credentials.create({ publicKey });
-                console.log("[Register] Credential created:", credential);
+function updateDeviceInfoDisplay() {
+  const info = state.deviceInfo;
+  elements.deviceInfo.innerHTML = `
+    <div>Browser ID: ${info.browserId}</div>
+    <div>Timestamp: ${new Date(info.timestamp).toLocaleString()}</div>
+    <div>Platform: ${info.platform}</div>
+    <div>Screen: ${info.screenWidth}x${info.screenHeight}</div>
+    <div>WebAuthn: ${info.webAuthnSupport ? 'Supported' : 'Unsupported'}</div>
+    <div>Fingerprint: ${info.fingerprintSupport ? 'Supported' : 'Unsupported'}</div>
+  `;
+}
 
-                if (!credential) throw new Error("Gagal membuat credential.");
+function isWebAuthnSupported() {
+  return !!window.PublicKeyCredential && 
+         typeof PublicKeyCredential !== 'undefined' && 
+         typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function';
+}
 
-                // Ambil data credential untuk disimpan ke Supabase
-                const rawIdBase64 = arrayBufferToBase64(credential.rawId);
-                const attestationObject = arrayBufferToBase64(
-                    credential.response.attestationObject
-                );
-                const clientDataJSON = arrayBufferToBase64(
-                    credential.response.clientDataJSON
-                );
+async function checkFingerprintSupport() {
+  if (!isWebAuthnSupported()) return false;
+  
+  try {
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  } catch (e) {
+    return false;
+  }
+}
 
-                console.log("[Register] Credential data prepared to store");
+function startFingerprintDetection() {
+  if (state.isScanning || state.isLocked) return;
+  
+  state.isScanning = true;
+  elements.scanLine.style.opacity = '1';
+  elements.status.textContent = "SCANNING FINGERPRINT...";
+  
+  // Simulate fingerprint scan (in a real app, this would use WebAuthn API)
+  setTimeout(() => {
+    simulateFingerprintScan();
+  }, 3000);
+}
 
-                // Simpan credential ke Supabase (tabel user_credentials)
-                const { data, error } = await supabase.from("user_credentials").insert([
-                    {
-                        user_id: email,
-                        credential_id: rawIdBase64,
-                        public_key: attestationObject,
-                        created_at: new Date().toISOString(),
-                    },
-                ]);
+function simulateFingerprintScan() {
+  state.isScanning = false;
+  elements.scanLine.style.opacity = '0';
+  
+  // Random success/failure for demo purposes
+  const isSuccess = Math.random() > 0.3;
+  
+  if (isSuccess) {
+    handleSuccess();
+  } else {
+    handleFailure();
+  }
+}
 
-                if (error) throw error;
+function handleSuccess() {
+  elements.status.textContent = "AUTHENTICATION SUCCESSFUL!";
+  playSuccessSound();
+  
+  // Redirect to dashboard after delay
+  setTimeout(() => {
+    window.location.href = config.dashboardUrl;
+  }, 1000);
+}
 
-                registerStatus.textContent =
-                    "Sidik jari berhasil didaftarkan. Halaman pendaftaran sekarang disembunyikan.";
+function handleFailure() {
+  state.attemptCount++;
+  playErrorSound();
+  
+  if (state.attemptCount >= config.maxAttempts) {
+    // Too many attempts - lock out
+    elements.status.innerHTML = `<span class="warning-text">TOO MANY ATTEMPTS - SYSTEM LOCKED</span>`;
+    setCookie('blocked', 'true', 1); // Block for 1 day
+    setTimeout(() => {
+      window.location.href = config.lockdownUrl;
+    }, 2000);
+  } else {
+    // Show retry options
+    elements.status.innerHTML = `<span class="warning-text">AUTHENTICATION FAILED (${state.attemptCount}/${config.maxAttempts})</span>`;
+    showButtons();
+  }
+  
+  // Log failed attempt
+  sendToCloudflare('auth_failed', {
+    attempt: state.attemptCount,
+    deviceInfo: state.deviceInfo
+  });
+}
 
-                // Sembunyikan form pendaftaran supaya tidak bisa dipakai orang lain
-                registerContainer.classList.add("hidden");
-            } catch (err) {
-                console.error("[Register] Error:", err);
-                registerStatus.textContent = "Error: " + err.message;
-            }
-        });
+function playSuccessSound() {
+  if (!state.audioCtx) return;
+  
+  const oscillator = state.audioCtx.createOscillator();
+  const gainNode = state.audioCtx.createGain();
+  
+  oscillator.type = 'sine';
+  oscillator.frequency.value = 880;
+  gainNode.gain.value = 0.1;
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(state.audioCtx.destination);
+  
+  oscillator.start();
+  gainNode.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + 0.5);
+  oscillator.stop(state.audioCtx.currentTime + 0.5);
+}
 
-        // Login sidik jari
-        loginFingerprintBtn.addEventListener("click", async () => {
-            const email = loginEmailInput.value.trim().toLowerCase();
-            loginStatus.textContent = "";
-            console.log("[Login] Start login for:", email);
+function playErrorSound() {
+  if (!state.audioCtx) return;
+  
+  const oscillator = state.audioCtx.createOscillator();
+  const gainNode = state.audioCtx.createGain();
+  
+  oscillator.type = 'sine';
+  oscillator.frequency.value = 220;
+  gainNode.gain.value = 0.1;
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(state.audioCtx.destination);
+  
+  oscillator.start();
+  gainNode.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + 0.3);
+  oscillator.stop(state.audioCtx.currentTime + 0.3);
+}
 
-            if (!email) {
-                loginStatus.textContent = "Masukkan email dulu.";
-                return;
-            }
+function setupEventListeners() {
+  // Add any additional event listeners here
+}
 
-            if (!isWebAuthnSupported()) {
-                loginStatus.textContent = "WebAuthn tidak didukung di browser ini.";
-                return;
-            }
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
 
-            try {
-                loginStatus.textContent = "Mengecek credential sidik jari...";
+function setCookie(name, value, days) {
+  const date = new Date();
+  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+}
 
-                // Ambil credential yang sudah tersimpan untuk email ini di Supabase
-                const { data: creds, error } = await supabase
-                    .from("user_credentials")
-                    .select("*")
-                    .eq("user_id", email);
+async function sendToCloudflare(eventType, data) {
+  try {
+    await fetch(config.cloudflareEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        eventType,
+        ...data,
+        timestamp: new Date().toISOString()
+      })
+    });
+  } catch (error) {
+    console.error('Error sending to Cloudflare:', error);
+  }
+}
 
-                if (error) throw error;
-                if (!creds || creds.length === 0) {
-                    loginStatus.textContent =
-                        "Tidak ada sidik jari terdaftar untuk email ini.";
-                    return;
-                }
-
-                // Buat daftar credential untuk allowCredentials
-                const allowCredentials = creds.map((c) => ({
-                    id: base64ToArrayBuffer(c.credential_id),
-                    type: "public-key",
-                    transports: ["internal"],
-                }));
-
-                // Buat challenge login
-                const challenge = new Uint8Array(32);
-                window.crypto.getRandomValues(challenge);
-
-                // Opsi login WebAuthn
-                const publicKey = {
-                    challenge: challenge.buffer,
-                    allowCredentials,
-                    timeout: 60000,
-                    userVerification: "required",
-                };
-
-                console.log("[Login] publicKey options:", publicKey);
-
-                // Panggil API autentikasi WebAuthn
-                const assertion = await navigator.credentials.get({ publicKey });
-
-                console.log("[Login] Assertion received:", assertion);
-
-                if (!assertion) throw new Error("Gagal autentikasi sidik jari.");
-
-                // Biasanya kamu harus verifikasi signature assertion di server.
-                // Untuk demo ini, anggap autentikasi sukses jika sampai sini.
-                loginStatus.textContent = "Login sukses! Selamat datang.";
-
-                // TODO: Redirect atau muat halaman setelah login berhasil
-            } catch (err) {
-                console.error("[Login] Error:", err);
-                loginStatus.textContent = "Error: " + err.message;
-            }
-        });
-    </script>
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
