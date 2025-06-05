@@ -111,6 +111,6 @@
       border-radius: 4px;
     }
     .auth-btn {
-      display: none;
+      display: block;
       margin-top: 20px;
     }
