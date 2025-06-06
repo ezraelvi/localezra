@@ -38,16 +38,6 @@ body {
   overflow-x: hidden;
 }
 
-#particles-js {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  opacity: 0.3;
-}
-
 .container {
   width: 100%;
   max-width: 480px;
@@ -173,6 +163,23 @@ body {
   box-shadow: var(--box-shadow);
   display: none;
   animation: fadeIn 0.5s ease;
+}
+
+.webauthn-section {
+  background: rgba(10, 10, 18, 0.8);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: var(--box-shadow);
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+
+.webauthn-info {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 @keyframes fadeIn {
@@ -325,43 +332,4 @@ body {
   .auth-btn {
     width: 100%;
   }
-}
-
-/* Dark/Light Mode (future enhancement) */
-@media (prefers-color-scheme: light) {
-  :root {
-    --primary: #007bff;
-    --primary-dark: #0056b3;
-    --dark: #f8f9fa;
-    --darker: #e9ecef;
-    --text: #212529;
-    --text-secondary: #495057;
-    --bg-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  }
-  
-  body {
-    background: var(--bg-gradient);
-  }
-  
-  .login-form {
-    background: rgba(248, 249, 250, 0.9);
-  }
-  
-  .form-group input {
-    background: rgba(255, 255, 255, 0.8);
-    color: var(--text);
-  }
-}
-/* dashboard.css */
-.guest-banner {
-  background: rgba(0, 255, 136, 0.1);
-  border: 1px solid var(--primary);
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: none; /* Awalnya disembunyikan */
-}
-
-.private-feature {
-  /* Fitur yang hanya untuk user */
 }
