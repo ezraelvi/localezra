@@ -1,7 +1,15 @@
 /**
- * BioVAuth - Secure Biometric Authentication System
- * Main Application Script
+ * BioVAuth - Secure Authentication System
+ * With Cloudflare Workers and Supabase WebAuthn Integration
  */
+
+// Supabase configuration
+const SUPABASE_URL = 'https://hjmosjvfrycamxowfurq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Cloudflare Worker endpoint
+const CLOUDFLARE_WORKER_URL = 'https://auth-logs.ezvvel.workers.dev/';
 
 class BioVAuth {
   constructor() {
@@ -12,7 +20,6 @@ class BioVAuth {
       btnContainer: document.getElementById('btnContainer'),
       loginForm: document.getElementById('loginForm'),
       fallbackBtn: document.getElementById('fallbackBtn'),
-      visitBtn: document.getElementById('visitBtn'),
       webauthnBtn: document.getElementById('webauthnBtn'),
       emailInput: document.getElementById('email'),
       passwordInput: document.getElementById('password'),
@@ -20,7 +27,10 @@ class BioVAuth {
       loadingSpinner: document.getElementById('loadingSpinner'),
       errorMsg: document.getElementById('errorMsg'),
       ipDisplay: document.getElementById('ipDisplay'),
-      togglePassword: document.querySelector('.toggle-password')
+      togglePassword: document.querySelector('.toggle-password'),
+      webauthnSection: document.getElementById('webauthnSection'),
+      registerWebauthnBtn: document.getElementById('registerWebauthnBtn'),
+      webauthnInfo: document.getElementById('webauthnInfo')
     };
 
     // Security Configuration
@@ -58,14 +68,8 @@ class BioVAuth {
       this.securityConfig.cookieName
     );
 
-    // Initialize placeholder rotation
-    this.initPlaceholderRotation();
-
     // Initialize password toggle
     this.initPasswordToggle();
-
-    // Check WebAuthn support
-    this.checkWebAuthnSupport();
   }
 
   /**
@@ -73,12 +77,12 @@ class BioVAuth {
    */
   startBiometricAnimation() {
     this.elements.scanLine.style.opacity = '1';
-    this.updateStatus('Scanning biometric patterns...', 'info');
+    this.updateStatus('Initializing authentication system...', 'info');
     
     // Simulate biometric scan completion
     setTimeout(() => {
       this.elements.scanLine.style.opacity = '0';
-      this.updateStatus('Biometric scan complete <> Tap Your Fingerprint', 'success');
+      this.updateStatus('Ready for authentication', 'success');
       this.elements.btnContainer.style.display = 'flex';
     }, 3000);
   }
@@ -109,14 +113,14 @@ class BioVAuth {
       this.showLoginForm();
     });
 
-    // Visit dashboard (initially disabled)
-    this.elements.visitBtn.addEventListener('click', () => {
-      window.location.href = 'dashboard/index.html';
+    // WebAuthn/Biometric login
+    this.elements.webauthnBtn.addEventListener('click', async () => {
+      await this.handleWebAuthnLogin();
     });
 
-    // Check WebAuthn support
-    this.elements.webauthnBtn.addEventListener('click', () => {
-      this.checkWebAuthnSupport(true);
+    // Register WebAuthn credential
+    this.elements.registerWebauthnBtn.addEventListener('click', async () => {
+      await this.registerWebAuthn();
     });
 
     // Form submission
@@ -129,55 +133,6 @@ class BioVAuth {
     this.elements.togglePassword.addEventListener('click', () => {
       this.togglePasswordVisibility();
     });
-
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.activeElement === this.elements.passwordInput) {
-        this.elements.passwordInput.blur();
-      }
-    });
-  }
-
-  /**
-   * Check if user is already authenticated
-   */
-  async checkAuthentication() {
-    const authToken = localStorage.getItem(this.securityConfig.localStorageKey);
-    
-    if (authToken) {
-      try {
-        // Validate token with server
-        const isValid = await this.validateAuthToken(authToken);
-        
-        if (isValid) {
-          this.updateStatus('Welcome back! Redirecting to dashboard...', 'success');
-          this.elements.visitBtn.disabled = false;
-          
-          // Enable dashboard button for 5 seconds
-          setTimeout(() => {
-            window.location.href = 'dashboard/index.html';
-          }, 5000);
-        } else {
-          localStorage.removeItem(this.securityConfig.localStorageKey);
-        }
-      } catch (error) {
-        console.error('Token validation error:', error);
-      }
-    }
-  }
-
-  /**
-   * Validate authentication token with server
-   * @param {string} token - Authentication token
-   */
-  async validateAuthToken(token) {
-    // In a real app, this would call your backend API
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Simulate token validation
-        resolve(Math.random() > 0.3); // 70% chance of valid token for demo
-      }, 500);
-    });
   }
 
   /**
@@ -186,8 +141,19 @@ class BioVAuth {
   showLoginForm() {
     this.elements.btnContainer.style.display = 'none';
     this.elements.loginForm.style.display = 'block';
+    this.elements.webauthnSection.style.display = 'none';
     this.elements.emailInput.focus();
     this.updateStatus('Enter your credentials', 'info');
+  }
+
+  /**
+   * Show WebAuthn section
+   */
+  showWebAuthnSection() {
+    this.elements.btnContainer.style.display = 'none';
+    this.elements.loginForm.style.display = 'none';
+    this.elements.webauthnSection.style.display = 'block';
+    this.updateStatus('Use your biometric credential', 'info');
   }
 
   /**
@@ -213,15 +179,26 @@ class BioVAuth {
     this.setLoadingState(true);
 
     try {
-      // Simulate API call
-      const response = await this.mockLoginAPI(email, password);
-      
-      if (response.success) {
+      // Send credentials to Cloudflare Worker
+      const response = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         // Successful login
-        this.handleSuccessfulLogin(response.token, email);
+        this.handleSuccessfulLogin(data.token, email, data.redirectUrl);
       } else {
         // Failed login
-        this.handleFailedLogin(response.error);
+        this.handleFailedLogin(data.error || 'Invalid credentials');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -233,42 +210,101 @@ class BioVAuth {
   }
 
   /**
-   * Mock login API (replace with real API call)
+   * Handle WebAuthn login
    */
-  async mockLoginAPI(email, password) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Simulate API response
-        const isValid = password.length >= 8 && email.includes('@');
-        
-        if (isValid) {
-          resolve({
-            success: true,
-            token: this.generateAuthToken(),
-            user: { email }
-          });
-        } else {
-          resolve({
-            success: false,
-            error: 'Invalid credentials'
-          });
+  async handleWebAuthnLogin() {
+    this.showWebAuthnSection();
+    this.elements.webauthnInfo.textContent = 'Preparing biometric authentication...';
+
+    try {
+      // Get the user's email (optional, could be skipped for true passwordless)
+      const email = prompt('Please enter your email for biometric login:');
+      if (!email) return;
+
+      // Get authentication options from Supabase
+      const { data: options, error: optionsError } = await supabase.auth.signInWithSSO({
+        domain: 'yourdomain.com', // Replace with your domain
+        options: {
+          redirectTo: `${window.location.origin}/vfiles/index.html`
         }
-      }, 1500);
-    });
+      });
+
+      if (optionsError) throw optionsError;
+
+      // Start WebAuthn authentication
+      const { data: authData, error: authError } = await supabase.auth.verifyOtp({
+        type: 'webauthn',
+        token: options.provider_token,
+        email
+      });
+
+      if (authError) throw authError;
+
+      // Successful WebAuthn login
+      this.handleSuccessfulLogin(authData.session.access_token, email, '/vfiles/index.html');
+    } catch (error) {
+      console.error('WebAuthn login error:', error);
+      this.elements.webauthnInfo.textContent = 'Biometric login failed. You can register your biometric below.';
+      this.elements.registerWebauthnBtn.style.display = 'block';
+    }
   }
 
   /**
-   * Generate mock auth token
+   * Register WebAuthn credential
    */
-  generateAuthToken() {
-    return 'mock-token-' + Math.random().toString(36).substring(2) + 
-           '-' + Date.now().toString(36);
+  async registerWebAuthn() {
+    this.elements.webauthnInfo.textContent = 'Preparing to register your biometric...';
+
+    try {
+      // Get the user's email
+      const email = prompt('Please enter your email to register biometric:');
+      if (!email) return;
+
+      // First verify the user with password
+      const password = prompt('Please enter your password to verify:');
+      if (!password) return;
+
+      // Verify credentials with Cloudflare Worker
+      const verifyResponse = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyResponse.ok || !verifyData.success) {
+        throw new Error('Invalid credentials');
+      }
+
+      // Register WebAuthn with Supabase
+      const { data: registrationData, error: registrationError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          webauthn: true
+        }
+      });
+
+      if (registrationError) throw registrationError;
+
+      this.elements.webauthnInfo.textContent = 'Biometric registration successful! You can now login with your fingerprint or face.';
+      this.elements.registerWebauthnBtn.style.display = 'none';
+    } catch (error) {
+      console.error('WebAuthn registration error:', error);
+      this.elements.webauthnInfo.textContent = `Registration failed: ${error.message}`;
+    }
   }
 
   /**
    * Handle successful login
    */
-  handleSuccessfulLogin(token, email) {
+  handleSuccessfulLogin(token, email, redirectUrl) {
     // Store token
     localStorage.setItem(this.securityConfig.localStorageKey, token);
     
@@ -279,9 +315,9 @@ class BioVAuth {
     this.updateStatus('Authentication successful!', 'success');
     this.elements.errorMsg.textContent = '';
     
-    // Redirect to dashboard after delay
+    // Redirect to appropriate dashboard
     setTimeout(() => {
-      window.location.href = 'dashboard/index.html';
+      window.location.href = redirectUrl || 'dashboard/index.html';
     }, 1000);
   }
 
@@ -374,22 +410,48 @@ class BioVAuth {
   }
 
   /**
-   * Initialize placeholder rotation
+   * Check if user is already authenticated
    */
-  initPlaceholderRotation() {
-    const placeholders = [
-      "Enter your email",
-      "username@example.com",
-      "your.login@domain.com",
-      "user.name@company.org"
-    ];
+  async checkAuthentication() {
+    const authToken = localStorage.getItem(this.securityConfig.localStorageKey);
     
-    let currentIndex = 0;
-    
-    setInterval(() => {
-      this.elements.emailInput.placeholder = placeholders[currentIndex];
-      currentIndex = (currentIndex + 1) % placeholders.length;
-    }, 3000);
+    if (authToken) {
+      try {
+        // Validate token with server
+        const isValid = await this.validateAuthToken(authToken);
+        
+        if (isValid) {
+          this.updateStatus('Welcome back! Redirecting to dashboard...', 'success');
+          
+          // Redirect to dashboard after delay
+          setTimeout(() => {
+            window.location.href = 'dashboard/index.html';
+          }, 2000);
+        } else {
+          localStorage.removeItem(this.securityConfig.localStorageKey);
+        }
+      } catch (error) {
+        console.error('Token validation error:', error);
+      }
+    }
+  }
+
+  /**
+   * Validate authentication token with server
+   */
+  async validateAuthToken(token) {
+    try {
+      const response = await fetch(`${CLOUDFLARE_WORKER_URL}/validate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return false;
+    }
   }
 
   /**
@@ -414,39 +476,6 @@ class BioVAuth {
     this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
     this.elements.togglePassword.setAttribute('aria-label', 
       isPassword ? 'Hide password' : 'Show password');
-  }
-
-  /**
-   * Check WebAuthn support
-   */
-  checkWebAuthnSupport(showAlert = false) {
-    if (window.PublicKeyCredential) {
-      const isSupported = PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      
-      isSupported.then((available) => {
-        if (available) {
-          if (showAlert) {
-            alert('WebAuthn is supported! You can use biometric authentication.');
-          }
-          this.updateStatus('WebAuthn/biometric authentication available', 'success');
-        } else {
-          if (showAlert) {
-            alert('WebAuthn is supported but no biometric authenticator found.');
-          }
-          this.updateStatus('No biometric authenticator detected', 'warning');
-        }
-      }).catch(() => {
-        if (showAlert) {
-          alert('Error checking WebAuthn support.');
-        }
-        this.updateStatus('Error checking WebAuthn', 'error');
-      });
-    } else {
-      if (showAlert) {
-        alert('WebAuthn is not supported in your browser.');
-      }
-      this.updateStatus('WebAuthn not supported', 'error');
-    }
   }
 
   /**
@@ -585,137 +614,5 @@ class SecuritySystem {
 
 // Initialize BioVAuth when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize particles.js
-  if (typeof particlesJS !== 'undefined') {
-    particlesJS('particles-js', {
-      particles: {
-        number: { value: 80, density: { enable: true, value_area: 800 } },
-        color: { value: '#00a8ff' },
-        shape: { type: 'circle' },
-        opacity: { value: 0.3, random: true },
-        size: { value: 3, random: true },
-        line_linked: { 
-          enable: true, 
-          distance: 150, 
-          color: '#00a8ff', 
-          opacity: 0.2, 
-          width: 1 
-        },
-        move: { 
-          enable: true, 
-          speed: 2, 
-          direction: 'none', 
-          random: true, 
-          straight: false, 
-          out_mode: 'out' 
-        }
-      },
-      interactivity: {
-        detect_on: 'canvas',
-        events: {
-          onhover: { enable: true, mode: 'repulse' },
-          onclick: { enable: true, mode: 'push' }
-        }
-      }
-    });
-  }
-
-  // Initialize BioVAuth application
   new BioVAuth();
 });
-
-// Kode rahasia di balik easter egg:
-let gestureCount = 0;
-let lastGestureTime = 0;
-
-window.addEventListener('touchmove', (e) => {
-  if (!lastTouchY) return;
-  
-  const currentY = e.touches[0].clientY;
-  const now = Date.now();
-
-  if (Math.abs(currentY - lastTouchY) > 30) {
-    if (now - lastGestureTime > 300) {
-      gestureCount++;
-      lastGestureTime = now;
-
-      if (gestureCount >= 5) {
-        if (confirm('danger mode love aktif')) {
-          startParticlesjs();
-        }
-      }
-    }
-  }
-});  
-  // Detect Konami code sequence
-  if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || 
-      e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-    if (now - lastGestureTime > 1000) {
-      gestureCount = 0;
-    }
-    
-    gestureCount++;
-    lastGestureTime = now;
-    
-    if (gestureCount >= 6) {
-      gestureCount = 0;
-      this.activateEasterEgg();
-    }
-  }
-});
-
-/**
- * Activate easter egg
- */
-function activateEasterEgg() {
-  if (confirm('🎉 You found a secret! Activate party mode?')) {
-    particlesJS('particles-js', {
-      particles: {
-        number: { value: 30, density: { enable: false } },
-        color: { value: '#ff69b4' },
-        shape: {
-          type: 'image',
-          image: {
-            src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 29.6"><path fill="%23ff69b4" d="M23.6 0c-2.7 0-5 1.7-6 4.1C16.4 1.7 14.1 0 11.4 0 6.4 0 2.4 4 2.4 9c0 7.1 9.6 13.6 13.6 20.6 4-7 13.6-13.5 13.6-20.6 0-5-4-9-9-9z"/></svg>',
-            width: 32,
-            height: 29.6
-          }
-        },
-        opacity: { value: 0.8, random: true, anim: { enable: true, speed: 1, opacity_min: 0, sync: false } },
-        size: { value: 15, random: true, anim: { enable: true, speed: 5, size_min: 5, sync: false } },
-        move: { enable: true, speed: 3, direction: 'top', random: true, straight: false, out_mode: 'out', bounce: false }
-      },
-      interactivity: {
-        detect_on: 'canvas',
-        events: { onhover: { enable: false }, onclick: { enable: false } }
-      },
-      retina_detect: true
-    });
-    
-    document.body.style.background = 'linear-gradient(135deg, #ff69b4, #8a2be2)';
-    document.querySelector('.container').style.animation = 'rainbowBorder 2s linear infinite';
-    
-    // Add rainbow border animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes rainbowBorder {
-        0% { box-shadow: 0 0 20px 5px #ff0000; }
-        14% { box-shadow: 0 0 20px 5px #ff7f00; }
-        28% { box-shadow: 0 0 20px 5px #ffff00; }
-        42% { box-shadow: 0 0 20px 5px #00ff00; }
-        57% { box-shadow: 0 0 20px 5px #0000ff; }
-        71% { box-shadow: 0 0 20px 5px #4b0082; }
-        85% { box-shadow: 0 0 20px 5px #9400d3; }
-        100% { box-shadow: 0 0 20px 5px #ff0000; }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Play celebration sound if available
-    if (typeof Audio !== 'undefined') {
-      const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
-      audio.volume = 0.3;
-      audio.play().catch(e => console.log('Audio play failed:', e));
-    }
-  }
-}
