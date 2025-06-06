@@ -1,10 +1,11 @@
 const config = {
   maxAttempts: 3,
   cloudflareEndpoint: 'https://auth-logs.ezvvel.workers.dev/',
+  webauthnEndpoint: 'https://your-api.com/webauthn',
   dashboardUrl: 'dashboard/index.html',
   lockdownUrl: 'whoareyou/index.html',
   webauthnSupportUrl: 'https://webauthn.me/browser-support',
-  authTimeout: 30000 // 30 seconds
+  authTimeout: 30000
 };
 
 const elements = {
@@ -19,6 +20,7 @@ const elements = {
   emailInput: document.getElementById('email'),
   passwordInput: document.getElementById('password'),
   submitLogin: document.getElementById('submitLogin'),
+  loadingSpinner: document.getElementById('loadingSpinner'),
   container: document.querySelector('.container')
 };
 
@@ -30,20 +32,24 @@ let state = {
   userIp: null,
   browserId: null,
   deviceInfo: null,
-  authTimeout: null
+  authTimeout: null,
+  audioInitialized: false
 };
 
-// Audio feedback functions
+// Audio System
 function initAudio() {
+  if (state.audioInitialized || !window.AudioContext) return;
+  
   try {
     state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    state.audioInitialized = true;
   } catch (e) {
-    console.error('Web Audio API not supported');
+    console.warn('Audio initialization failed:', e);
   }
 }
 
 function playBeep(type) {
-  if (!state.audioCtx) return;
+  if (!state.audioInitialized) return;
   
   const oscillator = state.audioCtx.createOscillator();
   const gainNode = state.audioCtx.createGain();
@@ -60,12 +66,27 @@ function playBeep(type) {
   };
   
   oscillator.frequency.value = frequencies[type] || 800;
-  gainNode.gain.exponentialRampToValueAtTime(0.1, state.audioCtx.currentTime + 0.1);
+  gainNode.gain.value = 0.1;
+  
+  oscillator.onended = () => {
+    oscillator.disconnect();
+    gainNode.disconnect();
+  };
+  
   oscillator.start();
   oscillator.stop(state.audioCtx.currentTime + 0.3);
 }
 
-// Device identification
+// Security Utilities
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 function generateBrowserId() {
   let id = localStorage.getItem('browserId');
   if (!id) {
@@ -81,9 +102,7 @@ function collectDeviceInfo() {
     userAgent: navigator.userAgent,
     platform: navigator.platform,
     hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
-    deviceMemory: navigator.deviceMemory || 'unknown',
     screenResolution: `${window.screen.width}x${window.screen.height}`,
-    colorDepth: window.screen.colorDepth,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     browserId: state.browserId,
     timestamp: new Date().toISOString(),
@@ -92,10 +111,9 @@ function collectDeviceInfo() {
   return state.deviceInfo;
 }
 
-// WebAuthn functions
+// WebAuthn Functions
 function isWebAuthnSupported() {
   return window.PublicKeyCredential !== undefined && 
-         typeof PublicKeyCredential === 'function' &&
          typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function';
 }
 
@@ -110,13 +128,11 @@ async function isFingerprintSupported() {
   }
 }
 
-async function startFingerprintDetection() {
+async function authenticateWithFingerprint() {
   if (state.isLocked) return;
   
   clearTimeout(state.authTimeout);
-  state.authTimeout = setTimeout(() => {
-    handleAuthTimeout();
-  }, config.authTimeout);
+  state.authTimeout = setTimeout(handleAuthTimeout, config.authTimeout);
   
   elements.status.textContent = "SCANNING FINGERPRINT...";
   elements.scanLine.style.opacity = '1';
@@ -124,46 +140,48 @@ async function startFingerprintDetection() {
   playBeep('scan');
   
   try {
-    const supported = await isFingerprintSupported();
-    if (!supported) {
-      handleFingerprintUnsupported();
-      return;
-    }
-    
-    await authenticateWithFingerprint();
-  } catch (error) {
-    console.error('Fingerprint authentication error:', error);
-    handleAuthFailure();
-  }
-}
-
-async function authenticateWithFingerprint() {
-  try {
-    // Prepare WebAuthn options
-    const challenge = new Uint8Array(32);
-    crypto.getRandomValues(challenge);
+    const challengeResponse = await fetch(`${config.webauthnEndpoint}/challenge`);
+    const { challenge, sessionId } = await challengeResponse.json();
     
     const publicKeyCredentialRequestOptions = {
-      challenge: challenge,
+      challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
       allowCredentials: [],
       userVerification: 'required',
       timeout: 60000
     };
     
-    // Start WebAuthn authentication
     const assertion = await navigator.credentials.get({
       publicKey: publicKeyCredentialRequestOptions
     });
     
-    // In a real implementation, you would verify the assertion with your server
-    handleAuthSuccess();
+    const verificationResponse = await fetch(`${config.webauthnEndpoint}/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assertion: {
+          id: assertion.id,
+          rawId: Array.from(new Uint8Array(assertion.rawId)),
+          response: {
+            authenticatorData: Array.from(new Uint8Array(assertion.response.authenticatorData)),
+            clientDataJSON: Array.from(new Uint8Array(assertion.response.clientDataJSON)),
+            signature: Array.from(new Uint8Array(assertion.response.signature))
+          },
+          type: assertion.type
+        },
+        sessionId,
+        deviceInfo: collectDeviceInfo()
+      })
+    });
+    
+    const { verified } = await verificationResponse.json();
+    verified ? handleAuthSuccess() : handleAuthFailure();
   } catch (error) {
-    console.error('WebAuthn authentication failed:', error);
+    console.error('Authentication failed:', error);
     handleAuthFailure();
   }
 }
 
-// Authentication state handlers
+// Auth State Handlers
 function handleAuthSuccess() {
   clearTimeout(state.authTimeout);
   state.isScanning = false;
@@ -173,12 +191,6 @@ function handleAuthSuccess() {
   elements.status.textContent = "AUTHENTICATION SUCCESSFUL";
   playBeep('success');
   
-  elements.btnContainer.style.display = 'block';
-  elements.visitBtn.style.display = 'inline-block';
-  elements.fallbackBtn.style.display = 'none';
-  elements.webauthnBtn.style.display = 'none';
-  
-  // Redirect to dashboard after short delay
   setTimeout(() => {
     window.location.href = config.dashboardUrl;
   }, 1000);
@@ -201,34 +213,8 @@ function handleAuthFailure() {
   
   elements.btnContainer.style.display = 'block';
   elements.fallbackBtn.style.display = 'inline-block';
+  elements.webauthnBtn.style.display = 'inline-block';
   elements.visitBtn.style.display = 'none';
-  elements.webauthnBtn.style.display = 'inline-block';
-  
-  setTimeout(() => {
-    if (!state.isLocked) {
-      startFingerprintDetection();
-    }
-  }, 2000);
-}
-
-function handleAuthTimeout() {
-  state.isScanning = false;
-  elements.scanLine.style.opacity = '0';
-  elements.status.textContent = "AUTHENTICATION TIMED OUT";
-  playBeep('error');
-  handleAuthFailure();
-}
-
-function handleFingerprintUnsupported() {
-  state.isScanning = false;
-  elements.scanLine.style.opacity = '0';
-  elements.status.textContent = "FINGERPRINT AUTHENTICATION NOT SUPPORTED";
-  playBeep('error');
-  
-  elements.btnContainer.style.display = 'block';
-  elements.fallbackBtn.style.display = 'inline-block';
-  elements.webauthnBtn.style.display = 'inline-block';
-  elements.visitBtn.style.display = 'inline-block';
 }
 
 function handleLockout() {
@@ -237,46 +223,37 @@ function handleLockout() {
   elements.status.textContent = "TOO MANY FAILED ATTEMPTS. ACCESS DENIED.";
   playBeep('fail');
   
-  // Set lockout cookie (1 hour)
   document.cookie = "blocked=true; max-age=3600; path=/";
-  
-  // Redirect to lockdown page
   setTimeout(() => {
     window.location.href = config.lockdownUrl;
   }, 3000);
 }
 
-// Email login functions
-function showLoginForm() {
-  elements.loginForm.style.display = 'block';
-  elements.btnContainer.style.display = 'none';
-  elements.status.textContent = "PLEASE ENTER YOUR CREDENTIALS";
-}
-
+// Login System
 async function submitLogin() {
   const email = elements.emailInput.value.trim();
   const password = elements.passwordInput.value;
   
   if (!email || !password) {
-    elements.status.textContent = "PLEASE ENTER BOTH EMAIL AND PASSWORD";
+    elements.status.textContent = "Please enter both email and password";
     playBeep('error');
     return;
   }
   
+  elements.submitLogin.disabled = true;
+  elements.loadingSpinner.style.display = 'block';
   elements.status.textContent = "VERIFYING CREDENTIALS...";
   
   try {
-    // Send credentials to Cloudflare Worker for verification
+    const hashedPassword = await hashPassword(password);
+    
     const response = await fetch(config.cloudflareEndpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email,
-        password,
-        deviceInfo: collectDeviceInfo(),
-        browserId: state.browserId
+        passwordHash: hashedPassword,
+        deviceInfo: collectDeviceInfo()
       })
     });
     
@@ -285,19 +262,21 @@ async function submitLogin() {
     if (result.success) {
       handleAuthSuccess();
     } else {
-      elements.status.textContent = result.message || "INVALID CREDENTIALS";
+      elements.status.textContent = result.message || "Invalid credentials";
       playBeep('fail');
       handleAuthFailure();
     }
-  } 
-  catch (error) {
+  } catch (error) {
     console.error('Login error:', error);
-    elements.status.textContent = "LOGIN SERVICE UNAVAILABLE";
+    elements.status.textContent = "Service unavailable. Please try later.";
     playBeep('error');
+  } finally {
+    elements.submitLogin.disabled = false;
+    elements.loadingSpinner.style.display = 'none';
   }
 }
 
-// Utility functions
+// Utility Functions
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -312,66 +291,64 @@ async function detectIp() {
     elements.ipDisplay.textContent = `IP: ${data.ip} | ${new Date().toLocaleString()}`;
   } catch (error) {
     console.error('IP detection failed:', error);
-    elements.ipDisplay.textContent = 'IP: Unknown | ' + new Date().toLocaleString();
+    elements.ipDisplay.textContent = `IP: Unknown | ${new Date().toLocaleString()}`;
   }
 }
 
-// Event listeners
+// Event Listeners
 function setupEventListeners() {
-  elements.fallbackBtn.addEventListener('click', showLoginForm);
+  elements.fallbackBtn.addEventListener('click', () => {
+    elements.loginForm.style.display = 'block';
+    elements.btnContainer.style.display = 'none';
+    elements.status.textContent = "PLEASE ENTER YOUR CREDENTIALS";
+  });
+  
   elements.visitBtn.addEventListener('click', () => {
     window.location.href = config.dashboardUrl;
   });
+  
   elements.webauthnBtn.addEventListener('click', () => {
     window.open(config.webauthnSupportUrl, '_blank');
   });
+  
   elements.submitLogin.addEventListener('click', submitLogin);
   elements.passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      submitLogin();
-    }
+    if (e.key === 'Enter') submitLogin();
   });
+  
+  // Initialize audio on first interaction
+  document.body.addEventListener('click', () => {
+    if (!state.audioInitialized) initAudio();
+  }, { once: true });
 }
 
-// Main initialization
+// Initialization
 async function init() {
-  try {
-    // Check if user is blocked
-    if (getCookie('blocked') === 'true') {
-      window.location.href = config.lockdownUrl;
-      return;
-    }
-    
-    // Initialize systems
-    initAudio();
-    await detectIp();
-    generateBrowserId();
-    collectDeviceInfo();
-    
-    // Check WebAuthn support
-    if (!isWebAuthnSupported()) {
-      handleFingerprintUnsupported();
-      return;
-    }
-    
-    setupEventListeners();
-    
-    // Check fingerprint support and start auth
-    const supported = await isFingerprintSupported();
-    if (supported) {
-      startFingerprintDetection();
-    } else {
-      handleFingerprintUnsupported();
-    }
-  } catch (error) {
-    console.error('Initialization error:', error);
-    elements.status.textContent = "SYSTEM INITIALIZATION FAILED";
-    elements.btnContainer.style.display = 'block';
-    elements.fallbackBtn.style.display = 'inline-block';
-    elements.webauthnBtn.style.display = 'inline-block';
-    playBeep('error');
+  if (getCookie('blocked') === 'true') {
+    window.location.href = config.lockdownUrl;
+    return;
   }
+  
+  await detectIp();
+  generateBrowserId();
+  collectDeviceInfo();
+  setupEventListeners();
+  
+  if (!isWebAuthnSupported()) {
+    handleFingerprintUnsupported();
+    return;
+  }
+  
+  elements.status.textContent = "CLICK ANYWHERE TO START BIOMETRIC SCAN";
 }
 
-// Start the application
+function handleFingerprintUnsupported() {
+  elements.status.textContent = "BIOMETRIC AUTH NOT SUPPORTED IN THIS BROWSER";
+  elements.btnContainer.style.display = 'block';
+  elements.fallbackBtn.style.display = 'inline-block';
+  elements.webauthnBtn.style.display = 'inline-block';
+  elements.visitBtn.style.display = 'none';
+  playBeep('error');
+}
+
 document.addEventListener('DOMContentLoaded', init);
