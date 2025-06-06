@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://api.ipify.org; style-src 'self' 'unsafe-inline'; connect-src https://api.ipify.org https://auth-logs.ezvvel.workers.dev https://your-api.com">
   <title>BioVAuth</title>
   <link rel="preload" href="whoareyou/elvi.css" as="style">
   <link rel="stylesheet" href="whoareyou/elvi.css">
@@ -19,24 +18,25 @@
     </div>
     <div class="status" id="status" aria-live="polite">INITIALIZING BIOMETRIC</div>    
     <div class="btn-container" id="btnContainer">
-      <button class="auth-btn" id="fallbackBtn" aria-label="Use email login">USE EMAIL LOGIN</button>
-      <button class="auth-btn" id="visitBtn" aria-label="Go to dashboard">DASHBOARD</button>
-      <button class="auth-btn" id="webauthnBtn" aria-label="Check browser support">CHECK WEBAUTHN SUPPORT</button>
+      <button class="auth-btn" id="fallbackBtn">USE EMAIL LOGIN</button>
+      <button class="auth-btn" id="visitBtn" style="display:none;">DASHBOARD</button>
+      <button class="auth-btn" id="webauthnBtn" style="display:none;">CHECK WEBAUTHN SUPPORT</button>
     </div>   
     <div class="login-form" id="loginForm">
       <div class="form-group">
         <label for="email">EMAIL or USERNAME:</label>
-        <input type="email" id="email" required aria-required="true" autocomplete="username">
+        <input type="text" id="email" required>
       </div>
       <div class="form-group">
         <label for="password">PASSWORD:</label>
-        <input type="password" id="password" required aria-required="true" autocomplete="current-password">
+        <input type="password" id="password" required>
       </div>
       <button class="auth-btn" id="submitLogin">LOGIN</button>
       <div class="loading-spinner" id="loadingSpinner"></div>
     </div> 
-    <div class="ip-display" id="ipDisplay">Detecting IP...</div>
+    <div class="ip-display" id="ipDisplay">Your IP</div>
   </div>
-  <script src="/whoareyou/ezra.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/whoareyou/ezra.js"></script>
 </body>
 </html>
