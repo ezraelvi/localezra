@@ -82,6 +82,8 @@ async function handleEmailLogin(email, password) {
   try {
     const response = await fetch(config.cloudflareEndpoint, {
       method: 'POST',
+      mode: 'cors', // Tambahkan ini
+      credentials: 'include', // Jika menggunakan cookies
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
