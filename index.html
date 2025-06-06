@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://api.ipify.org; style-src 'self' 'unsafe-inline'; connect-src https://api.ipify.org https://auth-logs.ezvvel.workers.dev https://your-api.com">
   <title>BioVAuth</title>
+  <link rel="preload" href="whoareyou/elvi.css" as="style">
   <link rel="stylesheet" href="whoareyou/elvi.css">
   <link rel="apple-touch-icon" sizes="180x180" href="whoareyou/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="whoareyou/favicon-32x32.png">
@@ -15,25 +17,26 @@
       <img src="whoareyou/mix.svg" alt="Biometric Platform" class="svg-image">
       <div class="scan-line" id="scanLine"></div>
     </div>
-    <div class="status" id="status">INITIALIZING BIOMETRIC</div>    
+    <div class="status" id="status" aria-live="polite">INITIALIZING BIOMETRIC</div>    
     <div class="btn-container" id="btnContainer">
-      <button class="auth-btn" id="fallbackBtn">USE EMAIL LOGIN</button>
-      <button class="auth-btn" id="visitBtn">DASHBOARD</button>
-      <button class="auth-btn" id="webauthnBtn">CHECKING WEBAUTHN SUPPORT FOR BROWSER</button>
+      <button class="auth-btn" id="fallbackBtn" aria-label="Use email login">USE EMAIL LOGIN</button>
+      <button class="auth-btn" id="visitBtn" aria-label="Go to dashboard">DASHBOARD</button>
+      <button class="auth-btn" id="webauthnBtn" aria-label="Check browser support">CHECK WEBAUTHN SUPPORT</button>
     </div>   
     <div class="login-form" id="loginForm">
       <div class="form-group">
         <label for="email">EMAIL or USERNAME:</label>
-        <input type="email" id="email" required>
+        <input type="email" id="email" required aria-required="true" autocomplete="username">
       </div>
       <div class="form-group">
         <label for="password">PASSWORD:</label>
-        <input type="password" id="password" required>
+        <input type="password" id="password" required aria-required="true" autocomplete="current-password">
       </div>
       <button class="auth-btn" id="submitLogin">LOGIN</button>
+      <div class="loading-spinner" id="loadingSpinner"></div>
     </div> 
-    <div class="ip-display" id="ipDisplay">Your IP</div>
+    <div class="ip-display" id="ipDisplay">Detecting IP...</div>
   </div>
-  <script src="/whoareyou/ezra.js"></script>
+  <script src="/whoareyou/ezra.js" defer></script>
 </body>
 </html>
