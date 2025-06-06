@@ -1,116 +1,158 @@
-    :root {
-      --glow: #00ff88;
-      --dark: #0a0a12;
-      --error: #ff0033;
-      --scan-speed: 3s;
-    }
-    body {
-      background: radial-gradient(circle at center, #0a0a20, #000000);
-      height: 100vh;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Courier New', monospace;
-      color: var(--glow);
-      overflow: hidden;
-    }
-    .container {
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      position: relative;
-    }
-    .svg-container {
-      position: relative;
-      margin: 0 auto 30px;
-      width: 200px;
-      height: 200px;
-    }
-    .svg-container svg {
-      width: 100%;
-      height: 100%;
-      fill: var(--glow);
-      opacity: 0.7;
-    }
-    .scan-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(to bottom, transparent, var(--glow), transparent);
-      animation: scan var(--scan-speed) linear infinite;
-      opacity: 0;
-      z-index: 2;
-    }
-    @keyframes scan {
-      0% { top: 0; opacity: 0; }
-      5% { opacity: 1; }
-      95% { opacity: 1; }
-      100% { top: 100%; opacity: 0; }
-    }
-    .status {
-      margin-top: 20px;
-      font-size: 14px;
-      text-shadow: 0 0 5px var(--glow);
-      min-height: 20px;
-    }
-    .ip-display {
-      position: fixed;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
-      font-size: 12px;
-      color: rgba(0, 255, 136, 0.7);
-    }
-    .auth-btn {
-      background: transparent;
-      border: 1px solid var(--glow);
-      color: var(--glow);
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      cursor: pointer;
-      margin: 5px;
-      transition: all 0.3s;
-    }
-    .auth-btn:hover {
-      background: rgba(0, 255, 136, 0.1);
-      box-shadow: 0 0 10px var(--glow);
-    }
-    .btn-container {
-      margin-top: 20px;
-      display: none;
-    }
-    .error-state {
-      animation: error-pulse 0.8s infinite;
-    }
-    @keyframes error-pulse {
-      0%, 100% { box-shadow: 0 0 10px var(--error); }
-      50% { box-shadow: 0 0 30px var(--error); }
-    }
-    .login-form {
-      display: none;
-      margin-top: 20px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-      text-align: left;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 8px;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid var(--glow);
-      color: var(--glow);
-      border-radius: 4px;
-    }
-    .auth-btn {
-      display: block;
-      margin-top: 20px;
-    }
+:root {
+  --glow: #00ff88;
+  --dark: #0a0a12;
+  --error: #ff0033;
+  --scan-speed: 3s;
+}
+
+body {
+  background: radial-gradient(circle at center, #0a0a20, #000000);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Courier New', monospace, system-ui;
+  color: var(--glow);
+  overflow: hidden;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  position: relative;
+}
+
+.svg-container {
+  position: relative;
+  margin: 0 auto 30px;
+  width: 200px;
+  height: 200px;
+}
+
+.svg-image {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to bottom, transparent, var(--glow), transparent);
+  animation: scan var(--scan-speed) linear infinite;
+  opacity: 0;
+  z-index: 2;
+}
+
+@keyframes scan {
+  0% { top: 0; opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.status {
+  margin: 20px 0;
+  font-size: 14px;
+  text-shadow: 0 0 5px var(--glow);
+  min-height: 20px;
+}
+
+.ip-display {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0, 255, 136, 0.7);
+}
+
+.auth-btn {
+  background: transparent;
+  border: 1px solid var(--glow);
+  color: var(--glow);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: inherit;
+  cursor: pointer;
+  margin: 5px;
+  transition: all 0.3s;
+}
+
+.auth-btn:hover:not(:disabled) {
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 10px var(--glow);
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-container, .login-form {
+  margin-top: 20px;
+  display: none;
+}
+
+.error-state {
+  animation: error-pulse 0.8s infinite;
+}
+
+@keyframes error-pulse {
+  0%, 100% { box-shadow: 0 0 10px var(--error); }
+  50% { box-shadow: 0 0 30px var(--error); }
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glow);
+  color: var(--glow);
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.loading-spinner {
+  border: 3px solid rgba(0, 255, 136, 0.2);
+  border-radius: 50%;
+  border-top: 3px solid var(--glow);
+  width: 20px;
+  height: 20px;
+  margin: 20px auto;
+  animation: spin 1s linear infinite;
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-width: 100%;
+    padding: 0 15px;
+  }
+  
+  .svg-container {
+    width: 150px;
+    height: 150px;
+  }
+}
