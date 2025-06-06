@@ -22,6 +22,22 @@ class BioVAuth {
       ipDisplay: document.getElementById('ipDisplay'),
       togglePassword: document.querySelector('.toggle-password')
     };
+    setupEventListeners() {
+    this.elements.visitBtn.addEventListener('click', () => {
+      const isLoggedIn = !!localStorage.getItem(this.securityConfig.localStorageKey);
+      
+      if (isLoggedIn) {
+        // Versi logged-in (full access)
+        window.location.href = 'dashboard.html?mode=user';
+      } else {
+        // Versi pengunjung (limited access)
+        window.location.href = 'dashboard.html?mode=guest';
+        
+        // Opsional: Tampilkan disclaimer
+        this.updateStatus('Anda masuk sebagai pengunjung', 'info');
+      }
+    });
+  }
 
     // Security Configuration
     this.securityConfig = {
