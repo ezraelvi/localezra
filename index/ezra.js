@@ -78,7 +78,7 @@ class BioVAuth {
     // Simulate biometric scan completion
     setTimeout(() => {
       this.elements.scanLine.style.opacity = '0';
-      this.updateStatus('Biometric scan complete', 'success');
+      this.updateStatus('Biometric scan complete <> Tap Your Fingerprint', 'success');
       this.elements.btnContainer.style.display = 'flex';
     }, 3000);
   }
