@@ -28,10 +28,10 @@ class BioVAuth {
       
       if (isLoggedIn) {
         // Versi logged-in (full access)
-        window.location.href = 'dashboard.html?mode=user';
+        window.location.href = 'dashboard/index.html?mode=user';
       } else {
         // Versi pengunjung (limited access)
-        window.location.href = 'dashboard.html?mode=guest';
+        window.location.href = 'dashboard/index.html?mode=guest';
         
         // Opsional: Tampilkan disclaimer
         this.updateStatus('Anda masuk sebagai pengunjung', 'info');
