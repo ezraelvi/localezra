@@ -1294,6 +1294,23 @@ if (typeof scene !== 'undefined') {
     earth = null;
     controls = null;
 }
+       // Di dalam dashboard.html:
+const urlParams = new URLSearchParams(window.location.search);
+const mode = urlParams.get('mode');
+
+if (mode === 'guest') {
+  // Sembunyikan fitur privat
+  document.querySelectorAll('.private-feature').forEach(el => {
+    el.style.display = 'none';
+  });
+  document.getElementById('welcomeMsg').textContent = 'Selamat Datang Pengunjung';
+  
+  // Tampilkan upgrade prompt
+  document.getElementById('guestBanner').style.display = 'block';
+} else if (mode === 'user') {
+  // Tampilkan semua fitur
+  document.getElementById('welcomeMsg').textContent = 'Selamat Datang User';
+}
     </script>
 </body>
 </html>
