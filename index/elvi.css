@@ -352,3 +352,16 @@ body {
     color: var(--text);
   }
 }
+/* dashboard.css */
+.guest-banner {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid var(--primary);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: none; /* Awalnya disembunyikan */
+}
+
+.private-feature {
+  /* Fitur yang hanya untuk user */
+}
