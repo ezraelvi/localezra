@@ -624,13 +624,29 @@ document.addEventListener('DOMContentLoaded', () => {
   new BioVAuth();
 });
 
-// Easter egg - Secret gesture detection
+// Kode rahasia di balik easter egg:
 let gestureCount = 0;
 let lastGestureTime = 0;
 
-window.addEventListener('keydown', (e) => {
-  const now = Date.now();
+window.addEventListener('touchmove', (e) => {
+  if (!lastTouchY) return;
   
+  const currentY = e.touches[0].clientY;
+  const now = Date.now();
+
+  if (Math.abs(currentY - lastTouchY) > 30) {
+    if (now - lastGestureTime > 300) {
+      gestureCount++;
+      lastGestureTime = now;
+
+      if (gestureCount >= 5) {
+        if (confirm('danger mode love aktif')) {
+          startParticlesjs();
+        }
+      }
+    }
+  }
+});  
   // Detect Konami code sequence
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || 
       e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
