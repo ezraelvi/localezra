@@ -35,7 +35,6 @@ let state = {
   browserId: null,
   authTimeout: null,
   supabase: null,
-  loginSecurity: new LoginSecurity()
 };
 
 class LoginSecurity {
