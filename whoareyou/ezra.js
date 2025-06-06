@@ -1,6 +1,6 @@
 const config = {
   maxAttempts: 3,
-  cloudflareEndpoint: 'https://auth-logs.ezvvel.workers.dev/',
+  workerEndpoint: 'https://auth-logs.ezvvel.workers.dev/',
   supabaseUrl: 'https://hjmosjvfrycamxowfurq.supabase.co',
   supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM',
   dashboardUrl: 'dashboard/index.html',
@@ -34,38 +34,56 @@ let state = {
   userIp: null,
   browserId: null,
   authTimeout: null,
-  supabase: null
+  supabase: null,
+  loginSecurity: new LoginSecurity()
 };
+
+class LoginSecurity {
+  constructor() {
+    this.attempts = 0;
+    this.maxAttempts = 3;
+    this.blockDuration = 5 * 60 * 1000; // 5 minutes
+  }
+
+  isBlocked() {
+    const lastAttempt = localStorage.getItem('lastFailedAttempt');
+    if (!lastAttempt) return false;
+    return Date.now() < (parseInt(lastAttempt) + this.blockDuration);
+  }
+
+  getRemainingBlockTime() {
+    const lastAttempt = localStorage.getItem('lastFailedAttempt');
+    return Math.max(0, (parseInt(lastAttempt) + this.blockDuration) - Date.now());
+  }
+
+  recordFailedAttempt() {
+    this.attempts++;
+    localStorage.setItem('lastFailedAttempt', Date.now().toString());
+    state.attemptCount = this.attempts;
+  }
+
+  resetAttempts() {
+    this.attempts = 0;
+    localStorage.removeItem('lastFailedAttempt');
+    state.attemptCount = 0;
+  }
+}
 
 // Initialize Supabase
 function initSupabase() {
   state.supabase = supabase.createClient(config.supabaseUrl, config.supabaseKey);
 }
 
-// WebAuthn Support Check
-function isWebAuthnSupported() {
-  return window.PublicKeyCredential !== undefined && 
-         typeof PublicKeyCredential === 'function' &&
-         typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function';
-}
-
-async function checkFingerprintSupport() {
-  if (!isWebAuthnSupported()) return false;
-  try {
-    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-  } catch (error) {
-    console.error('WebAuthn check failed:', error);
-    return false;
-  }
-}
-
-// Authentication Handlers
+// Authentication functions
 async function handleWebAuthnLogin() {
+  if (state.loginSecurity.isBlocked()) {
+    handleLockout();
+    return;
+  }
+
   try {
     const { data, error } = await state.supabase.auth.signInWithWebAuthn();
-    
     if (error) throw error;
-    
     if (data.user) {
       handleAuthSuccess(data.user.email);
     }
@@ -76,28 +94,46 @@ async function handleWebAuthnLogin() {
 }
 
 async function handleEmailLogin(email, password) {
+  if (state.loginSecurity.isBlocked()) {
+    handleLockout();
+    return;
+  }
+
   elements.loadingSpinner.style.display = 'block';
   elements.submitLogin.disabled = true;
-  
+  elements.status.textContent = "VERIFYING CREDENTIALS...";
+
   try {
-    const response = await fetch(config.cloudflareEndpoint, {
+    const response = await fetch(config.workerEndpoint, {
       method: 'POST',
-      mode: 'cors', // Tambahkan ini
-      credentials: 'include', // Jika menggunakan cookies
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ 
+        username: email, 
+        password 
+      })
     });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      handleAuthSuccess(result.email, result.redirectUrl);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      sessionStorage.setItem('authToken', data.token || 'dummy-token');
+      sessionStorage.setItem('loggedInUser', email);
+      state.loginSecurity.resetAttempts();
+      handleAuthSuccess(email, data.redirectUrl);
     } else {
-      throw new Error(result.message || 'Login failed');
+      throw new Error(data.error || 'Invalid credentials');
     }
   } catch (error) {
     console.error('Login error:', error);
-    elements.status.textContent = "Login failed. Please try again.";
+    state.loginSecurity.recordFailedAttempt();
+    elements.status.textContent = error.message || "Login failed";
     handleAuthFailure();
   } finally {
     elements.loadingSpinner.style.display = 'none';
@@ -107,33 +143,28 @@ async function handleEmailLogin(email, password) {
 
 function handleAuthSuccess(email, redirectUrl = null) {
   clearTimeout(state.authTimeout);
-  state.attemptCount = 0;
   
   elements.scanLine.style.opacity = '0';
   elements.status.textContent = `AUTH SUCCESS: ${email}`;
-  
-  if (redirectUrl) {
-    window.location.href = redirectUrl;
-  } else {
-    // Default redirect based on email
-    if (email === 'ezvvel@gmail.com') {
-      window.location.href = config.vfilesUrl;
-    } else if (email === 'ezra') {
-      window.location.href = config.dashboardUrl;
-    } else if (email === 'elvi') {
-      window.location.href = config.elviUrl;
-    }
-  }
+
+  const targetUrl = redirectUrl || 
+                   (email === 'ezvvel@gmail.com' ? config.vfilesUrl :
+                   email === 'ezra' ? config.dashboardUrl :
+                   email === 'elvi' ? config.elviUrl : config.dashboardUrl);
+
+  setTimeout(() => {
+    window.location.href = targetUrl;
+  }, 1000);
 }
 
 function handleAuthFailure() {
-  state.attemptCount++;
-  
-  if (state.attemptCount >= config.maxAttempts) {
+  if (state.loginSecurity.isBlocked()) {
+    const remainingMinutes = Math.ceil(state.loginSecurity.getRemainingBlockTime() / 60000);
+    elements.status.textContent = `Too many attempts. Try again in ${remainingMinutes} minutes.`;
     handleLockout();
     return;
   }
-  
+
   elements.status.textContent = `Attempt ${state.attemptCount}/${config.maxAttempts}`;
   elements.fallbackBtn.style.display = 'block';
   elements.webauthnBtn.style.display = 'block';
@@ -142,7 +173,6 @@ function handleAuthFailure() {
 function handleLockout() {
   state.isLocked = true;
   elements.container.classList.add('error-state');
-  elements.status.textContent = "TOO MANY ATTEMPTS. ACCESS DENIED.";
   
   document.cookie = "blocked=true; max-age=3600; path=/";
   setTimeout(() => {
@@ -150,49 +180,18 @@ function handleLockout() {
   }, 3000);
 }
 
-// Event Listeners
-function setupEventListeners() {
-  elements.fallbackBtn.addEventListener('click', () => {
-    elements.loginForm.style.display = 'block';
-    elements.btnContainer.style.display = 'none';
-  });
-  
-  elements.webauthnBtn.addEventListener('click', () => {
-    handleWebAuthnLogin();
-  });
-  
-  elements.submitLogin.addEventListener('click', async () => {
-    const email = elements.emailInput.value.trim();
-    const password = elements.passwordInput.value;
-    
-    if (!email || !password) {
-      elements.status.textContent = "Please enter both fields";
-      return;
-    }
-    
-    await handleEmailLogin(email, password);
-  });
-  
-  elements.passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      elements.submitLogin.click();
-    }
-  });
-}
-
-// Initialization
+// Initialize the application
 async function init() {
   if (document.cookie.includes('blocked=true')) {
     window.location.href = config.lockdownUrl;
     return;
   }
-  
+
   initSupabase();
   setupEventListeners();
-  
+
   try {
     const hasWebAuthn = await checkFingerprintSupport();
-    
     if (hasWebAuthn) {
       elements.status.textContent = "BIOMETRIC READY";
       await handleWebAuthnLogin();
@@ -207,6 +206,34 @@ async function init() {
     elements.btnContainer.style.display = 'block';
     elements.fallbackBtn.style.display = 'block';
   }
+}
+
+// WebAuthn support check
+async function checkFingerprintSupport() {
+  return window.PublicKeyCredential && 
+         PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
+         await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+}
+
+// Event listeners
+function setupEventListeners() {
+  elements.fallbackBtn.addEventListener('click', () => {
+    elements.loginForm.style.display = 'block';
+    elements.btnContainer.style.display = 'none';
+  });
+
+  elements.webauthnBtn.addEventListener('click', handleWebAuthnLogin);
+
+  elements.submitLogin.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await handleEmailLogin(elements.emailInput.value.trim(), elements.passwordInput.value);
+  });
+
+  elements.passwordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      elements.submitLogin.click();
+    }
+  });
 }
 
 // Start the app
