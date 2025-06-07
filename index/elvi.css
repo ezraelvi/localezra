@@ -100,6 +100,22 @@ body {
   transition: var(--transition);
 }
 
+.status.info {
+  color: var(--primary);
+}
+
+.status.success {
+  color: #00ff88;
+}
+
+.status.error {
+  color: var(--error);
+}
+
+.status.warning {
+  color: var(--warning);
+}
+
 /* Button Styles */
 .btn-container {
   display: flex;
@@ -165,23 +181,6 @@ body {
   animation: fadeIn 0.5s ease;
 }
 
-.webauthn-section {
-  background: rgba(10, 10, 18, 0.8);
-  border: 1px solid rgba(0, 255, 136, 0.2);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-  margin-top: 1rem;
-  box-shadow: var(--box-shadow);
-  display: none;
-  animation: fadeIn 0.5s ease;
-}
-
-.webauthn-info {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -237,6 +236,11 @@ body {
   color: var(--primary);
 }
 
+.webauthn-options {
+  margin-top: 1rem;
+  text-align: center;
+}
+
 /* Loading Spinner */
 .loading-spinner {
   display: none;
@@ -277,29 +281,14 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.security-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+.browser-support a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition);
 }
 
-.secure-icon {
-  font-size: 1rem;
-}
-
-/* Utility Classes */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.browser-support a:hover {
+  text-decoration: underline;
 }
 
 /* Animations */
