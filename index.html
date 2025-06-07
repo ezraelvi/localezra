@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="Secure biometric authentication platform">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://api.ipify.org https://cdn.jsdelivr.net https://unpkg.com/@supabase/supabase-js@2; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.ipify.org https://auth-logs.ezvvel.workers.dev/ https://hjmosjvfrycamxowfurq.supabase.co; frame-src 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/@supabase/supabase-js@2 https://unpkg.com/@simplewebauthn/browser@7; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://hjmosjvfrycamxowfurq.supabase.co https://auth-logs.ezvvel.workers.dev/; frame-src 'none';">
   <meta name="theme-color" content="#0a0a12">
-  <title>BioVAuth | Secure</title>
+  <title>BioVAuth | Secure Authentication</title>
   <link rel="stylesheet" href="index/elvi.css">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicons/favicon-16x16.png">
+  <link rel="icon" href="/assets/favicon.ico">
 </head>
 <body>
   <div class="container">
     <header class="auth-header">
+      <h1 class="sr-only">BioVAuth Authentication</h1>
       <div class="biometric-container">
-        <img src="index/mix.svg" alt="mix uai" class="biometric-scan" width="200" height="200">
+        <img src="index/mix.svg" alt="Mix UaI" class="biometric-scan" width="200" height="200">
         <div class="scan-line" id="scanLine" aria-hidden="true"></div>
       </div>
       <div class="status" id="status" aria-live="polite">Initializing authentication system...</div>
@@ -54,23 +52,30 @@
         </button>
         <div id="errorMsg" class="error-msg" aria-live="assertive"></div>
         <div id="webauthnOptions" class="webauthn-options" style="display: none;">
-          <button type="button" class="auth-btn" id="registerWebauthn">
-            <span class="icon">➕</span> Register Biometric
+          <button type="button" class="auth-btn outline" id="registerWebauthn">
+            <span class="icon">🖐️</span> Register Biometric
           </button>
         </div>
       </form>
+
+      <div id="unsupportedBrowser" class="browser-warning" style="display: none;">
+        <p>Your browser doesn't support WebAuthn. Please use a modern browser.</p>
+        <a href="https://webauthn.me/browser-support" class="auth-btn" target="_blank">
+          <span class="icon">🌐</span> Check Browser Support
+        </a>
+      </div>
     </main>
 
     <footer class="auth-footer">
-      <div class="ip-display" id="ipDisplay">Detecting your network...</div>
-      <div class="browser-support">
-        <a href="https://webauthn.me/browser-support" target="_blank" rel="noopener noreferrer">
-          Check WebAuthn browser support
-        </a>
+      <div class="security-info">
+        <span class="secure-icon">🔐</span>
+        <span>Secure Connection • TLS 1.3 • AES-256</span>
       </div>
     </footer>
   </div>
 
-  <script src="index/ezra.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@simplewebauthn/browser@7"></script>
+  <script src="index/ezra.js" type="module"></script>
 </body>
 </html>
