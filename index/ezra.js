@@ -1,14 +1,14 @@
 // Supabase Configuration
 const SUPABASE_URL = 'https://hjmosjvfrycamxowfurq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Cloudflare Worker Endpoint
 const WORKER_URL = 'https://auth-logs.ezvvel.workers.dev/';
-
+let supabase;
 class BioVAuth {
   constructor() {
     this.elements = {
+      supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       scanLine: document.getElementById('scanLine'),
       status: document.getElementById('status'),
       btnContainer: document.getElementById('btnContainer'),
