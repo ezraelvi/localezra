@@ -286,7 +286,7 @@ class AuthSystem {
   }
 
   async sendAuthRequest(username, password) {
-    const clientInfo = JSON.parse(sessionStorage.getItem('clientInfo') || {};
+    const clientInfo = JSON.parse(sessionStorage.getItem('clientInfo')) || {};
     
     const response = await fetch(this.config.workerUrl, {
       method: 'POST',
