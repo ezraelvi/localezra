@@ -1,6 +1,7 @@
 :root {
   --primary: #00ff88;
   --primary-dark: #00cc6a;
+  --secondary: #4285f4;
   --dark: #0a0a12;
   --darker: #050508;
   --error: #ff0033;
@@ -20,10 +21,8 @@
   padding: 0;
 }
 
-html, body {
-  width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -31,28 +30,24 @@ body {
   color: var(--text);
   font-family: 'Courier New', Courier, monospace;
   line-height: 1.6;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 1rem;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 
 .container {
   width: 100%;
   max-width: 480px;
+  min-width: 480px; /* Force desktop-like width */
   margin: 0 auto;
   position: relative;
   z-index: 1;
-}
-
-/* Force desktop-like layout */
-@media (max-width: 768px) {
-  .container {
-    min-width: 480px;
-    transform: scale(0.9);
-    transform-origin: center;
-  }
 }
 
 /* Header Styles */
@@ -133,7 +128,6 @@ body {
   gap: 0.5rem;
   min-width: 150px;
   justify-content: center;
-  text-decoration: none;
 }
 
 .auth-btn:hover:not(:disabled) {
@@ -159,10 +153,10 @@ body {
   box-shadow: 0 0 15px var(--primary);
 }
 
-.auth-btn.outline {
-  background: transparent;
-  border: 1px solid var(--warning);
-  color: var(--warning);
+.auth-btn.secondary {
+  background: var(--secondary);
+  color: white;
+  border-color: var(--secondary);
 }
 
 .icon {
@@ -236,11 +230,6 @@ body {
   color: var(--primary);
 }
 
-.webauthn-options {
-  margin-top: 1rem;
-  text-align: center;
-}
-
 /* Loading Spinner */
 .loading-spinner {
   display: none;
@@ -269,6 +258,11 @@ body {
   min-height: 1.25rem;
 }
 
+.webauthn-options {
+  margin-top: 1rem;
+  text-align: center;
+}
+
 .browser-warning {
   background: rgba(255, 204, 0, 0.1);
   border: 1px solid var(--warning);
@@ -289,6 +283,10 @@ body {
   text-align: center;
   font-size: 0.8rem;
   color: var(--text-secondary);
+}
+
+.ip-display {
+  margin-bottom: 0.5rem;
 }
 
 .security-info {
@@ -325,4 +323,22 @@ body {
 
 .shake {
   animation: shake 0.4s ease;
+}
+
+/* Responsive Design - Limited for desktop-like experience */
+@media (max-width: 600px) {
+  .container {
+    min-width: 95%;
+    max-width: 95%;
+    transform: scale(0.95);
+  }
+  
+  .biometric-container {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .auth-btn {
+    min-width: 100%;
+  }
 }
