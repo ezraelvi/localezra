@@ -1,7 +1,6 @@
 :root {
   --primary: #00ff88;
   --primary-dark: #00cc6a;
-  --secondary: #4285f4;
   --dark: #0a0a12;
   --darker: #050508;
   --error: #ff0033;
@@ -37,14 +36,12 @@ body {
   align-items: center;
   padding: 1rem;
   overflow-x: hidden;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
+  min-width: 1024px; /* Force desktop width */
 }
 
 .container {
   width: 100%;
   max-width: 480px;
-  min-width: 480px; /* Force desktop-like width */
   margin: 0 auto;
   position: relative;
   z-index: 1;
@@ -153,18 +150,12 @@ body {
   box-shadow: 0 0 15px var(--primary);
 }
 
-.auth-btn.secondary {
-  background: var(--secondary);
-  color: white;
-  border-color: var(--secondary);
-}
-
 .icon {
   font-size: 1.1rem;
 }
 
 /* Form Styles */
-.login-form {
+.login-form, .webauthn-section {
   background: rgba(10, 10, 18, 0.8);
   border: 1px solid rgba(0, 255, 136, 0.2);
   border-radius: var(--border-radius);
@@ -258,23 +249,11 @@ body {
   min-height: 1.25rem;
 }
 
-.webauthn-options {
+.webauthn-info {
   margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
   text-align: center;
-}
-
-.browser-warning {
-  background: rgba(255, 204, 0, 0.1);
-  border: 1px solid var(--warning);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-  margin-top: 1rem;
-  text-align: center;
-}
-
-.browser-warning p {
-  margin-bottom: 1rem;
-  color: var(--warning);
 }
 
 /* Footer Styles */
@@ -325,20 +304,15 @@ body {
   animation: shake 0.4s ease;
 }
 
-/* Responsive Design - Limited for desktop-like experience */
-@media (max-width: 600px) {
-  .container {
-    min-width: 95%;
-    max-width: 95%;
-    transform: scale(0.95);
-  }
-  
-  .biometric-container {
-    width: 150px;
-    height: 150px;
-  }
-  
-  .auth-btn {
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  body {
     min-width: 100%;
+    padding: 1rem;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 100%;
   }
 }
