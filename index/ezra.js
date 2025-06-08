@@ -5,18 +5,19 @@ const config = {
   supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqbW9zanZmcnljYW14b3dmdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTU1MTQsImV4cCI6MjA2NDQzMTUxNH0.8KNrzHleB62I4x7kjF-aR41vAmbbpJLgAkhhcZVwSSM',
   rateLimit: {
     attempts: 3,
-    window: 5 * 60 * 1000 // 5 minutes
+    windowMinutes: 5
   },
-  defaultRedirects: {
-    ezra: 'dashboard/index.html',
-    default: 'vfiles/index.html'
+  redirects: {
+    dashboard: 'dashboard/index.html',
+    vfiles: 'vfiles/index.html',
+    webauthnInfo: 'https://webauthn.me/browser-support'
   }
 };
 
-// Initialize Supabase client
+// Supabase Client
 const supabase = createClient(config.supabaseUrl, config.supabaseKey);
 
-class BioAuthSystem {
+class AuthSystem {
   constructor() {
     this.elements = {
       scanLine: document.getElementById('scanLine'),
@@ -33,9 +34,9 @@ class BioAuthSystem {
       errorMsg: document.getElementById('errorMsg'),
       ipDisplay: document.getElementById('ipDisplay'),
       togglePassword: document.querySelector('.toggle-password'),
-      webauthnOptions: document.getElementById('webauthnOptions'),
-      registerWebauthn: document.getElementById('registerWebauthn'),
-      unsupportedBrowser: document.getElementById('unsupportedBrowser')
+      webauthnSection: document.getElementById('webauthnSection'),
+      registerWebauthnBtn: document.getElementById('registerWebauthnBtn'),
+      webauthnInfo: document.getElementById('webauthnInfo')
     };
 
     this.security = {
@@ -44,209 +45,99 @@ class BioAuthSystem {
       blockedUntil: null
     };
 
+    this.supportsWebAuthn = false;
     this.init();
   }
 
   async init() {
-    this.startBiometricAnimation();
+    this.checkWebAuthnSupport();
     this.setupEventListeners();
-    this.checkBrowserSupport();
     this.getClientInfo();
-    this.checkExistingSession();
-  }
-
-  startBiometricAnimation() {
-    this.elements.scanLine.style.opacity = '1';
-    this.updateStatus('Initializing security protocols...');
+    this.startBiometricAnimation();
     
-    setTimeout(() => {
-      this.elements.scanLine.style.opacity = '0';
-      this.updateStatus('Ready for authentication');
-      this.elements.btnContainer.style.display = 'flex';
-    }, 3000);
+    // Check existing session
+    const session = localStorage.getItem('authSession');
+    if (session) {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (!error && data.session) {
+          this.redirectAuthenticatedUser(data.session.user);
+        }
+      } catch (e) {
+        console.error('Session check error:', e);
+      }
+    }
   }
 
-  updateStatus(message, type = 'info') {
-    this.elements.status.textContent = message;
-    this.elements.status.className = 'status';
-    if (type) this.elements.status.classList.add(type);
+  async checkWebAuthnSupport() {
+    if (window.PublicKeyCredential && 
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable && 
+        PublicKeyCredential.isConditionalMediationAvailable) {
+      try {
+        const [isUVPAA, isCMA] = await Promise.all([
+          PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+          PublicKeyCredential.isConditionalMediationAvailable()
+        ]);
+        
+        this.supportsWebAuthn = isUVPAA && isCMA;
+        
+        if (this.supportsWebAuthn) {
+          this.elements.webauthnBtn.disabled = false;
+          this.updateStatus('Biometric authentication available', 'success');
+          this.setupWebAuthnAutoFill();
+        } else {
+          this.disableWebAuthnFeatures();
+        }
+      } catch (e) {
+        console.error('WebAuthn check failed:', e);
+        this.disableWebAuthnFeatures();
+      }
+    } else {
+      this.disableWebAuthnFeatures();
+    }
+  }
+
+  disableWebAuthnFeatures() {
+    this.supportsWebAuthn = false;
+    this.elements.webauthnBtn.disabled = true;
+    this.elements.webauthnBtn.innerHTML = '<span class="icon">❌</span> Biometric Not Supported';
+    this.updateStatus('Biometric auth not supported', 'warning');
+  }
+
+  async setupWebAuthnAutoFill() {
+    try {
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'webauthn',
+        options: {
+          shouldCreateUser: false,
+          skipBrowserRedirect: true
+        }
+      });
+      
+      if (data && data.session) {
+        this.handleSuccessfulAuth(data.session);
+      }
+    } catch (e) {
+      console.log('Auto-fill attempt failed or no credentials found');
+    }
   }
 
   setupEventListeners() {
-    // Form toggle
-    this.elements.fallbackBtn.addEventListener('click', () => this.showLoginForm());
-    this.elements.visitBtn.addEventListener('click', () => window.location.href = 'dashboard/index.html');
-    
-    // WebAuthn
-    this.elements.webauthnBtn.addEventListener('click', () => this.handleWebAuthn());
-    this.elements.registerWebauthn.addEventListener('click', () => this.registerWebAuthn());
-    
     // Form submission
-    this.elements.loginForm.addEventListener('submit', (e) => {
+    this.elements.loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      this.handleLogin();
+      await this.handleFormLogin();
     });
-    
-    // Password toggle
+
+    // Button events
+    this.elements.fallbackBtn.addEventListener('click', () => this.showLoginForm());
+    this.elements.visitBtn.addEventListener('click', () => window.location.href = config.redirects.dashboard);
+    this.elements.webauthnBtn.addEventListener('click', () => this.handleWebAuthnLogin());
+    this.elements.registerWebauthnBtn.addEventListener('click', () => this.registerWebAuthn());
     this.elements.togglePassword.addEventListener('click', () => this.togglePasswordVisibility());
   }
 
-  async checkBrowserSupport() {
-    if (!window.PublicKeyCredential) {
-      this.elements.webauthnBtn.disabled = true;
-      this.elements.unsupportedBrowser.style.display = 'block';
-      return false;
-    }
-    
-    try {
-      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      if (!available) {
-        this.updateStatus('Biometric authenticator not found', 'warning');
-        this.elements.webauthnBtn.disabled = true;
-      }
-      return available;
-    } catch (error) {
-      console.error('WebAuthn check failed:', error);
-      return false;
-    }
-  }
-
-  async handleWebAuthn() {
-    if (this.isBlocked()) {
-      this.showBlockedMessage();
-      return;
-    }
-
-    this.setLoadingState(true, this.elements.webauthnBtn);
-    
-    try {
-      // Check if user has registered WebAuthn
-      const { data: user, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
-        this.updateStatus('Please login first to use biometric', 'warning');
-        this.showLoginForm();
-        return;
-      }
-
-      // Get challenge from Supabase
-      const { data: challenge, error: challengeError } = await supabase
-        .from('auth_challenges')
-        .insert({ user_id: user.id, type: 'webauthn_get' })
-        .select()
-        .single();
-
-      if (challengeError) throw challengeError;
-
-      // Get credentials from authenticator
-      const credential = await navigator.credentials.get({
-        publicKey: {
-          challenge: Uint8Array.from(challenge.challenge, c => c.charCodeAt(0)),
-          allowCredentials: [{
-            type: 'public-key',
-            id: Uint8Array.from(user.webauthn_id, c => c.charCodeAt(0)),
-            transports: ['internal']
-          }],
-          userVerification: 'required'
-        }
-      });
-
-      // Verify with Supabase
-      const { data: verification, error: verifyError } = await supabase
-        .rpc('verify_webauthn', {
-          credential: JSON.stringify(credential),
-          user_id: user.id
-        });
-
-      if (verifyError) throw verifyError;
-
-      if (verification.verified) {
-        this.handleSuccessfulAuth(user);
-      } else {
-        throw new Error('Biometric verification failed');
-      }
-    } catch (error) {
-      console.error('WebAuthn error:', error);
-      this.security.attempts++;
-      this.updateStatus('Biometric login failed', 'error');
-      this.elements.webauthnOptions.style.display = 'block';
-    } finally {
-      this.setLoadingState(false, this.elements.webauthnBtn);
-    }
-  }
-
-  async registerWebAuthn() {
-    try {
-      const email = this.elements.emailInput.value.trim();
-      if (!email) {
-        this.updateStatus('Please enter your email first', 'warning');
-        return;
-      }
-
-      this.setLoadingState(true, this.elements.registerWebauthn);
-      
-      // Get user from Supabase
-      const { data: user, error: userError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      if (userError || !user) throw new Error('User not found');
-
-      // Get registration challenge from Supabase
-      const { data: challenge, error: challengeError } = await supabase
-        .from('auth_challenges')
-        .insert({ user_id: user.id, type: 'webauthn_create' })
-        .select()
-        .single();
-
-      if (challengeError) throw challengeError;
-
-      // Create new credential
-      const credential = await navigator.credentials.create({
-        publicKey: {
-          challenge: Uint8Array.from(challenge.challenge, c => c.charCodeAt(0)),
-          rp: { name: 'BioVAuth' },
-          user: {
-            id: Uint8Array.from(user.id, c => c.charCodeAt(0)),
-            name: email,
-            displayName: email
-          },
-          pubKeyCredParams: [
-            { type: 'public-key', alg: -7 }, // ES256
-            { type: 'public-key', alg: -257 } // RS256
-          ],
-          authenticatorSelection: {
-            userVerification: 'required',
-            requireResidentKey: true
-          }
-        }
-      });
-
-      // Register credential with Supabase
-      const { error: registerError } = await supabase
-        .from('webauthn_credentials')
-        .insert({
-          user_id: user.id,
-          credential_id: Array.from(new Uint8Array(credential.rawId)).join(','),
-          public_key: JSON.stringify(credential.response.getPublicKey()),
-          sign_count: credential.response.signCount
-        });
-
-      if (registerError) throw registerError;
-
-      this.updateStatus('Biometric registration successful!', 'success');
-      this.elements.webauthnOptions.style.display = 'none';
-    } catch (error) {
-      console.error('Registration error:', error);
-      this.updateStatus('Failed to register biometric', 'error');
-    } finally {
-      this.setLoadingState(false, this.elements.registerWebauthn);
-    }
-  }
-
-  async handleLogin() {
+  async handleFormLogin() {
     if (this.isBlocked()) {
       this.showBlockedMessage();
       return;
@@ -263,12 +154,12 @@ class BioAuthSystem {
     this.setLoadingState(true);
 
     try {
-      // Send to Cloudflare Worker for validation
+      // Cloudflare Worker authentication
       const response = await fetch(config.cloudflareWorkerUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Client-IP': await this.getClientIP(),
+          'X-Client-IP': this.clientIp || '',
           'X-User-Agent': navigator.userAgent
         },
         body: JSON.stringify({ email, password })
@@ -276,73 +167,224 @@ class BioAuthSystem {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+      if (response.ok && data.success) {
+        this.handleSuccessfulAuth(data);
+        
+        // Special case for "ezra" user
+        if (email.toLowerCase() === 'ezra' && password === 'admin') {
+          window.location.href = config.redirects.dashboard;
+          return;
+        }
+        
+        // Default redirect
+        window.location.href = data.redirectUrl || config.redirects.vfiles;
+      } else {
+        this.handleFailedLogin(data.error || 'Invalid credentials');
       }
-
-      // If using Supabase auth
-      if (data.supabase_token) {
-        const { error } = await supabase.auth.setSession({
-          access_token: data.supabase_token,
-          refresh_token: data.refresh_token
-        });
-
-        if (error) throw error;
-      }
-
-      // Redirect based on user
-      const redirectPath = config.defaultRedirects[email.split('@')[0]] || 
-                         config.defaultRedirects.default;
-      window.location.href = redirectPath;
-
     } catch (error) {
       console.error('Login error:', error);
-      this.handleFailedLogin(error.message);
+      this.handleFailedLogin('Network error. Please try again.');
     } finally {
       this.setLoadingState(false);
     }
   }
 
-  async checkExistingSession() {
+  async handleWebAuthnLogin() {
+    if (!this.supportsWebAuthn) {
+      window.open(config.redirects.webauthnInfo, '_blank');
+      return;
+    }
+
+    this.setLoadingState(true, 'Authenticating with biometric...');
+
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'webauthn',
+        options: {
+          shouldCreateUser: false,
+          skipBrowserRedirect: true
+        }
+      });
+
+      if (error) throw error;
       
-      if (!error && user) {
-        this.updateStatus(`Welcome back, ${user.email}`, 'success');
-        this.elements.visitBtn.disabled = false;
+      if (data && data.session) {
+        this.handleSuccessfulAuth(data.session);
+        window.location.href = config.redirects.vfiles;
+      } else {
+        this.showWebAuthnSection();
+        this.elements.webauthnInfo.textContent = 'No biometric credentials found. Please register.';
       }
     } catch (error) {
-      console.error('Session check error:', error);
+      console.error('WebAuthn error:', error);
+      this.showError('Biometric authentication failed');
+      this.showWebAuthnSection();
+    } finally {
+      this.setLoadingState(false);
     }
   }
 
-  async getClientIP() {
+  async registerWebAuthn() {
+    this.setLoadingState(true, 'Registering biometric...');
+
     try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      this.elements.ipDisplay.textContent = `IP: ${data.ip} • ${navigator.platform}`;
-      return data.ip;
+      const email = this.elements.emailInput.value.trim();
+      if (!email) {
+        throw new Error('Please enter your email first');
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        options: {
+          webauthn: {
+            skipBrowserRedirect: true,
+            shouldCreateUser: true
+          }
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data && data.session) {
+        this.handleSuccessfulAuth(data.session);
+        this.updateStatus('Biometric registration successful!', 'success');
+        setTimeout(() => {
+          window.location.href = config.redirects.vfiles;
+        }, 1500);
+      }
     } catch (error) {
-      console.error('IP detection failed:', error);
-      this.elements.ipDisplay.textContent = 'Network: Secure • Private';
-      return 'unknown';
+      console.error('Registration error:', error);
+      this.showError(error.message || 'Biometric registration failed');
+    } finally {
+      this.setLoadingState(false);
     }
   }
 
-  isBlocked() {
-    if (!this.security.blockedUntil) return false;
-    return new Date() < new Date(this.security.blockedUntil);
+  handleSuccessfulAuth(authData) {
+    this.resetSecurityCounters();
+    
+    // Store session
+    localStorage.setItem('authSession', JSON.stringify(authData));
+    
+    // Update UI
+    this.updateStatus('Authentication successful!', 'success');
+    this.elements.errorMsg.textContent = '';
   }
 
-  showBlockedMessage() {
-    const remaining = Math.ceil((new Date(this.security.blockedUntil) - new Date()) / 1000 / 60);
-    this.showError(`Too many attempts. Try again in ${remaining} minutes.`);
+  handleFailedLogin(error) {
+    this.recordFailedAttempt();
+    
+    const attemptsLeft = config.rateLimit.attempts - this.security.attempts;
+    const errorMessage = `${error} (${attemptsLeft} ${attemptsLeft === 1 ? 'attempt' : 'attempts'} left)`;
+    
+    this.showError(errorMessage);
+    
+    if (this.isBlocked()) {
+      this.showBlockedMessage();
+    }
+    
+    this.elements.passwordInput.value = '';
+    this.elements.loginForm.classList.add('shake');
+    setTimeout(() => {
+      this.elements.loginForm.classList.remove('shake');
+    }, 500);
+  }
+
+  redirectAuthenticatedUser(user) {
+    this.updateStatus(`Welcome back, ${user.email}! Redirecting...`, 'success');
+    setTimeout(() => {
+      window.location.href = config.redirects.vfiles;
+    }, 1000);
+  }
+
+  showWebAuthnSection() {
+    this.elements.loginForm.style.display = 'none';
+    this.elements.webauthnSection.style.display = 'block';
   }
 
   showLoginForm() {
     this.elements.btnContainer.style.display = 'none';
     this.elements.loginForm.style.display = 'block';
     this.elements.emailInput.focus();
+    this.updateStatus('Enter your credentials', 'info');
+  }
+
+  // Security methods
+  isBlocked() {
+    if (!this.security.blockedUntil) return false;
+    return new Date() < new Date(this.security.blockedUntil);
+  }
+
+  recordFailedAttempt() {
+    const now = new Date();
+    this.security.attempts++;
+    this.security.lastAttempt = now;
+
+    if (this.security.attempts >= config.rateLimit.attempts) {
+      const blockUntil = new Date(now.getTime() + config.rateLimit.windowMinutes * 60000);
+      this.security.blockedUntil = blockUntil;
+    }
+  }
+
+  resetSecurityCounters() {
+    this.security = {
+      attempts: 0,
+      lastAttempt: null,
+      blockedUntil: null
+    };
+  }
+
+  showBlockedMessage() {
+    const remainingMs = new Date(this.security.blockedUntil) - new Date();
+    const minutes = Math.floor(remainingMs / 60000);
+    const seconds = Math.floor((remainingMs % 60000) / 1000);
+    
+    this.showError(`Too many attempts. Please wait ${minutes}m ${seconds}s.`);
+    this.elements.submitLogin.disabled = true;
+    
+    const countdown = setInterval(() => {
+      const newRemaining = new Date(this.security.blockedUntil) - new Date();
+      if (newRemaining <= 0) {
+        clearInterval(countdown);
+        this.resetSecurityCounters();
+        this.elements.errorMsg.textContent = '';
+        this.elements.submitLogin.disabled = false;
+        return;
+      }
+      
+      const newMinutes = Math.floor(newRemaining / 60000);
+      const newSeconds = Math.floor((newRemaining % 60000) / 1000);
+      this.elements.errorMsg.textContent = `Too many attempts. Please wait ${newMinutes}m ${newSeconds}s.`;
+    }, 1000);
+  }
+
+  // UI Helpers
+  updateStatus(message, type = 'info') {
+    this.elements.status.textContent = message;
+    this.elements.status.className = 'status';
+    if (type) this.elements.status.classList.add(type);
+  }
+
+  showError(message) {
+    this.elements.errorMsg.textContent = message;
+    this.elements.errorMsg.style.display = 'block';
+    setTimeout(() => {
+      if (this.elements.errorMsg.textContent === message) {
+        this.elements.errorMsg.style.display = 'none';
+      }
+    }, 5000);
+  }
+
+  setLoadingState(isLoading, text = 'Authenticating...') {
+    if (isLoading) {
+      this.elements.submitLogin.disabled = true;
+      this.elements.loadingSpinner.style.display = 'inline-block';
+      this.elements.submitLogin.querySelector('.btn-text').textContent = text;
+    } else {
+      this.elements.submitLogin.disabled = false;
+      this.elements.loadingSpinner.style.display = 'none';
+      this.elements.submitLogin.querySelector('.btn-text').textContent = 'Login';
+    }
   }
 
   togglePasswordVisibility() {
@@ -353,64 +395,28 @@ class BioAuthSystem {
       isPassword ? 'Hide password' : 'Show password');
   }
 
-  setLoadingState(isLoading, element = null) {
-    const target = element || this.elements.submitLogin;
-    if (isLoading) {
-      target.disabled = true;
-      if (target.querySelector('.btn-text')) {
-        target.querySelector('.btn-text').textContent = 'Processing...';
-      }
-      if (target.querySelector('.loading-spinner')) {
-        target.querySelector('.loading-spinner').style.display = 'inline-block';
-      }
-    } else {
-      target.disabled = false;
-      if (target.querySelector('.btn-text')) {
-        target.querySelector('.btn-text').textContent = target === this.elements.submitLogin ? 'Login' : 
-                                                     target === this.elements.webauthnBtn ? 'Biometric Login' : 
-                                                     'Register Biometric';
-      }
-      if (target.querySelector('.loading-spinner')) {
-        target.querySelector('.loading-spinner').style.display = 'none';
-      }
-    }
-  }
-
-  showError(message) {
-    this.elements.errorMsg.textContent = message;
-    this.elements.loginForm.classList.add('shake');
+  startBiometricAnimation() {
+    this.elements.scanLine.style.opacity = '1';
     setTimeout(() => {
-      this.elements.loginForm.classList.remove('shake');
-    }, 500);
+      this.elements.scanLine.style.opacity = '0';
+      this.elements.btnContainer.style.display = 'flex';
+    }, 3000);
   }
 
-  handleSuccessfulAuth(user) {
-    this.updateStatus(`Welcome, ${user.email}!`, 'success');
-    setTimeout(() => {
-      const redirectPath = config.defaultRedirects[user.email.split('@')[0]] || 
-                         config.defaultRedirects.default;
-      window.location.href = redirectPath;
-    }, 1000);
-  }
-
-  handleFailedLogin(message) {
-    this.security.attempts++;
-    this.security.lastAttempt = new Date().toISOString();
-    
-    if (this.security.attempts >= config.rateLimit.attempts) {
-      this.security.blockedUntil = new Date(Date.now() + config.rateLimit.window).toISOString();
-      this.showBlockedMessage();
-    } else {
-      const remaining = config.rateLimit.attempts - this.security.attempts;
-      this.showError(`${message} (${remaining} ${remaining === 1 ? 'try' : 'tries'} left)`);
+  async getClientInfo() {
+    try {
+      const ipResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipResponse.json();
+      this.clientIp = ipData.ip;
+      this.elements.ipDisplay.textContent = `IP: ${ipData.ip} • Browser: ${navigator.userAgent.split(' ')[0]}`;
+    } catch (error) {
+      console.error('Error fetching IP:', error);
+      this.elements.ipDisplay.textContent = 'Network: Secure • Private';
     }
-    
-    this.elements.passwordInput.value = '';
-    this.elements.passwordInput.focus();
   }
 }
 
-// Initialize when DOM is ready
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new BioAuthSystem();
+  new AuthSystem();
 });
