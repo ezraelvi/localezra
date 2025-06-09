@@ -10,7 +10,7 @@
     margin: 0;
     padding: 0;
     font-family: 'Courier New', monospace;
-    background: url('Advanced files elvi/backgroundelvi.png');
+    background: url('backgroundelvi.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -181,7 +181,7 @@
         function checkLogin() {
             const authData = getCookie('authData');
             if (!authData) {
-                window.location.href = '/localezra.netlify.app/whoareyou/index.html';
+                window.location.href = '/whoareyou/index.html';
             } else {
                 const user = JSON.parse(authData);
                 if (user.username === 'elvi') {
