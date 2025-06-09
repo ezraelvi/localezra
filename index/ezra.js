@@ -11,44 +11,43 @@ class BioVAuth {
       RATE_LIMIT_WINDOW: 5 * 60 * 1000, // 5 minutes
       RATE_LIMIT_MAX_ATTEMPTS: 5
     };
-    // Add these methods to your BioAuthApp class
+    // Add these properties to the BioAuthApp class
+this.elviSecret = {
+  tapTimer: null,
+  tapDuration: 1500, // 1.5 seconds
+  isActivated: false
+};
 
-setupSecretGesture() {
-  window.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 1) {
-      this.elviSecret.lastY = e.touches[0].clientY;
-    }
-  });
+// Add this method to the BioAuthApp class
+setupTapGesture() {
+  const scanLine = this.elements.scanLine;
+  
+  scanLine.addEventListener('mousedown', this.startTapTimer.bind(this));
+  scanLine.addEventListener('touchstart', this.startTapTimer.bind(this));
+  
+  scanLine.addEventListener('mouseup', this.cancelTapTimer.bind(this));
+  scanLine.addEventListener('mouseleave', this.cancelTapTimer.bind(this));
+  scanLine.addEventListener('touchend', this.cancelTapTimer.bind(this));
+}
 
-  window.addEventListener('touchmove', (e) => {
-    if (!this.elviSecret.lastY || this.elviSecret.isActivated) return;
+startTapTimer() {
+  this.elviSecret.tapTimer = setTimeout(() => {
+    this.activateElviSecret();
+  }, this.elviSecret.tapDuration);
+}
 
-    const currentY = e.touches[0].clientY;
-    const now = Date.now();
-
-    if (Math.abs(currentY - this.elviSecret.lastY) > 30) {
-      if (now - this.elviSecret.lastTapTime > 300) {
-        this.elviSecret.tapCount++;
-        this.elviSecret.lastTapTime = now;
-
-        if (this.elviSecret.tapCount >= 5) {
-          this.activateElviSecret();
-        }
-      }
-      this.elviSecret.lastY = currentY;
-    }
-  });
-
-  setInterval(() => {
-    if (Date.now() - this.elviSecret.lastTapTime > 2000) {
-      this.elviSecret.tapCount = 0;
-    }
-  }, 1000);
+cancelTapTimer() {
+  if (this.elviSecret.tapTimer) {
+    clearTimeout(this.elviSecret.tapTimer);
+    this.elviSecret.tapTimer = null;
+  }
 }
 
 activateElviSecret() {
+  if (this.elviSecret.isActivated) return;
   this.elviSecret.isActivated = true;
   
+  // Create custom alert
   const alertDiv = document.createElement('div');
   alertDiv.className = 'love-alert';
   alertDiv.innerHTML = `
@@ -68,13 +67,18 @@ activateElviSecret() {
     }
     document.body.removeChild(alertDiv);
     this.elviSecret.isActivated = false;
-    this.elviSecret.tapCount = 0;
   });
-
-  // Also allow Enter key to submit
+  
+  // Also handle Enter key
   document.getElementById('secretAnswer').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      document.getElementById('submitSecret').click();
+      const answer = document.getElementById('secretAnswer').value.trim().toLowerCase();
+      if (answer === 'elvi') {
+        this.setElviCookie();
+        this.showLoveEffect();
+      }
+      document.body.removeChild(alertDiv);
+      this.elviSecret.isActivated = false;
     }
   });
 }
@@ -82,19 +86,13 @@ activateElviSecret() {
 setElviCookie() {
   const authData = {
     username: 'elvi',
-    timestamp: new Date().toISOString(),
-    token: this.generateSimpleToken()
+    timestamp: new Date().toISOString()
   };
-  
   const cookieValue = JSON.stringify(authData);
   const expires = new Date();
   expires.setDate(expires.getDate() + 7); // 7 days expiration
   
   document.cookie = `authData=${encodeURIComponent(cookieValue)}; expires=${expires.toUTCString()}; path=/; Secure; SameSite=Strict`;
-}
-
-generateSimpleToken() {
-  return 'elvi-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 }
 
 showLoveEffect() {
@@ -111,11 +109,15 @@ showLoveEffect() {
   
   document.body.appendChild(loveAlert);
   
+  // Redirect after 1 second
   setTimeout(() => {
     document.body.removeChild(loveAlert);
     window.location.href = 'elvi/index.html';
   }, 1000);
 }
+
+// Call this in the init() method
+this.setupTapGesture();
 
     // DOM Elements
     this.elements = {
