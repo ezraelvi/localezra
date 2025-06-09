@@ -6,123 +6,6 @@
     <title>Website ezVel</title>
     <link rel="icon" type="image/png" href="Advanced files elvi/iconelvi.png">
     <style>
-        /* New Auth Styles */
-        .auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            backdrop-filter: blur(10px);
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-        }
-        
-        .auth-box {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            border: 2px solid gold;
-            animation: glow 2s infinite alternate;
-        }
-        
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-            }
-            to {
-                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
-            }
-        }
-        
-        .auth-title {
-            color: gold;
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-        
-        .auth-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 1.5rem;
-            border: 2px solid gold;
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s;
-        }
-        
-        .auth-input:focus {
-            border-color: #ff69b4;
-            box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
-        }
-        
-        .auth-submit {
-            background: linear-gradient(to right, #ff69b4, #ff8c00);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-        }
-        
-        .auth-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.6);
-        }
-        
-        .auth-submit:active {
-            transform: translateY(1px);
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        .glitch-effect {
-            animation: glitch 1s linear infinite;
-        }
-        
-        @keyframes glitch {
-            0% {
-                transform: translate(0);
-            }
-            20% {
-                transform: translate(-5px, 5px);
-            }
-            40% {
-                transform: translate(-5px, -5px);
-            }
-            60% {
-                transform: translate(5px, 5px);
-            }
-            80% {
-                transform: translate(5px, -5px);
-            }
-            100% {
-                transform: translate(0);
-            }
-        }
-        
-        /* Original Styles */
         body {
             margin: 0;
             padding: 0;
@@ -134,15 +17,95 @@
             background-position: center;
             color: yellow;
             text-shadow: 2px 2px 4px #000;
-            filter: blur(0);
-            transition: filter 0.5s ease;
         }           
         
-        body.blurred {
-            filter: blur(10px);
-            pointer-events: none;
+        /* New Auth Modal Styles */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
         
+        .auth-modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #ff69b4;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            text-align: center;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+            }
+            to {
+                box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
+                            0 0 40px rgba(255, 105, 180, 0.6);
+            }
+        }
+        
+        .auth-title {
+            color: #ff69b4;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+        
+        .auth-input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border: 2px solid #ff69b4;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .auth-input:focus {
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .auth-submit {
+            background: linear-gradient(to right, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .auth-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Original Styles */
         .social-container {
             position: fixed;
             left: 10px;
@@ -150,15 +113,12 @@
             width: 160px;
             z-index: 100;
         }        
-        
         .tiktok-container {
             top: 40%;
         }    
-        
         .instagram-container {
             top: 65%;
         }
-        
         .check-btn {
             width: 100%;
             padding: 8px;
@@ -172,29 +132,24 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
         }      
-        
         .tiktok-btn {
             border-color: #00a8ff;
             color: #00a8ff;
             box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
         }
-        
         .tiktok-btn:hover {
             background: #00a8ff;
             color: #0d1b2a;
         }  
-        
         .instagram-btn {
             border-color: #E1306C;
             color: #E1306C;
             box-shadow: 0 0 10px rgba(225, 48, 108, 0.5);
         }
-       
-        .instagram-btn:hover {
+       .instagram-btn:hover {
             background: #E1306C;
             color: white;
         }
-        
         .social-tab {
             width: 100%;
             height: 200px;
@@ -212,23 +167,19 @@
             padding: 0;
             box-sizing: border-box;
         }    
-        
         .tiktok-tab {
             border-color: #00a8ff;
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
         }
-        
         .instagram-tab {
             border-color: #E1306C;
             box-shadow: 0 0 15px rgba(225, 48, 108, 0.7);
         }
-        
         .tab-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
         #video-container {
             position: fixed;
             top: 0px;
@@ -238,7 +189,6 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        
         #video-middle-right {
             position: fixed;
             top: 47%;
@@ -248,7 +198,6 @@
             border-radius: 10px;
             width: 175px;
         } 
-        
         #video-bottom-right {
             position: fixed;
             bottom: 0px;
@@ -257,7 +206,6 @@
             border: 3px solid green;
             border-radius: 10px;
         }
-        
         .btn {
             background: rgba(0, 123, 255, 0.7);
             position: fixed;
@@ -272,18 +220,15 @@
             transition: 0.1s;
             animation: pulse 3s infinite;
         }
-        
         .btn:hover {
             background: rgba(0, 86, 179, 0.9);
             transform: scale(1.05);
         }
-        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        
         footer {
             position: fixed;
             bottom: 0;
@@ -294,102 +239,135 @@
         }
     </style>
 </head>
-<body class="blurred">
-    <!-- Auth Overlay -->
-    <div class="auth-overlay">
-        <div class="auth-box">
+<body>
+    <!-- Authentication Modal -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-modal">
             <h1 class="auth-title">elvi :</h1>
-            <input type="text" class="auth-input" id="authAnswer" placeholder="Masukkan jawaban..." autocomplete="off">
+            <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter the secret word..." autocomplete="off">
             <button class="auth-submit" id="authSubmit">Submit</button>
         </div>
     </div>
 
-    <!-- Original Content -->
-    <div id="video-middle-right">
-        <video width="100%" autoplay loop muted>
-            <source src="Video Elvi/FDownloader.Net_13.mp4" type="audio/mpeg" />
-        </video>
+    <!-- Original Content (hidden by default) -->
+    <div id="mainContent" class="hidden">
+        <div id="video-middle-right">
+            <video width="100%" autoplay loop muted>
+                <source src="Video Elvi/FDownloader.Net_13.mp4" type="audio/mpeg" />
+            </video>
+        </div>
+        <div id="video-container">
+            <video width="100%" autoplay loop muted>
+              <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
+            </video>
+        </div>
+        <div id="video-bottom-right">
+            <video width="100%" autoplay loop muted>
+                <source src="Video Elvi/FDownloader.Net 4.mp4" type="audio/mpeg" />
+            </video>
+        </div>
+        <div class="social-container tiktok-container">
+            <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
+            <div class="social-tab tiktok-tab">
+                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        
+            </div>
+        </div>
+        <div class="social-container instagram-container">
+            <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
+            <div class="social-tab instagram-tab">
+                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        
+            </div>
+        </div>
+        <div style="padding: 20px; margin-bottom: 50px;">
+            <h1>Welcome</h1>
+        </div>
+        <footer>
+            <img src="Advanced Files Elvi/October 25, 2024 at 8.11 AM.png">
+            <p> 2025 Dibuat dengan ❤ oleh Kamu</p>
+        </footer>
     </div>
-    <div id="video-container">
-        <video width="100%" autoplay loop muted>
-          <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
-        </video>
-    </div>
-    <div id="video-bottom-right">
-        <video width="100%" autoplay loop muted>
-            <source src="Video Elvi/FDownloader.Net 4.mp4" type="audio/mpeg" />
-        </video>
-    </div>
-    <div class="social-container tiktok-container">
-        <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
-        <div class="social-tab tiktok-tab">
-            <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        </div>
-    </div>
-    <div class="social-container instagram-container">
-        <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
-        <div class="social-tab instagram-tab">
-            <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        </div>
-    </div>
-    <div style="padding: 20px; margin-bottom: 50px;">
-        <h1>Welcome</h1>
-    </div>
-    <footer>
-    <img src="Advanced Files Elvi/October 25, 2024 at 8.11 AM.png">
-    <p> 2025 Dibuat dengan ❤ oleh Kamu</p>
-    </footer>
 
     <script>
-        // Authentication System
+        // Authentication Logic
         document.addEventListener('DOMContentLoaded', function() {
-            const authOverlay = document.querySelector('.auth-overlay');
-            const authInput = document.getElementById('authAnswer');
+            const authOverlay = document.getElementById('authOverlay');
+            const mainContent = document.getElementById('mainContent');
+            const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
-            const body = document.querySelector('body');
             
-            // Focus on input when page loads
-            authInput.focus();
+            // Focus on input when modal appears
+            secretAnswer.focus();
             
             // Handle form submission
-            authSubmit.addEventListener('click', function() {
-                checkAuth();
-            });
-            
-            // Also allow Enter key to submit
-            authInput.addEventListener('keypress', function(e) {
+            authSubmit.addEventListener('click', checkSecret);
+            secretAnswer.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    checkAuth();
+                    checkSecret();
                 }
             });
             
-            function checkAuth() {
-                const answer = authInput.value.trim().toLowerCase();
+            function checkSecret() {
+                const answer = secretAnswer.value.trim().toLowerCase();
                 
                 if (answer === 'love') {
                     // Correct answer - reveal content
                     authOverlay.style.animation = 'fadeOut 0.5s forwards';
-                    body.classList.remove('blurred');
-                    
-                    // Remove overlay after animation
                     setTimeout(() => {
-                        authOverlay.classList.add('hidden');
+                        authOverlay.remove();
+                        mainContent.classList.remove('hidden');
+                        
+                        // Add celebration effect
+                        const celebration = document.createElement('div');
+                        celebration.style.position = 'fixed';
+                        celebration.style.top = '0';
+                        celebration.style.left = '0';
+                        celebration.style.width = '100%';
+                        celebration.style.height = '100%';
+                        celebration.style.background = 'rgba(255, 105, 180, 0.2)';
+                        celebration.style.zIndex = '9998';
+                        celebration.style.display = 'flex';
+                        celebration.style.justifyContent = 'center';
+                        celebration.style.alignItems = 'center';
+                        celebration.style.fontSize = '3rem';
+                        celebration.style.color = '#ff69b4';
+                        celebration.style.textShadow = '0 0 10px white';
+                        celebration.innerHTML = '❤️ Welcome Elvi ❤️';
+                        document.body.appendChild(celebration);
+                        
+                        setTimeout(() => {
+                            celebration.style.transition = 'opacity 1s';
+                            celebration.style.opacity = '0';
+                            setTimeout(() => {
+                                celebration.remove();
+                            }, 1000);
+                        }, 1500);
                     }, 500);
-                    
-                    // Play videos that were muted by some browsers
-                    document.querySelectorAll('video').forEach(video => {
-                        video.muted = true;
-                        video.play().catch(e => console.log('Video play error:', e));
-                    });
                 } else {
-                    // Wrong answer - glitch effect then redirect
-                    authOverlay.classList.add('glitch-effect');
+                    // Wrong answer - redirect
+                    secretAnswer.style.borderColor = '#ff0000';
+                    secretAnswer.style.animation = 'shake 0.5s';
                     
                     setTimeout(() => {
                         window.location.href = '/whoareyou.html';
                     }, 1000);
                 }
             }
+            
+            // Add shake animation for wrong answers
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeOut {
+                    to { opacity: 0; }
+                }
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    20%, 60% { transform: translateX(-10px); }
+                    40%, 80% { transform: translateX(10px); }
+                }
+            `;
+            document.head.appendChild(style);
         });
-
+        
         // Original Functions
         function openTikTok() {
             window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
@@ -403,7 +381,6 @@
             const content = document.querySelector('.verification-box');
             const aspectRatio = 16 / 9;
             const windowRatio = window.innerWidth / window.innerHeight;
-            
             if (windowRatio > aspectRatio) {
                 const scale = window.innerHeight / 900;
                 content.style.transform = `scale(${scale})`;
