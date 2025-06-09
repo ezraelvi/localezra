@@ -279,7 +279,7 @@ class BioVAuth {
     this.elements.errorMsg.textContent = '';
     
     // Redirect to dashboard
-    window.location.href = 'dashboard/index.html';
+    window.location.href = 'vfiles';
   }
 
   /**
