@@ -1,5 +1,17 @@
-class AuthSystem {
+/**
+ * BioVAuth - Secure Authentication System
+ * Main Application Script
+ */
+
+class BioVAuth {
   constructor() {
+    // Environment variables (would be replaced by build process in real app)
+    this.env = {
+      WORKER_URL: 'https://auth-logs.ezvvel.workers.dev/',
+      RATE_LIMIT_WINDOW: 5 * 60 * 1000, // 5 minutes
+      RATE_LIMIT_MAX_ATTEMPTS: 5
+    };
+
     // DOM Elements
     this.elements = {
       scanLine: document.getElementById('scanLine'),
@@ -9,97 +21,136 @@ class AuthSystem {
       fallbackBtn: document.getElementById('fallbackBtn'),
       visitBtn: document.getElementById('visitBtn'),
       webauthnBtn: document.getElementById('webauthnBtn'),
-      usernameInput: document.getElementById('username'),
+      emailInput: document.getElementById('email'),
       passwordInput: document.getElementById('password'),
       submitLogin: document.getElementById('submitLogin'),
-      loadingSpinner: document.querySelector('.loading-spinner'),
+      loadingSpinner: document.getElementById('loadingSpinner'),
       errorMsg: document.getElementById('errorMsg'),
       ipDisplay: document.getElementById('ipDisplay'),
       togglePassword: document.querySelector('.toggle-password'),
-      browserSupportWarning: document.getElementById('browserSupportWarning')
+      webauthnUnsupported: document.getElementById('webauthnUnsupported')
     };
 
-    // Configuration
-    this.config = {
-      workerUrl: 'https://auth-logs.ezvvel.workers.dev/',
+    // Security Configuration
+    this.securityConfig = {
       maxAttempts: 3,
       blockDuration: 5 * 60 * 1000, // 5 minutes
-      cookieName: 'authSecurity'
+      cookieName: 'bioVAuthSecurity',
+      localStorageKey: 'bioVAuthSession'
     };
 
     // State
     this.state = {
-      isWebAuthnSupported: false,
-      loginAttempts: 0,
-      blockedUntil: null
+      webauthnSupported: false,
+      clientInfo: {}
     };
 
     // Initialize
     this.init();
   }
 
+  /**
+   * Initialize the application
+   */
   async init() {
-    // Start scan animation
-    this.startScanAnimation();
+    // Start biometric animation
+    this.startBiometricAnimation();
 
-    // Check browser capabilities
-    this.checkBrowserSupport();
+    // Collect client information
+    await this.collectClientInfo();
 
-    // Setup event listeners
+    // Set up event listeners
     this.setupEventListeners();
 
-    // Get client info
-    this.getClientInfo();
+    // Check WebAuthn support
+    this.checkWebAuthnSupport();
 
-    // Check if already blocked
-    this.checkBlockStatus();
+    // Initialize security system
+    this.securitySystem = new SecuritySystem(
+      this.securityConfig.maxAttempts,
+      this.securityConfig.blockDuration,
+      this.securityConfig.cookieName
+    );
+
+    // Initialize password toggle
+    this.initPasswordToggle();
   }
 
-  startScanAnimation() {
+  /**
+   * Collect client information (IP, browser, etc.)
+   */
+  async collectClientInfo() {
+    try {
+      // Get IP address
+      const ipResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipResponse.json();
+      
+      this.state.clientInfo = {
+        ip: ipData.ip,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        timestamp: new Date().toISOString(),
+        screenResolution: `${window.screen.width}x${window.screen.height}`,
+        language: navigator.language
+      };
+
+      this.elements.ipDisplay.textContent = `IP: ${ipData.ip} • ${navigator.platform}`;
+    } catch (error) {
+      console.error('Error collecting client info:', error);
+      this.state.clientInfo = {
+        ip: 'unknown',
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      };
+      this.elements.ipDisplay.textContent = 'Network: Secure • Private';
+    }
+  }
+
+  /**
+   * Start biometric scanning animation
+   */
+  startBiometricAnimation() {
     this.elements.scanLine.style.opacity = '1';
-    this.updateStatus('Initializing security protocols...');
+    this.updateStatus('Initializing security protocols...', 'info');
     
+    // Simulate biometric scan completion
     setTimeout(() => {
       this.elements.scanLine.style.opacity = '0';
-      this.updateStatus('Ready for authentication');
+      this.updateStatus('System ready', 'success');
       this.elements.btnContainer.style.display = 'flex';
-    }, 2500);
+    }, 2000);
   }
 
-  async checkBrowserSupport() {
-    // Check WebAuthn support
-    this.state.isWebAuthnSupported = await this.checkWebAuthn();
-    
-    if (this.state.isWebAuthnSupported) {
-      this.elements.webauthnBtn.style.display = 'flex';
-    } else {
-      this.elements.browserSupportWarning.style.display = 'block';
-    }
+  /**
+   * Update status message
+   */
+  updateStatus(message, type = 'info') {
+    this.elements.status.textContent = message;
+    this.elements.status.className = 'status';
+    if (type) this.elements.status.classList.add(type);
   }
 
-  async checkWebAuthn() {
-    if (!window.PublicKeyCredential) return false;
-    
-    try {
-      return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-    } catch (e) {
-      console.error('WebAuthn check failed:', e);
-      return false;
-    }
-  }
-
+  /**
+   * Set up event listeners
+   */
   setupEventListeners() {
     // Fallback to email login
-    this.elements.fallbackBtn.addEventListener('click', () => this.showLoginForm());
+    this.elements.fallbackBtn.addEventListener('click', () => {
+      this.showLoginForm();
+    });
 
     // Visit dashboard
     this.elements.visitBtn.addEventListener('click', () => {
       window.location.href = 'dashboard/index.html';
     });
 
-    // WebAuthn button
+    // Check WebAuthn support
     this.elements.webauthnBtn.addEventListener('click', () => {
-      window.location.href = 'https://webauthn.me/browser-support';
+      if (this.state.webauthnSupported) {
+        this.initiateWebAuthn();
+      } else {
+        this.elements.webauthnUnsupported.style.display = 'block';
+      }
     });
 
     // Form submission
@@ -114,229 +165,144 @@ class AuthSystem {
     });
   }
 
-  togglePasswordVisibility() {
-    const isPassword = this.elements.passwordInput.type === 'password';
-    this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-    this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
-    this.elements.togglePassword.setAttribute('aria-label', 
-      isPassword ? 'Hide password' : 'Show password');
-  }
-
-  async getClientInfo() {
-    try {
-      // Get IP address
-      const ipResponse = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipResponse.json();
-      
-      // Get browser info
-      const browserInfo = this.parseUserAgent();
-      
-      this.elements.ipDisplay.textContent = 
-        `IP: ${ipData.ip} • Browser: ${browserInfo.name} ${browserInfo.version}`;
-      
-      // Store in session for audit logging
-      sessionStorage.setItem('clientInfo', JSON.stringify({
-        ip: ipData.ip,
-        userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString()
-      }));
-    } catch (error) {
-      console.error('Error getting client info:', error);
-      this.elements.ipDisplay.textContent = 'Secure connection established';
-    }
-  }
-
-  parseUserAgent() {
-    const ua = navigator.userAgent;
-    let name = 'Unknown';
-    let version = '';
-    
-    // Check Chrome
-    if (ua.includes('Chrome')) {
-      name = 'Chrome';
-      version = ua.match(/Chrome\/(\d+)/)[1];
-    } 
-    // Check Firefox
-    else if (ua.includes('Firefox')) {
-      name = 'Firefox';
-      version = ua.match(/Firefox\/(\d+)/)[1];
-    }
-    // Check Safari
-    else if (ua.includes('Safari')) {
-      name = 'Safari';
-      version = ua.match(/Version\/(\d+)/)[1];
-    }
-    // Check Edge
-    else if (ua.includes('Edg')) {
-      name = 'Edge';
-      version = ua.match(/Edg\/(\d+)/)[1];
-    }
-    
-    return { name, version };
-  }
-
-  checkBlockStatus() {
-    const blockData = this.getBlockData();
-    
-    if (blockData && blockData.blockedUntil > Date.now()) {
-      this.state.blockedUntil = blockData.blockedUntil;
-      this.state.loginAttempts = blockData.attempts;
-      this.disableLogin(true);
-      this.startBlockCountdown();
-      return true;
-    }
-    
-    return false;
-  }
-
-  getBlockData() {
-    const cookie = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(`${this.config.cookieName}=`));
-    
-    if (!cookie) return null;
-    
-    try {
-      return JSON.parse(decodeURIComponent(cookie.split('=')[1]));
-    } catch (e) {
-      console.error('Error parsing block data:', e);
-      return null;
-    }
-  }
-
-  disableLogin(disabled) {
-    this.elements.usernameInput.disabled = disabled;
-    this.elements.passwordInput.disabled = disabled;
-    this.elements.submitLogin.disabled = disabled;
-    
-    if (disabled) {
-      this.elements.loginForm.classList.add('disabled');
+  /**
+   * Check WebAuthn support
+   */
+  checkWebAuthnSupport() {
+    if (window.PublicKeyCredential) {
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        .then((available) => {
+          this.state.webauthnSupported = available;
+          if (!available) {
+            this.elements.webauthnUnsupported.style.display = 'block';
+          }
+        })
+        .catch(() => {
+          this.state.webauthnSupported = false;
+          this.elements.webauthnUnsupported.style.display = 'block';
+        });
     } else {
-      this.elements.loginForm.classList.remove('disabled');
+      this.state.webauthnSupported = false;
+      this.elements.webauthnBtn.disabled = true;
+      this.elements.webauthnUnsupported.style.display = 'block';
     }
   }
 
-  startBlockCountdown() {
-    const remaining = Math.ceil((this.state.blockedUntil - Date.now()) / 1000);
-    
-    const updateCountdown = () => {
-      const minutes = Math.floor(remaining / 60);
-      const seconds = remaining % 60;
-      
-      this.updateStatus(`Too many attempts. Try again in ${minutes}m ${seconds}s`, 'error');
-      
-      if (remaining <= 0) {
-        clearInterval(interval);
-        this.state.blockedUntil = null;
-        this.state.loginAttempts = 0;
-        this.disableLogin(false);
-        this.updateStatus('Ready for authentication');
-        document.cookie = `${this.config.cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; Secure`;
-      }
-      
-      remaining--;
-    };
-    
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-  }
-
+  /**
+   * Show login form
+   */
   showLoginForm() {
     this.elements.btnContainer.style.display = 'none';
     this.elements.loginForm.style.display = 'block';
-    this.elements.usernameInput.focus();
-    this.updateStatus('Enter your credentials');
+    this.elements.emailInput.focus();
+    this.updateStatus('Enter your credentials', 'info');
   }
 
+  /**
+   * Handle login form submission
+   */
   async handleLogin() {
-    // Check if blocked
-    if (this.state.blockedUntil && this.state.blockedUntil > Date.now()) {
-      this.startBlockCountdown();
+    // Check if user is blocked
+    if (this.securitySystem.isBlocked()) {
+      this.showBlockedMessage();
       return;
     }
-    
-    const username = this.elements.usernameInput.value.trim();
+
+    const email = this.elements.emailInput.value.trim();
     const password = this.elements.passwordInput.value;
-    
+
     // Basic validation
-    if (!username || !password) {
+    if (!email || !password) {
       this.showError('Please fill in all fields');
       return;
     }
-    
+
     // Show loading state
     this.setLoadingState(true);
-    
+
     try {
-      // Send to Cloudflare Worker
-      const response = await this.sendAuthRequest(username, password);
+      const response = await this.sendAuthRequest(email, password);
       
       if (response.success) {
-        this.handleSuccess(response);
+        this.handleSuccessfulLogin(response.token, email);
       } else {
-        this.handleFailure(response.error);
+        this.handleFailedLogin(response.error);
       }
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error('Login error:', error);
       this.showError('Network error. Please try again.');
-      this.recordFailedAttempt();
+      this.securitySystem.recordFailedAttempt();
     } finally {
       this.setLoadingState(false);
     }
   }
 
-  async sendAuthRequest(username, password) {
-    const clientInfo = JSON.parse(sessionStorage.getItem('clientInfo')) || {};
-    
-    const response = await fetch(this.config.workerUrl, {
+  /**
+   * Send authentication request to Cloudflare Worker
+   */
+  async sendAuthRequest(email, password) {
+    const requestData = {
+      email,
+      password,
+      clientInfo: this.state.clientInfo
+    };
+
+    const response = await fetch(this.env.WORKER_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Client-IP': clientInfo.ip || '',
-        'X-User-Agent': clientInfo.userAgent || ''
+        'X-Client-IP': this.state.clientInfo.ip,
+        'X-Client-UA': this.state.clientInfo.userAgent
       },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify(requestData)
     });
-    
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     return response.json();
   }
 
-  handleSuccess(response) {
-    // Reset attempts
-    this.state.loginAttempts = 0;
-    document.cookie = `${this.config.cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; Secure`;
+  /**
+   * Handle successful login
+   */
+  handleSuccessfulLogin(token, email) {
+    // Store token
+    localStorage.setItem(this.securityConfig.localStorageKey, token);
     
-    // Store session token
-    sessionStorage.setItem('authToken', response.token);
+    // Reset security attempts
+    this.securitySystem.resetAttempts();
     
     // Update UI
     this.updateStatus('Authentication successful!', 'success');
     this.elements.errorMsg.textContent = '';
     
-    // Redirect based on username
-    setTimeout(() => {
-      if (response.username === 'ezra') {
-        window.location.href = 'dashboard/index.html';
-      } else {
-        window.location.href = 'dashboard/general.html';
-      }
-    }, 1000);
+    // Redirect to dashboard
+    window.location.href = 'dashboard/index.html';
   }
 
-  handleFailure(error) {
-    this.recordFailedAttempt();
+  /**
+   * Handle failed login
+   */
+  handleFailedLogin(error) {
+    // Record failed attempt
+    this.securitySystem.recordFailedAttempt();
     
-    const attemptsLeft = this.config.maxAttempts - this.state.loginAttempts;
-    const errorMsg = attemptsLeft > 0 
-      ? `${error} (${attemptsLeft} ${attemptsLeft === 1 ? 'attempt' : 'attempts'} left)`
-      : 'Too many failed attempts. Account temporarily locked.';
+    // Show error message
+    const attemptsLeft = this.securitySystem.maxAttempts - this.securitySystem.attemptData.attempts;
+    const errorMessage = `${error} (${attemptsLeft} ${attemptsLeft === 1 ? 'attempt' : 'attempts'} left)`;
     
-    this.showError(errorMsg);
+    this.showError(errorMessage);
     
-    if (this.state.loginAttempts >= this.config.maxAttempts) {
-      this.disableLogin(true);
-      this.startBlockCountdown();
+    // Check if user is now blocked
+    if (this.securitySystem.isBlocked()) {
+      this.showBlockedMessage();
     }
+    
+    // Clear password field
+    this.elements.passwordInput.value = '';
+    this.elements.passwordInput.focus();
     
     // Shake form for visual feedback
     this.elements.loginForm.classList.add('shake');
@@ -345,58 +311,197 @@ class AuthSystem {
     }, 500);
   }
 
-  recordFailedAttempt() {
-    this.state.loginAttempts++;
+  /**
+   * Show blocked message
+   */
+  showBlockedMessage() {
+    const remainingTime = this.securitySystem.getRemainingBlockTime();
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
     
-    if (this.state.loginAttempts >= this.config.maxAttempts) {
-      this.state.blockedUntil = Date.now() + this.config.blockDuration;
-      
-      // Set cookie with block info
-      const blockData = {
-        attempts: this.state.loginAttempts,
-        blockedUntil: this.state.blockedUntil,
-        timestamp: new Date().toISOString()
-      };
-      
-      document.cookie = `${this.config.cookieName}=${encodeURIComponent(JSON.stringify(blockData))}; ` +
-        `max-age=${this.config.blockDuration / 1000}; path=/; Secure; SameSite=Strict`;
-    }
-  }
-
-  setLoadingState(isLoading) {
-    if (isLoading) {
-      this.elements.submitLogin.disabled = true;
-      this.elements.loadingSpinner.style.display = 'inline-block';
-      this.elements.submitLogin.querySelector('.btn-text').textContent = 'Verifying...';
-    } else {
-      this.elements.submitLogin.disabled = false;
-      this.elements.loadingSpinner.style.display = 'none';
-      this.elements.submitLogin.querySelector('.btn-text').textContent = 'Authenticate';
-    }
-  }
-
-  updateStatus(message, type) {
-    this.elements.status.textContent = message;
-    this.elements.status.className = 'status';
+    this.showError(`Too many attempts. Please wait ${minutes}m ${seconds}s.`);
+    this.setLoadingState(false);
+    this.elements.submitLogin.disabled = true;
     
-    if (type) {
-      this.elements.status.classList.add(type);
-    }
+    // Update countdown
+    const countdownInterval = setInterval(() => {
+      const newRemainingTime = this.securitySystem.getRemainingBlockTime();
+      
+      if (newRemainingTime <= 0) {
+        clearInterval(countdownInterval);
+        this.elements.errorMsg.textContent = '';
+        this.elements.submitLogin.disabled = false;
+        return;
+      }
+      
+      const newMinutes = Math.floor(newRemainingTime / 60);
+      const newSeconds = newRemainingTime % 60;
+      this.elements.errorMsg.textContent = `Too many attempts. Please wait ${newMinutes}m ${newSeconds}s.`;
+    }, 1000);
   }
 
+  /**
+   * Show error message
+   */
   showError(message) {
     this.elements.errorMsg.textContent = message;
     this.elements.errorMsg.style.display = 'block';
     
+    // Hide after 5 seconds
     setTimeout(() => {
       if (this.elements.errorMsg.textContent === message) {
         this.elements.errorMsg.style.display = 'none';
       }
     }, 5000);
   }
+
+  /**
+   * Set loading state
+   */
+  setLoadingState(isLoading) {
+    if (isLoading) {
+      this.elements.submitLogin.disabled = true;
+      this.elements.loadingSpinner.style.display = 'inline-block';
+      this.elements.submitLogin.querySelector('.btn-text').textContent = 'Authenticating...';
+    } else {
+      this.elements.submitLogin.disabled = false;
+      this.elements.loadingSpinner.style.display = 'none';
+      this.elements.submitLogin.querySelector('.btn-text').textContent = 'Login';
+    }
+  }
+
+  /**
+   * Initialize password toggle
+   */
+  initPasswordToggle() {
+    this.elements.togglePassword.addEventListener('click', () => {
+      const isPassword = this.elements.passwordInput.type === 'password';
+      this.elements.passwordInput.type = isPassword ? 'text' : 'password';
+      this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
+      this.elements.togglePassword.setAttribute('aria-label', 
+        isPassword ? 'Hide password' : 'Show password');
+    });
+  }
+
+  /**
+   * Toggle password visibility
+   */
+  togglePasswordVisibility() {
+    const isPassword = this.elements.passwordInput.type === 'password';
+    this.elements.passwordInput.type = isPassword ? 'text' : 'password';
+    this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
+    this.elements.togglePassword.setAttribute('aria-label', 
+      isPassword ? 'Hide password' : 'Show password');
+  }
+
+  /**
+   * Initiate WebAuthn authentication
+   */
+  initiateWebAuthn() {
+    if (!this.state.webauthnSupported) return;
+    
+    this.updateStatus('Initiating biometric authentication...', 'info');
+    // Here you would implement actual WebAuthn authentication
+    // For now, we'll simulate it
+    setTimeout(() => {
+      this.updateStatus('Please use your device biometric authenticator', 'info');
+    }, 1000);
+  }
 }
 
-// Initialize when DOM is loaded
+/**
+ * Security System Class
+ */
+class SecuritySystem {
+  constructor(maxAttempts, blockDuration, cookieName) {
+    this.maxAttempts = maxAttempts;
+    this.blockDuration = blockDuration;
+    this.cookieName = cookieName;
+    this.attemptData = this.loadAttemptData();
+  }
+
+  loadAttemptData() {
+    try {
+      const cookieData = this.getCookie(this.cookieName);
+      if (!cookieData) return this.getDefaultData();
+      
+      const data = JSON.parse(decodeURIComponent(cookieData));
+      return this.validateData(data) ? data : this.getDefaultData();
+    } catch (e) {
+      console.error('Failed to parse cookie data:', e);
+      return this.getDefaultData();
+    }
+  }
+
+  getDefaultData() {
+    return {
+      attempts: 0,
+      lastAttempt: null,
+      blockUntil: null
+    };
+  }
+
+  validateData(data) {
+    return data && typeof data === 'object' && 
+           'attempts' in data && 'lastAttempt' in data && 'blockUntil' in data;
+  }
+
+  saveAttemptData() {
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 1);
+    const data = encodeURIComponent(JSON.stringify(this.attemptData));
+    document.cookie = `${this.cookieName}=${data}; expires=${expires.toUTCString()}; path=/; SameSite=Strict; Secure`;
+  }
+
+  getCookie(name) {
+    return document.cookie.split(';')
+      .map(c => c.trim())
+      .find(c => c.startsWith(name + '='))
+      ?.substring(name.length + 1);
+  }
+
+  recordFailedAttempt() {
+    const now = new Date();
+    this.attemptData.attempts++;
+    this.attemptData.lastAttempt = now.toISOString();
+
+    if (this.attemptData.attempts >= this.maxAttempts) {
+      const blockUntil = new Date(now.getTime() + this.blockDuration);
+      this.attemptData.blockUntil = blockUntil.toISOString();
+    }
+
+    this.saveAttemptData();
+  }
+
+  resetAttempts() {
+    this.attemptData = this.getDefaultData();
+    this.saveAttemptData();
+  }
+
+  isBlocked() {
+    if (!this.attemptData.blockUntil) return false;
+    
+    const blockUntil = new Date(this.attemptData.blockUntil);
+    const now = new Date();
+    
+    if (now > blockUntil) {
+      this.resetAttempts();
+      return false;
+    }
+    
+    return true;
+  }
+
+  getRemainingBlockTime() {
+    if (!this.isBlocked()) return 0;
+    
+    const blockUntil = new Date(this.attemptData.blockUntil);
+    const now = new Date();
+    return Math.round((blockUntil - now) / 1000);
+  }
+}
+
+// Initialize BioVAuth when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new AuthSystem();
+  new BioVAuth();
 });
