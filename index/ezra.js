@@ -11,6 +11,111 @@ class BioVAuth {
       RATE_LIMIT_WINDOW: 5 * 60 * 1000, // 5 minutes
       RATE_LIMIT_MAX_ATTEMPTS: 5
     };
+    // Add these methods to your BioAuthApp class
+
+setupSecretGesture() {
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      this.elviSecret.lastY = e.touches[0].clientY;
+    }
+  });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!this.elviSecret.lastY || this.elviSecret.isActivated) return;
+
+    const currentY = e.touches[0].clientY;
+    const now = Date.now();
+
+    if (Math.abs(currentY - this.elviSecret.lastY) > 30) {
+      if (now - this.elviSecret.lastTapTime > 300) {
+        this.elviSecret.tapCount++;
+        this.elviSecret.lastTapTime = now;
+
+        if (this.elviSecret.tapCount >= 5) {
+          this.activateElviSecret();
+        }
+      }
+      this.elviSecret.lastY = currentY;
+    }
+  });
+
+  setInterval(() => {
+    if (Date.now() - this.elviSecret.lastTapTime > 2000) {
+      this.elviSecret.tapCount = 0;
+    }
+  }, 1000);
+}
+
+activateElviSecret() {
+  this.elviSecret.isActivated = true;
+  
+  const alertDiv = document.createElement('div');
+  alertDiv.className = 'love-alert';
+  alertDiv.innerHTML = `
+    <h2>Buat siapa sih?</h2>
+    <input type="text" id="secretAnswer" placeholder="Masukkan nama..." autofocus>
+    <button id="submitSecret">Submit</button>
+  `;
+  
+  document.body.appendChild(alertDiv);
+  
+  // Handle submission
+  document.getElementById('submitSecret').addEventListener('click', () => {
+    const answer = document.getElementById('secretAnswer').value.trim().toLowerCase();
+    if (answer === 'elvi') {
+      this.setElviCookie();
+      this.showLoveEffect();
+    }
+    document.body.removeChild(alertDiv);
+    this.elviSecret.isActivated = false;
+    this.elviSecret.tapCount = 0;
+  });
+
+  // Also allow Enter key to submit
+  document.getElementById('secretAnswer').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      document.getElementById('submitSecret').click();
+    }
+  });
+}
+
+setElviCookie() {
+  const authData = {
+    username: 'elvi',
+    timestamp: new Date().toISOString(),
+    token: this.generateSimpleToken()
+  };
+  
+  const cookieValue = JSON.stringify(authData);
+  const expires = new Date();
+  expires.setDate(expires.getDate() + 7); // 7 days expiration
+  
+  document.cookie = `authData=${encodeURIComponent(cookieValue)}; expires=${expires.toUTCString()}; path=/; Secure; SameSite=Strict`;
+}
+
+generateSimpleToken() {
+  return 'elvi-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+}
+
+showLoveEffect() {
+  const loveAlert = document.createElement('div');
+  loveAlert.className = 'love-alert';
+  loveAlert.innerHTML = `
+    <h2>Untuk Elvi ❤️</h2>
+    <div class="hearts">
+      ❤️❤️❤️<br>
+      ❤️❤️❤️<br>
+      ❤️❤️❤️
+    </div>
+  `;
+  
+  document.body.appendChild(loveAlert);
+  
+  setTimeout(() => {
+    document.body.removeChild(loveAlert);
+    window.location.href = 'elvi/index.html';
+  }, 1000);
+}
 
     // DOM Elements
     this.elements = {
