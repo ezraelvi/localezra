@@ -116,7 +116,7 @@ class BioVAuth {
     // Simulate biometric scan completion
     setTimeout(() => {
       this.elements.scanLine.style.opacity = '0';
-      this.updateStatus('System ready', 'success');
+      this.updateStatus('System ready, is better if you use desktop site', 'success');
       this.elements.btnContainer.style.display = 'flex';
     }, 2000);
   }
