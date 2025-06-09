@@ -152,7 +152,7 @@ class BioVAuth {
       }
     } catch (error) {
       console.error('Login error:', error);
-      this.showError('Network error. Please try again.');
+      this.showError(' incorrect password/username. Please try again');
       this.securitySystem.recordFailedAttempt();
     } finally {
       this.setLoadingState(false);
