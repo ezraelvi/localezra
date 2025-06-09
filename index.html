@@ -25,7 +25,6 @@
       </div>
       <div class="status" id="status" aria-live="polite">Initializing authentication system...</div>
     </header>
-
     <main class="auth-main">
       <div class="btn-container" id="btnContainer">
         <button class="auth-btn" id="fallbackBtn">
@@ -38,7 +37,6 @@
           <span class="icon">🔒</span> Check WebAuthn
         </button>
       </div>
-      
       <form id="loginForm" class="login-form" novalidate>
         <div class="form-group">
           <label for="email">Email or Username</label>
@@ -57,7 +55,6 @@
         </button>
         <div id="errorMsg" class="error-msg" aria-live="assertive"></div>
       </form>
-
       <div id="webauthnUnsupported" class="unsupported-warning" style="display: none;">
         <p>Your browser doesn't support WebAuthn. You can still login with email.</p>
         <a href="https://webauthn.me/browser-support" target="_blank" rel="noopener noreferrer" class="auth-btn">
@@ -65,7 +62,6 @@
         </a>
       </div>
     </main>
-
     <footer class="auth-footer">
       <div class="ip-display" id="ipDisplay">Detecting your network...</div>
       <div class="security-info">
@@ -74,7 +70,6 @@
       </div>
     </footer>
   </div>
-
   <script src="index/ezra.js" defer></script>
 </body>
 </html>
