@@ -5,6 +5,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>vFiles</title>
   <style>
+    /* Hacker-style auth modal */
+    .auth-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .auth-modal {
+      background-color: #000;
+      border: 1px solid #00ff00;
+      padding: 20px;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 0 20px #00ff00;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .auth-modal::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00ff00, transparent);
+      animation: scanline 2s linear infinite;
+    }
+    
+    @keyframes scanline {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+    
+    .auth-title {
+      color: #00ff00;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      text-shadow: 0 0 5px #00ff00;
+    }
+    
+    .auth-input {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 20px;
+      outline: none;
+    }
+    
+    .auth-submit {
+      background: transparent;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      padding: 10px 20px;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s;
+    }
+    
+    .auth-submit:hover {
+      background: #00ff00;
+      color: #000;
+      box-shadow: 0 0 10px #00ff00;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .glitch {
+      animation: glitch 1s linear infinite;
+    }
+    
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff; }
+      25% { text-shadow: -2px 0 #00ff00, 2px 0 #ff00ff; }
+      50% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00; }
+      75% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ff00; }
+      100% { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff; }
+    }
+    
+    /* Original Styles */
     body {
       font-family: 'Courier New', monospace;
       background-color: #121212;
@@ -78,33 +173,131 @@
   </style>
 </head>
 <body>
-  <button id="toggleEditor" class="edit-btn">EDIT MODE</button>
-  
-  <div id="editorTools" class="editor-tools">
-    <h3>EDITOR TOOLS</h3>
-    <button id="addText">Add Text</button>
-    <button id="addImage">Add Image</button>
-    <button id="addVideo">Add Video</button>
-    <button id="saveChanges">Save Changes</button>
-    <button id="cancelEdit">Cancel</button>
-    <div id="mediaInput" style="display:none;">
-      <input type="text" id="mediaUrl" placeholder="Enter URL">
-      <button id="insertMedia">Insert</button>
+  <!-- Authentication Overlay -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <h1 class="auth-title glitch">SECURE ACCESS REQUIRED</h1>
+      <div style="margin-bottom: 20px; color: #00ff00;">
+        > Initializing authentication protocol...<br>
+        > Checking credentials...<br>
+        > Waiting for input...
+      </div>
+      <input type="password" class="auth-input" id="secretAnswer" placeholder="ezra:">
+      <button class="auth-submit" id="authSubmit">AUTHENTICATE</button>
     </div>
   </div>
 
-  <div class="info-panel">
-    <h2 class="content-editable">ACCESS INFORMATION</h2>
-    <div id="userInfo" class="content-editable"></div>
-    <div id="accessInfo" class="content-editable"></div>
-  </div>
-  
-  <div class="file-list">
-    <h3 class="content-editable">AVAILABLE FILES</h3>
-    <ul id="fileList"></ul>
+  <!-- Main Content (hidden initially) -->
+  <div id="mainContent" class="hidden">
+    <button id="toggleEditor" class="edit-btn">EDIT MODE</button>
+    
+    <div id="editorTools" class="editor-tools">
+      <h3>EDITOR TOOLS</h3>
+      <button id="addText">Add Text</button>
+      <button id="addImage">Add Image</button>
+      <button id="addVideo">Add Video</button>
+      <button id="saveChanges">Save Changes</button>
+      <button id="cancelEdit">Cancel</button>
+      <div id="mediaInput" style="display:none;">
+        <input type="text" id="mediaUrl" placeholder="Enter URL">
+        <button id="insertMedia">Insert</button>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <h2 class="content-editable">ACCESS INFORMATION</h2>
+      <div id="userInfo" class="content-editable"></div>
+      <div id="accessInfo" class="content-editable"></div>
+    </div>
+    
+    <div class="file-list">
+      <h3 class="content-editable">AVAILABLE FILES</h3>
+      <ul id="fileList"></ul>
+    </div>
   </div>
 
   <script>
+    // Authentication System
+    document.addEventListener('DOMContentLoaded', () => {
+      const authOverlay = document.getElementById('authOverlay');
+      const mainContent = document.getElementById('mainContent');
+      const secretAnswer = document.getElementById('secretAnswer');
+      const authSubmit = document.getElementById('authSubmit');
+      
+      // Focus on input immediately
+      secretAnswer.focus();
+      
+      // Add terminal-like behavior to input
+      secretAnswer.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          checkAuth();
+        }
+      });
+      
+      authSubmit.addEventListener('click', checkAuth);
+      
+      function checkAuth() {
+        const answer = secretAnswer.value.trim().toLowerCase();
+        
+        if (answer === 'elvi') {
+          // Correct answer - grant access
+          authOverlay.style.transition = 'opacity 1s';
+          authOverlay.style.opacity = '0';
+          
+          setTimeout(() => {
+            authOverlay.remove();
+            mainContent.classList.remove('hidden');
+            
+            // Add hacker-style access granted effect
+            const accessMsg = document.createElement('div');
+            accessMsg.style.position = 'fixed';
+            accessMsg.style.top = '50%';
+            accessMsg.style.left = '50%';
+            accessMsg.style.transform = 'translate(-50%, -50%)';
+            accessMsg.style.color = '#00ff00';
+            accessMsg.style.fontFamily = "'Courier New', monospace";
+            accessMsg.style.fontSize = '2rem';
+            accessMsg.style.textAlign = 'center';
+            accessMsg.style.zIndex = '9998';
+            accessMsg.style.textShadow = '0 0 10px #00ff00';
+            accessMsg.textContent = 'ACCESS GRANTED';
+            document.body.appendChild(accessMsg);
+            
+            setTimeout(() => {
+              accessMsg.style.transition = 'opacity 1s';
+              accessMsg.style.opacity = '0';
+              setTimeout(() => {
+                accessMsg.remove();
+              }, 1000);
+            }, 1500);
+          }, 500);
+        } else {
+          // Wrong answer - deny access
+          secretAnswer.style.borderColor = '#ff0000';
+          secretAnswer.style.animation = 'glitch 0.5s';
+          
+          setTimeout(() => {
+            window.location.href = '/whoareyou/index.html';
+          }, 1000);
+        }
+      }
+      
+      // Add glitch effect for wrong answers
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes glitch {
+          0% { transform: translate(0); }
+          20% { transform: translate(-5px, 5px); }
+          40% { transform: translate(-5px, -5px); }
+          60% { transform: translate(5px, 5px); }
+          80% { transform: translate(5px, -5px); }
+          100% { transform: translate(0); }
+        }
+      `;
+      document.head.appendChild(style);
+    });
+
+    // Original Application Code
     document.addEventListener('DOMContentLoaded', () => {
       const authData = JSON.parse(localStorage.getItem('authData'));
       const userInfo = document.getElementById('userInfo');
