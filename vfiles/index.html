@@ -5,149 +5,279 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>vFiles</title>
   <style>
-    /* Authentication Modal Styles */
+    :root {
+      --primary: #00ff88;
+      --dark: #0a0a12;
+      --darker: #050508;
+      --error: #ff0033;
+      --text: #e0e0e0;
+      --text-secondary: #a0a0a0;
+    }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background-color: var(--dark);
+      color: var(--primary);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    /* Authentication Modal */
     .auth-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(10px);
+      background-color: rgba(0, 0, 0, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      backdrop-filter: blur(5px);
     }
     
     .auth-modal {
-      background-color: #121212;
-      border: 1px solid #00ff00;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 2px solid var(--primary);
+      border-radius: 15px;
       padding: 30px;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 0 20px #00ff00;
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
       text-align: center;
-      animation: pulse 2s infinite alternate;
-    }
-    
-    @keyframes pulse {
-      from {
-        box-shadow: 0 0 10px #00ff00;
-      }
-      to {
-        box-shadow: 0 0 20px #00ff00;
-      }
     }
     
     .auth-title {
-      color: #00ff00;
-      font-size: 1.5rem;
+      color: var(--primary);
+      font-size: 1.8rem;
       margin-bottom: 20px;
-      text-shadow: 0 0 5px #00ff00;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
     }
     
     .auth-input {
       width: 100%;
-      padding: 10px;
+      padding: 12px 15px;
       margin: 15px 0;
-      background-color: #121212;
-      border: 1px solid #00ff00;
-      color: #00ff00;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--text);
       font-family: 'Courier New', monospace;
       font-size: 1rem;
       outline: none;
-    }
-    
-    .auth-submit {
-      background-color: #121212;
-      color: #00ff00;
-      border: 1px solid #00ff00;
-      padding: 10px 20px;
-      font-family: 'Courier New', monospace;
-      cursor: pointer;
       transition: all 0.3s;
     }
     
-    .auth-submit:hover {
-      background-color: #00ff00;
-      color: #121212;
+    .auth-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
     }
     
-    .hidden {
-      display: none;
-    }
-    
-    /* Original Styles */
-    body {
+    .auth-submit {
+      background: linear-gradient(to right, var(--primary), #00cc6a);
+      color: var(--dark);
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
       font-family: 'Courier New', monospace;
-      background-color: #121212;
-      color: #00ff00;
-      margin: 0;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    
+    .auth-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 20px;
-      line-height: 1.6;
+      display: none; /* Hidden until auth */
     }
-    .info-panel {
-      background-color: #1a1a1a;
-      padding: 15px;
-      border: 1px solid #00ff00;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
-      position: relative;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--primary);
     }
-    .file-list {
-      border: 1px dashed #00ff00;
-      padding: 10px;
-      min-height: 200px;
-    }
-    .editor-tools {
-      display: none;
-      background-color: #1a1a1a;
-      padding: 10px;
-      border: 1px solid #00ff00;
-      margin-bottom: 10px;
-    }
-    .editor-tools.active {
-      display: block;
-    }
-    button {
-      background-color: #121212;
-      color: #00ff00;
-      border: 1px solid #00ff00;
-      padding: 5px 10px;
-      margin: 5px;
+
+    .logout-btn {
+      background: var(--error);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
       cursor: pointer;
       font-family: 'Courier New', monospace;
     }
-    button:hover {
-      background-color: #00ff00;
-      color: #121212;
+
+    .info-panel {
+      background-color: rgba(10, 10, 18, 0.8);
+      padding: 20px;
+      border: 1px solid var(--primary);
+      margin-bottom: 20px;
+      border-radius: 8px;
     }
+
+    .file-list {
+      border: 1px dashed var(--primary);
+      padding: 20px;
+      min-height: 300px;
+      border-radius: 8px;
+      background-color: rgba(10, 10, 18, 0.5);
+    }
+
+    .editor-tools {
+      display: none;
+      background-color: rgba(10, 10, 18, 0.8);
+      padding: 15px;
+      border: 1px solid var(--primary);
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+
+    .editor-tools.active {
+      display: block;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: rgba(0, 0, 0, 0.3);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 8px 16px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background-color: rgba(0, 255, 136, 0.1);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
     textarea {
       width: 100%;
       min-height: 100px;
-      background-color: #121212;
-      color: #00ff00;
-      border: 1px solid #00ff00;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--text);
+      border: 1px solid var(--primary);
       font-family: 'Courier New', monospace;
       padding: 10px;
       margin-bottom: 10px;
+      border-radius: 4px;
     }
-    .edit-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
+
     .content-editable {
       min-height: 20px;
-      padding: 5px;
+      padding: 10px;
+      margin: 10px 0;
       border: 1px dashed transparent;
+      border-radius: 4px;
     }
+
     .content-editable:hover {
-      border-color: #00ff00;
+      border-color: var(--primary);
     }
+
     .editing {
-      border: 1px dashed #00ff00;
-      background-color: #1a1a1a;
+      border: 1px dashed var(--primary);
+      background-color: rgba(10, 10, 18, 0.5);
+    }
+
+    .media-container {
+      margin: 15px 0;
+    }
+
+    .media-container img {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 4px;
+    }
+
+    .media-container iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+      border-radius: 4px;
+    }
+
+    /* File items */
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Media input */
+    .media-input-container {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+
+    .media-input-container.active {
+      display: block;
+    }
+
+    .media-url-input {
+      width: 100%;
+      padding: 8px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--primary);
+      color: var(--text);
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    /* Animations */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+
+    .shake {
+      animation: shake 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
     }
   </style>
 </head>
@@ -156,244 +286,364 @@
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-modal">
       <h1 class="auth-title">ezra:</h1>
-      <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter response..." autocomplete="off">
-      <button class="auth-submit" id="authSubmit">AUTHENTICATE</button>
+      <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter the secret word..." autocomplete="off">
+      <button class="auth-submit" id="authSubmit">Submit</button>
     </div>
   </div>
 
-  <!-- Main Content (hidden until authenticated) -->
-  <div id="mainContent" class="hidden">
-    <button id="toggleEditor" class="edit-btn">EDIT MODE</button>
-    
-    <div id="editorTools" class="editor-tools">
-      <h3>EDITOR TOOLS</h3>
-      <button id="addText">Add Text</button>
-      <button id="addImage">Add Image</button>
-      <button id="addVideo">Add Video</button>
-      <button id="saveChanges">Save Changes</button>
-      <button id="cancelEdit">Cancel</button>
-      <div id="mediaInput" style="display:none;">
-        <input type="text" id="mediaUrl" placeholder="Enter URL">
-        <button id="insertMedia">Insert</button>
-      </div>
+  <!-- Main Content (hidden until auth) -->
+  <div class="container" id="mainContainer">
+    <div class="header">
+      <h1>vFiles</h1>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
 
     <div class="info-panel">
       <h2 class="content-editable">ACCESS INFORMATION</h2>
-      <div id="userInfo" class="content-editable"></div>
-      <div id="accessInfo" class="content-editable"></div>
+      <div id="userInfo" class="content-editable">Loading user data...</div>
+      <div id="accessInfo" class="content-editable">Last accessed: <span id="lastAccess"></span></div>
     </div>
-    
+
+    <div id="editorTools" class="editor-tools">
+      <h3>EDITOR TOOLS</h3>
+      <div class="toolbar">
+        <button id="addText">Add Text</button>
+        <button id="addImage">Add Image</button>
+        <button id="addVideo">Add Video</button>
+        <button id="addFile">Add File</button>
+        <button id="saveChanges">Save Changes</button>
+        <button id="cancelEdit">Cancel</button>
+      </div>
+
+      <div id="mediaInput" class="media-input-container">
+        <input type="text" class="media-url-input" id="mediaUrl" placeholder="Enter media URL">
+        <button id="insertMedia">Insert Media</button>
+      </div>
+    </div>
+
     <div class="file-list">
-      <h3 class="content-editable">AVAILABLE FILES</h3>
-      <ul id="fileList"></ul>
+      <h3>AVAILABLE FILES</h3>
+      <div id="fileList"></div>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Authentication Logic
+      // Authentication Elements
       const authOverlay = document.getElementById('authOverlay');
-      const mainContent = document.getElementById('mainContent');
+      const mainContainer = document.getElementById('mainContainer');
       const secretAnswer = document.getElementById('secretAnswer');
       const authSubmit = document.getElementById('authSubmit');
-      
-      // Focus on input when modal appears
-      secretAnswer.focus();
-      
-      // Handle form submission
-      authSubmit.addEventListener('click', checkSecret);
-      secretAnswer.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          checkSecret();
-        }
-      });
-      
-      function checkSecret() {
-        const answer = secretAnswer.value.trim().toLowerCase();
-        
-        if (answer === 'elvi') {
-          // Correct answer - reveal content with cyberpunk effect
-          authOverlay.style.animation = 'fadeOut 0.5s forwards';
-          
-          // Add cyberpunk-style success effect
-          const successEffect = document.createElement('div');
-          successEffect.style.position = 'fixed';
-          successEffect.style.top = '0';
-          successEffect.style.left = '0';
-          successEffect.style.width = '100%';
-          successEffect.style.height = '100%';
-          successEffect.style.background = 'rgba(0, 255, 0, 0.1)';
-          successEffect.style.zIndex = '9998';
-          successEffect.style.display = 'flex';
-          successEffect.style.justifyContent = 'center';
-          successEffect.style.alignItems = 'center';
-          successEffect.style.fontSize = '2rem';
-          successEffect.style.color = '#00ff00';
-          successEffect.style.textShadow = '0 0 10px #00ff00';
-          successEffect.style.fontWeight = 'bold';
-          successEffect.innerHTML = 'ACCESS GRANTED';
-          document.body.appendChild(successEffect);
-          
-          setTimeout(() => {
-            authOverlay.remove();
-            mainContent.classList.remove('hidden');
-            
-            setTimeout(() => {
-              successEffect.style.transition = 'opacity 1s';
-              successEffect.style.opacity = '0';
-              setTimeout(() => {
-                successEffect.remove();
-              }, 1000);
-            }, 1000);
-          }, 500);
-        } else {
-          // Wrong answer - redirect with error effect
-          secretAnswer.style.borderColor = '#ff0000';
-          secretAnswer.style.animation = 'shake 0.5s';
-          
-          const errorEffect = document.createElement('div');
-          errorEffect.style.position = 'fixed';
-          errorEffect.style.top = '0';
-          errorEffect.style.left = '0';
-          errorEffect.style.width = '100%';
-          errorEffect.style.height = '100%';
-          errorEffect.style.background = 'rgba(255, 0, 0, 0.1)';
-          errorEffect.style.zIndex = '9998';
-          errorEffect.style.display = 'flex';
-          errorEffect.style.justifyContent = 'center';
-          errorEffect.style.alignItems = 'center';
-          errorEffect.style.fontSize = '2rem';
-          errorEffect.style.color = '#ff0000';
-          errorEffect.style.textShadow = '0 0 10px #ff0000';
-          errorEffect.style.fontWeight = 'bold';
-          errorEffect.innerHTML = 'ACCESS DENIED';
-          document.body.appendChild(errorEffect);
-          
-          setTimeout(() => {
-            window.location.href = '/whoareyou/index.html';
-          }, 1000);
-        }
-      }
-      
-      // Add animations
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes fadeOut {
-          to { opacity: 0; }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-10px); }
-          40%, 80% { transform: translateX(10px); }
-        }
-      `;
-      document.head.appendChild(style);
+      const logoutBtn = document.getElementById('logoutBtn');
 
-      // Original Application Logic
-      const userInfo = document.getElementById('userInfo');
-      const accessInfo = document.getElementById('accessInfo');
-      const fileList = document.getElementById('fileList');
-      const toggleEditor = document.getElementById('toggleEditor');
+      // Editor Elements
+      const toggleEditor = document.createElement('button');
+      toggleEditor.id = 'toggleEditor';
+      toggleEditor.textContent = 'EDIT MODE';
       const editorTools = document.getElementById('editorTools');
       const addText = document.getElementById('addText');
       const addImage = document.getElementById('addImage');
       const addVideo = document.getElementById('addVideo');
+      const addFile = document.getElementById('addFile');
       const saveChanges = document.getElementById('saveChanges');
       const cancelEdit = document.getElementById('cancelEdit');
       const mediaInput = document.getElementById('mediaInput');
       const mediaUrl = document.getElementById('mediaUrl');
       const insertMedia = document.getElementById('insertMedia');
       
+      // Content Elements
+      const userInfo = document.getElementById('userInfo');
+      const accessInfo = document.getElementById('accessInfo');
+      const lastAccess = document.getElementById('lastAccess');
+      const fileList = document.getElementById('fileList');
 
-      // Display sample files (in a real app, you'd fetch these from a server)
-      const files = [
-        'document1.txt',
-        'report.pdf',
-        'data.json'
-      ];
-      
-      files.forEach(file => {
-        const li = document.createElement('li');
-        li.textContent = file;
-        li.className = 'content-editable';
-        fileList.appendChild(li);
-      });
-      
-      // Editor functionality
+      // State variables
       let editMode = false;
       let currentMediaType = '';
-      
-      toggleEditor.addEventListener('click', () => {
-        editMode = !editMode;
-        toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
-        editorTools.classList.toggle('active', editMode);
+      let filesData = [];
+      let authToken = '';
+
+      // Cloudflare Worker URL (replace with your actual worker URL)
+      const WORKER_URL = 'https://your-worker.your-subdomain.workers.dev';
+
+      // Initialize authentication
+      initAuthentication();
+
+      // Check if already authenticated
+      function checkAuth() {
+        const authData = localStorage.getItem('vFilesAuth');
+        if (authData) {
+          try {
+            const data = JSON.parse(authData);
+            if (data.token && data.expires > Date.now()) {
+              authToken = data.token;
+              showMainContent();
+              fetchData();
+              return true;
+            }
+          } catch (e) {
+            console.error('Error parsing auth data:', e);
+          }
+        }
+        return false;
+      }
+
+      // Initialize authentication modal
+      function initAuthentication() {
+        if (checkAuth()) return;
+
+        // Focus on input when modal appears
+        secretAnswer.focus();
         
-        document.querySelectorAll('.content-editable').forEach(el => {
-          el.contentEditable = editMode;
-          el.classList.toggle('editing', editMode);
+        // Handle form submission
+        authSubmit.addEventListener('click', checkSecret);
+        secretAnswer.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') checkSecret();
         });
-      });
-      
-      addText.addEventListener('click', () => {
-        const newText = document.createElement('div');
-        newText.className = 'content-editable';
-        newText.contentEditable = true;
-        newText.textContent = 'New text block - click to edit';
-        document.body.insertBefore(newText, document.querySelector('.info-panel'));
-        newText.focus();
-      });
-      
-      addImage.addEventListener('click', () => {
-        currentMediaType = 'image';
-        mediaInput.style.display = 'block';
-        mediaUrl.placeholder = 'Enter image URL';
-        mediaUrl.focus();
-      });
-      
-      addVideo.addEventListener('click', () => {
-        currentMediaType = 'video';
-        mediaInput.style.display = 'block';
-        mediaUrl.placeholder = 'Enter video URL';
-        mediaUrl.focus();
-      });
-      
-      insertMedia.addEventListener('click', () => {
-        const url = mediaUrl.value.trim();
-        if (url) {
-          let mediaElement;
+      }
+
+      // Check secret answer
+      function checkSecret() {
+        const answer = secretAnswer.value.trim().toLowerCase();
+        
+        if (answer === 'elvi') {
+          // Correct answer - authenticate
+          authenticateUser();
+        } else {
+          // Wrong answer - redirect
+          secretAnswer.style.borderColor = 'var(--error)';
+          secretAnswer.classList.add('shake');
           
-          if (currentMediaType === 'image') {
-            mediaElement = document.createElement('img');
-            mediaElement.src = url;
-            mediaElement.style.maxWidth = '100%';
+          setTimeout(() => {
+            window.location.href = '/whoareyou/index.html';
+          }, 1000);
+        }
+      }
+
+      // Simulate authentication (replace with actual auth API call)
+      function authenticateUser() {
+        // In a real app, you would call your Cloudflare Worker here
+        // This is a simulation that creates a mock token
+        const mockToken = 'mock-token-' + Math.random().toString(36).substring(2);
+        const authData = {
+          token: mockToken,
+          expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+        };
+        
+        localStorage.setItem('vFilesAuth', JSON.stringify(authData));
+        authToken = mockToken;
+        
+        // Hide auth modal and show content
+        authOverlay.style.opacity = '0';
+        setTimeout(() => {
+          authOverlay.style.display = 'none';
+          showMainContent();
+          fetchData();
+        }, 500);
+      }
+
+      // Show main content
+      function showMainContent() {
+        mainContainer.style.display = 'block';
+        mainContainer.classList.add('fade-in');
+        
+        // Add EDIT MODE button to header
+        const header = document.querySelector('.header');
+        header.insertBefore(toggleEditor, logoutBtn);
+        
+        // Set last access time
+        lastAccess.textContent = new Date().toLocaleString();
+        
+        // Initialize editor functionality
+        initEditor();
+      }
+
+      // Logout handler
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('vFilesAuth');
+        window.location.href = 'https://localezra.netlify.app';
+      });
+
+      // Fetch data from Cloudflare Worker
+      async function fetchData() {
+        try {
+          // In a real app, you would call your Cloudflare Worker API
+          // This is a mock implementation with sample data
+          const mockData = {
+            user: {
+              name: "Ezra",
+              role: "Admin",
+              email: "ezra@example.com"
+            },
+            files: [
+              { id: 1, name: "document1.txt", type: "text", url: "", content: "Sample text content" },
+              { id: 2, name: "presentation.pdf", type: "file", url: "https://example.com/files/presentation.pdf" },
+              { id: 3, name: "profile.jpg", type: "image", url: "https://example.com/images/profile.jpg" },
+              { id: 4, name: "tutorial.mp4", type: "video", url: "https://example.com/videos/tutorial.mp4" }
+            ]
+          };
+
+          // Display user info
+          userInfo.innerHTML = `
+            <strong>User:</strong> ${mockData.user.name}<br>
+            <strong>Role:</strong> ${mockData.user.role}<br>
+            <strong>Email:</strong> ${mockData.user.email}
+          `;
+
+          // Display files
+          filesData = mockData.files;
+          renderFiles();
+          
+          // In a real implementation, you would use:
+          /*
+          const response = await fetch(`${WORKER_URL}/api/data`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            }
+          });
+          const data = await response.json();
+          */
+          
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          userInfo.textContent = 'Error loading user data';
+        }
+      }
+
+      // Render files list
+      function renderFiles() {
+        fileList.innerHTML = '';
+        
+        filesData.forEach(file => {
+          const fileItem = document.createElement('div');
+          fileItem.className = 'file-item';
+          
+          let content = '';
+          if (file.type === 'text') {
+            content = `<div>${file.name}</div><div class="file-content">${file.content}</div>`;
+          } else if (file.type === 'image') {
+            content = `
+              <div>${file.name}</div>
+              <div class="media-container">
+                <img src="${file.url}" alt="${file.name}">
+              </div>
+            `;
+          } else if (file.type === 'video') {
+            content = `
+              <div>${file.name}</div>
+              <div class="media-container">
+                <iframe src="${file.url}" allowfullscreen></iframe>
+              </div>
+            `;
           } else {
-            mediaElement = document.createElement('iframe');
-            mediaElement.src = url;
-            mediaElement.style.width = '100%';
-            mediaElement.style.height = '400px';
-            mediaElement.setAttribute('allowfullscreen', '');
+            content = `<div>${file.name}</div><div><a href="${file.url}" target="_blank">Download</a></div>`;
           }
           
-          mediaElement.className = 'content-editable';
-          document.body.insertBefore(mediaElement, document.querySelector('.info-panel'));
-        }
+          fileItem.innerHTML = `
+            <div class="file-info">${content}</div>
+            <div class="file-actions">
+              <button class="edit-file" data-id="${file.id}">Edit</button>
+              <button class="delete-file" data-id="${file.id}">Delete</button>
+            </div>
+          `;
+          
+          fileList.appendChild(fileItem);
+        });
+      }
+
+      // Initialize editor functionality
+      function initEditor() {
+        let editMode = false;
+        let currentMediaType = '';
         
-        mediaUrl.value = '';
-        mediaInput.style.display = 'none';
-      });
-      
-      saveChanges.addEventListener('click', () => {
-        // In a real implementation, you would save to a database
-        alert('Changes saved (this would save to database in production)');
-        toggleEditor.click(); // Exit edit mode
-      });
-      
-      cancelEdit.addEventListener('click', () => {
-        if (confirm('Discard all changes?')) {
-          location.reload(); // Reload the page to discard changes
-        }
-      });
+        toggleEditor.addEventListener('click', () => {
+          editMode = !editMode;
+          toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
+          editorTools.classList.toggle('active', editMode);
+          
+          document.querySelectorAll('.content-editable').forEach(el => {
+            el.contentEditable = editMode;
+            el.classList.toggle('editing', editMode);
+          });
+        });
+        
+        addText.addEventListener('click', () => {
+          const newText = document.createElement('div');
+          newText.className = 'content-editable';
+          newText.contentEditable = true;
+          newText.textContent = 'New text block - click to edit';
+          fileList.appendChild(newText);
+          newText.focus();
+        });
+        
+        addImage.addEventListener('click', () => {
+          currentMediaType = 'image';
+          mediaInput.classList.add('active');
+          mediaUrl.placeholder = 'Enter image URL';
+          mediaUrl.focus();
+        });
+        
+        addVideo.addEventListener('click', () => {
+          currentMediaType = 'video';
+          mediaInput.classList.add('active');
+          mediaUrl.placeholder = 'Enter video URL';
+          mediaUrl.focus();
+        });
+        
+        addFile.addEventListener('click', () => {
+          currentMediaType = 'file';
+          mediaInput.classList.add('active');
+          mediaUrl.placeholder = 'Enter file URL';
+          mediaUrl.focus();
+        });
+        
+        insertMedia.addEventListener('click', () => {
+          const url = mediaUrl.value.trim();
+          if (url) {
+            let mediaElement;
+            
+            if (currentMediaType === 'image') {
+              mediaElement = document.createElement('div');
+              mediaElement.className = 'media-container content-editable';
+              mediaElement.innerHTML = `<img src="${url}" alt="Uploaded image">`;
+            } else if (currentMediaType === 'video') {
+              mediaElement = document.createElement('div');
+              mediaElement.className = 'media-container content-editable';
+              mediaElement.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
+            } else {
+              mediaElement = document.createElement('div');
+              mediaElement.className = 'content-editable';
+              mediaElement.innerHTML = `<a href="${url}" target="_blank">${url.split('/').pop()}</a>`;
+            }
+            
+            fileList.appendChild(mediaElement);
+            
+            // In a real app, you would save this to your database via the Cloudflare Worker
+            filesData.push({
+              id: Date.now(),
+              name: url.split('/').pop(),
+              type: currentMediaType,
+              url: url
+            });
+          }
+          
+          mediaUrl.value = '';
+          mediaInput.classList.remove('active');
+        });
+        
+        saveChanges.addEventListener('click', () => {
+          // In a real implementation, you would save to your Cloudflare Worker
+          alert('Changes saved to database (simulated)');
+          toggleEditor.click(); // Exit edit mode
+        });
+        
+        cancelEdit.addEventListener('click', () => {
+          if (confirm('Discard all changes?')) {
+            fetchData(); // Reload data from server
+            toggleEditor.click(); // Exit edit mode
+          }
+        });
+      }
     });
   </script>
 </body>
