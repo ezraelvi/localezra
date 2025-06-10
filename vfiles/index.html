@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>vFiles</title>
   <style>
-    /* Hacker-style auth modal */
+    /* Authentication Modal Styles */
     .auth-overlay {
       position: fixed;
       top: 0;
@@ -17,86 +17,65 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      font-family: 'Courier New', monospace;
+      backdrop-filter: blur(5px);
     }
     
     .auth-modal {
-      background-color: #000;
+      background-color: #121212;
       border: 1px solid #00ff00;
-      padding: 20px;
-      width: 80%;
-      max-width: 500px;
+      padding: 30px;
+      width: 90%;
+      max-width: 400px;
       box-shadow: 0 0 20px #00ff00;
-      position: relative;
-      overflow: hidden;
+      text-align: center;
+      animation: pulse 2s infinite alternate;
     }
     
-    .auth-modal::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #00ff00, transparent);
-      animation: scanline 2s linear infinite;
-    }
-    
-    @keyframes scanline {
-      0% { top: 0; }
-      100% { top: 100%; }
+    @keyframes pulse {
+      from {
+        box-shadow: 0 0 10px #00ff00;
+      }
+      to {
+        box-shadow: 0 0 20px #00ff00;
+      }
     }
     
     .auth-title {
       color: #00ff00;
-      text-align: center;
-      margin-bottom: 20px;
       font-size: 1.5rem;
+      margin-bottom: 20px;
       text-shadow: 0 0 5px #00ff00;
     }
     
     .auth-input {
       width: 100%;
       padding: 10px;
-      background: transparent;
+      margin: 15px 0;
+      background-color: #121212;
       border: 1px solid #00ff00;
       color: #00ff00;
       font-family: 'Courier New', monospace;
-      margin-bottom: 20px;
+      font-size: 1rem;
       outline: none;
     }
     
     .auth-submit {
-      background: transparent;
-      border: 1px solid #00ff00;
+      background-color: #121212;
       color: #00ff00;
+      border: 1px solid #00ff00;
       padding: 10px 20px;
       font-family: 'Courier New', monospace;
       cursor: pointer;
-      width: 100%;
       transition: all 0.3s;
     }
     
     .auth-submit:hover {
-      background: #00ff00;
-      color: #000;
-      box-shadow: 0 0 10px #00ff00;
+      background-color: #00ff00;
+      color: #121212;
     }
     
     .hidden {
-      display: none !important;
-    }
-    
-    .glitch {
-      animation: glitch 1s linear infinite;
-    }
-    
-    @keyframes glitch {
-      0% { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff; }
-      25% { text-shadow: -2px 0 #00ff00, 2px 0 #ff00ff; }
-      50% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00; }
-      75% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ff00; }
-      100% { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff; }
+      display: none;
     }
     
     /* Original Styles */
@@ -173,21 +152,16 @@
   </style>
 </head>
 <body>
-  <!-- Authentication Overlay -->
+  <!-- Authentication Modal -->
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-modal">
-      <h1 class="auth-title glitch">SECURE ACCESS REQUIRED</h1>
-      <div style="margin-bottom: 20px; color: #00ff00;">
-        > Initializing authentication protocol...<br>
-        > Checking credentials...<br>
-        > Waiting for input...
-      </div>
-      <input type="password" class="auth-input" id="secretAnswer" placeholder="ezra:">
+      <h1 class="auth-title">ezra:</h1>
+      <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter response..." autocomplete="off">
       <button class="auth-submit" id="authSubmit">AUTHENTICATE</button>
     </div>
   </div>
 
-  <!-- Main Content (hidden initially) -->
+  <!-- Main Content (hidden until authenticated) -->
   <div id="mainContent" class="hidden">
     <button id="toggleEditor" class="edit-btn">EDIT MODE</button>
     
@@ -217,64 +191,84 @@
   </div>
 
   <script>
-    // Authentication System
     document.addEventListener('DOMContentLoaded', () => {
+      // Authentication Logic
       const authOverlay = document.getElementById('authOverlay');
       const mainContent = document.getElementById('mainContent');
       const secretAnswer = document.getElementById('secretAnswer');
       const authSubmit = document.getElementById('authSubmit');
       
-      // Focus on input immediately
+      // Focus on input when modal appears
       secretAnswer.focus();
       
-      // Add terminal-like behavior to input
-      secretAnswer.addEventListener('keydown', (e) => {
+      // Handle form submission
+      authSubmit.addEventListener('click', checkSecret);
+      secretAnswer.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-          checkAuth();
+          checkSecret();
         }
       });
       
-      authSubmit.addEventListener('click', checkAuth);
-      
-      function checkAuth() {
+      function checkSecret() {
         const answer = secretAnswer.value.trim().toLowerCase();
         
         if (answer === 'elvi') {
-          // Correct answer - grant access
-          authOverlay.style.transition = 'opacity 1s';
-          authOverlay.style.opacity = '0';
+          // Correct answer - reveal content with cyberpunk effect
+          authOverlay.style.animation = 'fadeOut 0.5s forwards';
+          
+          // Add cyberpunk-style success effect
+          const successEffect = document.createElement('div');
+          successEffect.style.position = 'fixed';
+          successEffect.style.top = '0';
+          successEffect.style.left = '0';
+          successEffect.style.width = '100%';
+          successEffect.style.height = '100%';
+          successEffect.style.background = 'rgba(0, 255, 0, 0.1)';
+          successEffect.style.zIndex = '9998';
+          successEffect.style.display = 'flex';
+          successEffect.style.justifyContent = 'center';
+          successEffect.style.alignItems = 'center';
+          successEffect.style.fontSize = '2rem';
+          successEffect.style.color = '#00ff00';
+          successEffect.style.textShadow = '0 0 10px #00ff00';
+          successEffect.style.fontWeight = 'bold';
+          successEffect.innerHTML = 'ACCESS GRANTED';
+          document.body.appendChild(successEffect);
           
           setTimeout(() => {
             authOverlay.remove();
             mainContent.classList.remove('hidden');
             
-            // Add hacker-style access granted effect
-            const accessMsg = document.createElement('div');
-            accessMsg.style.position = 'fixed';
-            accessMsg.style.top = '50%';
-            accessMsg.style.left = '50%';
-            accessMsg.style.transform = 'translate(-50%, -50%)';
-            accessMsg.style.color = '#00ff00';
-            accessMsg.style.fontFamily = "'Courier New', monospace";
-            accessMsg.style.fontSize = '2rem';
-            accessMsg.style.textAlign = 'center';
-            accessMsg.style.zIndex = '9998';
-            accessMsg.style.textShadow = '0 0 10px #00ff00';
-            accessMsg.textContent = 'ACCESS GRANTED';
-            document.body.appendChild(accessMsg);
-            
             setTimeout(() => {
-              accessMsg.style.transition = 'opacity 1s';
-              accessMsg.style.opacity = '0';
+              successEffect.style.transition = 'opacity 1s';
+              successEffect.style.opacity = '0';
               setTimeout(() => {
-                accessMsg.remove();
+                successEffect.remove();
               }, 1000);
-            }, 1500);
+            }, 1000);
           }, 500);
         } else {
-          // Wrong answer - deny access
+          // Wrong answer - redirect with error effect
           secretAnswer.style.borderColor = '#ff0000';
-          secretAnswer.style.animation = 'glitch 0.5s';
+          secretAnswer.style.animation = 'shake 0.5s';
+          
+          const errorEffect = document.createElement('div');
+          errorEffect.style.position = 'fixed';
+          errorEffect.style.top = '0';
+          errorEffect.style.left = '0';
+          errorEffect.style.width = '100%';
+          errorEffect.style.height = '100%';
+          errorEffect.style.background = 'rgba(255, 0, 0, 0.1)';
+          errorEffect.style.zIndex = '9998';
+          errorEffect.style.display = 'flex';
+          errorEffect.style.justifyContent = 'center';
+          errorEffect.style.alignItems = 'center';
+          errorEffect.style.fontSize = '2rem';
+          errorEffect.style.color = '#ff0000';
+          errorEffect.style.textShadow = '0 0 10px #ff0000';
+          errorEffect.style.fontWeight = 'bold';
+          errorEffect.innerHTML = 'ACCESS DENIED';
+          document.body.appendChild(errorEffect);
           
           setTimeout(() => {
             window.location.href = '/whoareyou/index.html';
@@ -282,24 +276,21 @@
         }
       }
       
-      // Add glitch effect for wrong answers
+      // Add animations
       const style = document.createElement('style');
       style.textContent = `
-        @keyframes glitch {
-          0% { transform: translate(0); }
-          20% { transform: translate(-5px, 5px); }
-          40% { transform: translate(-5px, -5px); }
-          60% { transform: translate(5px, 5px); }
-          80% { transform: translate(5px, -5px); }
-          100% { transform: translate(0); }
+        @keyframes fadeOut {
+          to { opacity: 0; }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-10px); }
+          40%, 80% { transform: translateX(10px); }
         }
       `;
       document.head.appendChild(style);
-    });
 
-    // Original Application Code
-    document.addEventListener('DOMContentLoaded', () => {
-      const authData = JSON.parse(localStorage.getItem('authData'));
+      // Original Application Logic
       const userInfo = document.getElementById('userInfo');
       const accessInfo = document.getElementById('accessInfo');
       const fileList = document.getElementById('fileList');
