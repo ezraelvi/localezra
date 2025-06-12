@@ -2,996 +2,669 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ezra's Interactive Hub</title>
+    <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.32.6/src-min-noconflict/ace.js"></script>
     <style>
         /* =================================
-           1. FUTURISTIC BACKGROUND & GLOBAL STYLES
-           ================================= */
+           1. VARIABLES & GLOBAL STYLES
+        ================================= */
         :root {
-            --primary: #6c5ce7;
-            --accent: #fd79a8;
-            --success: #00b894;
-            --danger: #ff7675;
-            --light: #f5f6fa;
-            --dark: #1e1e2f;
-            --bg-main: #141e30;
-            --bg-card: rgba(44, 44, 66, 0.7);
-            --text-primary: #f5f6fa;
-            --text-secondary: #bdc3c7;
-            --grid-color: rgba(255, 255, 255, 0.05);
-            --border-color: rgba(108, 92, 231, 0.3);
-            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            --primary: #8e44ad; --accent: #00a8ff; --success: #2ecc71;
+            --danger: #e74c3c; --light: #ecf0f1; --dark: #1a1a2e;
+            --bg-main: #16213e; --bg-panel: rgba(26, 26, 46, 0.9);
+            --text-primary: #e0fbfc; --text-secondary: #98ded9;
+            --border-color: rgba(0, 168, 255, 0.3);
         }
-
         html[data-theme='light'] {
-            --bg-main: #f0f2f5;
-            --bg-card: rgba(255, 255, 255, 0.8);
-            --text-primary: #2d3436;
-            --text-secondary: #636e72;
-            --grid-color: rgba(0, 0, 0, 0.05);
-            --border-color: rgba(108, 92, 231, 0.2);
-            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --primary: #3498db; --accent: #e67e22;
+            --bg-main: #ecf0f1; --bg-panel: rgba(255, 255, 255, 0.9);
+            --text-primary: #2c3e50; --text-secondary: #7f8c8d;
+            --border-color: rgba(52, 152, 219, 0.4);
         }
-
-        body {
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            color: var(--text-primary);
-            background-color: var(--bg-main);
+        * { box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%; margin: 0; padding: 0;
+            overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-main); color: var(--text-primary);
         }
-
-        /* Futuristic interactive background */
-        #matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.3;
+        
+        /* =================================
+           2. INTERACTIVE BACKGROUND
+        ================================= */
+        #interactive-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; background-color: var(--bg-main);
         }
+        
+        /* =================================
+           3. MAIN LAYOUT & CORE COMPONENTS
+        ================================= */
+        .main-container {
+            position: relative; z-index: 1; width: 100%; height: 100%;
+            transition: all 0.5s ease-in-out;
+        }
+        #map-wrapper {
+            position: absolute; inset: 20px;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.5s ease-in-out;
+        }
+        #map-container {
+            width: 100%; height: 100%; background: var(--bg-panel);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        #map { flex-grow: 1; background-color: #333; }
+        #locationInfo { padding: 10px; text-align: center; background: rgba(0,0,0,0.2); font-size: 0.9em; }
+        .lock-screen {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; gap: 15px; height: 100%;
+        }
+        .hidden { display: none !important; }
 
         /* =================================
-           2. LAYOUT & CARDS
-           ================================= */
-        #content {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+           4. PANELS (Editor, Music, Contribution)
+        ================================= */
+        .panel {
+            position: fixed; background: var(--bg-panel); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); z-index: 1010;
+            box-shadow: 0 0 50px rgba(0,0,0,0.6);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            display: flex; flex-direction: column;
         }
-
-        header {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 2px solid var(--primary);
-            color: var(--text-primary);
-            padding: 1rem 1.5rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            user-select: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 990;
+        /* Editor Panel (Left) */
+        #editor-panel {
+            top: 0; left: 0; width: 100%; height: 100%;
+            transform: translateX(-100%);
         }
+        #editor-panel.active { transform: translateX(0); }
+        /* Music Panel (Bottom) */
+        #music-panel {
+            bottom: 0; left: 0; width: 100%; height: auto;
+            max-height: 50vh; border-top: 1px solid var(--border-color);
+            transform: translateY(100%); padding: 15px;
+        }
+        #music-panel.active { transform: translateY(0); }
+        /* Contribution Panel (Right) */
+        #contribution-panel {
+            top: 0; right: 0; width: 400px; max-width: 90vw; height: 100%;
+            transform: translateX(100%); padding: 20px;
+        }
+        #contribution-panel.active { transform: translateX(0); }
 
-        main {
-            flex: 1;
-            padding: 2rem;
+        .panel-close-btn {
+            position: absolute; top: 15px; right: 15px; background: none; border: none;
+            color: var(--text-primary); font-size: 1.5rem; cursor: pointer; z-index: 5;
+        }
+        
+        /* =================================
+           5. FLOATING ACTION BUTTONS (FABs)
+        ================================= */
+        .fab-container { position: fixed; z-index: 1000; }
+        .fab {
+            background: var(--primary); color: white; width: 55px; height: 55px;
+            border-radius: 50%; border: none; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.4rem; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .fab:hover { background: var(--accent); transform: scale(1.1); }
+        #fab-editor { top: 20px; left: 20px; }
+        #fab-music { bottom: 20px; left: 50%; transform: translateX(-50%); }
+        #fab-contribution { top: 20px; right: 20px; }
+        #fab-layout, #fab-theme { bottom: 20px; }
+        #fab-layout { left: 20px; }
+        #fab-theme { right: 20px; }
+
+        /* =================================
+           6. ENHANCED EDITOR PANEL
+        ================================= */
+        #editor-panel { padding: 0; }
+        .editor-toolbar { display: flex; gap: 5px; padding: 10px; background: rgba(0,0,0,0.2); flex-wrap: wrap; }
+        .editor-toolbar button, .editor-toolbar select { background: var(--primary); color: white; border:none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        .editor-main { display: flex; flex-grow: 1; height: calc(100% - 58px); }
+        .editor-code-area, .editor-preview-area { flex: 1; display: flex; flex-direction: column; }
+        .editor-panes { display: flex; flex-direction: column; flex-grow: 1; }
+        .editor-pane { display: flex; flex-direction: column; flex-grow: 1; }
+        .editor-pane label { background: #333; color: var(--accent); padding: 5px 10px; font-size: 0.8em; font-weight: bold;}
+        .editor-pane textarea { flex-grow: 1; background: #1e1e1e; color: #f8f8f2; border: none; resize: none; padding: 10px; font-family: 'Courier New', monospace; font-size: 14px; outline: none; }
+        #editor-preview { width: 100%; height: 100%; border: none; background: white; }
+        
+        /* =================================
+           7. OTHER WIDGETS (VIDEO, SOCIALS)
+        ================================= */
+        #video-player-widget {
+            position: fixed; bottom: 20px; right: 90px; z-index: 999;
+            width: 150px; height: 150px; border-radius: 10px;
+            overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            border: 2px solid var(--border-color);
+        }
+        #video-player-widget video { width: 100%; height: 100%; object-fit: cover; }
+        .video-controls { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;}
+        .video-controls button { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; }
+
+        .social-links {
+            position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 999;
+        }
+        .social-links a { color: var(--text-primary); font-size: 1.5rem; transition: color 0.3s, transform 0.3s; }
+        .social-links a:hover { color: var(--accent); transform: scale(1.2); }
+
+        /* =================================
+           8. DESKTOP GRID LAYOUT
+        ================================= */
+        body.desktop-layout .main-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            max-width: 1500px;
-            margin: 0 auto;
-            width: 100%;
+            grid-template-columns: 350px 1fr 350px;
+            grid-template-rows: 1fr;
+            gap: 20px; padding: 20px; height: 100vh;
         }
-
-        .dashboard-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        body.desktop-layout #map-wrapper { position: static; }
+        body.desktop-layout .panel {
+            position: static; transform: none !important;
+            height: auto; width: auto; max-height: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); border: 1px solid var(--border-color);
             border-radius: 15px;
-            padding: 1.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
-
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            border-color: var(--primary);
-        }
-        
-        .card-header {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            margin-bottom: 1.5rem; 
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .card-title {
-            margin: 0; 
-            font-size: 1.3rem; 
-            color: var(--primary);
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-        }
-        
-        /* =================================
-           3. PANEL EDITOR & FLOATING CONTROLS
-           ================================= */
-        .floating-btn {
-            position: fixed;
-            background: var(--primary);
-            color: white;
-            width: 60px; 
-            height: 60px;
-            border-radius: 50%;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .floating-btn:hover {
-            transform: scale(1.1) translateY(-3px);
-            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
-        }
-        
-        #editorBtn {
-            bottom: 30px; 
-            left: 30px;
-        }
-        
-        #musicBtn {
-            bottom: 30px; 
-            left: 50%; 
-            transform: translateX(-50%);
-        }
-        
-        #contributionBtn {
-            bottom: 30px; 
-            right: 30px;
-        }
-        
-        /* Editor Panel */
-        .editor-overlay {
-            position: fixed; 
-            top: 0; 
-            left: 0;
-            width: 100%; 
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1001;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        
-        .editor-overlay.active { 
-            opacity: 1; 
-            pointer-events: all; 
-        }
-        
-        .editor-panel {
-            position: fixed; 
-            top: 50%; 
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%; 
-            max-width: 900px;
-            height: 80vh;
-            background: var(--bg-main);
-            color: var(--text-primary);
-            z-index: 1002;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
-            display: flex; 
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid var(--primary);
-        }
-        
-        .editor-header {
-            padding: 15px;
-            background: rgba(108, 92, 231, 0.2);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .editor-tabs {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .editor-tab {
-            padding: 5px 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 5px;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        
-        .editor-tab.active {
-            border-color: var(--primary);
-            background: rgba(108, 92, 231, 0.3);
-        }
-        
-        .editor-content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-        
-        #editor {
-            flex: 1;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-        }
-        
-        .editor-tools {
-            width: 250px;
-            border-left: 1px solid var(--border-color);
-            padding: 15px;
-            overflow-y: auto;
-        }
-        
-        .editor-tool-section {
-            margin-bottom: 20px;
-        }
-        
-        .close-editor-btn {
-            background: var(--danger); 
-            color: white; 
-            border: none;
-            width: 30px; 
-            height: 30px; 
-            border-radius: 50%;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        /* Other Panels */
-        .offcanvas-overlay {
-            position: fixed; 
-            top: 0; 
-            left: 0;
-            width: 100%; 
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1001;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        
-        .offcanvas-overlay.active { 
-            opacity: 1; 
-            pointer-events: all; 
-        }
-        
-        .offcanvas-panel {
-            position: fixed; 
-            top: 0;
-            width: 90%; 
-            max-width: 500px;
-            height: 100vh;
-            background: var(--bg-main);
-            color: var(--text-primary);
-            z-index: 1002;
-            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-            display: flex; 
-            flex-direction: column;
-            padding: 2rem;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-        
-        .offcanvas-panel.from-left { 
-            left: -100%; 
-            transition: left 0.4s ease-out; 
-        }
-        
-        .offcanvas-panel.from-left.active { 
-            left: 0; 
-        }
-        
-        .offcanvas-panel.from-right { 
-            right: -100%; 
-            transition: right 0.4s ease-out; 
-        }
-        
-        .offcanvas-panel.from-right.active { 
-            right: 0; 
-        }
-        
-        .close-panel-btn {
-            position: absolute; 
-            top: 15px; 
-            right: 15px;
-            background: var(--danger); 
-            color: white; 
-            border: none;
-            width: 30px; 
-            height: 30px; 
-            border-radius: 50%;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            cursor: pointer; 
-            z-index: 1003; 
-            font-size: 1rem;
-        }
-        
-        /* Map Styles */
-        #map { 
-            width: 100%; 
-            height: 300px; 
-            border-radius: 10px; 
-            border: 2px solid var(--primary); 
-            overflow: hidden; 
-        }
-        
-        .location-info { 
-            margin-top: 15px; 
-            color: var(--text-secondary); 
-            font-size: 1rem; 
-            line-height: 1.5; 
-        }
-        
-        /* Form Styles */
-        .header-btn {
-            background: rgba(108, 92, 231, 0.2); 
-            color: var(--light); 
-            border: 1px solid var(--primary);
-            padding: 0.5rem 1rem; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .header-btn:hover { 
-            background: var(--primary); 
-            transform: translateY(-2px); 
-        }
-        
-        textarea, input {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 10px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        /* Tracking Code Input */
-        #trackingCodeInput {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            z-index: 2000;
-            border: 1px solid var(--primary);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        #trackingCodeInput h3 {
-            margin-top: 0;
-            color: var(--primary);
-        }
-        
-        #trackingCodeInput input {
-            margin: 15px 0;
-            padding: 10px;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-        
-        /* Contribution Styles */
-        .contribution-item {
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 3px solid var(--accent);
-        }
-        
-        .contribution-meta {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        /* Music Player Styles */
-        .music-player {
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        .playlist {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-        
-        .playlist-item {
-            padding: 10px;
-            margin: 5px 0;
-            background: rgba(0,0,0,0.2);
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .playlist-item:hover, .playlist-item.active {
-            background: var(--primary);
+        body.desktop-layout .panel-close-btn, 
+        body.desktop-layout .fab, 
+        body.desktop-layout .social-links { display: none; }
+        body.desktop-layout .desktop-fab-bar {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; gap: 10px;
+            background: var(--bg-panel); padding: 10px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
     </style>
 </head>
-<body>
-    <!-- Futuristic Matrix Background -->
-    <canvas id="matrix-bg"></canvas>
-
-    <!-- Main Content -->
-    <div id="content">
-        <header>
-            <div class="logo">
-                <i class="fas fa-terminal"></i>
-                <span id="welcome-greeting">vFiles System</span>
+<body class=""> <canvas id="interactive-bg"></canvas>
+    
+    <div class="main-container">
+        <div id="map-wrapper">
+            <div id="map-container">
+                <div class="lock-screen" id="map-lock-screen">
+                    <i class="fas fa-satellite fa-3x fa-spin" style="--fa-animation-duration: 5s; color: var(--accent);"></i>
+                    <h3>REAL-TIME TRACKING SYSTEM</h3>
+                    <p style="margin:0; color:var(--text-secondary);">System is offline. Type secret code to activate.</p>
+                </div>
+                <div id="map" class="hidden"></div>
+                <div id="locationInfo" class="hidden">Initializing tracking...</div>
             </div>
-            <div class="header-controls">
-                <button class="header-btn" id="theme-toggle-btn">
-                    <i class="fas fa-sun"></i>
-                </button>
-                <button class="header-btn" id="trackingToggleBtn" style="display: none;">
-                    <i class="fas fa-map-marked-alt"></i> Tracking
-                </button>
-            </div>
-        </header>
+        </div>
 
-        <main>
-            <!-- Editor Panel (hidden by default) -->
-            <section class="dashboard-card" id="editorCard" style="display: none;">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-code"></i> Live Editor</h2>
-                </div>
-                <div id="editorContainer" style="height: 400px;"></div>
-            </section>
-
-            <!-- Music Panel (hidden by default) -->
-            <section class="dashboard-card" id="musicCard" style="display: none;">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-music"></i> Music Player</h2>
-                </div>
-                <div id="musicPlayerContainer"></div>
-            </section>
-
-            <!-- Contributions Panel -->
-            <section class="dashboard-card" id="contributionsCard">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-feather-alt"></i> Visitor Contributions</h2>
-                </div>
-                <div id="contributionsContainer">
-                    <p>Loading contributions...</p>
-                </div>
-            </section>
-
-            <!-- Tracking Panel (hidden until activated) -->
-            <section class="dashboard-card" id="trackingCard" style="display: none;">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> Location Tracking</h2>
-                </div>
-                <div id="map"></div>
-                <div id="locationInfo" class="location-info">
-                    <i class="fas fa-lock"></i> Tracking disabled - Enter code to activate
-                </div>
-            </section>
-        </main>
+        <div class="panel" id="contribution-panel-desktop" style="display: none;">
+             </div>
     </div>
 
-    <!-- Floating Action Buttons -->
-    <button class="floating-btn" id="editorBtn">
-        <i class="fas fa-code"></i>
-    </button>
-    <button class="floating-btn" id="musicBtn">
-        <i class="fas fa-music"></i>
-    </button>
-    <button class="floating-btn" id="contributionBtn">
-        <i class="fas fa-feather-alt"></i>
-    </button>
-
-    <!-- Tracking Code Input Modal -->
-    <div id="trackingCodeInput" style="display: none;">
-        <h3><i class="fas fa-lock"></i> Enter Tracking Code</h3>
-        <p>To enable tracking features, please enter the security code</p>
-        <input type="password" id="trackingCode" placeholder="Enter code...">
-        <button class="header-btn" id="submitTrackingCode">Submit</button>
-        <p id="codeStatus" style="font-size: 0.9rem; margin-top: 10px;"></p>
+    <div class="panel" id="editor-panel">
+        <button class="panel-close-btn" data-panel="editor-panel"><i class="fas fa-times"></i></button>
+        <div class="editor-toolbar">
+            <button id="editor-run"><i class="fas fa-play"></i> Run</button>
+            <button id="editor-save"><i class="fas fa-save"></i> Save</button>
+            <button id="editor-load"><i class="fas fa-folder-open"></i> Load</button>
+            <button id="editor-new"><i class="fas fa-file"></i> New</button>
+            <button id="editor-add-media"><i class="fas fa-photo-video"></i> Add Media</button>
+        </div>
+        <div class="editor-main">
+            <div class="editor-code-area">
+                <div class="editor-panes">
+                    <div class="editor-pane">
+                        <label for="html-editor">HTML</label>
+                        <textarea id="html-editor" spellcheck="false"></textarea>
+                    </div>
+                    <div class="editor-pane">
+                        <label for="css-editor">CSS</label>
+                        <textarea id="css-editor" spellcheck="false"></textarea>
+                    </div>
+                    <div class="editor-pane">
+                        <label for="js-editor">JAVASCRIPT</label>
+                        <textarea id="js-editor" spellcheck="false"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="editor-preview-area">
+                 <iframe id="editor-preview"></iframe>
+            </div>
+        </div>
+    </div>
+    
+    <div class="panel" id="music-panel">
+        <button class="panel-close-btn" data-panel="music-panel"><i class="fas fa-times"></i></button>
+        <h4>Now Playing</h4>
+        <div id="music-player-content">
+            <h5 id="song-title">Select a song</h5>
+            <audio id="audio-player" controls style="width: 100%;"></audio>
+            <div id="playlist" style="max-height: 20vh; overflow-y: auto; margin-top: 10px;"></div>
+        </div>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        // ===================================================================
-        // === CONFIGURATION & INITIALIZATION ================================
-        // ===================================================================
-        const config = {
-            trackingWorkerUrl: 'https://your-worker-subdomain.workers.dev/track',
-            contributionsWorkerUrl: 'https://your-worker-subdomain.workers.dev/contributions',
-            trackingCode: 'whereare', // Secret code to activate tracking
-            musicPlaylist: [
-                { name: "Future Sound", url: "https://example.com/music1.mp3" },
-                { name: "Digital Dreams", url: "https://example.com/music2.mp3" },
-                { name: "Code Symphony", url: "https://example.com/music3.mp3" }
-            ]
-        };
+    <div class="panel" id="contribution-panel">
+        <button class="panel-close-btn" data-panel="contribution-panel"><i class="fas fa-times"></i></button>
+        <div id="contribution-content" style="display: flex; flex-direction: column; height: 100%;">
+            <h3 style="margin-top:20px;">Leave a Message</h3>
+            <div id="contribution-display" style="flex-grow: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 15px;">
+                <p>Loading messages...</p>
+            </div>
+            <form id="contribution-form">
+                <textarea id="contribution-text" placeholder="Your message..." required style="width:100%; min-height: 80px; background:rgba(0,0,0,0.2); color:var(--text-primary); border:1px solid var(--border-color); border-radius:5px; padding:10px;"></textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <input type="file" id="contribution-file" accept="image/*,video/*" style="color:var(--text-secondary);">
+                    <button type="submit" class="fab" style="position:static; width:45px; height:45px; font-size:1.1rem;"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <p id="contribution-status" style="font-size:0.9em; text-align:center; margin-top:10px;"></p>
+            </form>
+        </div>
+    </div>
 
-        // State management
-        const state = {
-            trackingActive: false,
-            editorActive: false,
-            currentTrack: 0,
-            visitorId: null,
-            map: null,
-            marker: null,
-            editor: null
-        };
+    <div class="fab-container" id="fab-editor">
+        <button class="fab" data-panel="editor-panel" title="Code Editor"><i class="fas fa-code"></i></button>
+    </div>
+    <div class="fab-container" id="fab-music">
+        <button class="fab" data-panel="music-panel" title="Music Player"><i class="fas fa-music"></i></button>
+    </div>
+    <div class="fab-container" id="fab-contribution">
+        <button class="fab" data-panel="contribution-panel" title="Leave a Message"><i class="fas fa-feather-alt"></i></button>
+    </div>
+    <div class="fab-container" id="fab-layout">
+        <button class="fab" title="Toggle Layout"><i class="fas fa-layer-group"></i></button>
+    </div>
+    <div class="fab-container" id="fab-theme">
+        <button class="fab" title="Toggle Theme"><i class="fas fa-sun"></i></button>
+    </div>
+    
+    <div class="desktop-fab-bar" style="display:none;">
+         <button class="fab" id="desktop-layout-toggle" title="Toggle Layout" style="position:static;"><i class="fas fa-mobile-alt"></i></button>
+         <button class="fab" id="desktop-theme-toggle" title="Toggle Theme" style="position:static;"><i class="fas fa-sun"></i></button>
+    </div>
 
-        // DOM Elements
-        const elements = {
-            matrixBg: document.getElementById('matrix-bg'),
-            themeToggleBtn: document.getElementById('theme-toggle-btn'),
-            editorBtn: document.getElementById('editorBtn'),
-            musicBtn: document.getElementById('musicBtn'),
-            contributionBtn: document.getElementById('contributionBtn'),
-            trackingToggleBtn: document.getElementById('trackingToggleBtn'),
-            submitTrackingCode: document.getElementById('submitTrackingCode'),
-            trackingCodeInput: document.getElementById('trackingCodeInput'),
-            trackingCode: document.getElementById('trackingCode'),
-            codeStatus: document.getElementById('codeStatus'),
-            welcomeGreeting: document.getElementById('welcome-greeting'),
-            editorCard: document.getElementById('editorCard'),
-            musicCard: document.getElementById('musicCard'),
-            contributionsCard: document.getElementById('contributionsCard'),
-            trackingCard: document.getElementById('trackingCard'),
-            editorContainer: document.getElementById('editorContainer'),
-            musicPlayerContainer: document.getElementById('musicPlayerContainer'),
-            contributionsContainer: document.getElementById('contributionsContainer'),
-            map: document.getElementById('map'),
-            locationInfo: document.getElementById('locationInfo')
-        };
+    <div id="video-player-widget">
+        <video id="widget-video" loop src="path/to/your/video.mp4"></video>
+        <div class="video-controls">
+            <button id="video-play-pause"><i class="fas fa-play"></i></button>
+            <button id="video-mute"><i class="fas fa-volume-up"></i></button>
+        </div>
+    </div>
 
-        // Initialize everything when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initMatrixBackground();
-            setGreeting();
-            initTheme();
-            initEditor();
-            initMusicPlayer();
-            loadContributions();
-            generateVisitorId();
-            setupEventListeners();
-            
-            // Check if tracking was previously activated
-            if (localStorage.getItem('trackingActive') === 'true') {
-                activateTrackingFeatures();
+    <div class="social-links">
+        <a href="https://wa.me/6281234567890" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://instagram.com/ezravvv" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+    </div>
+
+<script>
+// ===================================================================
+// === CONFIGURATION & INITIALIZATION
+// ===================================================================
+const SECRET_CODE = "whereare";
+const CONTRIBUTIONS_WORKER_URL = 'https://ganti-dengan-url-worker-kontribusi-anda.workers.dev';
+const VISITOR_TRACKER_WORKER_URL = 'https://ganti-dengan-url-worker-pelacak-anda.workers.dev';
+
+document.addEventListener('DOMContentLoaded', () => {
+    initParticleBackground();
+    initSecretCodeListener();
+    initPanelControls();
+    initLayoutAndThemeToggles();
+    initVideoPlayer();
+    initEditor();
+    initMusicPlayer();
+    trackVisitor();
+});
+
+// ===================================================================
+// === 1. INTERACTIVE BACKGROUND
+// ===================================================================
+function initParticleBackground() {
+    const canvas = document.getElementById('interactive-bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: null, y: null, radius: 150 };
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+    window.addEventListener('mousemove', (event) => {
+        mouse.x = event.x;
+        mouse.y = event.y;
+    });
+
+    class Particle {
+        constructor(x, y, dirX, dirY, size, color) {
+            this.x = x; this.y = y; this.dirX = dirX; this.dirY = dirY;
+            this.size = size; this.color = color;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+        update() {
+            if (this.x > canvas.width || this.x < 0) this.dirX = -this.dirX;
+            if (this.y > canvas.height || this.y < 0) this.dirY = -this.dirY;
+            this.x += this.dirX;
+            this.y += this.dirY;
+            this.draw();
+        }
+    }
+
+    function initParticles() {
+        particles = [];
+        let numParticles = (canvas.height * canvas.width) / 9000;
+        for (let i = 0; i < numParticles; i++) {
+            let size = Math.random() * 2 + 1;
+            let x = Math.random() * (innerWidth - size * 2);
+            let y = Math.random() * (innerHeight - size * 2);
+            let dirX = (Math.random() * .4) - .2;
+            let dirY = (Math.random() * .4) - .2;
+            let color = 'rgba(0, 168, 255, 0.8)';
+            particles.push(new Particle(x, y, dirX, dirY, size, color));
+        }
+    }
+
+    function connectParticles() {
+        for (let a = 0; a < particles.length; a++) {
+            for (let b = a; b < particles.length; b++) {
+                let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                             + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                    let opacity = 1 - (distance / 20000);
+                    ctx.strokeStyle = `rgba(0, 168, 255, ${opacity})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[a].x, particles[a].y);
+                    ctx.lineTo(particles[b].x, particles[b].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function animateParticles() {
+        requestAnimationFrame(animateParticles);
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        particles.forEach(p => p.update());
+        connectParticles();
+    }
+    
+    initParticles();
+    animateParticles();
+}
+
+// ===================================================================
+// === 2. MAP & TRACKING SYSTEM
+// ===================================================================
+let keySequence = [];
+function initSecretCodeListener() {
+    window.addEventListener('keydown', (e) => {
+        keySequence.push(e.key.toLowerCase());
+        keySequence = keySequence.slice(-SECRET_CODE.length);
+        if (keySequence.join('') === SECRET_CODE) {
+            unlockTrackingSystem();
+            keySequence = []; // Reset
+        }
+    });
+}
+
+function unlockTrackingSystem() {
+    const lockScreen = document.getElementById('map-lock-screen');
+    if (!lockScreen.classList.contains('hidden')) {
+        lockScreen.classList.add('hidden');
+        document.getElementById('map').classList.remove('hidden');
+        document.getElementById('locationInfo').classList.remove('hidden');
+        getLocation();
+        // Optional: show a success message
+        const info = document.getElementById('locationInfo');
+        info.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success);"></i> System Activated. Initializing tracker...`;
+    }
+}
+
+let map, marker;
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+            (pos) => initMap(pos.coords.latitude, pos.coords.longitude),
+            () => initMap(2.4633, 97.9158, true), // Fallback to Subulussalam
+            { enableHighAccuracy: true }
+        );
+    }
+}
+
+function initMap(lat, lon, isDefault = false) {
+    if (!map) {
+        map = L.map('map').setView([lat, lon], 13);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CartoDB'
+        }).addTo(map);
+        marker = L.marker([lat, lon]).addTo(map);
+    } else {
+        map.setView([lat, lon]);
+        marker.setLatLng([lat, lon]);
+    }
+    const locationInfoEl = document.getElementById('locationInfo');
+    if (isDefault) {
+        locationInfoEl.innerHTML = `Default Location: Subulussalam, Aceh`;
+    } else {
+        locationInfoEl.innerHTML = `Tracking... Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+    }
+}
+
+// ===================================================================
+// === 3. PANELS & UI CONTROLS
+// ===================================================================
+function initPanelControls() {
+    document.querySelectorAll('[data-panel]').forEach(button => {
+        button.addEventListener('click', () => {
+            const panelId = button.getAttribute('data-panel');
+            const panel = document.getElementById(panelId);
+            panel.classList.toggle('active');
+
+            if (panelId === 'contribution-panel' && panel.classList.contains('active')) {
+                fetchContributions();
             }
         });
+    });
+}
 
-        // ===================================================================
-        // === FUTURISTIC BACKGROUND =========================================
-        // ===================================================================
-        function initMatrixBackground() {
-            const canvas = elements.matrixBg;
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas to full window
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            // Matrix characters
-            const matrixChars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
-            
-            // Set font size and calculate columns
-            const fontSize = 14;
-            const columns = canvas.width / fontSize;
-            
-            // Create drops for each column
-            const drops = [];
-            for (let i = 0; i < columns; i++) {
-                drops[i] = Math.random() * canvas.height;
-            }
-            
-            // Draw function
-            function draw() {
-                // Black background with opacity to create trail effect
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Set font and color
-                ctx.fillStyle = '#00ff00';
-                ctx.font = fontSize + 'px monospace';
-                
-                // Draw characters
-                for (let i = 0; i < drops.length; i++) {
-                    const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    
-                    // Reset drop at random intervals
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
+function initLayoutAndThemeToggles() {
+    const layoutBtn = document.querySelector('#fab-layout .fab');
+    const themeBtn = document.querySelector('#fab-theme .fab');
+    const desktopLayoutBtn = document.getElementById('desktop-layout-toggle');
+    const desktopThemeBtn = document.getElementById('desktop-theme-toggle');
+
+    const toggleLayout = () => document.body.classList.toggle('desktop-layout');
+    const toggleTheme = () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        document.querySelectorAll('#fab-theme i, #desktop-theme-toggle i').forEach(i => {
+            i.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+    };
+    
+    layoutBtn.addEventListener('click', toggleLayout);
+    desktopLayoutBtn.addEventListener('click', toggleLayout);
+    themeBtn.addEventListener('click', toggleTheme);
+    desktopThemeBtn.addEventListener('click', toggleTheme);
+}
+
+// ===================================================================
+// === 4. WIDGETS (VIDEO, MUSIC)
+// ===================================================================
+function initVideoPlayer() {
+    const video = document.getElementById('widget-video');
+    const playBtn = document.getElementById('video-play-pause');
+    const muteBtn = document.getElementById('video-mute');
+
+    playBtn.addEventListener('click', () => {
+        if (video.paused) {
+            video.play();
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+            video.pause();
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    });
+    muteBtn.addEventListener('click', () => {
+        video.muted = !video.muted;
+        muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+    });
+}
+
+function initMusicPlayer() {
+    const player = document.getElementById('audio-player');
+    const playlistEl = document.getElementById('playlist');
+    const songTitleEl = document.getElementById('song-title');
+    const songs = [
+        { name: "Where We Are", url: "path/to/where-we-are.mp3" },
+        { name: "Wish You Were Here", url: "path/to/wish-you-were-here.mp3" }
+    ];
+
+    songs.forEach((song, index) => {
+        const item = document.createElement('div');
+        item.textContent = song.name;
+        item.style.cursor = 'pointer';
+        item.style.padding = '8px';
+        item.onclick = () => {
+            player.src = song.url;
+            songTitleEl.textContent = song.name;
+            player.play();
+        };
+        playlistEl.appendChild(item);
+    });
+}
+
+// ===================================================================
+// === 5. ENHANCED CODE EDITOR
+// ===================================================================
+function initEditor() {
+    const htmlEditor = document.getElementById('html-editor');
+    const cssEditor = document.getElementById('css-editor');
+    const jsEditor = document.getElementById('js-editor');
+    const previewFrame = document.getElementById('editor-preview');
+
+    const runCode = () => {
+        const source = `
+            <html>
+                <head><style>${cssEditor.value}</style></head>
+                <body>${htmlEditor.value}<script>${jsEditor.value}<\/script></body>
+            </html>
+        `;
+        previewFrame.srcdoc = source;
+    };
+    
+    const saveCode = () => {
+        localStorage.setItem('editor_html', htmlEditor.value);
+        localStorage.setItem('editor_css', cssEditor.value);
+        localStorage.setItem('editor_js', jsEditor.value);
+        alert('Code saved!');
+    };
+    
+    const loadCode = () => {
+        htmlEditor.value = localStorage.getItem('editor_html') || '';
+        cssEditor.value = localStorage.getItem('editor_css') || '';
+        jsEditor.value = localStorage.getItem('editor_js') || '';
+        runCode();
+    };
+
+    const newDoc = () => {
+        htmlEditor.value = '<h1>Hello World</h1>';
+        cssEditor.value = 'h1 { color: blue; }';
+        jsEditor.value = 'console.log("Hello from JS!");';
+        runCode();
+    };
+
+    document.getElementById('editor-run').addEventListener('click', runCode);
+    document.getElementById('editor-save').addEventListener('click', saveCode);
+    document.getElementById('editor-load').addEventListener('click', loadCode);
+    document.getElementById('editor-new').addEventListener('click', newDoc);
+    document.getElementById('editor-add-media').addEventListener('click', () => {
+        htmlEditor.value += '\n<img src="path/to/image.jpg" alt="image" width="100">';
+    });
+    
+    // Load saved code on init
+    loadCode();
+}
+
+// ===================================================================
+// === 6. CONTRIBUTION SYSTEM (WORKER INTERACTION)
+// ===================================================================
+async function fetchContributions() {
+    const display = document.getElementById('contribution-display');
+    display.innerHTML = `<p>Loading...</p>`;
+    try {
+        const response = await fetch(CONTRIBUTIONS_WORKER_URL);
+        const contributions = await response.json();
+        if (contributions && contributions.length > 0) {
+            display.innerHTML = contributions.reverse().map(c => {
+                let mediaHTML = '';
+                if(c.fileUrl) {
+                    if(c.fileType.startsWith('image/')) {
+                        mediaHTML = `<img src="${c.fileUrl}" style="max-width:100%; border-radius:5px; margin-top:10px;">`;
+                    } else if(c.fileType.startsWith('video/')) {
+                         mediaHTML = `<video src="${c.fileUrl}" controls style="max-width:100%; border-radius:5px; margin-top:10px;"></video>`;
                     }
-                    
-                    drops[i]++;
                 }
-            }
-            
-            // Animation loop
-            setInterval(draw, 33);
-            
-            // Resize handler
-            window.addEventListener('resize', () => {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            });
+                return `<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;">
+                    <p style="margin:0;">${c.text}</p>${mediaHTML}
+                    <small style="color:var(--text-secondary);">${new Date(c.timestamp).toLocaleString()}</small>
+                </div>`;
+            }).join('');
+        } else {
+            display.innerHTML = `<p>Be the first to leave a message!</p>`;
         }
+    } catch (e) {
+        display.innerHTML = `<p style="color:var(--danger);">Could not load contributions.</p>`;
+    }
+}
 
-        // ===================================================================
-        // === THEME MANAGEMENT ==============================================
-        // ===================================================================
-        function initTheme() {
-            // Set initial theme from localStorage or default to dark
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
-            
-            // Set up theme toggle
-            elements.themeToggleBtn.addEventListener('click', toggleTheme);
-        }
-        
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        }
-        
-        function updateThemeIcon(theme) {
-            const icon = elements.themeToggleBtn.querySelector('i');
-            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
+document.getElementById('contribution-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById('contribution-status');
+    statusEl.textContent = 'Uploading...';
+    
+    const formData = new FormData();
+    formData.append('text', document.getElementById('contribution-text').value);
+    const fileInput = document.getElementById('contribution-file');
+    if (fileInput.files.length > 0) {
+        formData.append('file', fileInput.files[0]);
+    }
 
-        // ===================================================================
-        // === EDITOR FUNCTIONALITY ==========================================
-        // ===================================================================
-        function initEditor() {
-            // Initialize ACE Editor
-            elements.editorCard.style.display = 'block';
-            elements.editorContainer.innerHTML = '<div id="aceEditor" style="width:100%;height:100%;"></div>';
-            
-            state.editor = ace.edit("aceEditor");
-            state.editor.setTheme("ace/theme/twilight");
-            state.editor.session.setMode("ace/mode/html");
-            state.editor.setFontSize(14);
-            state.editor.setOptions({
-                enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true
-            });
-            
-            // Set initial content
-            state.editor.setValue(`<!DOCTYPE html>
-<html>
-<head>
-    <title>My Custom Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Welcome to My Page</h1>
-        <p>This is a custom page created with the vFiles editor.</p>
-        <!-- Add your content here -->
-    </div>
-</body>
-</html>`);
-            
-            // Toggle editor visibility
-            elements.editorBtn.addEventListener('click', () => {
-                elements.editorCard.style.display = elements.editorCard.style.display === 'none' ? 'block' : 'none';
-            });
-        }
+    try {
+        const response = await fetch(CONTRIBUTIONS_WORKER_URL, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Upload failed');
+        statusEl.textContent = 'Message sent! Thank you.';
+        e.target.reset();
+        fetchContributions();
+    } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
+    }
+});
 
-        // ===================================================================
-        // === MUSIC PLAYER ==================================================
-        // ===================================================================
-        function initMusicPlayer() {
-            elements.musicCard.style.display = 'block';
-            
-            // Create music player HTML
-            elements.musicPlayerContainer.innerHTML = `
-                <audio id="audioPlayer" controls></audio>
-                <ul class="playlist" id="playlist"></ul>
-            `;
-            
-            const audioPlayer = document.getElementById('audioPlayer');
-            const playlist = document.getElementById('playlist');
-            
-            // Populate playlist
-            config.musicPlaylist.forEach((song, index) => {
-                const li = document.createElement('li');
-                li.className = 'playlist-item';
-                li.textContent = song.name;
-                li.addEventListener('click', () => {
-                    playTrack(index);
-                });
-                playlist.appendChild(li);
-            });
-            
-            // Play selected track
-            function playTrack(index) {
-                state.currentTrack = index;
-                audioPlayer.src = config.musicPlaylist[index].url;
-                audioPlayer.play();
-                
-                // Update active item in playlist
-                document.querySelectorAll('.playlist-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                playlist.children[index].classList.add('active');
-            }
-            
-            // Auto play next track when current ends
-            audioPlayer.addEventListener('ended', () => {
-                const nextTrack = (state.currentTrack + 1) % config.musicPlaylist.length;
-                playTrack(nextTrack);
-            });
-            
-            // Play first track
-            playTrack(0);
-            
-            // Toggle music player visibility
-            elements.musicBtn.addEventListener('click', () => {
-                elements.musicCard.style.display = elements.musicCard.style.display === 'none' ? 'block' : 'none';
-            });
-        }
-
-        // ===================================================================
-        // === CONTRIBUTIONS SYSTEM ==========================================
-        // ===================================================================
-        function loadContributions() {
-            fetch(config.contributionsWorkerUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        let html = '';
-                        data.reverse().forEach(contribution => {
-                            html += `
-                                <div class="contribution-item">
-                                    <p>${contribution.text}</p>
-                                    <div class="contribution-meta">
-                                        <span>${new Date(contribution.timestamp).toLocaleString()}</span>
-                                        <span>Visitor ID: ${contribution.visitorId || 'anonymous'}</span>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        elements.contributionsContainer.innerHTML = html;
-                    } else {
-                        elements.contributionsContainer.innerHTML = '<p>No contributions yet. Be the first to leave a message!</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading contributions:', error);
-                    elements.contributionsContainer.innerHTML = '<p>Failed to load contributions. Please try again later.</p>';
-                });
-        }
-
-        // ===================================================================
-        // === TRACKING SYSTEM ===============================================
-        // ===================================================================
-        function generateVisitorId() {
-            // Generate or retrieve visitor ID
-            state.visitorId = localStorage.getItem('visitorId');
-            if (!state.visitorId) {
-                state.visitorId = 'visitor-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
-                localStorage.setItem('visitorId', state.visitorId);
-            }
-            
-            // Send basic visitor info to tracking service
-            const visitorData = {
-                id: state.visitorId,
-                userAgent: navigator.userAgent,
-                timestamp: new Date().toISOString(),
-                referrer: document.referrer || 'direct'
-            };
-            
-            fetch(config.trackingWorkerUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(visitorData),
-                mode: 'no-cors'
-            });
-        }
-        
-        function showTrackingCodeInput() {
-            elements.trackingCodeInput.style.display = 'block';
-            elements.trackingCode.focus();
-        }
-        
-        function hideTrackingCodeInput() {
-            elements.trackingCodeInput.style.display = 'none';
-            elements.trackingCode.value = '';
-            elements.codeStatus.textContent = '';
-        }
-        
-        function activateTrackingFeatures() {
-            state.trackingActive = true;
-            localStorage.setItem('trackingActive', 'true');
-            
-            // Show tracking card and button
-            elements.trackingCard.style.display = 'block';
-            elements.trackingToggleBtn.style.display = 'inline-block';
-            
-            // Initialize map
-            initMap();
-            
-            // Update UI
-            elements.locationInfo.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Acquiring location...';
-        }
-        
-        function initMap() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        
-                        // Initialize map if not already done
-                        if (!state.map) {
-                            state.map = L.map('map').setView([lat, lon], 13);
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                attribution: '&copy; OpenStreetMap contributors'
-                            }).addTo(state.map);
-                            
-                            state.marker = L.marker([lat, lon]).addTo(state.map);
-                        } else {
-                            state.map.setView([lat, lon], 13);
-                            state.marker.setLatLng([lat, lon]);
-                        }
-                        
-                        // Get address information
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                const address = data.display_name || 'Unknown Location';
-                                elements.locationInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${address}`;
-                                state.marker.bindPopup(address).openPopup();
-                            })
-                            .catch(error => {
-                                console.error('Geocoding error:', error);
-                                elements.locationInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-                            });
-                    },
-                    error => {
-                        console.error('Geolocation error:', error);
-                        elements.locationInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Location access denied`;
-                    }
-                );
-            } else {
-                elements.locationInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Geolocation not supported`;
-            }
-        }
-
-        // ===================================================================
-        // === UTILITY FUNCTIONS =============================================
-        // ===================================================================
-        function setGreeting() {
-            const hour = new Date().getHours();
-            let greeting = 'Welcome';
-            
-            if (hour < 12) greeting = 'Good morning';
-            else if (hour < 18) greeting = 'Good afternoon';
-            else greeting = 'Good evening';
-            
-            elements.welcomeGreeting.textContent = `${greeting}, Visitor`;
-        }
-        
-        function setupEventListeners() {
-            // Contribution button - reload contributions
-            elements.contributionBtn.addEventListener('click', loadContributions);
-            
-            // Tracking code submission
-            elements.submitTrackingCode.addEventListener('click', () => {
-                const enteredCode = elements.trackingCode.value.trim();
-                
-                if (enteredCode === config.trackingCode) {
-                    elements.codeStatus.textContent = 'Code accepted! Activating tracking...';
-                    elements.codeStatus.style.color = 'green';
-                    
-                    setTimeout(() => {
-                        hideTrackingCodeInput();
-                        activateTrackingFeatures();
-                    }, 1000);
-                } else {
-                    elements.codeStatus.textContent = 'Incorrect code. Please try again.';
-                    elements.codeStatus.style.color = 'red';
-                    elements.trackingCode.value = '';
-                    elements.trackingCode.focus();
-                }
-            });
-            
-            // Tracking toggle button
-            elements.trackingToggleBtn.addEventListener('click', () => {
-                if (!state.trackingActive) {
-                    showTrackingCodeInput();
-                } else {
-                    elements.trackingCard.style.display = elements.trackingCard.style.display === 'none' ? 'block' : 'none';
-                }
-            });
-            
-            // Allow pressing Enter in tracking code input
-            elements.trackingCode.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    elements.submitTrackingCode.click();
-                }
-            });
-        }
-    </script>
+// ===================================================================
+// === 7. VISITOR TRACKING (WORKER INTERACTION)
+// ===================================================================
+function trackVisitor() {
+    try {
+        const data = {
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+        };
+        fetch(VISITOR_TRACKER_WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            mode: 'no-cors'
+        });
+    } catch(e) { /* Fail silently */ }
+}
+</script>
 </body>
 </html>
