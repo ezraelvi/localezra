@@ -74,6 +74,26 @@
         pointer-events: none;
     }
 
+    /* Futuristic Technology Background */
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(108, 92, 231, 0.1) 0%, transparent 20%),
+            radial-gradient(circle at 80% 70%, rgba(253, 121, 168, 0.1) 0%, transparent 20%),
+            linear-gradient(135deg, transparent 49.9%, rgba(0, 184, 148, 0.1) 50%, transparent 50.1%);
+        z-index: -1;
+        pointer-events: none;
+        animation: pulse 15s infinite alternate;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.3; }
+        100% { opacity: 0.7; }
+    }
+
     /* =================================
        2. LAYOUT & CARDS
        ================================= */
@@ -123,12 +143,30 @@
         border-radius: 15px;
         padding: 1.5rem;
         transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
     .dashboard-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
         border-color: var(--primary);
+    }
+
+    .dashboard-card:hover::before {
+        opacity: 1;
     }
     
     .card-header {
@@ -166,11 +204,12 @@
     .offcanvas-overlay {
         position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.8);
         z-index: 1001;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease;
+        backdrop-filter: blur(5px);
     }
     .offcanvas-overlay.active { opacity: 1; pointer-events: all; }
 
@@ -201,8 +240,163 @@
         display: flex; align-items: center; justify-content: center;
         cursor: pointer; z-index: 1003; font-size: 1rem;
     }
-    
-    /* Other specific styles from original code */
+
+    /* Editor Panel Styles */
+    .editor-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .editor-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .code-editor-panel {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 800px;
+        height: 80vh;
+        background: var(--bg-card);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        z-index: 1002;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .code-editor-panel.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .editor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .editor-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .editor-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .editor-tab {
+        padding: 5px 15px;
+        background: rgba(108, 92, 231, 0.2);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .editor-tab.active {
+        background: var(--primary);
+    }
+
+    .editor-area {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        padding: 15px;
+        color: var(--text-primary);
+        font-family: 'Courier New', monospace;
+        resize: none;
+        outline: none;
+    }
+
+    .editor-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    /* Activation Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background: var(--bg-card);
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: var(--primary);
+    }
+
+    .modal-input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .modal-button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .modal-button:hover {
+        background: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    /* Other specific styles */
     #map { width: 100%; height: 300px; border-radius: 10px; border: 2px solid var(--primary); overflow: hidden; }
     .location-info { margin-top: 15px; color: var(--text-secondary); font-size: 1rem; line-height: 1.5; }
     .header-btn {
@@ -210,53 +404,6 @@
         padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; transition: all 0.3s ease;
     }
     .header-btn:hover { background: var(--primary); transform: translateY(-2px); }
-
-    /* Password Overlay Styles */
-    .password-overlay {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        flex-direction: column;
-        color: white;
-    }
-    .password-overlay input {
-        padding: 10px;
-        margin-top: 15px;
-        border-radius: 5px;
-        border: 1px solid var(--primary);
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        font-size: 1.2rem;
-        text-align: center;
-    }
-    .password-overlay button {
-        padding: 10px 20px;
-        margin-top: 15px;
-        border-radius: 5px;
-        border: none;
-        background-color: var(--primary);
-        color: white;
-        cursor: pointer;
-        font-size: 1.1rem;
-        transition: background-color 0.3s ease;
-    }
-    .password-overlay button:hover {
-        background-color: #5a4ac7;
-    }
-    .password-overlay p {
-        color: var(--danger);
-        margin-top: 10px;
-    }
-
-    /* Hide map section by default */
-    #mapSection {
-        display: none;
-    }
 </style>
 </head>
 <body>
@@ -270,10 +417,23 @@
                 <button class="header-btn" id="theme-toggle-btn">
                     <i class="fas fa-sun"></i>
                 </button>
+                <button class="header-btn" id="tracking-toggle">
+                    <i class="fas fa-shield-alt"></i> Tracking
+                </button>
             </div>
         </header>
 
         <main>
+            <section class="dashboard-card" aria-label="Live tracking">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> Live Location</h2>
+                </div>
+                <div id="map"></div>
+                <div id="locationInfo" class="location-info">
+                    <i class="fas fa-sync-alt fa-spin"></i> Acquiring location...
+                </div>
+            </section>
+
             <section class="dashboard-card" aria-label="Threat statistics">
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-chart-pie"></i> Threat Overview</h2>
@@ -284,39 +444,48 @@
                 </div>
             </section>
 
-            <section class="dashboard-card" aria-label="Live tracking" id="mapSection">
+            <section class="dashboard-card" aria-label="Journal">
                 <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> Live Location</h2>
+                    <h2 class="card-title"><i class="fas fa-book"></i> Digital Journal</h2>
                 </div>
-                <div id="map"></div>
-                <div id="locationInfo" class="location-info">
-                    <i class="fas fa-sync-alt fa-spin"></i> Acquiring location...
+                <div id="journalContent" style="min-height: 200px;">
+                    <p>Welcome to your digital journal. Add your thoughts, images, and memories here.</p>
                 </div>
+                <button class="header-btn" id="editJournalBtn" style="width: 100%; margin-top: 15px;">
+                    <i class="fas fa-edit"></i> Edit Journal
+                </button>
             </section>
         </main>
     </div>
 
-    <button class="floating-btn" id="musicBtn" style="bottom: 30px; left: 30px;">
+    <!-- Floating Action Buttons -->
+    <button class="floating-code-btn" id="codeEditorBtn" style="bottom: 30px; left: 30px;">
+        <i class="fas fa-code"></i>
+    </button>
+    <button class="floating-btn" id="musicBtn" style="bottom: 30px; left: 50%; transform: translateX(-50%);">
         <i class="fas fa-music"></i>
     </button>
     <button class="floating-btn" id="contributionBtn" style="bottom: 30px; right: 30px;">
         <i class="fas fa-feather-alt"></i>
     </button>
 
+    <!-- Music Panel -->
     <div class="offcanvas-overlay" id="musicPanelOverlay"></div>
     <div class="offcanvas-panel from-left" id="musicPanel">
         <button class="close-panel-btn" id="closeMusicPanelBtn"><i class="fas fa-times"></i></button>
         <iframe src="about:blank" id="musicPanelIframe" style="width: 100%; height: 100%; border: none; margin-top: 30px;"></iframe>
     </div>
 
+    <!-- Contribution Panel -->
     <div class="offcanvas-overlay" id="contributionPanelOverlay"></div>
     <div class="offcanvas-panel from-right" id="contributionPanel">
         <button class="close-panel-btn" id="closeContributionPanelBtn"><i class="fas fa-times"></i></button>
         <h3>Leave Something Behind</h3>
-        <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: -10px; margin-bottom: 20px;">Share a message for others to see.</p>
+        <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: -10px; margin-bottom: 20px;">Share a message, a picture, or a video for others to see.</p>
         
         <form id="contributionForm" style="margin-top: auto; display: flex; flex-direction: column; gap: 15px;">
             <textarea id="contributionText" placeholder="Your message..." required style="width: 100%; min-height: 100px; padding: 10px; box-sizing: border-box; background-color: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;"></textarea>
+            <input type="file" id="contributionFile" accept="image/*,video/*" style="color: var(--text-secondary);">
             <button type="submit" class="header-btn" style="width: 100%; padding: 10px;">Submit Contribution</button>
             <div id="contributionStatus" style="margin-top: 10px; font-size: 0.9em; text-align: center;"></div>
         </form>
@@ -327,52 +496,69 @@
         </div>
     </div>
     
-    <div class="password-overlay" id="passwordOverlay">
-        <h2>Enter Password to Access Map</h2>
-        <input type="password" id="passwordInput" placeholder="Password">
-        <button id="passwordSubmit">Unlock Map</button>
-        <p id="passwordError" style="display: none;">Incorrect password. Try again.</p>
+    <!-- Editor Panel -->
+    <div class="editor-overlay" id="editorOverlay"></div>
+    <div class="code-editor-panel" id="codeEditorPanel">
+        <div class="editor-header">
+            <h3>Website Editor</h3>
+            <button class="close-panel-btn" id="closeEditorBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="editor-content">
+            <div class="editor-tabs">
+                <div class="editor-tab active" data-tab="html">HTML</div>
+                <div class="editor-tab" data-tab="css">CSS</div>
+                <div class="editor-tab" data-tab="js">JavaScript</div>
+            </div>
+            <textarea class="editor-area" id="htmlEditor" spellcheck="false"></textarea>
+            <div class="editor-actions">
+                <button class="header-btn" id="previewBtn">Preview</button>
+                <button class="header-btn" id="saveEditorBtn">Save Changes</button>
+            </div>
+        </div>
     </div>
 
+    <!-- Activation Modal -->
+    <div class="modal-overlay" id="activationModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Activate Tracking</h3>
+            <p>Enter activation code to enable visitor tracking features:</p>
+            <input type="password" class="modal-input" id="activationCode" placeholder="Enter activation code">
+            <button class="modal-button" id="activateBtn">Activate</button>
+            <p id="activationStatus" style="margin-top: 15px; color: var(--accent);"></p>
+        </div>
+    </div>
 
 <script>
 // ===================================================================
 // === BAGIAN UTAMA: INISIALISASI & KONFIGURASI ======================
 // ===================================================================
 
-// !!! PENTING: GANTI DENGAN URL CLOUDFLARE WORKER ANDA !!!
+// Konfigurasi Cloudflare Worker
 const CONTRIBUTIONS_WORKER_URL = 'https://your-worker-subdomain.workers.dev/contributions';
-// const VISITOR_TRACKER_WORKER_URL = 'https://your-worker-subdomain.workers.dev/track'; // Removed for simplicity
+const TRACKING_WORKER_URL = 'https://your-worker-subdomain.workers.dev/track';
+const VALID_ACTIVATION_CODE = 'EZRA1234'; // Ganti dengan kode aktivasimu
+
+// State aplikasi
+const appState = {
+    trackingEnabled: false,
+    editorContent: {
+        html: '',
+        css: '',
+        js: ''
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inisialisasi semua fitur saat halaman siap
     setTheme(localStorage.getItem('theme') || 'dark');
     setGreeting();
+    getLocation();
     initThreatChart();
     initPanelControls();
-    // trackVisitor(); // Removed for simplicity
+    initEditor();
+    checkTrackingActivation();
     animate(); // Memulai loop animasi
-
-    // Password logic for map
-    const passwordOverlay = document.getElementById('passwordOverlay');
-    const passwordInput = document.getElementById('passwordInput');
-    const passwordSubmit = document.getElementById('passwordSubmit');
-    const passwordError = document.getElementById('passwordError');
-    const mapSection = document.getElementById('mapSection');
-    const CORRECT_PASSWORD = 'map'; // Replace with your desired password
-
-    passwordSubmit.addEventListener('click', () => {
-        if (passwordInput.value === CORRECT_PASSWORD) {
-            passwordOverlay.style.display = 'none';
-            mapSection.style.display = 'block'; // Show the map section
-            getLocation(); // Initialize map only after correct password
-        } else {
-            passwordError.style.display = 'block';
-            passwordInput.value = ''; // Clear input
-        }
-    });
 });
-
 
 // ===================================================================
 // === BAGIAN 1: PETA & LOKASI (LEAFLET.JS) ===========================
@@ -427,7 +613,6 @@ function reverseGeocode(lat, lon) {
         });
 }
 
-
 // ===================================================================
 // === BAGIAN 2: GRAFIK INTERAKTIF (CHART.JS) =========================
 // ===================================================================
@@ -464,7 +649,6 @@ function animate() {
     updateChartData(); // Memperbarui data chart di setiap frame
 }
 
-
 // ===================================================================
 // === BAGIAN 3: KONTROL UI (TEMA, SAMBUTAN, PANEL) ===================
 // ===================================================================
@@ -495,14 +679,15 @@ function initPanelControls() {
     // Panel Logic
     const panels = [
         { btnId: 'musicBtn', panelId: 'musicPanel', overlayId: 'musicPanelOverlay', onOpen: openMusicPanel },
-        { btnId: 'contributionBtn', panelId: 'contributionPanel', overlayId: 'contributionPanelOverlay', onOpen: fetchContributions }
+        { btnId: 'contributionBtn', panelId: 'contributionPanel', overlayId: 'contributionPanelOverlay', onOpen: fetchContributions },
+        { btnId: 'codeEditorBtn', panelId: 'codeEditorPanel', overlayId: 'editorOverlay', onOpen: loadEditorContent }
     ];
 
     panels.forEach(p => {
         const btn = document.getElementById(p.btnId);
         const panel = document.getElementById(p.panelId);
         const overlay = document.getElementById(p.overlayId);
-        const closeBtn = panel.querySelector('.close-panel-btn');
+        const closeBtn = panel.querySelector('.close-panel-btn, .close-editor-btn');
 
         if(btn && panel && overlay) {
             const close = () => {
@@ -518,45 +703,83 @@ function initPanelControls() {
             if (closeBtn) closeBtn.addEventListener('click', close);
         }
     });
+
+    // Journal Edit Button
+    document.getElementById('editJournalBtn').addEventListener('click', () => {
+        const journalContent = document.getElementById('journalContent');
+        const currentContent = journalContent.innerHTML;
+        
+        // Set editor content
+        appState.editorContent.html = currentContent;
+        document.getElementById('htmlEditor').value = currentContent;
+        
+        // Open editor
+        document.getElementById('codeEditorPanel').classList.add('active');
+        document.getElementById('editorOverlay').classList.add('active');
+    });
 }
 
-
 // ===================================================================
-// === BAGIAN 4: PANEL SPESIFIK & INTERAKSI WORKER ===================
+// === BAGIAN 4: EDITOR & KONTRIBUSI =================================
 // ===================================================================
 
-// --- 4.1 Panel Musik ---
-function openMusicPanel() {
-    const iframe = document.getElementById('musicPanelIframe');
-    const musicHTML = `
-        <!DOCTYPE html><html><head><style>
-        body{font-family:sans-serif;background:#1e1e2f;color:#fff;padding:15px;text-align:center;}
-        h2{color:#fd79a8;margin-top:0;}ul{list-style:none;padding:0;}
-        li{background:#2d2d44;margin:5px 0;padding:10px;border-radius:5px;cursor:pointer;transition:background .2s;}
-        li:hover,li.active{background:#6c5ce7;}audio{width:100%;margin-top:20px;}
-        </style></head><body><h2>Music Player</h2><ul id="playlist"></ul><audio id="player" controls autoplay></audio>
-        <script>
-            const player=document.getElementById('player');const playlist=document.getElementById('playlist');
-            const songs=[
-                {name:"Where We Are", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}, // Ganti URL
-                {name:"Wish You Were Here", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"},
-                {name:"Hero", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"}
-            ];
-            songs.forEach((song,index)=>{
-                const item=document.createElement('li');item.textContent=song.name;
-                item.onclick=()=>{playSong(index)};playlist.appendChild(item);
-            });
-            function playSong(index){
-                document.querySelectorAll('li').forEach(li=>li.classList.remove('active'));
-                playlist.children[index].classList.add('active');
-                player.src=songs[index].url;
-            }
-            playSong(0);
-        <\/script></body></html>`;
-    iframe.srcdoc = musicHTML;
+function initEditor() {
+    const editorTabs = document.querySelectorAll('.editor-tab');
+    const htmlEditor = document.getElementById('htmlEditor');
+    const saveEditorBtn = document.getElementById('saveEditorBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    
+    // Tab switching
+    editorTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            editorTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // In a real implementation, you would switch between editors
+            // For this demo, we'll just use the HTML editor
+            htmlEditor.value = appState.editorContent[tab.dataset.tab] || '';
+        });
+    });
+    
+    // Save editor content
+    saveEditorBtn.addEventListener('click', () => {
+        const activeTab = document.querySelector('.editor-tab.active').dataset.tab;
+        appState.editorContent[activeTab] = htmlEditor.value;
+        
+        if (activeTab === 'html') {
+            document.getElementById('journalContent').innerHTML = htmlEditor.value;
+        }
+        
+        // Show success message
+        const originalText = saveEditorBtn.textContent;
+        saveEditorBtn.textContent = 'Saved!';
+        saveEditorBtn.style.backgroundColor = 'var(--success)';
+        
+        setTimeout(() => {
+            saveEditorBtn.textContent = originalText;
+            saveEditorBtn.style.backgroundColor = 'var(--primary)';
+        }, 2000);
+    });
+    
+    // Preview content
+    previewBtn.addEventListener('click', () => {
+        if (document.querySelector('.editor-tab.active').dataset.tab === 'html') {
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(htmlEditor.value);
+        }
+    });
 }
 
-// --- 4.2 Panel Kontribusi ---
+function loadEditorContent() {
+    // In a real implementation, you would load the actual content
+    document.getElementById('htmlEditor').value = appState.editorContent.html || '';
+}
+
+// ===================================================================
+// === BAGIAN 5: KONTRIBUSI & TRACKING ===============================
+// ===================================================================
+
+// Panel Kontribusi
 const contributionForm = document.getElementById('contributionForm');
 const contributionStatus = document.getElementById('contributionStatus');
 const contributionDisplay = document.getElementById('contributionDisplay');
@@ -566,17 +789,25 @@ contributionForm.addEventListener('submit', async (e) => {
     contributionStatus.textContent = 'Submitting...';
     
     const text = document.getElementById('contributionText').value;
-
+    const fileInput = document.getElementById('contributionFile');
+    
     try {
+        const formData = new FormData();
+        formData.append('text', text);
+        if (fileInput.files[0]) {
+            formData.append('file', fileInput.files[0]);
+        }
+        
         const response = await fetch(CONTRIBUTIONS_WORKER_URL, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ text }),
+            body: formData
         });
+        
         if (!response.ok) throw new Error('Network response was not ok.');
+        
         contributionStatus.textContent = 'Thank you for your contribution!';
         contributionForm.reset();
-        fetchContributions(); // Muat ulang
+        fetchContributions(); // Muat ulang kontribusi
     } catch (error) {
         console.error('Error submitting:', error);
         contributionStatus.textContent = 'Submission failed. Please try again.';
@@ -591,12 +822,21 @@ async function fetchContributions() {
         const contributions = await response.json();
         
         if (contributions && contributions.length > 0) {
-            contributionDisplay.innerHTML = contributions.reverse().map(c => 
-                `<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;border-left:3px solid var(--accent);">
-                    <p style="margin:0;">${c.text}</p>
-                    <small style="color:var(--text-secondary);">${new Date(c.timestamp).toLocaleString()}</small>
-                </div>`
-            ).join('');
+            contributionDisplay.innerHTML = contributions.reverse().map(c => {
+                let content = `<p style="margin:0;">${c.text}</p>`;
+                if (c.mediaUrl) {
+                    if (c.mediaType.startsWith('image')) {
+                        content += `<img src="${c.mediaUrl}" style="max-width:100%; margin-top:10px; border-radius:5px;">`;
+                    } else if (c.mediaType.startsWith('video')) {
+                        content += `<video controls src="${c.mediaUrl}" style="max-width:100%; margin-top:10px; border-radius:5px;"></video>`;
+                    }
+                }
+                return `
+                    <div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;border-left:3px solid var(--accent);">
+                        ${content}
+                        <small style="color:var(--text-secondary);">${new Date(c.timestamp).toLocaleString()}</small>
+                    </div>`;
+            }).join('');
         } else {
             contributionDisplay.innerHTML = `<p>Be the first to contribute!</p>`;
         }
@@ -606,8 +846,105 @@ async function fetchContributions() {
     }
 }
 
-// Removed: 4.3 Pelacakan Pengunjung
-// Removed: Code Editor Panel and related functionality for simplicity.
+// Tracking Activation
+function checkTrackingActivation() {
+    const isActivated = localStorage.getItem('trackingActivated') === 'true';
+    if (!isActivated) {
+        document.getElementById('activationModal').style.display = 'flex';
+    } else {
+        appState.trackingEnabled = true;
+        document.getElementById('tracking-toggle').innerHTML = `<i class="fas fa-shield-alt"></i> Tracking: ON`;
+        trackVisitor();
+    }
+}
+
+document.getElementById('activateBtn').addEventListener('click', () => {
+    const code = document.getElementById('activationCode').value;
+    const status = document.getElementById('activationStatus');
+    
+    if (code === VALID_ACTIVATION_CODE) {
+        localStorage.setItem('trackingActivated', 'true');
+        appState.trackingEnabled = true;
+        document.getElementById('activationModal').style.display = 'none';
+        document.getElementById('tracking-toggle').innerHTML = `<i class="fas fa-shield-alt"></i> Tracking: ON`;
+        status.textContent = '';
+        trackVisitor();
+    } else {
+        status.textContent = 'Invalid activation code';
+    }
+});
+
+document.getElementById('tracking-toggle').addEventListener('click', () => {
+    if (!appState.trackingEnabled) {
+        document.getElementById('activationModal').style.display = 'flex';
+    } else {
+        // Toggle tracking on/off
+        appState.trackingEnabled = !appState.trackingEnabled;
+        const btn = document.getElementById('tracking-toggle');
+        btn.innerHTML = `<i class="fas fa-shield-alt"></i> Tracking: ${appState.trackingEnabled ? 'ON' : 'OFF'}`;
+        
+        if (appState.trackingEnabled) {
+            trackVisitor();
+        }
+    }
+});
+
+function trackVisitor() {
+    if (!appState.trackingEnabled) return;
+    
+    try {
+        const data = {
+            userAgent: navigator.userAgent,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString(),
+            location: window.location.href,
+            screenResolution: `${window.screen.width}x${window.screen.height}`,
+            language: navigator.language
+        };
+        
+        fetch(TRACKING_WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            mode: 'no-cors'
+        });
+    } catch(e) { 
+        console.error('Visitor tracking failed:', e); 
+    }
+}
+
+// ===================================================================
+// === BAGIAN 6: MUSIC PLAYER ========================================
+// ===================================================================
+function openMusicPanel() {
+    const iframe = document.getElementById('musicPanelIframe');
+    const musicHTML = `
+        <!DOCTYPE html><html><head><style>
+        body{font-family:sans-serif;background:#1e1e2f;color:#fff;padding:15px;text-align:center;}
+        h2{color:#fd79a8;margin-top:0;}ul{list-style:none;padding:0;}
+        li{background:#2d2d44;margin:5px 0;padding:10px;border-radius:5px;cursor:pointer;transition:background .2s;}
+        li:hover,li.active{background:#6c5ce7;}audio{width:100%;margin-top:20px;}
+        </style></head><body><h2>Music Player</h2><ul id="playlist"></ul><audio id="player" controls autoplay></audio>
+        <script>
+            const player=document.getElementById('player');const playlist=document.getElementById('playlist');
+            const songs=[
+                {name:"Where We Are", url:"https://example.com/song1.mp3"},
+                {name:"Wish You Were Here", url:"https://example.com/song2.mp3"},
+                {name:"Hero", url:"https://example.com/song3.mp3"}
+            ];
+            songs.forEach((song,index)=>{
+                const item=document.createElement('li');item.textContent=song.name;
+                item.onclick=()=>{playSong(index)};playlist.appendChild(item);
+            });
+            function playSong(index){
+                document.querySelectorAll('li').forEach(li=>li.classList.remove('active'));
+                playlist.children[index].classList.add('active');
+                player.src=songs[index].url;
+            }
+            playSong(0);
+        <\/script></body></html>`;
+    iframe.srcdoc = musicHTML;
+}
 </script>
 </body>
 </html>
