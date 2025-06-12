@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ezra's Interactive Hub</title>
-    <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
+    <title>Dashboard</title>
+    <link rel="icon" type="image/png" href="dashboardicon.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* =================================
-           1. VARIABLES & GLOBAL STYLES
-        ================================= */
         :root {
             --primary: #8e44ad; --accent: #00a8ff; --success: #2ecc71;
             --danger: #e74c3c; --light: #ecf0f1; --dark: #1a1a2e;
@@ -31,18 +28,10 @@
             overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-main); color: var(--text-primary);
         }
-        
-        /* =================================
-           2. INTERACTIVE BACKGROUND
-        ================================= */
         #interactive-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0; background-color: var(--bg-main);
         }
-        
-        /* =================================
-           3. MAIN LAYOUT & CORE COMPONENTS
-        ================================= */
         .main-container {
             position: relative; z-index: 1; width: 100%; height: 100%;
             transition: all 0.5s ease-in-out;
@@ -66,10 +55,6 @@
             text-align: center; gap: 15px; height: 100%;
         }
         .hidden { display: none !important; }
-
-        /* =================================
-           4. PANELS (Editor, Music, Contribution)
-        ================================= */
         .panel {
             position: fixed; background: var(--bg-panel); backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px); z-index: 1010;
@@ -77,34 +62,26 @@
             transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             display: flex; flex-direction: column;
         }
-        /* Editor Panel (Left) */
         #editor-panel {
             top: 0; left: 0; width: 100%; height: 100%;
             transform: translateX(-100%);
         }
         #editor-panel.active { transform: translateX(0); }
-        /* Music Panel (Bottom) */
         #music-panel {
             bottom: 0; left: 0; width: 100%; height: auto;
             max-height: 50vh; border-top: 1px solid var(--border-color);
             transform: translateY(100%); padding: 15px;
         }
         #music-panel.active { transform: translateY(0); }
-        /* Contribution Panel (Right) */
         #contribution-panel {
             top: 0; right: 0; width: 400px; max-width: 90vw; height: 100%;
             transform: translateX(100%); padding: 20px;
         }
         #contribution-panel.active { transform: translateX(0); }
-
         .panel-close-btn {
             position: absolute; top: 15px; right: 15px; background: none; border: none;
             color: var(--text-primary); font-size: 1.5rem; cursor: pointer; z-index: 5;
         }
-        
-        /* =================================
-           5. FLOATING ACTION BUTTONS (FABs)
-        ================================= */
         .fab-container { position: fixed; z-index: 1000; }
         .fab {
             background: var(--primary); color: white; width: 55px; height: 55px;
@@ -120,10 +97,6 @@
         #fab-layout, #fab-theme { bottom: 20px; }
         #fab-layout { left: 20px; }
         #fab-theme { right: 20px; }
-
-        /* =================================
-           6. ENHANCED EDITOR PANEL
-        ================================= */
         #editor-panel { padding: 0; }
         .editor-toolbar { display: flex; gap: 5px; padding: 10px; background: rgba(0,0,0,0.2); flex-wrap: wrap; }
         .editor-toolbar button, .editor-toolbar select { background: var(--primary); color: white; border:none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
@@ -134,10 +107,6 @@
         .editor-pane label { background: #333; color: var(--accent); padding: 5px 10px; font-size: 0.8em; font-weight: bold;}
         .editor-pane textarea { flex-grow: 1; background: #1e1e1e; color: #f8f8f2; border: none; resize: none; padding: 10px; font-family: 'Courier New', monospace; font-size: 14px; outline: none; }
         #editor-preview { width: 100%; height: 100%; border: none; background: white; }
-        
-        /* =================================
-           7. OTHER WIDGETS (VIDEO, SOCIALS)
-        ================================= */
         #video-player-widget {
             position: fixed; bottom: 20px; right: 90px; z-index: 999;
             width: 150px; height: 150px; border-radius: 10px;
@@ -147,17 +116,12 @@
         #video-player-widget video { width: 100%; height: 100%; object-fit: cover; }
         .video-controls { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;}
         .video-controls button { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; }
-
         .social-links {
             position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
             display: flex; flex-direction: column; gap: 15px; z-index: 999;
         }
         .social-links a { color: var(--text-primary); font-size: 1.5rem; transition: color 0.3s, transform 0.3s; }
         .social-links a:hover { color: var(--accent); transform: scale(1.2); }
-
-        /* =================================
-           8. DESKTOP GRID LAYOUT
-        ================================= */
         body.desktop-layout .main-container {
             display: grid;
             grid-template-columns: 350px 1fr 350px;
@@ -182,8 +146,7 @@
         }
     </style>
 </head>
-<body class=""> <canvas id="interactive-bg"></canvas>
-    
+<body class=""> <canvas id="interactive-bg"></canvas> 
     <div class="main-container">
         <div id="map-wrapper">
             <div id="map-container">
@@ -196,11 +159,9 @@
                 <div id="locationInfo" class="hidden">Initializing tracking...</div>
             </div>
         </div>
-
         <div class="panel" id="contribution-panel-desktop" style="display: none;">
              </div>
     </div>
-
     <div class="panel" id="editor-panel">
         <button class="panel-close-btn" data-panel="editor-panel"><i class="fas fa-times"></i></button>
         <div class="editor-toolbar">
@@ -232,7 +193,6 @@
             </div>
         </div>
     </div>
-    
     <div class="panel" id="music-panel">
         <button class="panel-close-btn" data-panel="music-panel"><i class="fas fa-times"></i></button>
         <h4>Now Playing</h4>
@@ -242,7 +202,6 @@
             <div id="playlist" style="max-height: 20vh; overflow-y: auto; margin-top: 10px;"></div>
         </div>
     </div>
-
     <div class="panel" id="contribution-panel">
         <button class="panel-close-btn" data-panel="contribution-panel"><i class="fas fa-times"></i></button>
         <div id="contribution-content" style="display: flex; flex-direction: column; height: 100%;">
@@ -260,7 +219,6 @@
             </form>
         </div>
     </div>
-
     <div class="fab-container" id="fab-editor">
         <button class="fab" data-panel="editor-panel" title="Code Editor"><i class="fas fa-code"></i></button>
     </div>
@@ -276,33 +234,25 @@
     <div class="fab-container" id="fab-theme">
         <button class="fab" title="Toggle Theme"><i class="fas fa-sun"></i></button>
     </div>
-    
     <div class="desktop-fab-bar" style="display:none;">
          <button class="fab" id="desktop-layout-toggle" title="Toggle Layout" style="position:static;"><i class="fas fa-mobile-alt"></i></button>
          <button class="fab" id="desktop-theme-toggle" title="Toggle Theme" style="position:static;"><i class="fas fa-sun"></i></button>
     </div>
-
     <div id="video-player-widget">
-        <video id="widget-video" loop src="path/to/your/video.mp4"></video>
+        <video id="widget-video" loop src="video.mp4"></video>
         <div class="video-controls">
             <button id="video-play-pause"><i class="fas fa-play"></i></button>
             <button id="video-mute"><i class="fas fa-volume-up"></i></button>
         </div>
     </div>
-
     <div class="social-links">
-        <a href="https://wa.me/6281234567890" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://wa.me/6281434046148" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
         <a href="https://instagram.com/ezravvv" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
     </div>
-
 <script>
-// ===================================================================
-// === CONFIGURATION & INITIALIZATION
-// ===================================================================
-const SECRET_CODE = "whereare";
-const CONTRIBUTIONS_WORKER_URL = 'https://ganti-dengan-url-worker-kontribusi-anda.workers.dev';
-const VISITOR_TRACKER_WORKER_URL = 'https://ganti-dengan-url-worker-pelacak-anda.workers.dev';
-
+const SECRET_CODE = "wherewe";
+const CONTRIBUTIONS_WORKER_URL = 'https://contributions-workerjs.ezvvel.workers.dev/';
+const VISITOR_TRACKER_WORKER_URL = 'https://visitor-tracker-workerjs.ezvvel.workers.dev/';
 document.addEventListener('DOMContentLoaded', () => {
     initParticleBackground();
     initSecretCodeListener();
@@ -313,19 +263,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initMusicPlayer();
     trackVisitor();
 });
-
-// ===================================================================
-// === 1. INTERACTIVE BACKGROUND
-// ===================================================================
 function initParticleBackground() {
     const canvas = document.getElementById('interactive-bg');
     const ctx = canvas.getContext('2d');
     let particles = [];
     let mouse = { x: null, y: null, radius: 150 };
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
     window.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -334,7 +278,6 @@ function initParticleBackground() {
         mouse.x = event.x;
         mouse.y = event.y;
     });
-
     class Particle {
         constructor(x, y, dirX, dirY, size, color) {
             this.x = x; this.y = y; this.dirX = dirX; this.dirY = dirY;
@@ -354,7 +297,6 @@ function initParticleBackground() {
             this.draw();
         }
     }
-
     function initParticles() {
         particles = [];
         let numParticles = (canvas.height * canvas.width) / 9000;
@@ -368,7 +310,6 @@ function initParticleBackground() {
             particles.push(new Particle(x, y, dirX, dirY, size, color));
         }
     }
-
     function connectParticles() {
         for (let a = 0; a < particles.length; a++) {
             for (let b = a; b < particles.length; b++) {
@@ -386,21 +327,15 @@ function initParticleBackground() {
             }
         }
     }
-
     function animateParticles() {
         requestAnimationFrame(animateParticles);
         ctx.clearRect(0, 0, innerWidth, innerHeight);
         particles.forEach(p => p.update());
         connectParticles();
     }
-    
     initParticles();
     animateParticles();
 }
-
-// ===================================================================
-// === 2. MAP & TRACKING SYSTEM
-// ===================================================================
 let keySequence = [];
 function initSecretCodeListener() {
     window.addEventListener('keydown', (e) => {
@@ -408,11 +343,10 @@ function initSecretCodeListener() {
         keySequence = keySequence.slice(-SECRET_CODE.length);
         if (keySequence.join('') === SECRET_CODE) {
             unlockTrackingSystem();
-            keySequence = []; // Reset
+            keySequence = [];
         }
     });
 }
-
 function unlockTrackingSystem() {
     const lockScreen = document.getElementById('map-lock-screen');
     if (!lockScreen.classList.contains('hidden')) {
@@ -420,12 +354,10 @@ function unlockTrackingSystem() {
         document.getElementById('map').classList.remove('hidden');
         document.getElementById('locationInfo').classList.remove('hidden');
         getLocation();
-        // Optional: show a success message
         const info = document.getElementById('locationInfo');
         info.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success);"></i> System Activated. Initializing tracker...`;
     }
 }
-
 let map, marker;
 function getLocation() {
     if (navigator.geolocation) {
@@ -436,7 +368,6 @@ function getLocation() {
         );
     }
 }
-
 function initMap(lat, lon, isDefault = false) {
     if (!map) {
         map = L.map('map').setView([lat, lon], 13);
@@ -455,30 +386,23 @@ function initMap(lat, lon, isDefault = false) {
         locationInfoEl.innerHTML = `Tracking... Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
     }
 }
-
-// ===================================================================
-// === 3. PANELS & UI CONTROLS
-// ===================================================================
 function initPanelControls() {
     document.querySelectorAll('[data-panel]').forEach(button => {
         button.addEventListener('click', () => {
             const panelId = button.getAttribute('data-panel');
             const panel = document.getElementById(panelId);
             panel.classList.toggle('active');
-
             if (panelId === 'contribution-panel' && panel.classList.contains('active')) {
                 fetchContributions();
             }
         });
     });
 }
-
 function initLayoutAndThemeToggles() {
     const layoutBtn = document.querySelector('#fab-layout .fab');
     const themeBtn = document.querySelector('#fab-theme .fab');
     const desktopLayoutBtn = document.getElementById('desktop-layout-toggle');
     const desktopThemeBtn = document.getElementById('desktop-theme-toggle');
-
     const toggleLayout = () => document.body.classList.toggle('desktop-layout');
     const toggleTheme = () => {
         const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -488,16 +412,11 @@ function initLayoutAndThemeToggles() {
             i.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         });
     };
-    
     layoutBtn.addEventListener('click', toggleLayout);
     desktopLayoutBtn.addEventListener('click', toggleLayout);
     themeBtn.addEventListener('click', toggleTheme);
     desktopThemeBtn.addEventListener('click', toggleTheme);
 }
-
-// ===================================================================
-// === 4. WIDGETS (VIDEO, MUSIC)
-// ===================================================================
 function initVideoPlayer() {
     const video = document.getElementById('widget-video');
     const playBtn = document.getElementById('video-play-pause');
@@ -517,16 +436,15 @@ function initVideoPlayer() {
         muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
     });
 }
-
 function initMusicPlayer() {
     const player = document.getElementById('audio-player');
     const playlistEl = document.getElementById('playlist');
     const songTitleEl = document.getElementById('song-title');
     const songs = [
-        { name: "Where We Are", url: "path/to/where-we-are.mp3" },
-        { name: "Wish You Were Here", url: "path/to/wish-you-were-here.mp3" }
+        { name: "Where We Are", url: "where-we-are.mp3" },
+        { name: "Wish You Were Here", url: "wish-you-were-here.mp3" }
+        { name: "ghost to you", url: "ghost-to-you.mp3" }
     ];
-
     songs.forEach((song, index) => {
         const item = document.createElement('div');
         item.textContent = song.name;
@@ -540,16 +458,11 @@ function initMusicPlayer() {
         playlistEl.appendChild(item);
     });
 }
-
-// ===================================================================
-// === 5. ENHANCED CODE EDITOR
-// ===================================================================
 function initEditor() {
     const htmlEditor = document.getElementById('html-editor');
     const cssEditor = document.getElementById('css-editor');
     const jsEditor = document.getElementById('js-editor');
     const previewFrame = document.getElementById('editor-preview');
-
     const runCode = () => {
         const source = `
             <html>
@@ -559,28 +472,24 @@ function initEditor() {
         `;
         previewFrame.srcdoc = source;
     };
-    
     const saveCode = () => {
         localStorage.setItem('editor_html', htmlEditor.value);
         localStorage.setItem('editor_css', cssEditor.value);
         localStorage.setItem('editor_js', jsEditor.value);
         alert('Code saved!');
     };
-    
     const loadCode = () => {
         htmlEditor.value = localStorage.getItem('editor_html') || '';
         cssEditor.value = localStorage.getItem('editor_css') || '';
         jsEditor.value = localStorage.getItem('editor_js') || '';
         runCode();
     };
-
     const newDoc = () => {
         htmlEditor.value = '<h1>Hello World</h1>';
         cssEditor.value = 'h1 { color: blue; }';
         jsEditor.value = 'console.log("Hello from JS!");';
         runCode();
     };
-
     document.getElementById('editor-run').addEventListener('click', runCode);
     document.getElementById('editor-save').addEventListener('click', saveCode);
     document.getElementById('editor-load').addEventListener('click', loadCode);
@@ -588,14 +497,8 @@ function initEditor() {
     document.getElementById('editor-add-media').addEventListener('click', () => {
         htmlEditor.value += '\n<img src="path/to/image.jpg" alt="image" width="100">';
     });
-    
-    // Load saved code on init
     loadCode();
 }
-
-// ===================================================================
-// === 6. CONTRIBUTION SYSTEM (WORKER INTERACTION)
-// ===================================================================
 async function fetchContributions() {
     const display = document.getElementById('contribution-display');
     display.innerHTML = `<p>Loading...</p>`;
@@ -624,19 +527,16 @@ async function fetchContributions() {
         display.innerHTML = `<p style="color:var(--danger);">Could not load contributions.</p>`;
     }
 }
-
 document.getElementById('contribution-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const statusEl = document.getElementById('contribution-status');
     statusEl.textContent = 'Uploading...';
-    
     const formData = new FormData();
     formData.append('text', document.getElementById('contribution-text').value);
     const fileInput = document.getElementById('contribution-file');
     if (fileInput.files.length > 0) {
         formData.append('file', fileInput.files[0]);
     }
-
     try {
         const response = await fetch(CONTRIBUTIONS_WORKER_URL, { method: 'POST', body: formData });
         if (!response.ok) throw new Error('Upload failed');
@@ -647,10 +547,6 @@ document.getElementById('contribution-form').addEventListener('submit', async (e
         statusEl.textContent = `Error: ${err.message}`;
     }
 });
-
-// ===================================================================
-// === 7. VISITOR TRACKING (WORKER INTERACTION)
-// ===================================================================
 function trackVisitor() {
     try {
         const data = {
@@ -663,7 +559,7 @@ function trackVisitor() {
             body: JSON.stringify(data),
             mode: 'no-cors'
         });
-    } catch(e) { /* Fail silently */ }
+    } catch(e) { }
 }
 </script>
 </body>
