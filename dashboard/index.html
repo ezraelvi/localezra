@@ -3,948 +3,995 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard Ezra</title>
-    <link rel="icon" type="image/png" href="/imgvidaud/dashboardicon.png">
-
+    <title>vFiles</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.32.6/src-min-noconflict/ace.js"></script>
+    <style>
+        /* =================================
+           1. FUTURISTIC BACKGROUND & GLOBAL STYLES
+           ================================= */
+        :root {
+            --primary: #6c5ce7;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --danger: #ff7675;
+            --light: #f5f6fa;
+            --dark: #1e1e2f;
+            --bg-main: #141e30;
+            --bg-card: rgba(44, 44, 66, 0.7);
+            --text-primary: #f5f6fa;
+            --text-secondary: #bdc3c7;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(108, 92, 231, 0.3);
+            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
 
-<style>
-    /* =================================
-       1. VARIABLES & GLOBAL STYLES
-       ================================= */
-    :root {
-        --primary: #6c5ce7;
-        --accent: #fd79a8;
-        --success: #00b894;
-        --danger: #ff7675;
-        --light: #f5f6fa;
-        --dark: #1e1e2f;
+        html[data-theme='light'] {
+            --bg-main: #f0f2f5;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --grid-color: rgba(0, 0, 0, 0.05);
+            --border-color: rgba(108, 92, 231, 0.2);
+            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
 
-        --bg-main: #141e30;
-        --bg-card: rgba(44, 44, 66, 0.7);
-        --text-primary: #f5f6fa;
-        --text-secondary: #bdc3c7;
-        --grid-color: rgba(255, 255, 255, 0.05);
-        --border-color: rgba(108, 92, 231, 0.3);
-        --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            color: var(--text-primary);
+            background-color: var(--bg-main);
+        }
 
-    html[data-theme='light'] {
-        --bg-main: #f0f2f5;
-        --bg-card: rgba(255, 255, 255, 0.8);
-        --text-primary: #2d3436;
-        --text-secondary: #636e72;
-        --grid-color: rgba(0, 0, 0, 0.05);
-        --border-color: rgba(108, 92, 231, 0.2);
-        --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
+        /* Futuristic interactive background */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
 
-    body {
-        background: linear-gradient(45deg, #141e30, #243b55, #141e30);
-        color: var(--text-primary);
-        font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-        transition: background 0.3s ease, color 0.3s ease;
-        animation: gradient 20s ease infinite;
-        background-size: 200% 200%;
-        margin: 0;
-        padding: 0;
-    }
+        /* =================================
+           2. LAYOUT & CARDS
+           ================================= */
+        #content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+        header {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary);
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 990;
+        }
 
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background-image:
-            linear-gradient(var(--grid-color) 1px, transparent 1px),
-            linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-        background-size: 40px 40px;
-        z-index: -2;
-        pointer-events: none;
-    }
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1500px;
+            margin: 0 auto;
+            width: 100%;
+        }
 
-    /* Futuristic Technology Background */
-    body::after {
-        content: '';
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background: 
-            radial-gradient(circle at 20% 30%, rgba(108, 92, 231, 0.1) 0%, transparent 20%),
-            radial-gradient(circle at 80% 70%, rgba(253, 121, 168, 0.1) 0%, transparent 20%),
-            linear-gradient(135deg, transparent 49.9%, rgba(0, 184, 148, 0.1) 50%, transparent 50.1%);
-        z-index: -1;
-        pointer-events: none;
-        animation: pulse 15s infinite alternate;
-    }
+        .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
 
-    @keyframes pulse {
-        0% { opacity: 0.3; }
-        100% { opacity: 0.7; }
-    }
-
-    /* =================================
-       2. LAYOUT & CARDS
-       ================================= */
-    #content {
-        position: relative;
-        z-index: 1;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    header {
-        background: var(--bg-card);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-bottom: 2px solid var(--primary);
-        color: var(--text-primary);
-        padding: 1rem 1.5rem;
-        font-size: 1.5rem;
-        font-weight: bold;
-        user-select: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 990;
-    }
-
-    main {
-        flex: 1;
-        padding: 2rem;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        max-width: 1500px;
-        margin: 0 auto;
-        width: 100%;
-    }
-
-    .dashboard-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--card-shadow);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 1.5rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .dashboard-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--primary), var(--accent));
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        border-color: var(--primary);
-    }
-
-    .dashboard-card:hover::before {
-        opacity: 1;
-    }
-    
-    .card-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 1.5rem; padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .card-title {
-        margin: 0; font-size: 1.3rem; color: var(--primary);
-        display: flex; align-items: center; gap: 10px;
-    }
-    
-    /* =================================
-       3. FLOATING BUTTONS & PANELS
-       ================================= */
-    .floating-btn, .floating-code-btn {
-        position: fixed;
-        background: var(--primary);
-        color: white;
-        width: 60px; height: 60px;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem;
-        cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-        transition: all 0.3s ease;
-        border: none;
-    }
-    .floating-btn:hover, .floating-code-btn:hover {
-        transform: scale(1.1) translateY(-3px);
-        box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
-    }
-    
-    .offcanvas-overlay {
-        position: fixed; top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1001;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
-        backdrop-filter: blur(5px);
-    }
-    .offcanvas-overlay.active { opacity: 1; pointer-events: all; }
-
-    .offcanvas-panel {
-        position: fixed; top: 0;
-        width: 90%; max-width: 500px;
-        height: 100vh;
-        background: var(--bg-main);
-        color: var(--text-primary);
-        z-index: 1002;
-        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-        display: flex; flex-direction: column;
-        padding: 2rem;
-        box-sizing: border-box;
-        overflow-y: auto;
-    }
-    
-    .offcanvas-panel.from-left { left: -100%; transition: left 0.4s ease-out; }
-    .offcanvas-panel.from-left.active { left: 0; }
-    
-    .offcanvas-panel.from-right { right: -100%; transition: right 0.4s ease-out; }
-    .offcanvas-panel.from-right.active { right: 0; }
-    
-    .close-panel-btn {
-        position: absolute; top: 15px; right: 15px;
-        background: var(--danger); color: white; border: none;
-        width: 30px; height: 30px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; z-index: 1003; font-size: 1rem;
-    }
-
-    /* Editor Panel Styles */
-    .editor-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1001;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
-        backdrop-filter: blur(5px);
-    }
-
-    .editor-overlay.active {
-        opacity: 1;
-        pointer-events: all;
-    }
-
-    .code-editor-panel {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 90%;
-        max-width: 800px;
-        height: 80vh;
-        background: var(--bg-card);
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        z-index: 1002;
-        display: flex;
-        flex-direction: column;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
-    }
-
-    .code-editor-panel.active {
-        opacity: 1;
-        pointer-events: all;
-    }
-
-    .editor-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .editor-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .editor-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-
-    .editor-tab {
-        padding: 5px 15px;
-        background: rgba(108, 92, 231, 0.2);
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .editor-tab.active {
-        background: var(--primary);
-    }
-
-    .editor-area {
-        flex: 1;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid var(--border-color);
-        border-radius: 5px;
-        padding: 15px;
-        color: var(--text-primary);
-        font-family: 'Courier New', monospace;
-        resize: none;
-        outline: none;
-    }
-
-    .editor-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    /* Activation Modal */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1100;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(5px);
-    }
-
-    .modal-content {
-        background: var(--bg-card);
-        padding: 30px;
-        border-radius: 15px;
-        max-width: 500px;
-        width: 90%;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-title {
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-        color: var(--primary);
-    }
-
-    .modal-input {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 20px;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid var(--border-color);
-        border-radius: 5px;
-        color: var(--text-primary);
-        font-size: 1rem;
-    }
-
-    .modal-button {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-    }
-
-    .modal-button:hover {
-        background: var(--accent);
-        transform: translateY(-2px);
-    }
-
-    /* Other specific styles */
-    #map { width: 100%; height: 300px; border-radius: 10px; border: 2px solid var(--primary); overflow: hidden; }
-    .location-info { margin-top: 15px; color: var(--text-secondary); font-size: 1rem; line-height: 1.5; }
-    .header-btn {
-        background: rgba(108, 92, 231, 0.2); color: var(--light); border: 1px solid var(--primary);
-        padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; transition: all 0.3s ease;
-    }
-    .header-btn:hover { background: var(--primary); transform: translateY(-2px); }
-</style>
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary);
+        }
+        
+        .card-header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 1.5rem; 
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-title {
+            margin: 0; 
+            font-size: 1.3rem; 
+            color: var(--primary);
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+        
+        /* =================================
+           3. PANEL EDITOR & FLOATING CONTROLS
+           ================================= */
+        .floating-btn {
+            position: fixed;
+            background: var(--primary);
+            color: white;
+            width: 60px; 
+            height: 60px;
+            border-radius: 50%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .floating-btn:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+        }
+        
+        #editorBtn {
+            bottom: 30px; 
+            left: 30px;
+        }
+        
+        #musicBtn {
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%);
+        }
+        
+        #contributionBtn {
+            bottom: 30px; 
+            right: 30px;
+        }
+        
+        /* Editor Panel */
+        .editor-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .editor-overlay.active { 
+            opacity: 1; 
+            pointer-events: all; 
+        }
+        
+        .editor-panel {
+            position: fixed; 
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%; 
+            max-width: 900px;
+            height: 80vh;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            z-index: 1002;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--primary);
+        }
+        
+        .editor-header {
+            padding: 15px;
+            background: rgba(108, 92, 231, 0.2);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .editor-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .editor-tab {
+            padding: 5px 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        
+        .editor-tab.active {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.3);
+        }
+        
+        .editor-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        #editor {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .editor-tools {
+            width: 250px;
+            border-left: 1px solid var(--border-color);
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .editor-tool-section {
+            margin-bottom: 20px;
+        }
+        
+        .close-editor-btn {
+            background: var(--danger); 
+            color: white; 
+            border: none;
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        /* Other Panels */
+        .offcanvas-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .offcanvas-overlay.active { 
+            opacity: 1; 
+            pointer-events: all; 
+        }
+        
+        .offcanvas-panel {
+            position: fixed; 
+            top: 0;
+            width: 90%; 
+            max-width: 500px;
+            height: 100vh;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            z-index: 1002;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+            display: flex; 
+            flex-direction: column;
+            padding: 2rem;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        
+        .offcanvas-panel.from-left { 
+            left: -100%; 
+            transition: left 0.4s ease-out; 
+        }
+        
+        .offcanvas-panel.from-left.active { 
+            left: 0; 
+        }
+        
+        .offcanvas-panel.from-right { 
+            right: -100%; 
+            transition: right 0.4s ease-out; 
+        }
+        
+        .offcanvas-panel.from-right.active { 
+            right: 0; 
+        }
+        
+        .close-panel-btn {
+            position: absolute; 
+            top: 15px; 
+            right: 15px;
+            background: var(--danger); 
+            color: white; 
+            border: none;
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer; 
+            z-index: 1003; 
+            font-size: 1rem;
+        }
+        
+        /* Map Styles */
+        #map { 
+            width: 100%; 
+            height: 300px; 
+            border-radius: 10px; 
+            border: 2px solid var(--primary); 
+            overflow: hidden; 
+        }
+        
+        .location-info { 
+            margin-top: 15px; 
+            color: var(--text-secondary); 
+            font-size: 1rem; 
+            line-height: 1.5; 
+        }
+        
+        /* Form Styles */
+        .header-btn {
+            background: rgba(108, 92, 231, 0.2); 
+            color: var(--light); 
+            border: 1px solid var(--primary);
+            padding: 0.5rem 1rem; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .header-btn:hover { 
+            background: var(--primary); 
+            transform: translateY(-2px); 
+        }
+        
+        textarea, input {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Tracking Code Input */
+        #trackingCodeInput {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 2000;
+            border: 1px solid var(--primary);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        #trackingCodeInput h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        
+        #trackingCodeInput input {
+            margin: 15px 0;
+            padding: 10px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        /* Contribution Styles */
+        .contribution-item {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .contribution-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Music Player Styles */
+        .music-player {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .playlist {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .playlist-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .playlist-item:hover, .playlist-item.active {
+            background: var(--primary);
+        }
+    </style>
 </head>
 <body>
+    <!-- Futuristic Matrix Background -->
+    <canvas id="matrix-bg"></canvas>
+
+    <!-- Main Content -->
     <div id="content">
         <header>
             <div class="logo">
-                <i class="fas fa-satellite-dish"></i>
-                <span id="welcome-greeting">Loading...</span>
+                <i class="fas fa-terminal"></i>
+                <span id="welcome-greeting">vFiles System</span>
             </div>
             <div class="header-controls">
                 <button class="header-btn" id="theme-toggle-btn">
                     <i class="fas fa-sun"></i>
                 </button>
-                <button class="header-btn" id="tracking-toggle">
-                    <i class="fas fa-shield-alt"></i> Tracking
+                <button class="header-btn" id="trackingToggleBtn" style="display: none;">
+                    <i class="fas fa-map-marked-alt"></i> Tracking
                 </button>
             </div>
         </header>
 
         <main>
-            <section class="dashboard-card" aria-label="Live tracking">
+            <!-- Editor Panel (hidden by default) -->
+            <section class="dashboard-card" id="editorCard" style="display: none;">
                 <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> Live Location</h2>
+                    <h2 class="card-title"><i class="fas fa-code"></i> Live Editor</h2>
+                </div>
+                <div id="editorContainer" style="height: 400px;"></div>
+            </section>
+
+            <!-- Music Panel (hidden by default) -->
+            <section class="dashboard-card" id="musicCard" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-music"></i> Music Player</h2>
+                </div>
+                <div id="musicPlayerContainer"></div>
+            </section>
+
+            <!-- Contributions Panel -->
+            <section class="dashboard-card" id="contributionsCard">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-feather-alt"></i> Visitor Contributions</h2>
+                </div>
+                <div id="contributionsContainer">
+                    <p>Loading contributions...</p>
+                </div>
+            </section>
+
+            <!-- Tracking Panel (hidden until activated) -->
+            <section class="dashboard-card" id="trackingCard" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> Location Tracking</h2>
                 </div>
                 <div id="map"></div>
                 <div id="locationInfo" class="location-info">
-                    <i class="fas fa-sync-alt fa-spin"></i> Acquiring location...
+                    <i class="fas fa-lock"></i> Tracking disabled - Enter code to activate
                 </div>
-            </section>
-
-            <section class="dashboard-card" aria-label="Threat statistics">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-chart-pie"></i> Threat Overview</h2>
-                    <span class="card-badge" style="background-color: var(--success);">LIVE</span>
-                </div>
-                <div style="height: 300px; position: relative;">
-                     <canvas id="threatChart"></canvas>
-                </div>
-            </section>
-
-            <section class="dashboard-card" aria-label="Journal">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-book"></i> Digital Journal</h2>
-                </div>
-                <div id="journalContent" style="min-height: 200px;">
-                    <p>Welcome to your digital journal. Add your thoughts, images, and memories here.</p>
-                </div>
-                <button class="header-btn" id="editJournalBtn" style="width: 100%; margin-top: 15px;">
-                    <i class="fas fa-edit"></i> Edit Journal
-                </button>
             </section>
         </main>
     </div>
 
     <!-- Floating Action Buttons -->
-    <button class="floating-code-btn" id="codeEditorBtn" style="bottom: 30px; left: 30px;">
+    <button class="floating-btn" id="editorBtn">
         <i class="fas fa-code"></i>
     </button>
-    <button class="floating-btn" id="musicBtn" style="bottom: 30px; left: 50%; transform: translateX(-50%);">
+    <button class="floating-btn" id="musicBtn">
         <i class="fas fa-music"></i>
     </button>
-    <button class="floating-btn" id="contributionBtn" style="bottom: 30px; right: 30px;">
+    <button class="floating-btn" id="contributionBtn">
         <i class="fas fa-feather-alt"></i>
     </button>
 
-    <!-- Music Panel -->
-    <div class="offcanvas-overlay" id="musicPanelOverlay"></div>
-    <div class="offcanvas-panel from-left" id="musicPanel">
-        <button class="close-panel-btn" id="closeMusicPanelBtn"><i class="fas fa-times"></i></button>
-        <iframe src="about:blank" id="musicPanelIframe" style="width: 100%; height: 100%; border: none; margin-top: 30px;"></iframe>
+    <!-- Tracking Code Input Modal -->
+    <div id="trackingCodeInput" style="display: none;">
+        <h3><i class="fas fa-lock"></i> Enter Tracking Code</h3>
+        <p>To enable tracking features, please enter the security code</p>
+        <input type="password" id="trackingCode" placeholder="Enter code...">
+        <button class="header-btn" id="submitTrackingCode">Submit</button>
+        <p id="codeStatus" style="font-size: 0.9rem; margin-top: 10px;"></p>
     </div>
 
-    <!-- Contribution Panel -->
-    <div class="offcanvas-overlay" id="contributionPanelOverlay"></div>
-    <div class="offcanvas-panel from-right" id="contributionPanel">
-        <button class="close-panel-btn" id="closeContributionPanelBtn"><i class="fas fa-times"></i></button>
-        <h3>Leave Something Behind</h3>
-        <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: -10px; margin-bottom: 20px;">Share a message, a picture, or a video for others to see.</p>
-        
-        <form id="contributionForm" style="margin-top: auto; display: flex; flex-direction: column; gap: 15px;">
-            <textarea id="contributionText" placeholder="Your message..." required style="width: 100%; min-height: 100px; padding: 10px; box-sizing: border-box; background-color: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;"></textarea>
-            <input type="file" id="contributionFile" accept="image/*,video/*" style="color: var(--text-secondary);">
-            <button type="submit" class="header-btn" style="width: 100%; padding: 10px;">Submit Contribution</button>
-            <div id="contributionStatus" style="margin-top: 10px; font-size: 0.9em; text-align: center;"></div>
-        </form>
-        <hr style="border-color: var(--border-color); width: 100%; margin: 20px 0;">
-        <h4>Recent Contributions:</h4>
-        <div id="contributionDisplay" style="flex: 1; overflow-y: auto;">
-             <p>Loading contributions...</p>
-        </div>
-    </div>
-    
-    <!-- Editor Panel -->
-    <div class="editor-overlay" id="editorOverlay"></div>
-    <div class="code-editor-panel" id="codeEditorPanel">
-        <div class="editor-header">
-            <h3>Website Editor</h3>
-            <button class="close-panel-btn" id="closeEditorBtn"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="editor-content">
-            <div class="editor-tabs">
-                <div class="editor-tab active" data-tab="html">HTML</div>
-                <div class="editor-tab" data-tab="css">CSS</div>
-                <div class="editor-tab" data-tab="js">JavaScript</div>
-            </div>
-            <textarea class="editor-area" id="htmlEditor" spellcheck="false"></textarea>
-            <div class="editor-actions">
-                <button class="header-btn" id="previewBtn">Preview</button>
-                <button class="header-btn" id="saveEditorBtn">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Activation Modal -->
-    <div class="modal-overlay" id="activationModal">
-        <div class="modal-content">
-            <h3 class="modal-title">Activate Tracking</h3>
-            <p>Enter activation code to enable visitor tracking features:</p>
-            <input type="password" class="modal-input" id="activationCode" placeholder="Enter activation code">
-            <button class="modal-button" id="activateBtn">Activate</button>
-            <p id="activationStatus" style="margin-top: 15px; color: var(--accent);"></p>
-        </div>
-    </div>
-
-<script>
-// ===================================================================
-// === BAGIAN UTAMA: INISIALISASI & KONFIGURASI ======================
-// ===================================================================
-
-// Konfigurasi Cloudflare Worker
-const CONTRIBUTIONS_WORKER_URL = 'https://your-worker-subdomain.workers.dev/contributions';
-const TRACKING_WORKER_URL = 'https://your-worker-subdomain.workers.dev/track';
-const VALID_ACTIVATION_CODE = 'EZRA1234'; // Ganti dengan kode aktivasimu
-
-// State aplikasi
-const appState = {
-    trackingEnabled: false,
-    editorContent: {
-        html: '',
-        css: '',
-        js: ''
-    }
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Inisialisasi semua fitur saat halaman siap
-    setTheme(localStorage.getItem('theme') || 'dark');
-    setGreeting();
-    getLocation();
-    initThreatChart();
-    initPanelControls();
-    initEditor();
-    checkTrackingActivation();
-    animate(); // Memulai loop animasi
-});
-
-// ===================================================================
-// === BAGIAN 1: PETA & LOKASI (LEAFLET.JS) ===========================
-// ===================================================================
-let map, marker;
-const locationInfo = document.getElementById('locationInfo');
-
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            position => initMap(position.coords.latitude, position.coords.longitude),
-            error => {
-                console.error('Geolocation error:', error);
-                locationInfo.innerHTML = `<i class='fas fa-exclamation-triangle'></i> Using default location.`;
-                const defaultLat = 2.4633; // Subulussalam Latitude
-                const defaultLon = 97.9158; // Subulussalam Longitude
-                initMap(defaultLat, defaultLon);
-            }
-        );
-    } else {
-        const defaultLat = 2.4633;
-        const defaultLon = 97.9158;
-        initMap(defaultLat, defaultLon);
-    }
-}
-
-function initMap(lat, lon) {
-    if (!map) {
-        map = L.map('map').setView([lat, lon], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        marker = L.marker([lat, lon]).addTo(map);
-    } else {
-        map.setView([lat, lon], 13);
-        marker.setLatLng([lat, lon]);
-    }
-    reverseGeocode(lat, lon);
-}
-
-function reverseGeocode(lat, lon) {
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-        .then(response => response.json())
-        .then(data => {
-            const address = data.display_name || 'Unknown Location';
-            locationInfo.innerHTML = `<i class='fas fa-map-pin'></i> ${address}`;
-            marker.bindPopup(address).openPopup();
-        })
-        .catch(error => {
-            console.error('Geocoding error:', error);
-            locationInfo.innerHTML = `<i class='fas fa-map-pin'></i> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-        });
-}
-
-// ===================================================================
-// === BAGIAN 2: GRAFIK INTERAKTIF (CHART.JS) =========================
-// ===================================================================
-let threatChart;
-function initThreatChart() {
-    const ctx = document.getElementById('threatChart').getContext('2d');
-    threatChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Active', 'Blocked', 'Neutralized'],
-            datasets: [{
-                data: [24, 142, 89],
-                backgroundColor: ['#fd79a8', '#6c5ce7', '#00b894'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, cutout: '70%',
-            plugins: { legend: { position: 'bottom' } }
-        }
-    });
-}
-
-function updateChartData() {
-    if (!threatChart) return;
-    threatChart.data.datasets[0].data[0] = 20 + Math.floor(Math.random() * 10);
-    threatChart.data.datasets[0].data[1] = 140 + Math.floor(Math.random() * 20);
-    threatChart.data.datasets[0].data[2] = 80 + Math.floor(Math.random() * 15);
-    threatChart.update('none'); // Update tanpa animasi agar mulus
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    updateChartData(); // Memperbarui data chart di setiap frame
-}
-
-// ===================================================================
-// === BAGIAN 3: KONTROL UI (TEMA, SAMBUTAN, PANEL) ===================
-// ===================================================================
-function setTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    const icon = document.querySelector('#theme-toggle-btn i');
-    icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-}
-
-function setGreeting() {
-    const hour = new Date().getHours();
-    let greeting = 'Welcome!';
-    if (hour < 11) greeting = 'Good Morning, Visitor!';
-    else if (hour < 15) greeting = 'Good Afternoon, Visitor!';
-    else if (hour < 19) greeting = 'Good Evening, Visitor!';
-    else greeting = 'Good Night, Visitor!';
-    document.getElementById('welcome-greeting').textContent = greeting;
-}
-
-function initPanelControls() {
-    // Theme Toggle
-    document.getElementById('theme-toggle-btn').addEventListener('click', () => {
-        const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        setTheme(newTheme);
-    });
-    
-    // Panel Logic
-    const panels = [
-        { btnId: 'musicBtn', panelId: 'musicPanel', overlayId: 'musicPanelOverlay', onOpen: openMusicPanel },
-        { btnId: 'contributionBtn', panelId: 'contributionPanel', overlayId: 'contributionPanelOverlay', onOpen: fetchContributions },
-        { btnId: 'codeEditorBtn', panelId: 'codeEditorPanel', overlayId: 'editorOverlay', onOpen: loadEditorContent }
-    ];
-
-    panels.forEach(p => {
-        const btn = document.getElementById(p.btnId);
-        const panel = document.getElementById(p.panelId);
-        const overlay = document.getElementById(p.overlayId);
-        const closeBtn = panel.querySelector('.close-panel-btn, .close-editor-btn');
-
-        if(btn && panel && overlay) {
-            const close = () => {
-                panel.classList.remove('active');
-                overlay.classList.remove('active');
-            };
-            btn.addEventListener('click', () => {
-                panel.classList.add('active');
-                overlay.classList.add('active');
-                if (p.onOpen) p.onOpen();
-            });
-            overlay.addEventListener('click', close);
-            if (closeBtn) closeBtn.addEventListener('click', close);
-        }
-    });
-
-    // Journal Edit Button
-    document.getElementById('editJournalBtn').addEventListener('click', () => {
-        const journalContent = document.getElementById('journalContent');
-        const currentContent = journalContent.innerHTML;
-        
-        // Set editor content
-        appState.editorContent.html = currentContent;
-        document.getElementById('htmlEditor').value = currentContent;
-        
-        // Open editor
-        document.getElementById('codeEditorPanel').classList.add('active');
-        document.getElementById('editorOverlay').classList.add('active');
-    });
-}
-
-// ===================================================================
-// === BAGIAN 4: EDITOR & KONTRIBUSI =================================
-// ===================================================================
-
-function initEditor() {
-    const editorTabs = document.querySelectorAll('.editor-tab');
-    const htmlEditor = document.getElementById('htmlEditor');
-    const saveEditorBtn = document.getElementById('saveEditorBtn');
-    const previewBtn = document.getElementById('previewBtn');
-    
-    // Tab switching
-    editorTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            editorTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            // In a real implementation, you would switch between editors
-            // For this demo, we'll just use the HTML editor
-            htmlEditor.value = appState.editorContent[tab.dataset.tab] || '';
-        });
-    });
-    
-    // Save editor content
-    saveEditorBtn.addEventListener('click', () => {
-        const activeTab = document.querySelector('.editor-tab.active').dataset.tab;
-        appState.editorContent[activeTab] = htmlEditor.value;
-        
-        if (activeTab === 'html') {
-            document.getElementById('journalContent').innerHTML = htmlEditor.value;
-        }
-        
-        // Show success message
-        const originalText = saveEditorBtn.textContent;
-        saveEditorBtn.textContent = 'Saved!';
-        saveEditorBtn.style.backgroundColor = 'var(--success)';
-        
-        setTimeout(() => {
-            saveEditorBtn.textContent = originalText;
-            saveEditorBtn.style.backgroundColor = 'var(--primary)';
-        }, 2000);
-    });
-    
-    // Preview content
-    previewBtn.addEventListener('click', () => {
-        if (document.querySelector('.editor-tab.active').dataset.tab === 'html') {
-            const previewWindow = window.open('', '_blank');
-            previewWindow.document.write(htmlEditor.value);
-        }
-    });
-}
-
-function loadEditorContent() {
-    // In a real implementation, you would load the actual content
-    document.getElementById('htmlEditor').value = appState.editorContent.html || '';
-}
-
-// ===================================================================
-// === BAGIAN 5: KONTRIBUSI & TRACKING ===============================
-// ===================================================================
-
-// Panel Kontribusi
-const contributionForm = document.getElementById('contributionForm');
-const contributionStatus = document.getElementById('contributionStatus');
-const contributionDisplay = document.getElementById('contributionDisplay');
-
-contributionForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    contributionStatus.textContent = 'Submitting...';
-    
-    const text = document.getElementById('contributionText').value;
-    const fileInput = document.getElementById('contributionFile');
-    
-    try {
-        const formData = new FormData();
-        formData.append('text', text);
-        if (fileInput.files[0]) {
-            formData.append('file', fileInput.files[0]);
-        }
-        
-        const response = await fetch(CONTRIBUTIONS_WORKER_URL, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) throw new Error('Network response was not ok.');
-        
-        contributionStatus.textContent = 'Thank you for your contribution!';
-        contributionForm.reset();
-        fetchContributions(); // Muat ulang kontribusi
-    } catch (error) {
-        console.error('Error submitting:', error);
-        contributionStatus.textContent = 'Submission failed. Please try again.';
-    }
-});
-
-async function fetchContributions() {
-    contributionDisplay.innerHTML = `<p>Loading...</p>`;
-    try {
-        const response = await fetch(CONTRIBUTIONS_WORKER_URL);
-        if (!response.ok) throw new Error('Failed to fetch.');
-        const contributions = await response.json();
-        
-        if (contributions && contributions.length > 0) {
-            contributionDisplay.innerHTML = contributions.reverse().map(c => {
-                let content = `<p style="margin:0;">${c.text}</p>`;
-                if (c.mediaUrl) {
-                    if (c.mediaType.startsWith('image')) {
-                        content += `<img src="${c.mediaUrl}" style="max-width:100%; margin-top:10px; border-radius:5px;">`;
-                    } else if (c.mediaType.startsWith('video')) {
-                        content += `<video controls src="${c.mediaUrl}" style="max-width:100%; margin-top:10px; border-radius:5px;"></video>`;
-                    }
-                }
-                return `
-                    <div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;border-left:3px solid var(--accent);">
-                        ${content}
-                        <small style="color:var(--text-secondary);">${new Date(c.timestamp).toLocaleString()}</small>
-                    </div>`;
-            }).join('');
-        } else {
-            contributionDisplay.innerHTML = `<p>Be the first to contribute!</p>`;
-        }
-    } catch (error) {
-        console.error('Error fetching:', error);
-        contributionDisplay.innerHTML = `<p>Could not load contributions.</p>`;
-    }
-}
-
-// Tracking Activation
-function checkTrackingActivation() {
-    const isActivated = localStorage.getItem('trackingActivated') === 'true';
-    if (!isActivated) {
-        document.getElementById('activationModal').style.display = 'flex';
-    } else {
-        appState.trackingEnabled = true;
-        document.getElementById('tracking-toggle').innerHTML = `<i class="fas fa-shield-alt"></i> Tracking: ON`;
-        trackVisitor();
-    }
-}
-
-document.getElementById('activateBtn').addEventListener('click', () => {
-    const code = document.getElementById('activationCode').value;
-    const status = document.getElementById('activationStatus');
-    
-    if (code === VALID_ACTIVATION_CODE) {
-        localStorage.setItem('trackingActivated', 'true');
-        appState.trackingEnabled = true;
-        document.getElementById('activationModal').style.display = 'none';
-        document.getElementById('tracking-toggle').innerHTML = `<i class="fas fa-shield-alt"></i> Tracking: ON`;
-        status.textContent = '';
-        trackVisitor();
-    } else {
-        status.textContent = 'Invalid activation code';
-    }
-});
-
-document.getElementById('tracking-toggle').addEventListener('click', () => {
-    if (!appState.trackingEnabled) {
-        document.getElementById('activationModal').style.display = 'flex';
-    } else {
-        // Toggle tracking on/off
-        appState.trackingEnabled = !appState.trackingEnabled;
-        const btn = document.getElementById('tracking-toggle');
-        btn.innerHTML = `<i class="fas fa-shield-alt"></i> Tracking: ${appState.trackingEnabled ? 'ON' : 'OFF'}`;
-        
-        if (appState.trackingEnabled) {
-            trackVisitor();
-        }
-    }
-});
-
-function trackVisitor() {
-    if (!appState.trackingEnabled) return;
-    
-    try {
-        const data = {
-            userAgent: navigator.userAgent,
-            referrer: document.referrer,
-            timestamp: new Date().toISOString(),
-            location: window.location.href,
-            screenResolution: `${window.screen.width}x${window.screen.height}`,
-            language: navigator.language
+    <!-- JavaScript -->
+    <script>
+        // ===================================================================
+        // === CONFIGURATION & INITIALIZATION ================================
+        // ===================================================================
+        const config = {
+            trackingWorkerUrl: 'https://your-worker-subdomain.workers.dev/track',
+            contributionsWorkerUrl: 'https://your-worker-subdomain.workers.dev/contributions',
+            trackingCode: 'whereare', // Secret code to activate tracking
+            musicPlaylist: [
+                { name: "Future Sound", url: "https://example.com/music1.mp3" },
+                { name: "Digital Dreams", url: "https://example.com/music2.mp3" },
+                { name: "Code Symphony", url: "https://example.com/music3.mp3" }
+            ]
         };
-        
-        fetch(TRACKING_WORKER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-            mode: 'no-cors'
-        });
-    } catch(e) { 
-        console.error('Visitor tracking failed:', e); 
-    }
-}
 
-// ===================================================================
-// === BAGIAN 6: MUSIC PLAYER ========================================
-// ===================================================================
-function openMusicPanel() {
-    const iframe = document.getElementById('musicPanelIframe');
-    const musicHTML = `
-        <!DOCTYPE html><html><head><style>
-        body{font-family:sans-serif;background:#1e1e2f;color:#fff;padding:15px;text-align:center;}
-        h2{color:#fd79a8;margin-top:0;}ul{list-style:none;padding:0;}
-        li{background:#2d2d44;margin:5px 0;padding:10px;border-radius:5px;cursor:pointer;transition:background .2s;}
-        li:hover,li.active{background:#6c5ce7;}audio{width:100%;margin-top:20px;}
-        </style></head><body><h2>Music Player</h2><ul id="playlist"></ul><audio id="player" controls autoplay></audio>
-        <script>
-            const player=document.getElementById('player');const playlist=document.getElementById('playlist');
-            const songs=[
-                {name:"Where We Are", url:"https://example.com/song1.mp3"},
-                {name:"Wish You Were Here", url:"https://example.com/song2.mp3"},
-                {name:"Hero", url:"https://example.com/song3.mp3"}
-            ];
-            songs.forEach((song,index)=>{
-                const item=document.createElement('li');item.textContent=song.name;
-                item.onclick=()=>{playSong(index)};playlist.appendChild(item);
-            });
-            function playSong(index){
-                document.querySelectorAll('li').forEach(li=>li.classList.remove('active'));
-                playlist.children[index].classList.add('active');
-                player.src=songs[index].url;
+        // State management
+        const state = {
+            trackingActive: false,
+            editorActive: false,
+            currentTrack: 0,
+            visitorId: null,
+            map: null,
+            marker: null,
+            editor: null
+        };
+
+        // DOM Elements
+        const elements = {
+            matrixBg: document.getElementById('matrix-bg'),
+            themeToggleBtn: document.getElementById('theme-toggle-btn'),
+            editorBtn: document.getElementById('editorBtn'),
+            musicBtn: document.getElementById('musicBtn'),
+            contributionBtn: document.getElementById('contributionBtn'),
+            trackingToggleBtn: document.getElementById('trackingToggleBtn'),
+            submitTrackingCode: document.getElementById('submitTrackingCode'),
+            trackingCodeInput: document.getElementById('trackingCodeInput'),
+            trackingCode: document.getElementById('trackingCode'),
+            codeStatus: document.getElementById('codeStatus'),
+            welcomeGreeting: document.getElementById('welcome-greeting'),
+            editorCard: document.getElementById('editorCard'),
+            musicCard: document.getElementById('musicCard'),
+            contributionsCard: document.getElementById('contributionsCard'),
+            trackingCard: document.getElementById('trackingCard'),
+            editorContainer: document.getElementById('editorContainer'),
+            musicPlayerContainer: document.getElementById('musicPlayerContainer'),
+            contributionsContainer: document.getElementById('contributionsContainer'),
+            map: document.getElementById('map'),
+            locationInfo: document.getElementById('locationInfo')
+        };
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initMatrixBackground();
+            setGreeting();
+            initTheme();
+            initEditor();
+            initMusicPlayer();
+            loadContributions();
+            generateVisitorId();
+            setupEventListeners();
+            
+            // Check if tracking was previously activated
+            if (localStorage.getItem('trackingActive') === 'true') {
+                activateTrackingFeatures();
             }
-            playSong(0);
-        <\/script></body></html>`;
-    iframe.srcdoc = musicHTML;
-}
-</script>
+        });
+
+        // ===================================================================
+        // === FUTURISTIC BACKGROUND =========================================
+        // ===================================================================
+        function initMatrixBackground() {
+            const canvas = elements.matrixBg;
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas to full window
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Matrix characters
+            const matrixChars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+            
+            // Set font size and calculate columns
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            // Create drops for each column
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.random() * canvas.height;
+            }
+            
+            // Draw function
+            function draw() {
+                // Black background with opacity to create trail effect
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Set font and color
+                ctx.fillStyle = '#00ff00';
+                ctx.font = fontSize + 'px monospace';
+                
+                // Draw characters
+                for (let i = 0; i < drops.length; i++) {
+                    const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    // Reset drop at random intervals
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    drops[i]++;
+                }
+            }
+            
+            // Animation loop
+            setInterval(draw, 33);
+            
+            // Resize handler
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // ===================================================================
+        // === THEME MANAGEMENT ==============================================
+        // ===================================================================
+        function initTheme() {
+            // Set initial theme from localStorage or default to dark
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // Set up theme toggle
+            elements.themeToggleBtn.addEventListener('click', toggleTheme);
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+        
+        function updateThemeIcon(theme) {
+            const icon = elements.themeToggleBtn.querySelector('i');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // ===================================================================
+        // === EDITOR FUNCTIONALITY ==========================================
+        // ===================================================================
+        function initEditor() {
+            // Initialize ACE Editor
+            elements.editorCard.style.display = 'block';
+            elements.editorContainer.innerHTML = '<div id="aceEditor" style="width:100%;height:100%;"></div>';
+            
+            state.editor = ace.edit("aceEditor");
+            state.editor.setTheme("ace/theme/twilight");
+            state.editor.session.setMode("ace/mode/html");
+            state.editor.setFontSize(14);
+            state.editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
+            });
+            
+            // Set initial content
+            state.editor.setValue(`<!DOCTYPE html>
+<html>
+<head>
+    <title>My Custom Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to My Page</h1>
+        <p>This is a custom page created with the vFiles editor.</p>
+        <!-- Add your content here -->
+    </div>
+</body>
+</html>`);
+            
+            // Toggle editor visibility
+            elements.editorBtn.addEventListener('click', () => {
+                elements.editorCard.style.display = elements.editorCard.style.display === 'none' ? 'block' : 'none';
+            });
+        }
+
+        // ===================================================================
+        // === MUSIC PLAYER ==================================================
+        // ===================================================================
+        function initMusicPlayer() {
+            elements.musicCard.style.display = 'block';
+            
+            // Create music player HTML
+            elements.musicPlayerContainer.innerHTML = `
+                <audio id="audioPlayer" controls></audio>
+                <ul class="playlist" id="playlist"></ul>
+            `;
+            
+            const audioPlayer = document.getElementById('audioPlayer');
+            const playlist = document.getElementById('playlist');
+            
+            // Populate playlist
+            config.musicPlaylist.forEach((song, index) => {
+                const li = document.createElement('li');
+                li.className = 'playlist-item';
+                li.textContent = song.name;
+                li.addEventListener('click', () => {
+                    playTrack(index);
+                });
+                playlist.appendChild(li);
+            });
+            
+            // Play selected track
+            function playTrack(index) {
+                state.currentTrack = index;
+                audioPlayer.src = config.musicPlaylist[index].url;
+                audioPlayer.play();
+                
+                // Update active item in playlist
+                document.querySelectorAll('.playlist-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                playlist.children[index].classList.add('active');
+            }
+            
+            // Auto play next track when current ends
+            audioPlayer.addEventListener('ended', () => {
+                const nextTrack = (state.currentTrack + 1) % config.musicPlaylist.length;
+                playTrack(nextTrack);
+            });
+            
+            // Play first track
+            playTrack(0);
+            
+            // Toggle music player visibility
+            elements.musicBtn.addEventListener('click', () => {
+                elements.musicCard.style.display = elements.musicCard.style.display === 'none' ? 'block' : 'none';
+            });
+        }
+
+        // ===================================================================
+        // === CONTRIBUTIONS SYSTEM ==========================================
+        // ===================================================================
+        function loadContributions() {
+            fetch(config.contributionsWorkerUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        let html = '';
+                        data.reverse().forEach(contribution => {
+                            html += `
+                                <div class="contribution-item">
+                                    <p>${contribution.text}</p>
+                                    <div class="contribution-meta">
+                                        <span>${new Date(contribution.timestamp).toLocaleString()}</span>
+                                        <span>Visitor ID: ${contribution.visitorId || 'anonymous'}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        elements.contributionsContainer.innerHTML = html;
+                    } else {
+                        elements.contributionsContainer.innerHTML = '<p>No contributions yet. Be the first to leave a message!</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading contributions:', error);
+                    elements.contributionsContainer.innerHTML = '<p>Failed to load contributions. Please try again later.</p>';
+                });
+        }
+
+        // ===================================================================
+        // === TRACKING SYSTEM ===============================================
+        // ===================================================================
+        function generateVisitorId() {
+            // Generate or retrieve visitor ID
+            state.visitorId = localStorage.getItem('visitorId');
+            if (!state.visitorId) {
+                state.visitorId = 'visitor-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
+                localStorage.setItem('visitorId', state.visitorId);
+            }
+            
+            // Send basic visitor info to tracking service
+            const visitorData = {
+                id: state.visitorId,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                referrer: document.referrer || 'direct'
+            };
+            
+            fetch(config.trackingWorkerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(visitorData),
+                mode: 'no-cors'
+            });
+        }
+        
+        function showTrackingCodeInput() {
+            elements.trackingCodeInput.style.display = 'block';
+            elements.trackingCode.focus();
+        }
+        
+        function hideTrackingCodeInput() {
+            elements.trackingCodeInput.style.display = 'none';
+            elements.trackingCode.value = '';
+            elements.codeStatus.textContent = '';
+        }
+        
+        function activateTrackingFeatures() {
+            state.trackingActive = true;
+            localStorage.setItem('trackingActive', 'true');
+            
+            // Show tracking card and button
+            elements.trackingCard.style.display = 'block';
+            elements.trackingToggleBtn.style.display = 'inline-block';
+            
+            // Initialize map
+            initMap();
+            
+            // Update UI
+            elements.locationInfo.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Acquiring location...';
+        }
+        
+        function initMap() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        // Initialize map if not already done
+                        if (!state.map) {
+                            state.map = L.map('map').setView([lat, lon], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; OpenStreetMap contributors'
+                            }).addTo(state.map);
+                            
+                            state.marker = L.marker([lat, lon]).addTo(state.map);
+                        } else {
+                            state.map.setView([lat, lon], 13);
+                            state.marker.setLatLng([lat, lon]);
+                        }
+                        
+                        // Get address information
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const address = data.display_name || 'Unknown Location';
+                                elements.locationInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${address}`;
+                                state.marker.bindPopup(address).openPopup();
+                            })
+                            .catch(error => {
+                                console.error('Geocoding error:', error);
+                                elements.locationInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+                            });
+                    },
+                    error => {
+                        console.error('Geolocation error:', error);
+                        elements.locationInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Location access denied`;
+                    }
+                );
+            } else {
+                elements.locationInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Geolocation not supported`;
+            }
+        }
+
+        // ===================================================================
+        // === UTILITY FUNCTIONS =============================================
+        // ===================================================================
+        function setGreeting() {
+            const hour = new Date().getHours();
+            let greeting = 'Welcome';
+            
+            if (hour < 12) greeting = 'Good morning';
+            else if (hour < 18) greeting = 'Good afternoon';
+            else greeting = 'Good evening';
+            
+            elements.welcomeGreeting.textContent = `${greeting}, Visitor`;
+        }
+        
+        function setupEventListeners() {
+            // Contribution button - reload contributions
+            elements.contributionBtn.addEventListener('click', loadContributions);
+            
+            // Tracking code submission
+            elements.submitTrackingCode.addEventListener('click', () => {
+                const enteredCode = elements.trackingCode.value.trim();
+                
+                if (enteredCode === config.trackingCode) {
+                    elements.codeStatus.textContent = 'Code accepted! Activating tracking...';
+                    elements.codeStatus.style.color = 'green';
+                    
+                    setTimeout(() => {
+                        hideTrackingCodeInput();
+                        activateTrackingFeatures();
+                    }, 1000);
+                } else {
+                    elements.codeStatus.textContent = 'Incorrect code. Please try again.';
+                    elements.codeStatus.style.color = 'red';
+                    elements.trackingCode.value = '';
+                    elements.trackingCode.focus();
+                }
+            });
+            
+            // Tracking toggle button
+            elements.trackingToggleBtn.addEventListener('click', () => {
+                if (!state.trackingActive) {
+                    showTrackingCodeInput();
+                } else {
+                    elements.trackingCard.style.display = elements.trackingCard.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+            
+            // Allow pressing Enter in tracking code input
+            elements.trackingCode.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    elements.submitTrackingCode.click();
+                }
+            });
+        }
+    </script>
 </body>
 </html>
