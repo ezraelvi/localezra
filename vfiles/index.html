@@ -412,579 +412,579 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Authentication Elements
-            const authOverlay = document.getElementById('authOverlay');
-            const mainContainer = document.getElementById('mainContainer');
-            const secretAnswer = document.getElementById('secretAnswer');
-            const authSubmit = document.getElementById('authSubmit');
-            const logoutBtn = document.getElementById('logoutBtn');
+    document.addEventListener('DOMContentLoaded', () => {
+        // Authentication Elements
+        const authOverlay = document.getElementById('authOverlay');
+        const mainContainer = document.getElementById('mainContainer');
+        const secretAnswer = document.getElementById('secretAnswer');
+        const authSubmit = document.getElementById('authSubmit');
+        const logoutBtn = document.getElementById('logoutBtn');
 
-            // Editor Elements
-            const toggleEditor = document.createElement('button');
-            toggleEditor.id = 'toggleEditor';
-            toggleEditor.textContent = 'EDIT MODE';
-            const editorTools = document.getElementById('editorTools');
-            const addText = document.getElementById('addText');
-            const addImage = document.getElementById('addImage');
-            const addVideo = document.getElementById('addVideo');
-            const addFile = document.getElementById('addFile');
-            const saveChanges = document.getElementById('saveChanges');
-            const cancelEdit = document.getElementById('cancelEdit');
-            const mediaInput = document.getElementById('mediaInput');
-            const mediaUrl = document.getElementById('mediaUrl');
-            const insertMedia = document.getElementById('insertMedia');
-            
-            // Content Elements
-            const userInfoElement = document.getElementById('userInfo');
-            const accessInfoElement = document.getElementById('accessInfo');
-            const lastAccessSpan = document.getElementById('lastAccess');
-            const fileListContainer = document.getElementById('fileList');
-            const infoPanelTitleElement = document.querySelector('.info-panel h2'); // Untuk judul info panel
+        // Editor Elements
+        const toggleEditor = document.createElement('button');
+        toggleEditor.id = 'toggleEditor';
+        toggleEditor.textContent = 'EDIT MODE';
+        const editorTools = document.getElementById('editorTools');
+        const addText = document.getElementById('addText');
+        const addImage = document.getElementById('addImage');
+        const addVideo = document.getElementById('addVideo');
+        const addFile = document.getElementById('addFile');
+        const saveChanges = document.getElementById('saveChanges');
+        const cancelEdit = document.getElementById('cancelEdit');
+        const mediaInput = document.getElementById('mediaInput');
+        const mediaUrl = document.getElementById('mediaUrl');
+        const insertMedia = document.getElementById('insertMedia');
+        
+        // Content Elements
+        const userInfoElement = document.getElementById('userInfo');
+        const accessInfoElement = document.getElementById('accessInfo');
+        const lastAccessSpan = document.getElementById('lastAccess');
+        const fileListContainer = document.getElementById('fileList');
+        const infoPanelTitleElement = document.querySelector('.info-panel h2'); // Untuk judul info panel
 
-            // Video Player Elements
-            const backgroundVideo = document.getElementById('background-video');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const muteUnmuteBtn = document.getElementById('muteUnmuteBtn');
+        // Video Player Elements
+        const backgroundVideo = document.getElementById('background-video');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const muteUnmuteBtn = document.getElementById('muteUnmuteBtn');
 
-            // State variables
-            let editMode = false;
-            let currentMediaType = '';
-            let filesData = []; // Data files yang akan disinkronkan dengan backend
-            let authToken = '';
-            let originalContent = {}; // Menyimpan konten asli untuk fungsi 'Cancel'
+        // State variables
+        let editMode = false;
+        let currentMediaType = '';
+        let filesData = []; // Data files yang akan disinkronkan dengan backend
+        let authToken = '';
+        let originalContent = {}; // Menyimpan konten asli untuk fungsi 'Cancel'
 
-            // Cloudflare Worker URL (GANTI DENGAN URL WORKER ASLI ANDA!)
-            const WORKER_URL = 'https://vfiles-backend.ezvvel.workers.dev'; 
+        // Cloudflare Worker URL (GANTI DENGAN URL WORKER ASLI ANDA!)
+        const WORKER_URL = 'https://vfiles-backend.ezvvel.workers.dev'; 
 
-            // --- Fungsi Autentikasi ---
-            function initAuthentication() {
-                if (checkAuth()) return; // Jika sudah authenticated, langsung tampilkan konten
+        // --- Fungsi Autentikasi ---
+        function initAuthentication() {
+            if (checkAuth()) return; // Jika sudah authenticated, langsung tampilkan konten
 
-                secretAnswer.focus();
-                authSubmit.addEventListener('click', authenticateUser);
-                secretAnswer.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') authenticateUser();
-                });
-            }
+            secretAnswer.focus();
+            authSubmit.addEventListener('click', authenticateUser);
+            secretAnswer.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') authenticateUser();
+            });
+        }
 
-            function checkAuth() {
-                const authData = localStorage.getItem('vFilesAuth');
-                if (authData) {
-                    try {
-                        const data = JSON.parse(authData);
-                        if (data.token && data.expires > Date.now()) {
-                            authToken = data.token;
-                            showMainContent();
-                            fetchData();
-                            return true;
-                        }
-                    } catch (e) {
-                        console.error('Error parsing auth data:', e);
-                        localStorage.removeItem('vFilesAuth'); // Hapus data auth yang rusak
-                    }
-                }
-                return false;
-            }
-
-            async function authenticateUser() {
-                const password = secretAnswer.value.trim();
-                if (!password) {
-                    secretAnswer.classList.add('shake');
-                    setTimeout(() => secretAnswer.classList.remove('shake'), 500);
-                    return;
-                }
-
+        function checkAuth() {
+            const authData = localStorage.getItem('vFilesAuth');
+            if (authData) {
                 try {
-                    const response = await fetch(`${WORKER_URL}/api/auth`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password: password })
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Authentication failed');
-                    }
-
-                    const data = await response.json();
-                    localStorage.setItem('vFilesAuth', JSON.stringify(data));
-                    authToken = data.token;
-
-                    authOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        authOverlay.style.display = 'none';
+                    const data = JSON.parse(authData);
+                    if (data.token && data.expires > Date.now()) {
+                        authToken = data.token;
                         showMainContent();
                         fetchData();
-                    }, 500);
-
-                } catch (error) {
-                    console.error('Authentication error:', error);
-                    secretAnswer.style.borderColor = 'var(--error)';
-                    secretAnswer.classList.add('shake');
-                    setTimeout(() => {
-                        window.location.href = '/whoareyou/index.html'; // Redirect on auth failure
-                    }, 1000);
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Error parsing auth data:', e);
+                    localStorage.removeItem('vFilesAuth'); // Hapus data auth yang rusak
                 }
             }
+            return false;
+        }
 
-            function showMainContent() {
-                mainContainer.style.display = 'block';
-                mainContainer.classList.add('fade-in');
-                
-                const header = document.querySelector('.header');
-                header.insertBefore(toggleEditor, logoutBtn);
-                
-                initEditor(); // Inisialisasi fungsionalitas editor
+        async function authenticateUser() {
+            const password = secretAnswer.value.trim();
+            if (!password) {
+                secretAnswer.classList.add('shake');
+                setTimeout(() => secretAnswer.classList.remove('shake'), 500);
+                return;
             }
 
-            // Logout handler
-            logoutBtn.addEventListener('click', () => {
-                localStorage.removeItem('vFilesAuth');
-                window.location.href = 'https://localezra.netlify.app'; // Sesuaikan URL logout
-            });
+            try {
+                const response = await fetch(`${WORKER_URL}/api/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
 
-            // --- Fungsi Fetch Data dari Worker ---
-            async function fetchData() {
-                try {
-                    const response = await fetch(`${WORKER_URL}/api/data`, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        }
-                    });
-
-                    if (!response.ok) {
-                        if (response.status === 401 || response.status === 403) {
-                            localStorage.removeItem('vFilesAuth');
-                            window.location.reload(); // Paksa reload untuk auth ulang
-                            return;
-                        }
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Failed to fetch data');
-                    }
-
-                    const data = await response.json();
-                    
-                    // Update User Info
-                    if (data.user) {
-                        userInfoElement.innerHTML = `
-                            <strong>User:</strong> <span data-field="name">${data.user.name || 'N/A'}</span><br>
-                            <strong>Role:</strong> <span data-field="role">${data.user.role || 'N/A'}</span><br>
-                            <strong>Email:</strong> <span data-field="email">${data.user.email || 'N/A'}</span>
-                        `;
-                    }
-
-                    // Update Last Access
-                    if (data.lastAccess) {
-                        lastAccessSpan.textContent = new Date(data.lastAccess).toLocaleString();
-                    } else {
-                        lastAccessSpan.textContent = 'Never accessed';
-                    }
-
-                    // Update Info Panel Title
-                    if (data.infoPanelTitle) {
-                        infoPanelTitleElement.textContent = data.infoPanelTitle;
-                    }
-
-                    // Update Files Data
-                    filesData = data.files || [];
-                    renderFiles();
-                    
-                    // Simpan konten asli untuk 'Cancel'
-                    saveOriginalContent();
-
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                    userInfoElement.textContent = `Error loading user data: ${error.message}`;
-                    fileListContainer.innerHTML = `<p style="color:var(--error);">Error loading files: ${error.message}</p>`;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Authentication failed');
                 }
+
+                const data = await response.json();
+                localStorage.setItem('vFilesAuth', JSON.stringify(data));
+                authToken = data.token;
+
+                authOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    authOverlay.style.display = 'none';
+                    showMainContent();
+                    fetchData();
+                }, 500);
+
+            } catch (error) {
+                console.error('Authentication error:', error);
+                secretAnswer.style.borderColor = 'var(--error)';
+                secretAnswer.classList.add('shake');
+                setTimeout(() => {
+                    window.location.href = '/whoareyou/index.html'; // Redirect on auth failure
+                }, 1000);
+            }
+        }
+
+        function showMainContent() {
+            mainContainer.style.display = 'block';
+            mainContainer.classList.add('fade-in');
+            
+            const header = document.querySelector('.header');
+            header.insertBefore(toggleEditor, logoutBtn);
+            
+            initEditor(); // Inisialisasi fungsionalitas editor
+        }
+
+        // Logout handler
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('vFilesAuth');
+            window.location.href = 'https://localezra.netlify.app'; // Sesuaikan URL logout
+        });
+
+        // --- Fungsi Fetch Data dari Worker ---
+        async function fetchData() {
+            try {
+                const response = await fetch(`${WORKER_URL}/api/data`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('vFilesAuth');
+                        window.location.reload(); // Paksa reload untuk auth ulang
+                        return;
+                    }
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch data');
+                }
+
+                const data = await response.json();
+                
+                // Update User Info
+                if (data.user) {
+                    userInfoElement.innerHTML = `
+                        <strong>User:</strong> <span data-field="name">${data.user.name || 'N/A'}</span><br>
+                        <strong>Role:</strong> <span data-field="role">${data.user.role || 'N/A'}</span><br>
+                        <strong>Email:</strong> <span data-field="email">${data.user.email || 'N/A'}</span>
+                    `;
+                }
+
+                // Update Last Access
+                if (data.lastAccess) {
+                    lastAccessSpan.textContent = new Date(data.lastAccess).toLocaleString();
+                } else {
+                    lastAccessSpan.textContent = 'Never accessed';
+                }
+
+                // Update Info Panel Title
+                if (data.infoPanelTitle) {
+                    infoPanelTitleElement.textContent = data.infoPanelTitle;
+                }
+
+                // Update Files Data
+                filesData = data.files || [];
+                renderFiles();
+                
+                // Simpan konten asli untuk 'Cancel'
+                saveOriginalContent();
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                userInfoElement.textContent = `Error loading user data: ${error.message}`;
+                fileListContainer.innerHTML = `<p style="color:var(--error);">Error loading files: ${error.message}</p>`;
+            }
+        }
+
+        // --- Fungsi Render Files ---
+        function renderFiles() {
+            fileListContainer.innerHTML = ''; // Kosongkan daftar sebelum render ulang
+            
+            if (filesData.length === 0) {
+                fileListContainer.innerHTML = '<p>No files available. Add some in EDIT MODE!</p>';
+                return;
             }
 
-            // --- Fungsi Render Files ---
-            function renderFiles() {
-                fileListContainer.innerHTML = ''; // Kosongkan daftar sebelum render ulang
-                
-                if (filesData.length === 0) {
-                    fileListContainer.innerHTML = '<p>No files available. Add some in EDIT MODE!</p>';
-                    return;
-                }
+            filesData.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.dataset.id = file.id; // Tambahkan ID ke elemen DOM
 
-                filesData.forEach(file => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-                    fileItem.dataset.id = file.id; // Tambahkan ID ke elemen DOM
-
-                    let contentHtml = '';
-                    if (file.type === 'text') {
-                        contentHtml = `
-                            <div>${file.name || 'Untitled Text'}</div>
-                            <div class="file-content content-editable" data-field="content">${file.content || 'Click to edit text content.'}</div>
-                        `;
-                    } else if (file.type === 'image') {
-                        contentHtml = `
-                            <div>${file.name || 'Untitled Image'}</div>
-                            <div class="media-container content-editable" data-field="url">
-                                <img src="${file.url}" alt="${file.name || 'Image'}">
-                            </div>
-                        `;
-                    } else if (file.type === 'video') {
-                        contentHtml = `
-                            <div>${file.name || 'Untitled Video'}</div>
-                            <div class="media-container content-editable" data-field="url">
-                                <iframe src="${file.url}" allowfullscreen></iframe>
-                            </div>
-                        `;
-                    } else if (file.type === 'file') { // Untuk file umum (misal PDF)
-                        contentHtml = `
-                            <div>${file.name || 'Untitled File'}</div>
-                            <div class="content-editable" data-field="url">
-                                <a href="${file.url}" target="_blank">Download: ${file.name || 'File'}</a>
-                            </div>
-                        `;
-                    }
-                    // Tambahkan juga untuk tipe 'raw_html'
-                    else if (file.type === 'raw_html') {
-                        contentHtml = `
-                            <div>${file.name || 'Raw HTML Content'}</div>
-                            <div class="raw-html-container content-editable" data-field="content">
-                                ${file.content || 'Click to edit HTML content.'}
-                            </div>
-                        `;
-                    }
-                    
-                    fileItem.innerHTML = `
-                        <div class="file-info">${contentHtml}</div>
-                        <div class="file-actions">
-                            <button class="edit-item-btn" data-id="${file.id}">Edit</button>
-                            <button class="delete-item-btn" data-id="${file.id}">Delete</button>
+                let contentHtml = '';
+                if (file.type === 'text') {
+                    contentHtml = `
+                        <div>${file.name || 'Untitled Text'}</div>
+                        <div class="file-content content-editable" data-field="content">${file.content || 'Click to edit text content.'}</div>
+                    `;
+                } else if (file.type === 'image') {
+                    contentHtml = `
+                        <div>${file.name || 'Untitled Image'}</div>
+                        <div class="media-container content-editable" data-field="url">
+                            <img src="${file.url}" alt="${file.name || 'Image'}">
                         </div>
                     `;
-                    
-                    fileListContainer.appendChild(fileItem);
-                });
-
-                attachEditDeleteListeners();
-                updateEditableElementsState(); // Pastikan elemen yang bisa diedit di-set dengan benar
-            }
-
-            // --- Fungsi Editor ---
-            function initEditor() {
-                toggleEditor.addEventListener('click', () => {
-                    editMode = !editMode;
-                    toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
-                    editorTools.classList.toggle('active', editMode);
-                    
-                    updateEditableElementsState();
-                    if (editMode) {
-                        saveOriginalContent(); // Simpan state saat masuk edit mode
-                    }
-                });
+                } else if (file.type === 'video') {
+                    contentHtml = `
+                        <div>${file.name || 'Untitled Video'}</div>
+                        <div class="media-container content-editable" data-field="url">
+                            <iframe src="${file.url}" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else if (file.type === 'file') { // Untuk file umum (misal PDF)
+                    contentHtml = `
+                        <div>${file.name || 'Untitled File'}</div>
+                        <div class="content-editable" data-field="url">
+                            <a href="${file.url}" target="_blank">Download: ${file.name || 'File'}</a>
+                        </div>
+                    `;
+                }
+                // Tambahkan juga untuk tipe 'raw_html'
+                else if (file.type === 'raw_html') {
+                    contentHtml = `
+                        <div>${file.name || 'Raw HTML Content'}</div>
+                        <div class="raw-html-container content-editable" data-field="content">
+                            ${file.content || 'Click to edit HTML content.'}
+                        </div>
+                    `;
+                }
                 
-                addText.addEventListener('click', () => addEditorItem('text'));
-                addImage.addEventListener('click', () => showMediaInput('image'));
-                addVideo.addEventListener('click', () => showMediaInput('video'));
-                addFile.addEventListener('click', () => showMediaInput('file')); // Atau jenis 'raw_html'
+                fileItem.innerHTML = `
+                    <div class="file-info">${contentHtml}</div>
+                    <div class="file-actions">
+                        <button class="edit-item-btn" data-id="${file.id}">Edit</button>
+                        <button class="delete-item-btn" data-id="${file.id}">Delete</button>
+                    </div>
+                `;
                 
-                insertMedia.addEventListener('click', insertMediaItem);
-                
-                saveChanges.addEventListener('click', saveAllChanges);
-                cancelEdit.addEventListener('click', cancelAllChanges);
-            }
+                fileListContainer.appendChild(fileItem);
+            });
 
-            function updateEditableElementsState() {
-                // Info Panel
-                document.querySelectorAll('.info-panel .content-editable').forEach(el => {
+            attachEditDeleteListeners();
+            updateEditableElementsState(); // Pastikan elemen yang bisa diedit di-set dengan benar
+        }
+
+        // --- Fungsi Editor ---
+        function initEditor() {
+            toggleEditor.addEventListener('click', () => {
+                editMode = !editMode;
+                toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
+                editorTools.classList.toggle('active', editMode);
+                
+                updateEditableElementsState();
+                if (editMode) {
+                    saveOriginalContent(); // Simpan state saat masuk edit mode
+                }
+            });
+            
+            addText.addEventListener('click', () => addEditorItem('text'));
+            addImage.addEventListener('click', () => showMediaInput('image'));
+            addVideo.addEventListener('click', () => showMediaInput('video'));
+            addFile.addEventListener('click', () => showMediaInput('file')); // Atau jenis 'raw_html'
+            
+            insertMedia.addEventListener('click', insertMediaItem);
+            
+            saveChanges.addEventListener('click', saveAllChanges);
+            cancelEdit.addEventListener('click', cancelAllChanges);
+        }
+
+        function updateEditableElementsState() {
+            // Info Panel
+            document.querySelectorAll('.info-panel .content-editable').forEach(el => {
+                el.contentEditable = editMode;
+                el.classList.toggle('editing', editMode);
+            });
+
+            // File List Items
+            document.querySelectorAll('.file-list .content-editable').forEach(el => {
+                if (el.classList.contains('raw-html-container')) {
+                    // Raw HTML content should not be contentEditable directly due to security/rendering issues
+                    // It should be edited via a textarea/modal
+                    el.contentEditable = false; 
+                    // Instead, you'd trigger a modal/textarea for raw_html content
+                    // For this example, we'll keep it simple: can't edit HTML directly here
+                } else {
                     el.contentEditable = editMode;
-                    el.classList.toggle('editing', editMode);
-                });
+                }
+                el.classList.toggle('editing', editMode);
+            });
 
-                // File List Items
-                document.querySelectorAll('.file-list .content-editable').forEach(el => {
-                    if (el.classList.contains('raw-html-container')) {
-                        // Raw HTML content should not be contentEditable directly due to security/rendering issues
-                        // It should be edited via a textarea/modal
-                        el.contentEditable = false; 
-                        // Instead, you'd trigger a modal/textarea for raw_html content
-                        // For this example, we'll keep it simple: can't edit HTML directly here
-                    } else {
-                        el.contentEditable = editMode;
-                    }
-                    el.classList.toggle('editing', editMode);
-                });
+            // Tampilkan/sembunyikan tombol edit/delete di file list
+            document.querySelectorAll('.file-actions button').forEach(btn => {
+                btn.style.display = editMode ? 'inline-block' : 'none';
+            });
+        }
 
-                // Tampilkan/sembunyikan tombol edit/delete di file list
-                document.querySelectorAll('.file-actions button').forEach(btn => {
-                    btn.style.display = editMode ? 'inline-block' : 'none';
-                });
-            }
+        function saveOriginalContent() {
+            originalContent = {
+                infoPanelTitle: infoPanelTitleElement.textContent,
+                userInfo: userInfoElement.innerHTML,
+                lastAccess: lastAccessSpan.textContent, // Ini mungkin tidak perlu di-rollback
+                files: JSON.parse(JSON.stringify(filesData)) // Deep copy
+            };
+        }
 
-            function saveOriginalContent() {
-                originalContent = {
-                    infoPanelTitle: infoPanelTitleElement.textContent,
-                    userInfo: userInfoElement.innerHTML,
-                    lastAccess: lastAccessSpan.textContent, // Ini mungkin tidak perlu di-rollback
-                    files: JSON.parse(JSON.stringify(filesData)) // Deep copy
-                };
-            }
+        function restoreOriginalContent() {
+            if (originalContent.infoPanelTitle) infoPanelTitleElement.textContent = originalContent.infoPanelTitle;
+            if (originalContent.userInfo) userInfoElement.innerHTML = originalContent.userInfo;
+            if (originalContent.lastAccess) lastAccessSpan.textContent = originalContent.lastAccess;
+            filesData = JSON.parse(JSON.stringify(originalContent.files)); // Restore files
+            renderFiles(); // Render ulang dengan data asli
+        }
 
-            function restoreOriginalContent() {
-                if (originalContent.infoPanelTitle) infoPanelTitleElement.textContent = originalContent.infoPanelTitle;
-                if (originalContent.userInfo) userInfoElement.innerHTML = originalContent.userInfo;
-                if (originalContent.lastAccess) lastAccessSpan.textContent = originalContent.lastAccess;
-                filesData = JSON.parse(JSON.stringify(originalContent.files)); // Restore files
-                renderFiles(); // Render ulang dengan data asli
-            }
+        function addEditorItem(type) {
+            const newItem = {
+                id: Date.now(), // ID unik untuk setiap item baru
+                type: type,
+                name: `New ${type} Item`,
+                content: type === 'text' ? 'Click to edit this new text block.' : '',
+                url: ''
+            };
+            filesData.push(newItem);
+            renderFiles(); // Render ulang untuk menampilkan item baru
+            // Opsional: scroll ke item baru
+            setTimeout(() => {
+                const newItemElement = document.querySelector(`.file-item[data-id="${newItem.id}"] .content-editable`);
+                if (newItemElement) newItemElement.focus();
+            }, 50);
+        }
 
-            function addEditorItem(type) {
+        function showMediaInput(type) {
+            currentMediaType = type;
+            mediaInput.classList.add('active');
+            mediaUrl.placeholder = `Enter ${type} URL`;
+            mediaUrl.focus();
+        }
+
+        async function insertMediaItem() {
+            const url = mediaUrl.value.trim();
+            if (url) {
                 const newItem = {
-                    id: Date.now(), // ID unik untuk setiap item baru
-                    type: type,
-                    name: `New ${type} Item`,
-                    content: type === 'text' ? 'Click to edit this new text block.' : '',
-                    url: ''
+                    id: Date.now(),
+                    name: url.split('/').pop() || `New ${currentMediaType}`,
+                    type: currentMediaType,
+                    url: url
                 };
                 filesData.push(newItem);
                 renderFiles(); // Render ulang untuk menampilkan item baru
-                // Opsional: scroll ke item baru
-                setTimeout(() => {
-                    const newItemElement = document.querySelector(`.file-item[data-id="${newItem.id}"] .content-editable`);
-                    if (newItemElement) newItemElement.focus();
-                }, 50);
-            }
-
-            function showMediaInput(type) {
-                currentMediaType = type;
-                mediaInput.classList.add('active');
-                mediaUrl.placeholder = `Enter ${type} URL`;
-                mediaUrl.focus();
-            }
-
-            async function insertMediaItem() {
-                const url = mediaUrl.value.trim();
-                if (url) {
-                    const newItem = {
-                        id: Date.now(),
-                        name: url.split('/').pop() || `New ${currentMediaType}`,
-                        type: currentMediaType,
-                        url: url
-                    };
-                    filesData.push(newItem);
-                    renderFiles(); // Render ulang untuk menampilkan item baru
-                    
-                    mediaUrl.value = '';
-                    mediaInput.classList.remove('active');
-                }
-            }
-
-            async function saveAllChanges() {
-                // Kumpulkan semua perubahan dari elemen content-editable
-                const updatedUserInfo = {};
-                userInfoElement.querySelectorAll('[data-field]').forEach(span => {
-                    updatedUserInfo[span.dataset.field] = span.textContent.trim();
-                });
-
-                const updatedInfoPanelTitle = infoPanelTitleElement.textContent.trim();
-
-                const updatedFilesData = [];
-                fileListContainer.querySelectorAll('.file-item').forEach(itemElement => {
-                    const id = parseInt(itemElement.dataset.id);
-                    const fileInfoDiv = itemElement.querySelector('.file-info');
-                    const originalFile = filesData.find(f => f.id === id); // Cari data asli berdasarkan ID
-
-                    if (originalFile) {
-                        const updatedFile = { ...originalFile }; // Buat salinan
-
-                        // Ambil nama (jika ada div nama terpisah)
-                        const nameDiv = fileInfoDiv.querySelector('div:first-child');
-                        if (nameDiv) updatedFile.name = nameDiv.textContent.trim();
-
-                        // Ambil konten/URL dari elemen content-editable
-                        const editableContent = fileInfoDiv.querySelector('[data-field="content"], [data-field="url"]');
-                        if (editableContent) {
-                            if (editableContent.dataset.field === 'content') {
-                                updatedFile.content = editableContent.innerHTML.trim(); // Gunakan innerHTML untuk mempertahankan formatting
-                            } else if (editableContent.dataset.field === 'url') {
-                                // Untuk media, URL diambil dari src/href di dalam elemen anak
-                                if (updatedFile.type === 'image' && editableContent.querySelector('img')) {
-                                    updatedFile.url = editableContent.querySelector('img').src;
-                                } else if (updatedFile.type === 'video' && editableContent.querySelector('iframe')) {
-                                    updatedFile.url = editableContent.querySelector('iframe').src;
-                                } else if (updatedFile.type === 'file' && editableContent.querySelector('a')) {
-                                    updatedFile.url = editableContent.querySelector('a').href;
-                                }
-                            }
-                        }
-                        updatedFilesData.push(updatedFile);
-                    }
-                });
-
-                try {
-                    const response = await fetch(`${WORKER_URL}/api/data`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${authToken}`
-                        },
-                        body: JSON.stringify({ 
-                            user: updatedUserInfo, 
-                            files: updatedFilesData,
-                            infoPanelTitle: updatedInfoPanelTitle
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Failed to save changes');
-                    }
-
-                    alert('Changes saved successfully!');
-                    filesData = updatedFilesData; // Update data lokal setelah berhasil disimpan
-                    toggleEditor.click(); // Exit edit mode
-                    fetchData(); // Refresh data dari server (optional, jika ada perubahan server-side)
-                } catch (error) {
-                    console.error('Save error:', error);
-                    alert(`Failed to save changes: ${error.message}`);
-                }
-            }
-
-            function cancelAllChanges() {
-                if (confirm('Discard all unsaved changes?')) {
-                    restoreOriginalContent(); // Kembalikan konten ke keadaan semula
-                    toggleEditor.click(); // Exit edit mode
-                    alert('Changes discarded.');
-                }
-            }
-
-            // --- Handler Edit/Delete per Item ---
-            function attachEditDeleteListeners() {
-                fileListContainer.querySelectorAll('.delete-item-btn').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        const fileId = parseInt(e.target.dataset.id);
-                        if (confirm('Are you sure you want to delete this item?')) {
-                            const initialFilesData = [...filesData]; // Simpan state awal untuk rollback
-                            filesData = filesData.filter(f => f.id !== fileId);
-                            renderFiles(); // Render ulang daftar tanpa item yang dihapus
-
-                            try {
-                                const response = await fetch(`${WORKER_URL}/api/data`, {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': `Bearer ${authToken}`
-                                    },
-                                    body: JSON.stringify({ files: filesData }) // Kirim data yang sudah difilter
-                                });
-
-                                if (!response.ok) {
-                                    const errorData = await response.json();
-                                    throw new Error(errorData.error || 'Failed to delete item');
-                                }
-                                console.log('Item deleted successfully from KV.');
-                            } catch (error) {
-                                console.error('Delete error:', error);
-                                alert(`Failed to delete item: ${error.message}`);
-                                filesData = initialFilesData; // Rollback
-                                renderFiles();
-                            }
-                        }
-                    });
-                });
-
-                // Tombol 'Edit' per item akan mengandalkan `content-editable`
-                // sehingga tidak perlu event listener terpisah, cukup pastikan
-                // `contentEditable` diaktifkan/dinonaktifkan oleh `toggleEditor`.
-                // Jika ingin modal edit untuk setiap item, logikanya akan lebih kompleks di sini.
-            }
-
-            // --- Video Player Widget Logic ---
-            playPauseBtn.addEventListener('click', () => {
-                if (backgroundVideo.paused) {
-                    backgroundVideo.play();
-                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                } else {
-                    backgroundVideo.pause();
-                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                }
-            });
-
-            muteUnmuteBtn.addEventListener('click', () => {
-                backgroundVideo.muted = !backgroundVideo.muted;
-                muteUnmuteBtn.innerHTML = backgroundVideo.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
-            });
-
-            // Pastikan video dimulai dalam keadaan muted
-            backgroundVideo.muted = true;
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; // Default state after autoplay
-            muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-
-            // Inisialisasi awal
-            initAuthentication();
-        });
-        // Existing JavaScript code...
-
-            // --- Fungsi Dragging Widget Video ---
-            const videoPlayerWidget = document.getElementById('video-player-widget');
-            let isDragging = false;
-            let currentX;
-            let currentY;
-            let initialX;
-            let initialY;
-            let xOffset = 0;
-            let yOffset = 0;
-
-            // Inisialisasi posisi awal (opsional, jika Anda ingin posisi default saat dimuat)
-            videoPlayerWidget.style.left = 'calc(50% - 75px)'; // Setengah dari lebar widget
-            videoPlayerWidget.style.top = '20px'; // Contoh posisi awal di atas
-
-            videoPlayerWidget.addEventListener('mousedown', dragStart);
-            document.addEventListener('mouseup', dragEnd);
-            document.addEventListener('mousemove', drag);
-
-            function dragStart(e) {
-                if (e.target !== videoPlayerWidget && !videoPlayerWidget.contains(e.target)) {
-                    // Hanya mulai drag jika klik pada widget itu sendiri atau kontrol di dalamnya
-                    return;
-                }
                 
-                // Jangan drag jika target adalah tombol (play/pause/mute)
-                if (e.target.closest('.video-controls')) {
-                    return;
+                mediaUrl.value = '';
+                mediaInput.classList.remove('active');
+            }
+        }
+
+        async function saveAllChanges() {
+            // Kumpulkan semua perubahan dari elemen content-editable
+            const updatedUserInfo = {};
+            userInfoElement.querySelectorAll('[data-field]').forEach(span => {
+                updatedUserInfo[span.dataset.field] = span.textContent.trim();
+            });
+
+            const updatedInfoPanelTitle = infoPanelTitleElement.textContent.trim();
+
+            const updatedFilesData = [];
+            fileListContainer.querySelectorAll('.file-item').forEach(itemElement => {
+                const id = parseInt(itemElement.dataset.id);
+                const fileInfoDiv = itemElement.querySelector('.file-info');
+                const originalFile = filesData.find(f => f.id === id); // Cari data asli berdasarkan ID
+
+                if (originalFile) {
+                    const updatedFile = { ...originalFile }; // Buat salinan
+
+                    // Ambil nama (jika ada div nama terpisah)
+                    const nameDiv = fileInfoDiv.querySelector('div:first-child');
+                    if (nameDiv) updatedFile.name = nameDiv.textContent.trim();
+
+                    // Ambil konten/URL dari elemen content-editable
+                    const editableContent = fileInfoDiv.querySelector('[data-field="content"], [data-field="url"]');
+                    if (editableContent) {
+                        if (editableContent.dataset.field === 'content') {
+                            updatedFile.content = editableContent.innerHTML.trim(); // Gunakan innerHTML untuk mempertahankan formatting
+                        } else if (editableContent.dataset.field === 'url') {
+                            // Untuk media, URL diambil dari src/href di dalam elemen anak
+                            if (updatedFile.type === 'image' && editableContent.querySelector('img')) {
+                                updatedFile.url = editableContent.querySelector('img').src;
+                            } else if (updatedFile.type === 'video' && editableContent.querySelector('iframe')) {
+                                updatedFile.url = editableContent.querySelector('iframe').src;
+                            } else if (updatedFile.type === 'file' && editableContent.querySelector('a')) {
+                                updatedFile.url = editableContent.querySelector('a').href;
+                            }
+                        }
+                    }
+                    updatedFilesData.push(updatedFile);
+                }
+            });
+
+            try {
+                const response = await fetch(`${WORKER_URL}/api/data`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ 
+                        user: updatedUserInfo, 
+                        files: updatedFilesData,
+                        infoPanelTitle: updatedInfoPanelTitle
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to save changes');
                 }
 
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
-
-                isDragging = true;
-                videoPlayerWidget.classList.add('dragging');
-                videoPlayerWidget.style.transition = 'none'; // Hapus transisi saat dragging
+                alert('Changes saved successfully!');
+                filesData = updatedFilesData; // Update data lokal setelah berhasil disimpan
+                toggleEditor.click(); // Exit edit mode
+                fetchData(); // Refresh data dari server (optional, jika ada perubahan server-side)
+            } catch (error) {
+                console.error('Save error:', error);
+                alert(`Failed to save changes: ${error.message}`);
             }
+        }
 
-            function dragEnd(e) {
-                initialX = currentX;
-                initialY = currentY;
-
-                isDragging = false;
-                videoPlayerWidget.classList.remove('dragging');
-                videoPlayerWidget.style.transition = ''; // Kembalikan transisi setelah dragging selesai (jika ada transisi lain)
+        function cancelAllChanges() {
+            if (confirm('Discard all unsaved changes?')) {
+                restoreOriginalContent(); // Kembalikan konten ke keadaan semula
+                toggleEditor.click(); // Exit edit mode
+                alert('Changes discarded.');
             }
+        }
 
-            function drag(e) {
-                if (!isDragging) return;
+        // --- Handler Edit/Delete per Item ---
+        function attachEditDeleteListeners() {
+            fileListContainer.querySelectorAll('.delete-item-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const fileId = parseInt(e.target.dataset.id);
+                    if (confirm('Are you sure you want to delete this item?')) {
+                        const initialFilesData = [...filesData]; // Simpan state awal untuk rollback
+                        filesData = filesData.filter(f => f.id !== fileId);
+                        renderFiles(); // Render ulang daftar tanpa item yang dihapus
 
-                e.preventDefault(); // Mencegah perilaku default browser (mis. memilih teks)
+                        try {
+                            const response = await fetch(`${WORKER_URL}/api/data`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${authToken}`
+                                },
+                                body: JSON.stringify({ files: filesData }) // Kirim data yang sudah difilter
+                            });
 
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-
-                xOffset = currentX;
-                yOffset = currentY;
-
-                setTranslate(currentX, currentY, videoPlayerWidget);
-            }
-
-            function setTranslate(xPos, yPos, el) {
-                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.error || 'Failed to delete item');
+                            }
+                            console.log('Item deleted successfully from KV.');
+                        } catch (error) {
+                            console.error('Delete error:', error);
+                            alert(`Failed to delete item: ${error.message}`);
+                            filesData = initialFilesData; // Rollback
+                            renderFiles();
+                        }
+                    }
+                });
             });
+
+            // Tombol 'Edit' per item akan mengandalkan `content-editable`
+            // sehingga tidak perlu event listener terpisah, cukup pastikan
+            // `contentEditable` diaktifkan/dinonaktifkan oleh `toggleEditor`.
+            // Jika ingin modal edit untuk setiap item, logikanya akan lebih kompleks di sini.
+        }
+
+        // --- Video Player Widget Logic ---
+        playPauseBtn.addEventListener('click', () => {
+            if (backgroundVideo.paused) {
+                backgroundVideo.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                backgroundVideo.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        });
+
+        muteUnmuteBtn.addEventListener('click', () => {
+            backgroundVideo.muted = !backgroundVideo.muted;
+            muteUnmuteBtn.innerHTML = backgroundVideo.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        });
+
+        // Pastikan video dimulai dalam keadaan muted
+        backgroundVideo.muted = true;
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; // Default state after autoplay
+        muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+
+        // Inisialisasi awal
+        initAuthentication();
+    }); // <--- Ini adalah penutup yang benar untuk DOMContentLoaded
+    // Existing JavaScript code...
+
+    // --- Fungsi Dragging Widget Video ---
+    const videoPlayerWidget = document.getElementById('video-player-widget');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    // Inisialisasi posisi awal (opsional, jika Anda ingin posisi default saat dimuat)
+    videoPlayerWidget.style.left = 'calc(50% - 75px)'; // Setengah dari lebar widget
+    videoPlayerWidget.style.top = '20px'; // Contoh posisi awal di atas
+
+    videoPlayerWidget.addEventListener('mousedown', dragStart);
+    document.addEventListener('mouseup', dragEnd);
+    document.addEventListener('mousemove', drag);
+
+    function dragStart(e) {
+        if (e.target !== videoPlayerWidget && !videoPlayerWidget.contains(e.target)) {
+            // Hanya mulai drag jika klik pada widget itu sendiri atau kontrol di dalamnya
+            return;
+        }
+        
+        // Jangan drag jika target adalah tombol (play/pause/mute)
+        if (e.target.closest('.video-controls')) {
+            return;
+        }
+
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+
+        isDragging = true;
+        videoPlayerWidget.classList.add('dragging');
+        videoPlayerWidget.style.transition = 'none'; // Hapus transisi saat dragging
+    }
+
+    function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+
+        isDragging = false;
+        videoPlayerWidget.classList.remove('dragging');
+        videoPlayerWidget.style.transition = ''; // Kembalikan transisi setelah dragging selesai (jika ada transisi lain)
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+
+        e.preventDefault(); // Mencegah perilaku default browser (mis. memilih teks)
+
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        setTranslate(currentX, currentY, videoPlayerWidget);
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    }
     </script>
 </body>
 </html>
