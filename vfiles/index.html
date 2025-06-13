@@ -6,340 +6,408 @@
     <title>vFiles</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        :root {
-            --primary: #00ff88;
-            --dark: #0a0a12;
-            --darker: #050508;
-            --error: #ff0033;
-            --text: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --border-color: rgba(0, 255, 136, 0.4);
-        }
+    :root {
+    --primary: #00ff88;
+    --dark: #0a0a12;
+    --darker: #050508;
+    --error: #ff0033;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --border-color: rgba(0, 255, 136, 0.4);
+}
 
-        body {
-            font-family: 'Courier New', monospace;
-            background-color: var(--dark);
-            color: var(--primary);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
+body {
+    font-family: 'Courier New', monospace;
+    background-color: var(--dark); /* Kembali ke latar belakang warna gelap */
+    color: var(--primary);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
 
-        /* Authentication Modal */
-        .auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            backdrop-filter: blur(10px);
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease-out;
-        }
-        
-        .auth-modal {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid var(--primary);
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
-            text-align: center;
-        }
-        
-        .auth-title {
-            color: var(--primary);
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-        
-        .auth-input {
-            width: 100%;
-            padding: 12px 15px;
-            margin: 15px 0;
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: var(--text);
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s;
-        }
-        
-        .auth-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-        
-        .auth-submit {
-            background: linear-gradient(to right, var(--primary), #00cc6a);
-            color: var(--dark);
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .auth-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
-        }
-
-        /* Main Content */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            display: none; /* Hidden until auth */
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--primary);
-        }
-
-        .logout-btn {
-            background: var(--error);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-
-        .info-panel {
-            background-color: rgba(10, 10, 18, 0.8);
-            padding: 20px;
-            border: 1px solid var(--primary);
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-
-        .file-list {
-            border: 1px dashed var(--primary);
-            padding: 20px;
-            min-height: 300px;
-            border-radius: 8px;
-            background-color: rgba(10, 10, 18, 0.5);
-        }
-
-        .editor-tools {
-            display: none;
-            background-color: rgba(10, 10, 18, 0.8);
-            padding: 15px;
-            border: 1px solid var(--primary);
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-
-        .editor-tools.active {
-            display: block;
-        }
-
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        button {
-            background-color: rgba(0, 0, 0, 0.3);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            padding: 8px 16px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        button:hover {
-            background-color: rgba(0, 255, 136, 0.1);
-            box-shadow: 0 0 10px var(--primary);
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 100px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: var(--text);
-            border: 1px solid var(--primary);
-            font-family: 'Courier New', monospace;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-
-        .content-editable {
-            min-height: 20px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px dashed transparent;
-            border-radius: 4px;
-        }
-
-        .content-editable:hover {
-            border-color: var(--primary);
-        }
-
-        .editing {
-            border: 1px dashed var(--primary);
-            background-color: rgba(10, 10, 18, 0.5);
-        }
-
-        .media-container {
-            margin: 15px 0;
-            text-align: center; /* Untuk menengahkan gambar/video */
-        }
-
-        .media-container img,
-        .media-container video { /* Tambahkan selector video */
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 4px;
-            display: block; /* Agar img/video bisa di-center dengan margin auto */
-            margin: 0 auto;
-        }
-
-        .media-container iframe {
-            width: 100%;
-            height: 400px;
-            border: none;
-            border-radius: 4px;
-        }
-
-        /* File items */
-        .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-            flex-wrap: wrap; /* Agar responsif pada layar kecil */
-        }
-
-        .file-item:last-child {
-            border-bottom: none;
-        }
-
-        .file-info {
-            flex-grow: 1;
-            padding-right: 10px;
-        }
-
-        .file-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px; /* Jarak atas di layar kecil */
-        }
-
-        /* Media input */
-        .media-input-container {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-        }
-
-        .media-input-container.active {
-            display: block;
-        }
-
-        .media-url-input {
-            width: 100%;
-            padding: 8px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--primary);
-            color: var(--text);
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        #video-player-widget {
-    position: fixed; /* Tetap di viewport */
+/* Authentication Modal */
+.auth-overlay {
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100vw; /* Lebar 100% dari viewport */
-    height: 100vh; /* Tinggi 100% dari viewport */
-    object-fit: cover; /* Memastikan video menutupi seluruh area tanpa distorsi, bisa ada cropping */
-    z-index: -1; /* Paling penting: meletakkan video di belakang semua elemen lain */
-    overflow: hidden; /* Sembunyikan bagian video yang terpotong jika object-fit: cover */
-    /* Hapus cursor: grab; dan transform: translateY(-50%); karena tidak lagi draggable/tengah vertikal */
-    border: none; /* Hilangkan border jika tidak diinginkan untuk background */
-    box-shadow: none; /* Hilangkan shadow jika tidak diinginkan untuk background */
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
 }
-        .video-controls {
-            display: none; /* Sembunyikan semua kontrol video */
-        }
-        .video-controls button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-        }
 
-        /* Social Links */
-        .social-links {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 1000;
-        }
+.auth-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
 
-        .social-links a {
-            color: var(--primary);
-            font-size: 2.2rem;
-            text-decoration: none;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
+.auth-modal {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid var(--primary);
+    border-radius: 15px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+    text-align: center;
+}
 
-        .social-links a:hover {
-            color: #00cc6a;
-            transform: scale(1.1);
-        }
+.auth-title {
+    color: var(--primary);
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
 
-        /* Animations */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
-        }
+.auth-input {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 15px 0;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+}
 
-        .shake {
-            animation: shake 0.5s;
-        }
+.auth-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+.auth-submit {
+    background: linear-gradient(to right, var(--primary), #00cc6a);
+    color: var(--dark);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
+.auth-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+}
+
+/* Main Content */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+.container.fade-in {
+    opacity: 1;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--primary);
+}
+
+.logout-btn, #toggleEditor {
+    background: var(--error);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: background-color 0.3s ease;
+}
+
+#toggleEditor {
+    background-color: var(--darker);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    margin-right: 10px;
+}
+
+#toggleEditor:hover {
+    background-color: rgba(0, 255, 136, 0.1);
+}
+
+.logout-btn:hover {
+    background-color: #cc0022;
+}
+
+.info-panel {
+    background-color: rgba(10, 10, 18, 0.8);
+    padding: 20px;
+    border: 1px solid var(--primary);
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.file-list {
+    border: 1px dashed var(--primary);
+    padding: 20px;
+    min-height: 300px;
+    border-radius: 8px;
+    background-color: rgba(10, 10, 18, 0.5);
+}
+
+.editor-tools {
+    display: none;
+    background-color: rgba(10, 10, 18, 0.8);
+    padding: 15px;
+    border: 1px solid var(--primary);
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.editor-tools.active {
+    display: block;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+button {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background-color: rgba(0, 255, 136, 0.1);
+    box-shadow: 0 0 10px var(--primary);
+}
+
+textarea {
+    width: 100%;
+    min-height: 100px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: var(--text);
+    border: 1px solid var(--primary);
+    font-family: 'Courier New', monospace;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.content-editable {
+    min-height: 20px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px dashed transparent;
+    border-radius: 4px;
+    outline: none;
+}
+
+.content-editable:hover {
+    border-color: var(--primary);
+}
+
+.editing {
+    border: 1px dashed var(--primary);
+    background-color: rgba(10, 10, 18, 0.5);
+    cursor: text;
+}
+
+.media-container {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.media-container img,
+.media-container video {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+}
+
+.media-container iframe {
+    width: 100%;
+    height: 400px;
+    border: none;
+    border-radius: 4px;
+}
+
+/* File items */
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    flex-wrap: wrap;
+}
+
+.file-item:last-child {
+    border-bottom: none;
+}
+
+.file-info {
+    flex-grow: 1;
+    padding-right: 10px;
+}
+
+.file-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Media input */
+.media-input-container {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.media-input-container.active {
+    display: block;
+}
+
+.media-url-input {
+    width: 100%;
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--primary);
+    color: var(--text);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Floating Video Widget */
+#floating-video-widget {
+    position: fixed;
+    width: 320px;
+    height: 180px;
+    top: 20px;
+    right: 20px;
+    background-color: var(--darker);
+    border: 2px solid var(--primary);
+    border-radius: 15px; /* Border bulat */
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+    z-index: 1000;
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.1s ease-out;
+}
+#floating-video-widget.dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+}
+
+#floating-video-widget video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 13px; /* Sedikit lebih kecil dari widget agar pas di dalam border */
+    display: block;
+}
+
+.floating-video-controls {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 1001;
+}
+
+.floating-video-controls button {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.floating-video-controls button:hover {
+    background-color: rgba(0, 255, 136, 0.2);
+    color: white;
+}
+
+/* Social Links */
+.social-links {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
+}
+
+.social-links a {
+    color: var(--primary);
+    font-size: 2.2rem;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #00cc6a;
+    transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
     </style>
 </head>
 <body>
@@ -385,12 +453,13 @@
             <div id="fileList"></div>
         </div>
     </div>
-    <div id="video-player-widget">
-    <video id="background-video" src="video.mp4" autoplay muted loop playsinline></video>
-    <div class="video-controls" style="display:none;">
-        <button id="playPauseBtn"><i class="fas fa-pause"></i></button>
-        <button id="muteUnmuteBtn"><i class="fas fa-volume-mute"></i></button>
-    </div>
+
+    <div id="floating-video-widget">
+        <video id="floating-video" src="floating_video.mp4" autoplay muted loop playsinline></video>
+        <div class="floating-video-controls">
+            <button id="floatingPlayPauseBtn"><i class="fas fa-pause"></i></button>
+            <button id="floatingMuteUnmuteBtn"><i class="fas fa-volume-mute"></i></button>
+        </div>
     </div>
 
     <div class="social-links">
@@ -401,517 +470,516 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Authentication Elements
-        const authOverlay = document.getElementById('authOverlay');
-        const mainContainer = document.getElementById('mainContainer');
-        const secretAnswer = document.getElementById('secretAnswer');
-        const authSubmit = document.getElementById('authSubmit');
-        const logoutBtn = document.getElementById('logoutBtn');
+    // Authentication Elements
+    const authOverlay = document.getElementById('authOverlay');
+    const mainContainer = document.getElementById('mainContainer');
+    const secretAnswer = document.getElementById('secretAnswer');
+    const authSubmit = document.getElementById('authSubmit');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-        // Editor Elements
-        const toggleEditor = document.createElement('button');
-        toggleEditor.id = 'toggleEditor';
-        toggleEditor.textContent = 'EDIT MODE';
-        const editorTools = document.getElementById('editorTools');
-        const addText = document.getElementById('addText');
-        const addImage = document.getElementById('addImage');
-        const addVideo = document.getElementById('addVideo');
-        const addFile = document.getElementById('addFile');
-        const saveChanges = document.getElementById('saveChanges');
-        const cancelEdit = document.getElementById('cancelEdit');
-        const mediaInput = document.getElementById('mediaInput');
-        const mediaUrl = document.getElementById('mediaUrl');
-        const insertMedia = document.getElementById('insertMedia');
-        
-        // Content Elements
-        const userInfoElement = document.getElementById('userInfo');
-        const accessInfoElement = document.getElementById('accessInfo');
-        const lastAccessSpan = document.getElementById('lastAccess');
-        const fileListContainer = document.getElementById('fileList');
-        const infoPanelTitleElement = document.querySelector('.info-panel h2'); // Untuk judul info panel
+    // Editor Elements
+    const toggleEditor = document.createElement('button');
+    toggleEditor.id = 'toggleEditor';
+    toggleEditor.textContent = 'EDIT MODE';
+    const editorTools = document.getElementById('editorTools');
+    const addText = document.getElementById('addText');
+    const addImage = document.getElementById('addImage');
+    const addVideo = document.getElementById('addVideo');
+    const addFile = document.getElementById('addFile'); // Ini bisa jadi raw_html atau file lain
+    const saveChanges = document.getElementById('saveChanges');
+    const cancelEdit = document.getElementById('cancelEdit');
+    const mediaInput = document.getElementById('mediaInput');
+    const mediaUrl = document.getElementById('mediaUrl');
+    const insertMedia = document.getElementById('insertMedia');
+    
+    // Content Elements
+    const userInfoElement = document.getElementById('userInfo');
+    const accessInfoElement = document.getElementById('accessInfo');
+    const lastAccessSpan = document.getElementById('lastAccess');
+    const fileListContainer = document.getElementById('fileList');
+    const infoPanelTitleElement = document.querySelector('.info-panel h2');
 
-        // Video Player Elements
-        const backgroundVideo = document.getElementById('background-video');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const muteUnmuteBtn = document.getElementById('muteUnmuteBtn');
+    // Background Video Elements (Hanya untuk background statis - AKAN JADI NULL KARENA DIHAPUS DARI HTML)
+    const backgroundVideo = document.getElementById('background-video');
 
-        // State variables
-        let editMode = false;
-        let currentMediaType = '';
-        let filesData = []; // Data files yang akan disinkronkan dengan backend
-        let authToken = '';
-        let originalContent = {}; // Menyimpan konten asli untuk fungsi 'Cancel'
+    // Floating Video Widget Elements
+    const floatingVideoWidget = document.getElementById('floating-video-widget');
+    const floatingVideo = document.getElementById('floating-video');
+    const floatingPlayPauseBtn = document.getElementById('floatingPlayPauseBtn');
+    const floatingMuteUnmuteBtn = document.getElementById('floatingMuteUnmuteBtn');
 
-        // Cloudflare Worker URL (GANTI DENGAN URL WORKER ASLI ANDA!)
-        const WORKER_URL = 'https://vfiles-backend.ezvvel.workers.dev'; 
+    // State variables
+    let editMode = false;
+    let currentMediaType = '';
+    let filesData = [];
+    let authToken = '';
+    let originalContent = {};
 
-        // --- Fungsi Autentikasi ---
-        function initAuthentication() {
-            if (checkAuth()) return; // Jika sudah authenticated, langsung tampilkan konten
+    // Cloudflare Worker URL (GANTI DENGAN URL WORKER ASLI ANDA!)
+    const WORKER_URL = 'https://vfiles-backend.ezvvel.workers.dev'; 
 
-            secretAnswer.focus();
-            authSubmit.addEventListener('click', authenticateUser);
-            secretAnswer.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') authenticateUser();
-            });
-        }
+    // --- Fungsi Autentikasi ---
+    function initAuthentication() {
+        if (checkAuth()) return; // Jika sudah authenticated, langsung tampilkan konten
 
-        function checkAuth() {
-            const authData = localStorage.getItem('vFilesAuth');
-            if (authData) {
-                try {
-                    const data = JSON.parse(authData);
-                    if (data.token && data.expires > Date.now()) {
-                        authToken = data.token;
-                        showMainContent();
-                        fetchData();
-                        return true;
-                    }
-                } catch (e) {
-                    console.error('Error parsing auth data:', e);
-                    localStorage.removeItem('vFilesAuth'); // Hapus data auth yang rusak
-                }
-            }
-            return false;
-        }
+        secretAnswer.focus();
+        authSubmit.addEventListener('click', authenticateUser);
+        secretAnswer.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') authenticateUser();
+        });
+    }
 
-        async function authenticateUser() {
-            const password = secretAnswer.value.trim();
-            if (!password) {
-                secretAnswer.classList.add('shake');
-                setTimeout(() => secretAnswer.classList.remove('shake'), 500);
-                return;
-            }
-
+    function checkAuth() {
+        const authData = localStorage.getItem('vFilesAuth');
+        if (authData) {
             try {
-                const response = await fetch(`${WORKER_URL}/api/auth`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: password })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Authentication failed');
-                }
-
-                const data = await response.json();
-                localStorage.setItem('vFilesAuth', JSON.stringify(data));
-                authToken = data.token;
-
-                authOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    authOverlay.style.display = 'none';
+                const data = JSON.parse(authData);
+                if (data.token && data.expires > Date.now()) {
+                    authToken = data.token;
                     showMainContent();
                     fetchData();
-                }, 500);
-
-            } catch (error) {
-                console.error('Authentication error:', error);
-                secretAnswer.style.borderColor = 'var(--error)';
-                secretAnswer.classList.add('shake');
-                setTimeout(() => {
-                    window.location.href = '/whoareyou/index.html'; // Redirect on auth failure
-                }, 1000);
+                    return true;
+                }
+            } catch (e) {
+                console.error('Error parsing auth data:', e);
+                localStorage.removeItem('vFilesAuth'); // Hapus data auth yang rusak
             }
         }
+        return false;
+    }
 
-        function showMainContent() {
-            mainContainer.style.display = 'block';
-            mainContainer.classList.add('fade-in');
-            
-            const header = document.querySelector('.header');
+    async function authenticateUser() {
+        const password = secretAnswer.value.trim();
+        if (!password) {
+            secretAnswer.classList.add('shake');
+            setTimeout(() => secretAnswer.classList.remove('shake'), 500);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${WORKER_URL}/api/auth`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Authentication failed');
+            }
+
+            const data = await response.json();
+            localStorage.setItem('vFilesAuth', JSON.stringify(data));
+            authToken = data.token;
+
+            authOverlay.classList.add('hidden');
+            setTimeout(() => {
+                authOverlay.style.display = 'none';
+                showMainContent();
+                fetchData();
+            }, 500);
+
+        } catch (error) {
+            console.error('Authentication error:', error);
+            secretAnswer.style.borderColor = 'var(--error)';
+            secretAnswer.classList.add('shake');
+            setTimeout(() => {
+                window.location.href = '/whoareyou/index.html'; // Redirect on auth failure
+            }, 1000);
+        }
+    }
+
+    function showMainContent() {
+        mainContainer.style.display = 'block';
+        mainContainer.classList.add('fade-in');
+        
+        const header = document.querySelector('.header');
+        if (!document.getElementById('toggleEditor')) {
             header.insertBefore(toggleEditor, logoutBtn);
-            
-            initEditor(); // Inisialisasi fungsionalitas editor
         }
+        
+        initEditor();
+    }
 
-        // Logout handler
-        logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('vFilesAuth');
-            window.location.href = 'https://localezra.netlify.app'; // Sesuaikan URL logout
-        });
+    // Logout handler
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('vFilesAuth');
+        window.location.href = 'https://localezra.netlify.app';
+    });
 
-        // --- Fungsi Fetch Data dari Worker ---
-        async function fetchData() {
-            try {
-                const response = await fetch(`${WORKER_URL}/api/data`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401 || response.status === 403) {
-                        localStorage.removeItem('vFilesAuth');
-                        window.location.reload(); // Paksa reload untuk auth ulang
-                        return;
-                    }
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to fetch data');
+    // --- Fungsi Fetch Data dari Worker ---
+    async function fetchData() {
+        try {
+            const response = await fetch(`${WORKER_URL}/api/data`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
                 }
+            });
 
-                const data = await response.json();
-                
-                // Update User Info
-                if (data.user) {
-                    userInfoElement.innerHTML = `
-                        <strong>User:</strong> <span data-field="name">${data.user.name || 'N/A'}</span><br>
-                        <strong>Role:</strong> <span data-field="role">${data.user.role || 'N/A'}</span><br>
-                        <strong>Email:</strong> <span data-field="email">${data.user.email || 'N/A'}</span>
-                    `;
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem('vFilesAuth');
+                    window.location.reload();
+                    return;
                 }
-
-                // Update Last Access
-                if (data.lastAccess) {
-                    lastAccessSpan.textContent = new Date(data.lastAccess).toLocaleString();
-                } else {
-                    lastAccessSpan.textContent = 'Never accessed';
-                }
-
-                // Update Info Panel Title
-                if (data.infoPanelTitle) {
-                    infoPanelTitleElement.textContent = data.infoPanelTitle;
-                }
-
-                // Update Files Data
-                filesData = data.files || [];
-                renderFiles();
-                
-                // Simpan konten asli untuk 'Cancel'
-                saveOriginalContent();
-
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                userInfoElement.textContent = `Error loading user data: ${error.message}`;
-                fileListContainer.innerHTML = `<p style="color:var(--error);">Error loading files: ${error.message}</p>`;
-            }
-        }
-
-        // --- Fungsi Render Files ---
-        function renderFiles() {
-            fileListContainer.innerHTML = ''; // Kosongkan daftar sebelum render ulang
-            
-            if (filesData.length === 0) {
-                fileListContainer.innerHTML = '<p>No files available. Add some in EDIT MODE!</p>';
-                return;
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to fetch data');
             }
 
-            filesData.forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.dataset.id = file.id; // Tambahkan ID ke elemen DOM
+            const data = await response.json();
+            
+            // Update User Info
+            if (data.user) {
+                userInfoElement.innerHTML = `
+                    <strong>User:</strong> <span data-field="name">${data.user.name || 'N/A'}</span><br>
+                    <strong>Role:</strong> <span data-field="role">${data.user.role || 'N/A'}</span><br>
+                    <strong>Email:</strong> <span data-field="email">${data.user.email || 'N/A'}</span>
+                `;
+            }
 
-                let contentHtml = '';
-                if (file.type === 'text') {
-                    contentHtml = `
-                        <div>${file.name || 'Untitled Text'}</div>
-                        <div class="file-content content-editable" data-field="content">${file.content || 'Click to edit text content.'}</div>
-                    `;
-                } else if (file.type === 'image') {
-                    contentHtml = `
-                        <div>${file.name || 'Untitled Image'}</div>
-                        <div class="media-container content-editable" data-field="url">
-                            <img src="${file.url}" alt="${file.name || 'Image'}">
-                        </div>
-                    `;
-                } else if (file.type === 'video') {
-                    contentHtml = `
-                        <div>${file.name || 'Untitled Video'}</div>
-                        <div class="media-container content-editable" data-field="url">
-                            <iframe src="${file.url}" allowfullscreen></iframe>
-                        </div>
-                    `;
-                } else if (file.type === 'file') { // Untuk file umum (misal PDF)
-                    contentHtml = `
-                        <div>${file.name || 'Untitled File'}</div>
-                        <div class="content-editable" data-field="url">
-                            <a href="${file.url}" target="_blank">Download: ${file.name || 'File'}</a>
-                        </div>
-                    `;
-                }
-                // Tambahkan juga untuk tipe 'raw_html'
-                else if (file.type === 'raw_html') {
-                    contentHtml = `
-                        <div>${file.name || 'Raw HTML Content'}</div>
-                        <div class="raw-html-container content-editable" data-field="content">
-                            ${file.content || 'Click to edit HTML content.'}
-                        </div>
-                    `;
-                }
-                
-                fileItem.innerHTML = `
-                    <div class="file-info">${contentHtml}</div>
-                    <div class="file-actions">
-                        <button class="edit-item-btn" data-id="${file.id}">Edit</button>
-                        <button class="delete-item-btn" data-id="${file.id}">Delete</button>
+            // Update Last Access
+            if (data.lastAccess) {
+                lastAccessSpan.textContent = new Date(data.lastAccess).toLocaleString();
+            } else {
+                lastAccessSpan.textContent = 'Never accessed';
+            }
+
+            // Update Info Panel Title
+            if (data.infoPanelTitle) {
+                infoPanelTitleElement.textContent = data.infoPanelTitle;
+            }
+
+            // Update Files Data
+            filesData = data.files || [];
+            renderFiles();
+            
+            // Simpan konten asli untuk 'Cancel'
+            saveOriginalContent();
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            userInfoElement.textContent = `Error loading user data: ${error.message}`;
+            fileListContainer.innerHTML = `<p style="color:var(--error);">Error loading files: ${error.message}</p>`;
+        }
+    }
+
+    // --- Fungsi Render Files ---
+    function renderFiles() {
+        fileListContainer.innerHTML = '';
+        
+        if (filesData.length === 0) {
+            fileListContainer.innerHTML = '<p>No files available. Add some in EDIT MODE!</p>';
+            return;
+        }
+
+        filesData.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.dataset.id = file.id;
+
+            let contentHtml = '';
+            if (file.type === 'text') {
+                contentHtml = `
+                    <div>${file.name || 'Untitled Text'}</div>
+                    <div class="file-content content-editable" data-field="content">${file.content || 'Click to edit text content.'}</div>
+                `;
+            } else if (file.type === 'image') {
+                contentHtml = `
+                    <div>${file.name || 'Untitled Image'}</div>
+                    <div class="media-container content-editable" data-field="url">
+                        <img src="${file.url}" alt="${file.name || 'Image'}">
                     </div>
                 `;
-                
-                fileListContainer.appendChild(fileItem);
-            });
-
-            attachEditDeleteListeners();
-            updateEditableElementsState(); // Pastikan elemen yang bisa diedit di-set dengan benar
-        }
-
-        // --- Fungsi Editor ---
-        function initEditor() {
-            toggleEditor.addEventListener('click', () => {
-                editMode = !editMode;
-                toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
-                editorTools.classList.toggle('active', editMode);
-                
-                updateEditableElementsState();
-                if (editMode) {
-                    saveOriginalContent(); // Simpan state saat masuk edit mode
-                }
-            });
+            } else if (file.type === 'video') {
+                contentHtml = `
+                    <div>${file.name || 'Untitled Video'}</div>
+                    <div class="media-container content-editable" data-field="url">
+                        <iframe src="${file.url}" allowfullscreen></iframe>
+                    </div>
+                `;
+            } else if (file.type === 'file') {
+                contentHtml = `
+                    <div>${file.name || 'Untitled File'}</div>
+                    <div class="content-editable" data-field="url">
+                        <a href="${file.url}" target="_blank">Download: ${file.name || 'File'}</a>
+                    </div>
+                `;
+            } else if (file.type === 'raw_html') {
+                contentHtml = `
+                    <div>${file.name || 'Raw HTML Content'}</div>
+                    <div class="raw-html-container" data-field="content">
+                        ${file.content || 'Click EDIT to modify HTML content (via modal).'}
+                    </div>
+                `;
+            }
             
-            addText.addEventListener('click', () => addEditorItem('text'));
-            addImage.addEventListener('click', () => showMediaInput('image'));
-            addVideo.addEventListener('click', () => showMediaInput('video'));
-            addFile.addEventListener('click', () => showMediaInput('file')); // Atau jenis 'raw_html'
+            fileItem.innerHTML = `
+                <div class="file-info">${contentHtml}</div>
+                <div class="file-actions">
+                    <button class="edit-item-btn" data-id="${file.id}">Edit</button>
+                    <button class="delete-item-btn" data-id="${file.id}">Delete</button>
+                </div>
+            `;
             
-            insertMedia.addEventListener('click', insertMediaItem);
-            
-            saveChanges.addEventListener('click', saveAllChanges);
-            cancelEdit.addEventListener('click', cancelAllChanges);
-        }
+            fileListContainer.appendChild(fileItem);
+        });
 
-        function updateEditableElementsState() {
-            // Info Panel
-            document.querySelectorAll('.info-panel .content-editable').forEach(el => {
+        attachEditDeleteListeners();
+        updateEditableElementsState();
+    }
+
+    // --- Fungsi Editor ---
+    function initEditor() {
+        toggleEditor.addEventListener('click', () => {
+            editMode = !editMode;
+            toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
+            editorTools.classList.toggle('active', editMode);
+            
+            updateEditableElementsState();
+            if (editMode) {
+                saveOriginalContent();
+            }
+        });
+        
+        addText.addEventListener('click', () => addEditorItem('text'));
+        addImage.addEventListener('click', () => showMediaInput('image'));
+        addVideo.addEventListener('click', () => showMediaInput('video'));
+        addFile.addEventListener('click', () => addEditorItem('raw_html')); // Menggunakan 'raw_html' untuk contoh
+        
+        insertMedia.addEventListener('click', insertMediaItem);
+        
+        saveChanges.addEventListener('click', saveAllChanges);
+        cancelEdit.addEventListener('click', cancelAllChanges);
+    }
+
+    function updateEditableElementsState() {
+        document.querySelectorAll('.info-panel .content-editable').forEach(el => {
+            el.contentEditable = editMode;
+            el.classList.toggle('editing', editMode);
+        });
+
+        document.querySelectorAll('.file-list .content-editable').forEach(el => {
+            if (el.classList.contains('raw-html-container')) {
+                el.contentEditable = false; 
+            } else {
                 el.contentEditable = editMode;
-                el.classList.toggle('editing', editMode);
-            });
+            }
+            el.classList.toggle('editing', editMode);
+        });
 
-            // File List Items
-            document.querySelectorAll('.file-list .content-editable').forEach(el => {
-                if (el.classList.contains('raw-html-container')) {
-                    // Raw HTML content should not be contentEditable directly due to security/rendering issues
-                    // It should be edited via a textarea/modal
-                    el.contentEditable = false; 
-                    // Instead, you'd trigger a modal/textarea for raw_html content
-                    // For this example, we'll keep it simple: can't edit HTML directly here
-                } else {
-                    el.contentEditable = editMode;
-                }
-                el.classList.toggle('editing', editMode);
-            });
+        document.querySelectorAll('.file-actions button').forEach(btn => {
+            btn.style.display = editMode ? 'inline-block' : 'none';
+        });
+    }
 
-            // Tampilkan/sembunyikan tombol edit/delete di file list
-            document.querySelectorAll('.file-actions button').forEach(btn => {
-                btn.style.display = editMode ? 'inline-block' : 'none';
-            });
+    function saveOriginalContent() {
+        originalContent = {
+            infoPanelTitle: infoPanelTitleElement.textContent,
+            userInfo: userInfoElement.innerHTML,
+            lastAccess: lastAccessSpan.textContent,
+            files: JSON.parse(JSON.stringify(filesData))
+        };
+    }
+
+    function restoreOriginalContent() {
+        if (originalContent.infoPanelTitle) infoPanelTitleElement.textContent = originalContent.infoPanelTitle;
+        if (originalContent.userInfo) userInfoElement.innerHTML = originalContent.userInfo;
+        if (originalContent.lastAccess) lastAccessSpan.textContent = originalContent.lastAccess;
+        filesData = JSON.parse(JSON.stringify(originalContent.files));
+        renderFiles();
+    }
+
+    function addEditorItem(type) {
+        let namePrefix = '';
+        let contentDefault = '';
+        if (type === 'text') {
+            namePrefix = 'New Text';
+            contentDefault = 'Click to edit this new text block.';
+        } else if (type === 'raw_html') {
+            namePrefix = 'New Raw HTML';
+            contentDefault = '';
         }
 
-        function saveOriginalContent() {
-            originalContent = {
-                infoPanelTitle: infoPanelTitleElement.textContent,
-                userInfo: userInfoElement.innerHTML,
-                lastAccess: lastAccessSpan.textContent, // Ini mungkin tidak perlu di-rollback
-                files: JSON.parse(JSON.stringify(filesData)) // Deep copy
-            };
-        }
-
-        function restoreOriginalContent() {
-            if (originalContent.infoPanelTitle) infoPanelTitleElement.textContent = originalContent.infoPanelTitle;
-            if (originalContent.userInfo) userInfoElement.innerHTML = originalContent.userInfo;
-            if (originalContent.lastAccess) lastAccessSpan.textContent = originalContent.lastAccess;
-            filesData = JSON.parse(JSON.stringify(originalContent.files)); // Restore files
-            renderFiles(); // Render ulang dengan data asli
-        }
-
-        function addEditorItem(type) {
-            const newItem = {
-                id: Date.now(), // ID unik untuk setiap item baru
-                type: type,
-                name: `New ${type} Item`,
-                content: type === 'text' ? 'Click to edit this new text block.' : '',
-                url: ''
-            };
-            filesData.push(newItem);
-            renderFiles(); // Render ulang untuk menampilkan item baru
-            // Opsional: scroll ke item baru
+        const newItem = {
+            id: Date.now(),
+            type: type,
+            name: `${namePrefix} Item`,
+            content: contentDefault,
+            url: ''
+        };
+        filesData.push(newItem);
+        renderFiles();
+        if (type === 'text') {
             setTimeout(() => {
                 const newItemElement = document.querySelector(`.file-item[data-id="${newItem.id}"] .content-editable`);
                 if (newItemElement) newItemElement.focus();
             }, 50);
         }
+    }
 
-        function showMediaInput(type) {
-            currentMediaType = type;
-            mediaInput.classList.add('active');
-            mediaUrl.placeholder = `Enter ${type} URL`;
-            mediaUrl.focus();
+    function showMediaInput(type) {
+        currentMediaType = type;
+        mediaInput.classList.add('active');
+        mediaUrl.placeholder = `Enter ${type} URL`;
+        mediaUrl.focus();
+    }
+
+    async function insertMediaItem() {
+        const url = mediaUrl.value.trim();
+        if (url) {
+            const newItem = {
+                id: Date.now(),
+                name: url.split('/').pop() || `New ${currentMediaType}`,
+                type: currentMediaType,
+                url: url
+            };
+            filesData.push(newItem);
+            renderFiles();
+            
+            mediaUrl.value = '';
+            mediaInput.classList.remove('active');
         }
+    }
 
-        async function insertMediaItem() {
-            const url = mediaUrl.value.trim();
-            if (url) {
-                const newItem = {
-                    id: Date.now(),
-                    name: url.split('/').pop() || `New ${currentMediaType}`,
-                    type: currentMediaType,
-                    url: url
-                };
-                filesData.push(newItem);
-                renderFiles(); // Render ulang untuk menampilkan item baru
-                
-                mediaUrl.value = '';
-                mediaInput.classList.remove('active');
-            }
-        }
+    async function saveAllChanges() {
+        const updatedUserInfo = {};
+        userInfoElement.querySelectorAll('[data-field]').forEach(span => {
+            updatedUserInfo[span.dataset.field] = span.textContent.trim();
+        });
 
-        async function saveAllChanges() {
-            // Kumpulkan semua perubahan dari elemen content-editable
-            const updatedUserInfo = {};
-            userInfoElement.querySelectorAll('[data-field]').forEach(span => {
-                updatedUserInfo[span.dataset.field] = span.textContent.trim();
-            });
+        const updatedInfoPanelTitle = infoPanelTitleElement.textContent.trim();
 
-            const updatedInfoPanelTitle = infoPanelTitleElement.textContent.trim();
+        const updatedFilesData = [];
+        fileListContainer.querySelectorAll('.file-item').forEach(itemElement => {
+            const id = parseInt(itemElement.dataset.id);
+            const fileInfoDiv = itemElement.querySelector('.file-info');
+            const originalFile = filesData.find(f => f.id === id);
 
-            const updatedFilesData = [];
-            fileListContainer.querySelectorAll('.file-item').forEach(itemElement => {
-                const id = parseInt(itemElement.dataset.id);
-                const fileInfoDiv = itemElement.querySelector('.file-info');
-                const originalFile = filesData.find(f => f.id === id); // Cari data asli berdasarkan ID
+            if (originalFile) {
+                const updatedFile = { ...originalFile };
 
-                if (originalFile) {
-                    const updatedFile = { ...originalFile }; // Buat salinan
+                const nameDiv = fileInfoDiv.querySelector('div:first-child');
+                if (nameDiv) updatedFile.name = nameDiv.textContent.trim();
 
-                    // Ambil nama (jika ada div nama terpisah)
-                    const nameDiv = fileInfoDiv.querySelector('div:first-child');
-                    if (nameDiv) updatedFile.name = nameDiv.textContent.trim();
-
-                    // Ambil konten/URL dari elemen content-editable
-                    const editableContent = fileInfoDiv.querySelector('[data-field="content"], [data-field="url"]');
-                    if (editableContent) {
-                        if (editableContent.dataset.field === 'content') {
-                            updatedFile.content = editableContent.innerHTML.trim(); // Gunakan innerHTML untuk mempertahankan formatting
-                        } else if (editableContent.dataset.field === 'url') {
-                            // Untuk media, URL diambil dari src/href di dalam elemen anak
-                            if (updatedFile.type === 'image' && editableContent.querySelector('img')) {
-                                updatedFile.url = editableContent.querySelector('img').src;
-                            } else if (updatedFile.type === 'video' && editableContent.querySelector('iframe')) {
-                                updatedFile.url = editableContent.querySelector('iframe').src;
-                            } else if (updatedFile.type === 'file' && editableContent.querySelector('a')) {
-                                updatedFile.url = editableContent.querySelector('a').href;
-                            }
+                const editableContent = fileInfoDiv.querySelector('[data-field="content"], [data-field="url"]');
+                if (editableContent) {
+                    if (editableContent.dataset.field === 'content') {
+                        updatedFile.content = editableContent.innerHTML.trim(); 
+                    } else if (editableContent.dataset.field === 'url') {
+                        if (updatedFile.type === 'image' && editableContent.querySelector('img')) {
+                            updatedFile.url = editableContent.querySelector('img').src;
+                        } else if (updatedFile.type === 'video' && editableContent.querySelector('iframe')) {
+                            updatedFile.url = editableContent.querySelector('iframe').src;
+                        } else if (updatedFile.type === 'file' && editableContent.querySelector('a')) {
+                            updatedFile.url = editableContent.querySelector('a').href;
                         }
                     }
-                    updatedFilesData.push(updatedFile);
                 }
+                updatedFilesData.push(updatedFile);
+            }
+        });
+
+        try {
+            const response = await fetch(`${WORKER_URL}/api/data`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ 
+                    user: updatedUserInfo, 
+                    files: updatedFilesData,
+                    infoPanelTitle: updatedInfoPanelTitle
+                })
             });
 
-            try {
-                const response = await fetch(`${WORKER_URL}/api/data`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({ 
-                        user: updatedUserInfo, 
-                        files: updatedFilesData,
-                        infoPanelTitle: updatedInfoPanelTitle
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to save changes');
-                }
-
-                alert('Changes saved successfully!');
-                filesData = updatedFilesData; // Update data lokal setelah berhasil disimpan
-                toggleEditor.click(); // Exit edit mode
-                fetchData(); // Refresh data dari server (optional, jika ada perubahan server-side)
-            } catch (error) {
-                console.error('Save error:', error);
-                alert(`Failed to save changes: ${error.message}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save changes');
             }
+
+            alert('Changes saved successfully!');
+            filesData = updatedFilesData;
+            toggleEditor.click();
+            fetchData();
+        } catch (error) {
+            console.error('Save error:', error);
+            alert(`Failed to save changes: ${error.message}`);
         }
+    }
 
-        function cancelAllChanges() {
-            if (confirm('Discard all unsaved changes?')) {
-                restoreOriginalContent(); // Kembalikan konten ke keadaan semula
-                toggleEditor.click(); // Exit edit mode
-                alert('Changes discarded.');
-            }
+    function cancelAllChanges() {
+        if (confirm('Discard all unsaved changes?')) {
+            restoreOriginalContent();
+            toggleEditor.click();
+            alert('Changes discarded.');
         }
+    }
 
-        // --- Handler Edit/Delete per Item ---
-        function attachEditDeleteListeners() {
-            fileListContainer.querySelectorAll('.delete-item-btn').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const fileId = parseInt(e.target.dataset.id);
-                    if (confirm('Are you sure you want to delete this item?')) {
-                        const initialFilesData = [...filesData]; // Simpan state awal untuk rollback
-                        filesData = filesData.filter(f => f.id !== fileId);
-                        renderFiles(); // Render ulang daftar tanpa item yang dihapus
+    // --- Handler Edit/Delete per Item ---
+    function attachEditDeleteListeners() {
+        fileListContainer.querySelectorAll('.delete-item-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const fileId = parseInt(e.target.dataset.id);
+                if (confirm('Are you sure you want to delete this item?')) {
+                    const initialFilesData = [...filesData];
+                    filesData = filesData.filter(f => f.id !== fileId);
+                    renderFiles();
 
-                        try {
-                            const response = await fetch(`${WORKER_URL}/api/data`, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${authToken}`
-                                },
-                                body: JSON.stringify({ files: filesData }) // Kirim data yang sudah difilter
-                            });
+                    try {
+                        const response = await fetch(`${WORKER_URL}/api/data`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${authToken}`
+                            },
+                            body: JSON.stringify({ files: filesData })
+                        });
 
-                            if (!response.ok) {
-                                const errorData = await response.json();
-                                throw new Error(errorData.error || 'Failed to delete item');
-                            }
-                            console.log('Item deleted successfully from KV.');
-                        } catch (error) {
-                            console.error('Delete error:', error);
-                            alert(`Failed to delete item: ${error.message}`);
-                            filesData = initialFilesData; // Rollback
-                            renderFiles();
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || 'Failed to delete item');
                         }
+                        console.log('Item deleted successfully from KV.');
+                    } catch (error) {
+                        console.error('Delete error:', error);
+                        alert(`Failed to delete item: ${error.message}`);
+                        filesData = initialFilesData;
+                        renderFiles();
                     }
-                });
+                }
             });
+        });
+    }
 
-            // Tombol 'Edit' per item akan mengandalkan `content-editable`
-            // sehingga tidak perlu event listener terpisah, cukup pastikan
-            // `contentEditable` diaktifkan/dinonaktifkan oleh `toggleEditor`.
-            // Jika ingin modal edit untuk setiap item, logikanya akan lebih kompleks di sini.
-        }
+    // --- Background Video Logic (Tidak ada lagi karena elemen dihapus dari HTML) ---
+    // if (backgroundVideo) { // Ini akan selalu false
+    //     backgroundVideo.muted = true;
+    // }
 
-        // --- Video Player Widget Logic ---
-        playPauseBtn.addEventListener('click', () => {
-            if (backgroundVideo.paused) {
-                backgroundVideo.play();
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    // --- Floating Video Widget Logic (Draggable & Kontrol) ---
+    if (floatingVideo) {
+        floatingVideo.muted = true;
+        floatingPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; 
+        floatingMuteUnmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+
+        floatingPlayPauseBtn.addEventListener('click', () => {
+            if (floatingVideo.paused) {
+                floatingVideo.play();
+                floatingPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
             } else {
-                backgroundVideo.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                floatingVideo.pause();
+                floatingPlayPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             }
         });
 
-        muteUnmuteBtn.addEventListener('click', () => {
-            backgroundVideo.muted = !backgroundVideo.muted;
-            muteUnmuteBtn.innerHTML = backgroundVideo.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        floatingMuteUnmuteBtn.addEventListener('click', () => {
+            floatingVideo.muted = !floatingVideo.muted;
+            floatingMuteUnmuteBtn.innerHTML = floatingVideo.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
         });
-
-        // Pastikan video dimulai dalam keadaan muted
-        backgroundVideo.muted = true;
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; // Default state after autoplay
-        muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-
-        // Inisialisasi awal
-        initAuthentication();
-    }); // <--- Ini adalah penutup yang benar untuk DOMContentLoaded
-    // Existing JavaScript code...
+    }
 
     // --- Fungsi Dragging Widget Video ---
-    const videoPlayerWidget = document.getElementById('video-player-widget');
     let isDragging = false;
     let currentX;
     let currentY;
@@ -920,22 +988,18 @@
     let xOffset = 0;
     let yOffset = 0;
 
-    // Inisialisasi posisi awal (opsional, jika Anda ingin posisi default saat dimuat)
-    videoPlayerWidget.style.left = 'calc(50% - 75px)'; // Setengah dari lebar widget
-    videoPlayerWidget.style.top = '20px'; // Contoh posisi awal di atas
-
-    videoPlayerWidget.addEventListener('mousedown', dragStart);
-    document.addEventListener('mouseup', dragEnd);
-    document.addEventListener('mousemove', drag);
+    if (floatingVideoWidget) {
+        floatingVideoWidget.addEventListener('mousedown', dragStart);
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('mousemove', drag);
+    }
 
     function dragStart(e) {
-        if (e.target !== videoPlayerWidget && !videoPlayerWidget.contains(e.target)) {
-            // Hanya mulai drag jika klik pada widget itu sendiri atau kontrol di dalamnya
+        if (e.target !== floatingVideoWidget && !floatingVideoWidget.contains(e.target) && !e.target.closest('.floating-video-controls')) {
             return;
         }
         
-        // Jangan drag jika target adalah tombol (play/pause/mute)
-        if (e.target.closest('.video-controls')) {
+        if (e.target.closest('.floating-video-controls')) {
             return;
         }
 
@@ -943,8 +1007,8 @@
         initialY = e.clientY - yOffset;
 
         isDragging = true;
-        videoPlayerWidget.classList.add('dragging');
-        videoPlayerWidget.style.transition = 'none'; // Hapus transisi saat dragging
+        floatingVideoWidget.classList.add('dragging');
+        floatingVideoWidget.style.transition = 'none';
     }
 
     function dragEnd(e) {
@@ -952,14 +1016,14 @@
         initialY = currentY;
 
         isDragging = false;
-        videoPlayerWidget.classList.remove('dragging');
-        videoPlayerWidget.style.transition = ''; // Kembalikan transisi setelah dragging selesai (jika ada transisi lain)
+        floatingVideoWidget.classList.remove('dragging');
+        floatingVideoWidget.style.transition = 'transform 0.1s ease-out';
     }
 
     function drag(e) {
         if (!isDragging) return;
 
-        e.preventDefault(); // Mencegah perilaku default browser (mis. memilih teks)
+        e.preventDefault();
 
         currentX = e.clientX - initialX;
         currentY = e.clientY - initialY;
@@ -967,12 +1031,16 @@
         xOffset = currentX;
         yOffset = currentY;
 
-        setTranslate(currentX, currentY, videoPlayerWidget);
+        setTranslate(currentX, currentY, floatingVideoWidget);
     }
 
     function setTranslate(xPos, yPos, el) {
-        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+        el.style.transform = `translate(${xPos}px, ${yPos}px)`;
     }
+
+    // --- Inisialisasi Awal ---
+    initAuthentication();
+});
     </script>
 </body>
 </html>
