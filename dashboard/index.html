@@ -81,26 +81,6 @@
             transform: translateX(100%); padding: 20px;
         }
         #contribution-panel.active { transform: translateX(0); }
-        /* New: Admin panel styling */
-        #admin-panel {
-            top: 50%;
-            left: 50%;
-            width: 400px; /* Adjust width as needed */
-            max-width: 90vw;
-            height: auto;
-            max-height: 80vh; /* Limit height for scrollable content */
-            transform: translate(-50%, -50%) scale(0.8);
-            opacity: 0;
-            pointer-events: none;
-            border-radius: 15px;
-            padding: 10px;
-            overflow-y: auto; /* Enable scrolling for visitor list */
-        }
-        #admin-panel.active {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-            pointer-events: all;
-        }
         .panel-close-btn {
             position: absolute; top: 15px; right: 15px; background: none; border: none;
             color: var(--text-primary); font-size: 1.5rem; cursor: pointer; z-index: 5;
@@ -120,12 +100,6 @@
         #fab-layout, #fab-theme { bottom: 20px; }
         #fab-layout { left: 20px; }
         #fab-theme { right: 20px; }
-        /* New: Admin FAB position (below private user FAB) */
-        #fab-admin {
-            left: 20px;
-            top: calc(50% + 70px); /* Adjust based on private user fab height + spacing */
-            transform: translateY(-50%);
-        }
         #editor-panel { padding: 0; }
         .editor-toolbar { display: flex; gap: 5px; padding: 10px; background: rgba(0,0,0,0.2); flex-wrap: wrap; }
         .editor-toolbar button, .editor-toolbar select { background: var(--primary); color: white; border:none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
@@ -136,6 +110,12 @@
         .editor-pane label { background: #333; color: var(--accent); padding: 5px 10px; font-size: 0.8em; font-weight: bold;}
         .editor-pane textarea { flex-grow: 1; background: #1e1e1e; color: #f8f8f2; border: none; resize: none; padding: 10px; font-family: 'Courier New', monospace; font-size: 14px; outline: none; }
         #editor-preview { width: 100%; height: 100%; border: none; background: white; }
+        #video-player-widget {
+            position: fixed; bottom: 20px; right: 90px; z-index: 999;
+            width: 150px; height: 150px; border-radius: 10px;
+            overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            border: 2px solid var(--border-color);
+        }
         #video-player-widget {
     position: fixed;
     top: 20px;
@@ -231,14 +211,9 @@
 body.desktop-layout #fab-private-user {
     display: none;
 }
-/* New: Hide Admin FAB in desktop layout */
-body.desktop-layout #fab-admin {
-    display: none;
-}
 
 /* Ensure desktop panel style for consistency */
-body.desktop-layout #private-user-panel,
-body.desktop-layout #admin-panel { /* Add admin panel here */
+body.desktop-layout #private-user-panel {
     position: static;
     transform: none !important;
     height: auto;
@@ -250,35 +225,6 @@ body.desktop-layout #admin-panel { /* Add admin panel here */
     opacity: 1; /* Always visible in desktop layout if implemented as a static panel */
     pointer-events: all;
 }
-
-/* Styling for visitor list within admin panel */
-#visitor-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    color: var(--text-secondary);
-}
-
-#visitor-list li {
-    background: rgba(0, 0, 0, 0.2);
-    margin-bottom: 8px;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 0.9em;
-    border: 1px solid var(--border-color);
-}
-
-#visitor-list li strong {
-    color: var(--text-primary);
-}
-
-#visitor-list li span {
-    display: block;
-    margin-top: 3px;
-    color: var(--text-secondary);
-    font-size: 0.85em;
-}
-
     </style>
 </head>
 <body class=""> <canvas id="interactive-bg"></canvas> 
@@ -355,39 +301,18 @@ body.desktop-layout #admin-panel { /* Add admin panel here */
         </div>
     </div>
     <div class="fab-container" id="fab-private-user">
-        <button class="fab" title="Private User"><i class="fas fa-user-secret"></i></button>
+    <button class="fab" title="Private User"><i class="fas fa-user-secret"></i></button>
+</div>
+<div class="panel" id="private-user-panel">
+    <button class="panel-close-btn" data-panel="private-user-panel"><i class="fas fa-times"></i></button>
+    <div style="padding: 20px; text-align: center;">
+        <h3 style="margin-bottom: 15px; color: var(--accent);">Private User</h3>
+        <p style="margin-bottom: 20px;">Masuk sebagai siapa?</p>
+        <input type="text" id="private-user-input" placeholder="Masukkan nama Anda..." style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--text-primary); margin-bottom: 15px;">
+        <button id="private-user-submit" class="fab" style="position:static; width:auto; padding: 10px 20px; font-size:1rem;">Masuk</button>
+        <p id="private-user-message" style="margin-top: 15px; font-size: 0.9em;"></p>
     </div>
-    <div class="panel" id="private-user-panel">
-        <button class="panel-close-btn" data-panel="private-user-panel"><i class="fas fa-times"></i></button>
-        <div style="padding: 20px; text-align: center;">
-            <h3 style="margin-bottom: 15px; color: var(--accent);">Private User</h3>
-            <p style="margin-bottom: 20px;">Masuk sebagai siapa?</p>
-            <input type="text" id="private-user-input" placeholder="Masukkan nama Anda..." style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--text-primary); margin-bottom: 15px;">
-            <button id="private-user-submit" class="fab" style="position:static; width:auto; padding: 10px 20px; font-size:1rem;">Masuk</button>
-            <p id="private-user-message" style="margin-top: 15px; font-size: 0.9em;"></p>
-        </div>
-    </div>
-
-    <div class="fab-container" id="fab-admin">
-        <button class="fab" title="Admin Panel"><i class="fas fa-shield-alt"></i></button>
-    </div>
-
-    <div class="panel" id="admin-panel">
-        <button class="panel-close-btn" data-panel="admin-panel"><i class="fas fa-times"></i></button>
-        <div id="admin-auth-section" style="padding: 20px; text-align: center;">
-            <h3 style="margin-bottom: 15px; color: var(--accent);">Masukkan Password Admin</h3>
-            <input type="password" id="admin-password-input" placeholder="Password..." style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--text-primary); margin-bottom: 15px;">
-            <button id="admin-password-submit" class="fab" style="position:static; width:auto; padding: 10px 20px; font-size:1rem;">Masuk</button>
-            <p id="admin-message" style="margin-top: 15px; font-size: 0.9em;"></p>
-        </div>
-        <div id="admin-content-section" class="hidden" style="flex-grow: 1; padding: 10px 20px;">
-            <h3 style="margin-bottom: 15px; color: var(--accent);">Live Visitor List</h3>
-            <ul id="visitor-list">
-                <p style="text-align: center; color: var(--text-secondary);">Loading visitor data...</p>
-            </ul>
-        </div>
-    </div>
-
+</div>
     <div class="fab-container" id="fab-editor">
         <button class="fab" data-panel="editor-panel" title="Code Editor"><i class="fas fa-code"></i></button>
     </div>
@@ -416,16 +341,13 @@ body.desktop-layout #admin-panel { /* Add admin panel here */
     </div>
     <div class="social-links">
         <a href="https://wa.me/6281434046148" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://instagram.com/localezra.netlify.app" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://instagram.com/ezravvv" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
         <a href="https://github.com/ezraelvi/localezra" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
     </div>
 <script>
 const SECRET_CODE = "wherewe";
 const CONTRIBUTIONS_WORKER_URL = 'https://contributions-workerjs.ezvvel.workers.dev/';
 const VISITOR_TRACKER_WORKER_URL = 'https://visitor-tracker-workerjs.ezvvel.workers.dev/';
-const ADMIN_AUTH_WORKER_URL = 'https://admin-auth-workerjs.ezvvel.workers.dev/'; // NEW: Admin Auth Worker URL
-const LIVE_VISITORS_WORKER_URL = 'https://live-visitors-workerjs.ezvvel.workers.dev/'; // NEW: Live Visitors Worker URL
-
 document.addEventListener('DOMContentLoaded', () => {
     initParticleBackground();
     initSecretCodeListener();
@@ -434,11 +356,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initVideoPlayer();
     initEditor();
     initMusicPlayer();
-    trackVisitor(); // This function will send data to your visitor tracker worker
+    trackVisitor();
     initPrivateUserAuth();
-    initAdminPanel(); // NEW: Initialize admin panel
 });
-
 function initParticleBackground() {
     const canvas = document.getElementById('interactive-bg');
     const ctx = canvas.getContext('2d');
@@ -562,34 +482,16 @@ function initMap(lat, lon, isDefault = false) {
         locationInfoEl.innerHTML = `Tracking... Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
     }
 }
-
-// Update initPanelControls to handle the new admin panel
+// Add the new panel to the initPanelControls function
 function initPanelControls() {
     document.querySelectorAll('[data-panel]').forEach(button => {
         button.addEventListener('click', () => {
             const panelId = button.getAttribute('data-panel');
             const panel = document.getElementById(panelId);
-
-            // If the panel is the admin panel, handle authentication first
-            if (panelId === 'admin-panel') {
-                const adminAuthSection = document.getElementById('admin-auth-section');
-                const adminContentSection = document.getElementById('admin-content-section');
-                const adminPasswordInput = document.getElementById('admin-password-input');
-                const adminMessage = document.getElementById('admin-message');
-
-                // Always show auth section and hide content when opening admin panel
-                adminAuthSection.classList.remove('hidden');
-                adminContentSection.classList.add('hidden');
-                adminPasswordInput.value = ''; // Clear password input
-                adminMessage.textContent = ''; // Clear message
-            }
-
             panel.classList.toggle('active');
-
             if (panelId === 'contribution-panel' && panel.classList.contains('active')) {
                 fetchContributions();
             }
-
             // Close other panels when one opens
             document.querySelectorAll('.panel').forEach(otherPanel => {
                 if (otherPanel.id !== panelId) {
@@ -670,20 +572,12 @@ function initPrivateUserAuth() {
     });
 }
     
-// MODIFIED: initLayoutAndThemeToggles to add alert for desktop layout
 function initLayoutAndThemeToggles() {
     const layoutBtn = document.querySelector('#fab-layout .fab');
     const themeBtn = document.querySelector('#fab-theme .fab');
     const desktopLayoutBtn = document.getElementById('desktop-layout-toggle');
     const desktopThemeBtn = document.getElementById('desktop-theme-toggle');
-
-    const toggleLayout = () => {
-        if (!document.body.classList.contains('desktop-layout')) {
-            alert('Silakan aktifkan "Situs Desktop" di browser Anda untuk pengalaman terbaik.');
-        }
-        document.body.classList.toggle('desktop-layout');
-    };
-
+    const toggleLayout = () => document.body.classList.toggle('desktop-layout');
     const toggleTheme = () => {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -692,13 +586,11 @@ function initLayoutAndThemeToggles() {
             i.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         });
     };
-
     layoutBtn.addEventListener('click', toggleLayout);
     desktopLayoutBtn.addEventListener('click', toggleLayout);
     themeBtn.addEventListener('click', toggleTheme);
     desktopThemeBtn.addEventListener('click', toggleTheme);
 }
-
 function initVideoPlayer() {
     const video = document.getElementById('widget-video');
     const playBtn = document.getElementById('video-play-pause');
@@ -793,201 +685,56 @@ async function fetchContributions() {
                 if(c.fileUrl) {
                     if(c.fileType.startsWith('image/')) {
                         mediaHTML = `<img src="${c.fileUrl}" style="max-width:100%; border-radius:5px; margin-top:10px;">`;
-                    } else if (c.fileType.startsWith('video/')) {
-                        mediaHTML = `<video controls src="${c.fileUrl}" style="max-width:100%; border-radius:5px; margin-top:10px;"></video>`;
+                    } else if(c.fileType.startsWith('video/')) {
+                         mediaHTML = `<video src="${c.fileUrl}" controls style="max-width:100%; border-radius:5px; margin-top:10px;"></video>`;
                     }
                 }
-                const timestamp = new Date(c.timestamp).toLocaleString();
-                return `
-                    <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border-color);">
-                        <p style="margin:0; font-size:0.95em;">${c.message}</p>
-                        ${mediaHTML}
-                        <p style="font-size:0.75em; color:var(--text-secondary); margin-top:5px; text-align:right;">${timestamp}</p>
-                    </div>
-                `;
+                return `<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;">
+                    <p style="margin:0;">${c.text}</p>${mediaHTML}
+                    <small style="color:var(--text-secondary);">${new Date(c.timestamp).toLocaleString()}</small>
+                </div>`;
             }).join('');
         } else {
-            display.innerHTML = `<p style="text-align:center;">No contributions yet.</p>`;
+            display.innerHTML = `<p>Be the first to leave a message!</p>`;
         }
-    } catch (error) {
-        console.error('Error fetching contributions:', error);
-        display.innerHTML = `<p style="color:var(--danger); text-align:center;">Failed to load messages.</p>`;
+    } catch (e) {
+        display.innerHTML = `<p style="color:var(--danger);">Could not load contributions.</p>`;
     }
 }
 document.getElementById('contribution-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const message = document.getElementById('contribution-text').value;
-    const fileInput = document.getElementById('contribution-file').files[0];
     const statusEl = document.getElementById('contribution-status');
-    statusEl.textContent = 'Sending message...';
-    statusEl.style.color = 'var(--text-secondary)';
+    statusEl.textContent = 'Uploading...';
     const formData = new FormData();
-    formData.append('message', message);
-    if (fileInput) {
-        formData.append('file', fileInput);
+    formData.append('text', document.getElementById('contribution-text').value);
+    const fileInput = document.getElementById('contribution-file');
+    if (fileInput.files.length > 0) {
+        formData.append('file', fileInput.files[0]);
     }
     try {
-        const response = await fetch(CONTRIBUTIONS_WORKER_URL, {
-            method: 'POST',
-            body: formData,
-        });
-        const result = await response.json();
-        if (result.success) {
-            statusEl.style.color = 'var(--success)';
-            statusEl.textContent = 'Message sent successfully!';
-            document.getElementById('contribution-text').value = '';
-            document.getElementById('contribution-file').value = '';
-            fetchContributions(); // Reload contributions
-        } else {
-            statusEl.style.color = 'var(--danger)';
-            statusEl.textContent = `Error: ${result.error || 'Failed to send message.'}`;
-        }
-    } catch (error) {
-        console.error('Error sending contribution:', error);
-        statusEl.style.color = 'var(--danger)';
-        statusEl.textContent = 'Network error or server unavailable.';
+        const response = await fetch(CONTRIBUTIONS_WORKER_URL, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Upload failed');
+        statusEl.textContent = 'Message sent! Thank you.';
+        e.target.reset();
+        fetchContributions();
+    } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
     }
 });
-
-// NEW: Function to track visitor data
-async function trackVisitor() {
+function trackVisitor() {
     try {
-        const referrer = document.referrer || 'Direct';
-        const userAgent = navigator.userAgent;
-        const browserId = generateBrowserId(); // Generate or retrieve a unique browser ID
-
         const data = {
-            browserId: browserId,
-            ip: '', // Will be filled by the Worker
-            device: userAgent,
-            referrer: referrer,
+            userAgent: navigator.userAgent,
             timestamp: new Date().toISOString()
         };
-
-        // Send data to the Cloudflare Worker
-        await fetch(VISITOR_TRACKER_WORKER_URL, {
+        fetch(VISITOR_TRACKER_WORKER_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            mode: 'no-cors'
         });
-        console.log('Visitor data sent to tracker worker.');
-    } catch (error) {
-        console.error('Error sending visitor data:', error);
-    }
+    } catch(e) { }
 }
-
-// Helper to generate/get a browser ID
-function generateBrowserId() {
-    let browserId = localStorage.getItem('browserId');
-    if (!browserId) {
-        browserId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-        localStorage.setItem('browserId', browserId);
-    }
-    return browserId;
-}
-
-// NEW: Initialize Admin Panel
-function initAdminPanel() {
-    const adminFab = document.querySelector('#fab-admin .fab');
-    const adminPanel = document.getElementById('admin-panel');
-    const adminPasswordInput = document.getElementById('admin-password-input');
-    const adminPasswordSubmit = document.getElementById('admin-password-submit');
-    const adminMessage = document.getElementById('admin-message');
-    const adminAuthSection = document.getElementById('admin-auth-section');
-    const adminContentSection = document.getElementById('admin-content-section');
-    const visitorList = document.getElementById('visitor-list');
-
-    adminFab.addEventListener('click', () => {
-        adminPanel.classList.toggle('active');
-        // Close other panels
-        document.querySelectorAll('.panel').forEach(otherPanel => {
-            if (otherPanel.id !== 'admin-panel') {
-                otherPanel.classList.remove('active');
-            }
-        });
-        // Reset admin panel state
-        adminAuthSection.classList.remove('hidden');
-        adminContentSection.classList.add('hidden');
-        adminPasswordInput.value = '';
-        adminMessage.textContent = '';
-    });
-
-    adminPasswordSubmit.addEventListener('click', async () => {
-        const password = adminPasswordInput.value.trim();
-        if (password === '') {
-            adminMessage.style.color = 'var(--danger)';
-            adminMessage.textContent = 'Password tidak boleh kosong!';
-            return;
-        }
-
-        adminMessage.style.color = 'var(--text-secondary)';
-        adminMessage.textContent = 'Memeriksa password...';
-
-        try {
-            const response = await fetch(ADMIN_AUTH_WORKER_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ password: password })
-            });
-
-            const data = await response.json();
-
-            if (data.authenticated) {
-                adminMessage.style.color = 'var(--success)';
-                adminMessage.textContent = 'Password benar! Memuat data pengunjung...';
-                adminAuthSection.classList.add('hidden');
-                adminContentSection.classList.remove('hidden');
-                fetchVisitorData(); // Fetch and display visitor data
-            } else {
-                adminMessage.style.color = 'var(--danger)';
-                adminMessage.textContent = 'Password salah.';
-            }
-        } catch (error) {
-            console.error('Error during admin authentication:', error);
-            adminMessage.style.color = 'var(--danger)';
-            adminMessage.textContent = 'Terjadi kesalahan saat otentikasi admin.';
-        }
-    });
-
-    async function fetchVisitorData() {
-        visitorList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Loading visitor data...</p>';
-        try {
-            const response = await fetch(LIVE_VISITORS_WORKER_URL);
-            const visitors = await response.json();
-
-            if (visitors && visitors.length > 0) {
-                visitorList.innerHTML = ''; // Clear loading message
-                visitors.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
-                visitors.forEach(visitor => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `
-                        <strong>ID:</strong> ${visitor.browserId.substring(0, 8)}...<br>
-                        <strong>IP:</strong> ${visitor.ip}<br>
-                        <strong>Perangkat:</strong> ${visitor.device}<br>
-                        <strong>Referrer:</strong> ${visitor.referrer}<br>
-                        <span>Masuk: ${new Date(visitor.timestamp).toLocaleString()}</span>
-                    `;
-                    visitorList.appendChild(listItem);
-                });
-            } else {
-                visitorList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada data pengunjung.</p>';
-            }
-        } catch (error) {
-            console.error('Error fetching visitor data:', error);
-            visitorList.innerHTML = '<p style="color:var(--danger); text-align:center;">Gagal memuat data pengunjung.</p>';
-        }
-    }
-}
-
-// ... (rest of your existing JavaScript)
-
 </script>
 </body>
 </html>
