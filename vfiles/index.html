@@ -273,33 +273,22 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
-       #video-player-widget {
-           position: fixed; /* Tetap fixed agar selalu terlihat di viewport */
-           cursor: grab; /* Ubah kursor menjadi 'grab' untuk menandakan bisa diseret */
-           /* Hapus top, bottom, left, transform awal karena akan diatur oleh JS */
-           z-index: 999;
-           width: 150px;
-           height: 150px;
-           border-radius: 10px;
-           overflow: hidden;
-           box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-           border: 2px solid var(--border-color);
-       }
-        #video-player-widget.dragging {
-            cursor: grabbing; /* Ubah kursor saat sedang diseret */
-        }
+        #video-player-widget {
+    position: fixed; /* Tetap di viewport */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Lebar 100% dari viewport */
+    height: 100vh; /* Tinggi 100% dari viewport */
+    object-fit: cover; /* Memastikan video menutupi seluruh area tanpa distorsi, bisa ada cropping */
+    z-index: -1; /* Paling penting: meletakkan video di belakang semua elemen lain */
+    overflow: hidden; /* Sembunyikan bagian video yang terpotong jika object-fit: cover */
+    /* Hapus cursor: grab; dan transform: translateY(-50%); karena tidak lagi draggable/tengah vertikal */
+    border: none; /* Hilangkan border jika tidak diinginkan untuk background */
+    box-shadow: none; /* Hilangkan shadow jika tidak diinginkan untuk background */
+}
         .video-controls {
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            background: rgba(0,0,0,0.5);
-            padding: 5px;
-            border-radius: 5px;
+            display: none; /* Sembunyikan semua kontrol video */
         }
-
         .video-controls button {
             background: none;
             border: none;
@@ -396,13 +385,12 @@
             <div id="fileList"></div>
         </div>
     </div>
-
     <div id="video-player-widget">
-        <video id="background-video" src="video.mp4" autoplay muted loop></video>
-        <div class="video-controls">
-            <button id="playPauseBtn"><i class="fas fa-pause"></i></button>
-            <button id="muteUnmuteBtn"><i class="fas fa-volume-mute"></i></button>
-        </div>
+    <video id="background-video" src="video.mp4" autoplay muted loop playsinline></video>
+    <div class="video-controls" style="display:none;">
+        <button id="playPauseBtn"><i class="fas fa-pause"></i></button>
+        <button id="muteUnmuteBtn"><i class="fas fa-volume-mute"></i></button>
+    </div>
     </div>
 
     <div class="social-links">
