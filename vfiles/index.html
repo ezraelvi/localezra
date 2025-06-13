@@ -273,26 +273,21 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
-        #video-player-widget {
-    position: fixed;
-    bottom: 20px; /* Change 'top' to 'bottom' and set a distance from the bottom */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 999;
-    width: 150px;
-    height: 150px;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-    border: 2px solid var(--border-color);
-}
-
-        #video-player-widget video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+       #video-player-widget {
+           position: fixed; /* Tetap fixed agar selalu terlihat di viewport */
+           cursor: grab; /* Ubah kursor menjadi 'grab' untuk menandakan bisa diseret */
+           /* Hapus top, bottom, left, transform awal karena akan diatur oleh JS */
+           z-index: 999;
+           width: 150px;
+           height: 150px;
+           border-radius: 10px;
+           overflow: hidden;
+           box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+           border: 2px solid var(--border-color);
+       }
+        #video-player-widget.dragging {
+            cursor: grabbing; /* Ubah kursor saat sedang diseret */
         }
-
         .video-controls {
             position: absolute;
             bottom: 5px;
@@ -924,6 +919,74 @@
 
             // Inisialisasi awal
             initAuthentication();
+        });
+        // Existing JavaScript code...
+
+            // --- Fungsi Dragging Widget Video ---
+            const videoPlayerWidget = document.getElementById('video-player-widget');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            // Inisialisasi posisi awal (opsional, jika Anda ingin posisi default saat dimuat)
+            videoPlayerWidget.style.left = 'calc(50% - 75px)'; // Setengah dari lebar widget
+            videoPlayerWidget.style.top = '20px'; // Contoh posisi awal di atas
+
+            videoPlayerWidget.addEventListener('mousedown', dragStart);
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('mousemove', drag);
+
+            function dragStart(e) {
+                if (e.target !== videoPlayerWidget && !videoPlayerWidget.contains(e.target)) {
+                    // Hanya mulai drag jika klik pada widget itu sendiri atau kontrol di dalamnya
+                    return;
+                }
+                
+                // Jangan drag jika target adalah tombol (play/pause/mute)
+                if (e.target.closest('.video-controls')) {
+                    return;
+                }
+
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+
+                isDragging = true;
+                videoPlayerWidget.classList.add('dragging');
+                videoPlayerWidget.style.transition = 'none'; // Hapus transisi saat dragging
+            }
+
+            function dragEnd(e) {
+                initialX = currentX;
+                initialY = currentY;
+
+                isDragging = false;
+                videoPlayerWidget.classList.remove('dragging');
+                videoPlayerWidget.style.transition = ''; // Kembalikan transisi setelah dragging selesai (jika ada transisi lain)
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+
+                e.preventDefault(); // Mencegah perilaku default browser (mis. memilih teks)
+
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                setTranslate(currentX, currentY, videoPlayerWidget);
+            }
+
+            function setTranslate(xPos, yPos, el) {
+                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+            }
+
+            // Existing JavaScript code continued...
         });
     </script>
 </body>
