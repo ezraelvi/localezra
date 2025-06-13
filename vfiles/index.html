@@ -411,14 +411,6 @@ textarea {
     </style>
 </head>
 <body>
-    <div class="auth-overlay" id="authOverlay">
-        <div class="auth-modal">
-            <h1 class="auth-title">ezra:</h1>
-            <input type="password" class="auth-input" id="secretAnswer" placeholder="Enter the secret word..." autocomplete="off">
-            <button class="auth-submit" id="authSubmit">Submit</button>
-        </div>
-    </div>
-
     <div class="container" id="mainContainer">
         <div class="header">
             <h1>vFiles</h1>
@@ -467,14 +459,12 @@ textarea {
         <a href="https://instagram.com/ezravvv" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
         <a href="https://github.com/ezravvv/my-dashboard-repo" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
     </div>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-    // Authentication Elements
-    const authOverlay = document.getElementById('authOverlay');
+ <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Authentication Elements (Dihapus atau dibuat tidak relevan)
     const mainContainer = document.getElementById('mainContainer');
-    const secretAnswer = document.getElementById('secretAnswer');
-    const authSubmit = document.getElementById('authSubmit');
+    // const secretAnswer = document.getElementById('secretAnswer'); // Hapus
+    // const authSubmit = document.getElementById('authSubmit');     // Hapus
     const logoutBtn = document.getElementById('logoutBtn');
 
     // Editor Elements
@@ -485,22 +475,22 @@ textarea {
     const addText = document.getElementById('addText');
     const addImage = document.getElementById('addImage');
     const addVideo = document.getElementById('addVideo');
-    const addFile = document.getElementById('addFile'); // Ini bisa jadi raw_html atau file lain
+    const addFile = document.getElementById('addFile');
     const saveChanges = document.getElementById('saveChanges');
     const cancelEdit = document.getElementById('cancelEdit');
     const mediaInput = document.getElementById('mediaInput');
     const mediaUrl = document.getElementById('mediaUrl');
     const insertMedia = document.getElementById('insertMedia');
-    
+
     // Content Elements
     const userInfoElement = document.getElementById('userInfo');
-    const accessInfoElement = document.getElementById('accessInfo');
+    const accessInfoElement = document.getElementById('accessInfo'); // Tetap relevan untuk informasi akses
     const lastAccessSpan = document.getElementById('lastAccess');
     const fileListContainer = document.getElementById('fileList');
     const infoPanelTitleElement = document.querySelector('.info-panel h2');
 
-    // Background Video Elements (Hanya untuk background statis - AKAN JADI NULL KARENA DIHAPUS DARI HTML)
-    const backgroundVideo = document.getElementById('background-video');
+    // Background Video Elements (Tidak digunakan, bisa dihapus jika tidak ada di HTML)
+    // const backgroundVideo = document.getElementById('background-video');
 
     // Floating Video Widget Elements
     const floatingVideoWidget = document.getElementById('floating-video-widget');
@@ -512,122 +502,58 @@ textarea {
     let editMode = false;
     let currentMediaType = '';
     let filesData = [];
-    let authToken = '';
+    let authToken = 'FIXED_TOKEN_FOR_UNAUTH_ACCESS'; // Token dummy atau tetap kosong jika tidak ada autentikasi API sama sekali
     let originalContent = {};
 
     // Cloudflare Worker URL (GANTI DENGAN URL WORKER ASLI ANDA!)
-    const WORKER_URL = 'https://vfiles-backend.ezvvel.workers.dev'; 
+    const WORKER_URL = 'https://vfiles-backend.ezvvel.workers.dev';
 
-    // --- Fungsi Autentikasi ---
-    function initAuthentication() {
-        if (checkAuth()) return; // Jika sudah authenticated, langsung tampilkan konten
-
-        secretAnswer.focus();
-        authSubmit.addEventListener('click', authenticateUser);
-        secretAnswer.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') authenticateUser();
-        });
-    }
-
-    function checkAuth() {
-        const authData = localStorage.getItem('vFilesAuth');
-        if (authData) {
-            try {
-                const data = JSON.parse(authData);
-                if (data.token && data.expires > Date.now()) {
-                    authToken = data.token;
-                    showMainContent();
-                    fetchData();
-                    return true;
-                }
-            } catch (e) {
-                console.error('Error parsing auth data:', e);
-                localStorage.removeItem('vFilesAuth'); // Hapus data auth yang rusak
-            }
-        }
-        return false;
-    }
-
-    async function authenticateUser() {
-        const password = secretAnswer.value.trim();
-        if (!password) {
-            secretAnswer.classList.add('shake');
-            setTimeout(() => secretAnswer.classList.remove('shake'), 500);
-            return;
-        }
-
-        try {
-            const response = await fetch(`${WORKER_URL}/api/auth`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: password })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Authentication failed');
-            }
-
-            const data = await response.json();
-            localStorage.setItem('vFilesAuth', JSON.stringify(data));
-            authToken = data.token;
-
-            authOverlay.classList.add('hidden');
-            setTimeout(() => {
-                authOverlay.style.display = 'none';
-                showMainContent();
-                fetchData();
-            }, 500);
-
-        } catch (error) {
-            console.error('Authentication error:', error);
-            secretAnswer.style.borderColor = 'var(--error)';
-            secretAnswer.classList.add('shake');
-            setTimeout(() => {
-                window.location.href = '/whoareyou/index.html'; // Redirect on auth failure
-            }, 1000);
-        }
-    }
+    // --- FUNGSI AUTENTIKASI DIHAPUS/DIMODIFIKASI ---
+    // initAuthentication, checkAuth, authenticateUser TIDAK DIPERLUKAN LAGI UNTUK LOGIN AWAL
 
     function showMainContent() {
         mainContainer.style.display = 'block';
         mainContainer.classList.add('fade-in');
-        
+
         const header = document.querySelector('.header');
         if (!document.getElementById('toggleEditor')) {
             header.insertBefore(toggleEditor, logoutBtn);
         }
-        
+
         initEditor();
     }
 
-    // Logout handler
+    // Logout handler (Jika masih ada tombol logout, mungkin untuk tujuan lain atau bisa dihapus)
     logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('vFilesAuth');
+        // Karena tidak ada autentikasi sesungguhnya, ini mungkin hanya mengarahkan ulang
         window.location.href = 'https://localezra.netlify.app';
     });
 
     // --- Fungsi Fetch Data dari Worker ---
     async function fetchData() {
         try {
-            const response = await fetch(`${WORKER_URL}/api/data`, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
+            // Perhatian: Jika backend tidak memerlukan token sama sekali, Anda bisa menghapus header 'Authorization'.
+            // Namun, untuk mode edit, disarankan tetap ada semacam otorisasi rahasia.
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            // Jika Anda ingin mengizinkan edit tanpa kata sandi di frontend, tapi tetap perlu "token"
+            // di backend (misal, untuk membedakan mode baca dan tulis), maka authToken
+            // bisa berupa kunci statis yang hanya diketahui frontend dan backend.
+            if (authToken) {
+                 headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            const response = await fetch(`${WORKER_URL}/api/data`, { headers });
 
             if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    localStorage.removeItem('vFilesAuth');
-                    window.location.reload();
-                    return;
-                }
+                // Penanganan error akan lebih sederhana karena tidak ada logout/re-autentikasi
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to fetch data');
             }
 
             const data = await response.json();
-            
+
             // Update User Info
             if (data.user) {
                 userInfoElement.innerHTML = `
@@ -652,7 +578,7 @@ textarea {
             // Update Files Data
             filesData = data.files || [];
             renderFiles();
-            
+
             // Simpan konten asli untuk 'Cancel'
             saveOriginalContent();
 
@@ -663,10 +589,10 @@ textarea {
         }
     }
 
-    // --- Fungsi Render Files ---
+    // --- Fungsi Render Files --- (Tidak ada perubahan)
     function renderFiles() {
         fileListContainer.innerHTML = '';
-        
+
         if (filesData.length === 0) {
             fileListContainer.innerHTML = '<p>No files available. Add some in EDIT MODE!</p>';
             return;
@@ -712,7 +638,7 @@ textarea {
                     </div>
                 `;
             }
-            
+
             fileItem.innerHTML = `
                 <div class="file-info">${contentHtml}</div>
                 <div class="file-actions">
@@ -720,7 +646,7 @@ textarea {
                     <button class="delete-item-btn" data-id="${file.id}">Delete</button>
                 </div>
             `;
-            
+
             fileListContainer.appendChild(fileItem);
         });
 
@@ -728,26 +654,26 @@ textarea {
         updateEditableElementsState();
     }
 
-    // --- Fungsi Editor ---
+    // --- Fungsi Editor --- (Tidak ada perubahan signifikan, hanya penanganan AUTH TOKEN pada saveAllChanges)
     function initEditor() {
         toggleEditor.addEventListener('click', () => {
             editMode = !editMode;
             toggleEditor.textContent = editMode ? 'NORMAL MODE' : 'EDIT MODE';
             editorTools.classList.toggle('active', editMode);
-            
+
             updateEditableElementsState();
             if (editMode) {
                 saveOriginalContent();
             }
         });
-        
+
         addText.addEventListener('click', () => addEditorItem('text'));
         addImage.addEventListener('click', () => showMediaInput('image'));
         addVideo.addEventListener('click', () => showMediaInput('video'));
-        addFile.addEventListener('click', () => addEditorItem('raw_html')); // Menggunakan 'raw_html' untuk contoh
-        
+        addFile.addEventListener('click', () => addEditorItem('raw_html'));
+
         insertMedia.addEventListener('click', insertMediaItem);
-        
+
         saveChanges.addEventListener('click', saveAllChanges);
         cancelEdit.addEventListener('click', cancelAllChanges);
     }
@@ -760,7 +686,7 @@ textarea {
 
         document.querySelectorAll('.file-list .content-editable').forEach(el => {
             if (el.classList.contains('raw-html-container')) {
-                el.contentEditable = false; 
+                el.contentEditable = false;
             } else {
                 el.contentEditable = editMode;
             }
@@ -835,7 +761,7 @@ textarea {
             };
             filesData.push(newItem);
             renderFiles();
-            
+
             mediaUrl.value = '';
             mediaInput.classList.remove('active');
         }
@@ -864,7 +790,7 @@ textarea {
                 const editableContent = fileInfoDiv.querySelector('[data-field="content"], [data-field="url"]');
                 if (editableContent) {
                     if (editableContent.dataset.field === 'content') {
-                        updatedFile.content = editableContent.innerHTML.trim(); 
+                        updatedFile.content = editableContent.innerHTML.trim();
                     } else if (editableContent.dataset.field === 'url') {
                         if (updatedFile.type === 'image' && editableContent.querySelector('img')) {
                             updatedFile.url = editableContent.querySelector('img').src;
@@ -880,14 +806,19 @@ textarea {
         });
 
         try {
+            // Perhatian: Jika Anda masih ingin otorisasi untuk operasi PUT (edit/hapus),
+            // Anda perlu mengirimkan authToken, bahkan jika itu adalah token statis.
+            // Jika tidak, siapa pun dapat mengedit data.
+            const headers = { 'Content-Type': 'application/json' };
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`; // Kirim token jika ada
+            }
+
             const response = await fetch(`${WORKER_URL}/api/data`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify({ 
-                    user: updatedUserInfo, 
+                headers: headers,
+                body: JSON.stringify({
+                    user: updatedUserInfo,
                     files: updatedFilesData,
                     infoPanelTitle: updatedInfoPanelTitle
                 })
@@ -916,7 +847,7 @@ textarea {
         }
     }
 
-    // --- Handler Edit/Delete per Item ---
+    // --- Handler Edit/Delete per Item --- (Tidak ada perubahan signifikan, hanya penanganan AUTH TOKEN)
     function attachEditDeleteListeners() {
         fileListContainer.querySelectorAll('.delete-item-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
@@ -927,12 +858,14 @@ textarea {
                     renderFiles();
 
                     try {
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (authToken) {
+                            headers['Authorization'] = `Bearer ${authToken}`;
+                        }
+
                         const response = await fetch(`${WORKER_URL}/api/data`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${authToken}`
-                            },
+                            method: 'PUT', // Delete juga akan menggunakan PUT dengan data yang sudah difilter
+                            headers: headers,
                             body: JSON.stringify({ files: filesData })
                         });
 
@@ -952,15 +885,10 @@ textarea {
         });
     }
 
-    // --- Background Video Logic (Tidak ada lagi karena elemen dihapus dari HTML) ---
-    // if (backgroundVideo) { // Ini akan selalu false
-    //     backgroundVideo.muted = true;
-    // }
-
-    // --- Floating Video Widget Logic (Draggable & Kontrol) ---
+    // --- Background Video Logic & Floating Video Widget Logic (Tidak ada perubahan) ---
     if (floatingVideo) {
         floatingVideo.muted = true;
-        floatingPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; 
+        floatingPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
         floatingMuteUnmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
 
         floatingPlayPauseBtn.addEventListener('click', () => {
@@ -979,7 +907,6 @@ textarea {
         });
     }
 
-    // --- Fungsi Dragging Widget Video ---
     let isDragging = false;
     let currentX;
     let currentY;
@@ -998,7 +925,7 @@ textarea {
         if (e.target !== floatingVideoWidget && !floatingVideoWidget.contains(e.target) && !e.target.closest('.floating-video-controls')) {
             return;
         }
-        
+
         if (e.target.closest('.floating-video-controls')) {
             return;
         }
@@ -1038,8 +965,10 @@ textarea {
         el.style.transform = `translate(${xPos}px, ${yPos}px)`;
     }
 
-    // --- Inisialisasi Awal ---
-    initAuthentication();
+    // --- Inisialisasi Awal (LANGSUNG TAMPILKAN) ---
+    // Hapus initAuthentication();
+    showMainContent(); // Langsung tampilkan konten
+    fetchData();      // Langsung ambil data
 });
     </script>
 </body>
