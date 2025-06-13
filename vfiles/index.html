@@ -273,21 +273,19 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
-
-        /* Video Player Widget */
         #video-player-widget {
-            position: fixed;
-            top: 20px; /* Mengatur jarak dari tepi atas layar */
-            left: 50%; /* Memulai elemen 50% dari kiri layar */
-            transform: translateX(-50%); /* Menggeser elemen ke kiri sebesar 50% dari lebarnya sendiri, untuk senter yang akurat */
-            z-index: 999;
-            width: 150px;
-            height: 150px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-            border: 2px solid var(--border-color);
-        }
+    position: fixed;
+    bottom: 20px; /* Change 'top' to 'bottom' and set a distance from the bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    border: 2px solid var(--border-color);
+}
 
         #video-player-widget video {
             width: 100%;
