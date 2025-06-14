@@ -329,10 +329,3 @@ class SecuritySystem {
 document.addEventListener('DOMContentLoaded', () => {
   new BioVAuth();
 });
-function isMobileDevice() {
-    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-}
-if (isMobileDevice()) {
-    alert("Lebih baik menggunakan situs desktop. Klik OK untuk beralih ke tampilan desktop.");
-    window.location.href = "https://localezra.netlify.app?desktop=true"; 
-}
