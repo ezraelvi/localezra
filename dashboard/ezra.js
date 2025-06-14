@@ -44,7 +44,6 @@ class BioVAuth {
       this.securityConfig.blockDuration,
       this.securityConfig.cookieName
     );
-    this.initPasswordToggle();
   }
   async collectClientInfo() {
     try {
