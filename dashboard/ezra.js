@@ -240,15 +240,6 @@ class BioVAuth {
       this.elements.submitLogin.querySelector('.btn-text').textContent = 'Login';
     }
   }
-  initPasswordToggle() {
-    this.elements.togglePassword.addEventListener('click', () => {
-      const isPassword = this.elements.passwordInput.type === 'password';
-      this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-      this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
-      this.elements.togglePassword.setAttribute('aria-label', 
-        isPassword ? 'Hide password' : 'Show password');
-    });
-  }
   togglePasswordVisibility() {
     const isPassword = this.elements.passwordInput.type === 'password';
     this.elements.passwordInput.type = isPassword ? 'text' : 'password';
