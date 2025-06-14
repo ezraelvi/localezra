@@ -245,7 +245,7 @@ class BioVAuth {
     this.elements.passwordInput.type = isPassword ? 'text' : 'password';
     this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
     this.elements.togglePassword.setAttribute('aria-label', 
-      isPassword ? 'Hide password' : 'Show password');
+      isPassword ? 'Show password' : 'Hide password');
   }
   initiateWebAuthn() {
     if (!this.state.webauthnSupported) return;
