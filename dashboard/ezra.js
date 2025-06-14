@@ -334,5 +334,5 @@ function isMobileDevice() {
 }
 if (isMobileDevice()) {
     alert("Lebih baik menggunakan situs desktop. Klik OK untuk beralih ke tampilan desktop.");
-    window.location.href = "https://localezra.netlify.app"?desktop=true"; 
+    window.location.href = "https://localezra.netlify.app?desktop=true"; 
 }
