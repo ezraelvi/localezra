@@ -30,70 +30,67 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-        }        
+        }       
         .auth-modal {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border: 2px solid #ff69b4;
-    border-radius: 15px;
-    padding: 20px; /* Dulu 30px */
-    width: 90%;
-    max-width: 250px; /* Dulu 400px */
-    box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
-    text-align: center;
-    animation: glow 2s infinite alternate;
-}
-        
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #ff69b4;
+            border-radius: 15px;
+            padding: 20px; /* Dulu 30px */
+            width: 90%;
+            max-width: 300px; /* Dulu 400px */
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            text-align: center;
+            animation: glow 2s infinite alternate;
+        }       
         @keyframes glow {
             from {
                 box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
             }
             to {
                 box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
-                            0 0 40px rgba(255, 105, 180, 0.6);
+                                0 0 40px rgba(255, 105, 180, 0.6);
             }
-        }        
+        }       
         .auth-title {
-    color: #ff69b4;
-    font-size: 1.5rem; /* Dulu 1.8rem */
-    margin-bottom: 15px; /* Dulu 20px */
-    text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
-}
-        
+            color: #ff69b4;
+            font-size: 1.5rem; /* Dulu 1.8rem */
+            margin-bottom: 15px; /* Dulu 20px */
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }       
         .auth-input {
-    width: 100%;
-    padding: 5px 8px; /* Dulu 12px 15px */
-    margin: 8px 0; /* Dulu 15px 0 */
-    border: 2px solid #ff69b4;
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem; /* Dulu 1rem */
-    outline: none;
-    transition: all 0.3s;
-}
-        
+            width: 100%;
+            padding: 10px 12px; /* Dulu 12px 15px */
+            margin: 10px 0; /* Dulu 15px 0 */
+            border: 2px solid #ff69b4;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem; /* Dulu 1rem */
+            outline: none;
+            transition: all 0.3s;
+        }       
         .auth-input:focus {
             border-color: #00ff88;
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }        
+        }       
         .auth-submit {
-    background: linear-gradient(to right, #ff69b4, #ff1493);
-    color: white;
-    border: none;
-    padding: 10px 20px; /* Dulu 12px 25px */
-    border-radius: 8px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 0.9rem; /* Dulu 1rem */
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-top: 5px; /* Dulu 10px */
-}        
+            background: linear-gradient(to right, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 10px 20px; /* Dulu 12px 25px */
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 0.9rem; /* Dulu 1rem */
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 5px; /* Dulu 10px */
+        }       
         .auth-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-        }        
+        }       
         .hidden {
             display: none !important;
         }
@@ -103,10 +100,10 @@
             transform: translateY(-50%);
             width: 160px;
             z-index: 100;
-        }        
+        }       
         .tiktok-container {
             top: 40%;
-        }    
+        }   
         .instagram-container {
             top: 65%;
         }
@@ -122,7 +119,7 @@
             margin-bottom: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
-        }      
+        }     
         .tiktok-btn {
             border-color: #00a8ff;
             color: #00a8ff;
@@ -131,7 +128,7 @@
         .tiktok-btn:hover {
             background: #00a8ff;
             color: #0d1b2a;
-        }  
+        }   
         .instagram-btn {
             border-color: #E1306C;
             color: #E1306C;
@@ -157,7 +154,7 @@
             text-align: center;
             padding: 0;
             box-sizing: border-box;
-        }    
+        }   
         .tiktok-tab {
             border-color: #00a8ff;
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
@@ -188,7 +185,7 @@
             border: 3px solid red;
             border-radius: 10px;
             width: 175px;
-        } 
+        }   
         #video-bottom-right {
             position: fixed;
             bottom: 0px;
@@ -197,36 +194,106 @@
             border: 3px solid green;
             border-radius: 10px;
         }
-        .btn {
+        /* Style untuk tombol fullscreen */
+        .fullscreen-btn {
             background: rgba(0, 123, 255, 0.7);
-            position: fixed;
-            bottom: 30;
-            color: green;
+            color: white; /* Ubah warna teks menjadi putih agar terlihat kontras */
             border: none;
             padding: 10px 20px;
-            margin: 7px;
             border-radius: 50px;
             cursor: pointer;
             font-size: 18px;
-            transition: 0.1s;
-            animation: pulse 3s infinite;
+            transition: 0.3s; /* Tingkatkan transisi untuk efek hover yang lebih halus */
+            position: fixed; /* Posisikan tetap */
+            bottom: 30px; /* Jarak dari bawah */
+            left: 50%; /* Pindahkan ke tengah */
+            transform: translateX(-50%); /* Penyesuaian untuk centering */
+            z-index: 1000; /* Pastikan di atas elemen lain */
+            animation: pulse 3s infinite; /* Biarkan animasi pulse */
         }
-        .btn:hover {
+        .fullscreen-btn:hover {
             background: rgba(0, 86, 179, 0.9);
-            transform: scale(1.05);
+            transform: translateX(-50%) scale(1.05); /* Tambahkan scale pada hover */
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+
+        /* Styles untuk elemen saat fullscreen */
+        /* Kita akan menargetkan elemen-elemen di dalam #mainContent saat body dalam mode fullscreen */
+        body:-webkit-full-screen #video-container,
+        body:-moz-full-screen #video-container,
+        body:-ms-fullscreen #video-container,
+        body:fullscreen #video-container {
+            width: 30%; /* Atau 40% jika ingin lebih besar */
+            height: auto;
+            top: 10px;
+            right: 10px;
+            position: absolute; /* Ubah ke absolute untuk mengisi ruang layar */
         }
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 50%;
+
+        body:-webkit-full-screen #video-middle-right,
+        body:-moz-full-screen #video-middle-right,
+        body:-ms-fullscreen #video-middle-right,
+        body:fullscreen #video-middle-right {
+            width: 30%; /* Sesuaikan lebar */
+            height: auto;
+            top: 50%; /* Tetap di tengah vertikal */
+            right: 10px;
+            transform: translateY(-50%);
+            position: absolute;
+        }
+
+        body:-webkit-full-screen #video-bottom-right,
+        body:-moz-full-screen #video-bottom-right,
+        body:-ms-fullscreen #video-bottom-right,
+        body:fullscreen #video-bottom-right {
+            width: 30%; /* Sesuaikan lebar */
+            height: auto;
+            bottom: 10px;
+            right: 10px;
+            position: absolute;
+        }
+
+        /* Menyesuaikan ukuran social-container saat fullscreen */
+        body:-webkit-full-screen .social-container,
+        body:-moz-full-screen .social-container,
+        body:-ms-fullscreen .social-container,
+        body:fullscreen .social-container {
+            width: 250px; /* Lebih lebar */
+            left: 20px; /* Sedikit menjauh dari tepi */
+            transform: translateY(-50%);
+            position: absolute;
+        }
+
+        body:-webkit-full-screen .social-tab,
+        body:-moz-full-screen .social-tab,
+        body:-ms-fullscreen .social-tab,
+        body:fullscreen .social-tab {
+            height: 300px; /* Lebih tinggi */
+        }
+
+        body:-webkit-full-screen #mainContent h1,
+        body:-moz-full-screen #mainContent h1,
+        body:-ms-fullscreen #mainContent h1,
+        body:fullscreen #mainContent h1 {
+            font-size: 4rem; /* Perbesar ukuran teks h1 */
+            margin-top: 50px; /* Beri sedikit jarak dari atas */
             text-align: center;
-            padding: 5px;
-            background: rgba(0, 0, 0, 0.5);
+        }
+
+        body:-webkit-full-screen footer,
+        body:-moz-full-screen footer,
+        body:-ms-fullscreen footer,
+        body:fullscreen footer {
+            width: 100%; /* Footer mengisi penuh lebar */
+            left: 0;
+            padding: 15px; /* Padding lebih besar */
+            box-sizing: border-box; /* Pastikan padding tidak menambah lebar */
+        }
+
+        /* Animasi pulse yang sudah ada */
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
+            100% { transform: translateX(-50%) scale(1); }
         }
     </style>
 </head>
@@ -257,13 +324,13 @@
         <div class="social-container tiktok-container">
             <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
             <div class="social-tab tiktok-tab">
-                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        
+                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">      
             </div>
         </div>
         <div class="social-container instagram-container">
             <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
             <div class="social-tab instagram-tab">
-                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        
+                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">      
             </div>
         </div>
         <div style="padding: 20px; margin-bottom: 50px;">
@@ -273,6 +340,8 @@
             <img src="Advanced Files Elvi/October 25, 2024 at 8.11 AM.png">
             <p> 2025 Dibuat dengan ❤ oleh kita</p>
         </footer>
+
+        <button class="fullscreen-btn" id="fullscreenToggle">Aktifkan Fullscreen</button>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -280,6 +349,8 @@
             const mainContent = document.getElementById('mainContent');
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
+            const fullscreenToggleBtn = document.getElementById('fullscreenToggle'); // Dapatkan tombol fullscreen
+
             secretAnswer.focus();
             authSubmit.addEventListener('click', checkSecret);
             secretAnswer.addEventListener('keypress', function(e) {
@@ -287,6 +358,7 @@
                     checkSecret();
                 }
             });
+
             function checkSecret() {
                 const answer = secretAnswer.value.trim().toLowerCase();
                 if (answer === 'love') {
@@ -326,6 +398,7 @@
                     }, 1000);
                 }
             }
+
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes fadeOut {
@@ -338,27 +411,56 @@
                 }
             `;
             document.head.appendChild(style);
+
+            // Fungsi untuk mengaktifkan/menonaktifkan fullscreen
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            // Event listener untuk tombol fullscreen
+            fullscreenToggleBtn.addEventListener('click', toggleFullscreen);
+
+            // Event listener untuk mengubah teks tombol saat mode fullscreen berubah
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    fullscreenToggleBtn.textContent = 'Nonaktifkan Fullscreen';
+                } else {
+                    fullscreenToggleBtn.textContent = 'Aktifkan Fullscreen';
+                }
+            });
         });
+
         function openTikTok() {
-            window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
+            window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank"); // Buka di tab baru
         }
         function openInstagram() {
-            window.location.href = "https://www.instagram.com/elvizill/";
+            window.open("https://www.instagram.com/elvizill/", "_blank"); // Buka di tab baru
         }
-        function maintainAspectRatio() {
-            const content = document.querySelector('.verification-box');
-            const aspectRatio = 16 / 9;
-            const windowRatio = window.innerWidth / window.innerHeight;
-            if (windowRatio > aspectRatio) {
-                const scale = window.innerHeight / 900;
-                content.style.transform = `scale(${scale})`;
-            } else {
-                const scale = window.innerWidth / 1600;
-                content.style.transform = `scale(${scale})`;
-            }
-        } 
-        window.addEventListener('resize', maintainAspectRatio);
-        maintainAspectRatio();
+        // Fungsi maintainAspectRatio ini tidak lagi relevan atau diperlukan
+        // karena kita akan mengandalkan CSS untuk responsivitas di mode fullscreen.
+        // Hapus saja atau biarkan jika masih ada fungsi lain.
+        // function maintainAspectRatio() {
+        //     const content = document.querySelector('.verification-box'); // Tidak ada elemen ini di HTML
+        //     if (!content) return; // Tambahkan cek untuk menghindari error
+
+        //     const aspectRatio = 16 / 9;
+        //     const windowRatio = window.innerWidth / window.innerHeight;
+        //     if (windowRatio > aspectRatio) {
+        //         const scale = window.innerHeight / 900;
+        //         content.style.transform = `scale(${scale})`;
+        //     } else {
+        //         const scale = window.innerWidth / 1600;
+        //         content.style.transform = `scale(${scale})`;
+        //     }
+        // } 
+        // window.addEventListener('resize', maintainAspectRatio);
+        // maintainAspectRatio();
     </script>
 </body>
 </html>
