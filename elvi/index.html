@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
+<head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website ezraVelvi</title>
@@ -17,9 +17,7 @@
             background-position: center;
             color: yellow;
             text-shadow: 2px 2px 4px #000;
-            overflow: hidden; /* Mencegah scroll saat animasi */
-        }
-
+        }           
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -32,20 +30,18 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-        }
-
+        }        
         .auth-modal {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid #ff69b4;
             border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
+            padding: 20px; /* Diperkecil dari 30px */
+            width: 80%; /* Diperkecil dari 90% */
+            max-width: 350px; /* Diperkecil dari 400px */
             box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
             text-align: center;
             animation: glow 2s infinite alternate;
-        }
-
+        }        
         @keyframes glow {
             from {
                 box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
@@ -54,73 +50,63 @@
                 box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
                             0 0 40px rgba(255, 105, 180, 0.6);
             }
-        }
-
+        }        
         .auth-title {
             color: #ff69b4;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            font-size: 1.5rem; /* Diperkecil dari 1.8rem */
+            margin-bottom: 15px; /* Diperkecil dari 20px */
             text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
-        }
-
+        }        
         .auth-input {
             width: 100%;
-            padding: 12px 15px;
-            margin: 15px 0;
+            padding: 10px 12px; /* Diperkecil dari 12px 15px */
+            margin: 10px 0; /* Diperkecil dari 15px 0 */
             border: 2px solid #ff69b4;
             border-radius: 8px;
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
             font-family: 'Courier New', monospace;
-            font-size: 1rem;
+            font-size: 0.9rem; /* Diperkecil dari 1rem */
             outline: none;
             transition: all 0.3s;
-        }
-
+        }        
         .auth-input:focus {
             border-color: #00ff88;
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-
+        }        
         .auth-submit {
             background: linear-gradient(to right, #ff69b4, #ff1493);
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 10px 20px; /* Diperkecil dari 12px 25px */
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.9rem; /* Diperkecil dari 1rem */
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 10px;
-        }
-
+        }        
         .auth-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-        }
-
+        }        
         .hidden {
             display: none !important;
         }
-
         .social-container {
             position: fixed;
             left: 10px;
             transform: translateY(-50%);
             width: 160px;
             z-index: 100;
-        }
-
+        }        
         .tiktok-container {
             top: 40%;
-        }
-
+        }    
         .instagram-container {
             top: 65%;
         }
-
         .check-btn {
             width: 100%;
             padding: 8px;
@@ -133,30 +119,25 @@
             margin-bottom: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
-        }
-
+        }      
         .tiktok-btn {
             border-color: #00a8ff;
             color: #00a8ff;
             box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
         }
-
         .tiktok-btn:hover {
             background: #00a8ff;
             color: #0d1b2a;
-        }
-
+        }  
         .instagram-btn {
             border-color: #E1306C;
             color: #E1306C;
             box-shadow: 0 0 10px rgba(225, 48, 108, 0.5);
         }
-
-        .instagram-btn:hover {
+       .instagram-btn:hover {
             background: #E1306C;
             color: white;
         }
-
         .social-tab {
             width: 100%;
             height: 200px;
@@ -173,24 +154,20 @@
             text-align: center;
             padding: 0;
             box-sizing: border-box;
-        }
-
+        }    
         .tiktok-tab {
             border-color: #00a8ff;
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
         }
-
         .instagram-tab {
             border-color: #E1306C;
             box-shadow: 0 0 15px rgba(225, 48, 108, 0.7);
         }
-
         .tab-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
         #video-container {
             position: fixed;
             top: 0px;
@@ -200,7 +177,6 @@
             border-radius: 10px;
             overflow: hidden;
         }
-
         #video-middle-right {
             position: fixed;
             top: 47%;
@@ -209,8 +185,7 @@
             border: 3px solid red;
             border-radius: 10px;
             width: 175px;
-        }
-
+        } 
         #video-bottom-right {
             position: fixed;
             bottom: 0px;
@@ -219,7 +194,6 @@
             border: 3px solid green;
             border-radius: 10px;
         }
-
         .btn {
             background: rgba(0, 123, 255, 0.7);
             position: fixed;
@@ -234,18 +208,15 @@
             transition: 0.1s;
             animation: pulse 3s infinite;
         }
-
         .btn:hover {
             background: rgba(0, 86, 179, 0.9);
             transform: scale(1.05);
         }
-
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-
         footer {
             position: fixed;
             bottom: 0;
@@ -255,131 +226,34 @@
             background: rgba(0, 0, 0, 0.5);
         }
 
-        /* --- Fullscreen Toggle Styles --- */
+        /* Gaya untuk tombol Fullscreen/Unfullscreen */
         #fullscreenToggle {
             position: fixed;
             top: 10px;
             left: 10px;
-            width: 30px;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #00ff88; /* Warna hijau neon khas hacker */
+            border: 1px solid #00ff88;
+            padding: 5px 10px;
             border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem; /* Diperkecil agar sesuai dengan ukuran baru */
             cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: background 0.3s ease;
+            z-index: 10000; /* Pastikan di atas semua elemen lain */
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
         }
 
         #fullscreenToggle:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        #fullscreenToggle svg {
-            fill: white;
-            width: 20px;
-            height: 20px;
-        }
-
-        /* --- Blackhole Animation --- */
-        .blackhole-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: transparent; /* Awalnya transparan */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10001; /* Di atas konten */
-            pointer-events: none; /* Agar tidak menghalangi interaksi */
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .blackhole-svg {
-            width: 0;
-            height: 0;
-            opacity: 0;
-            transform: scale(0);
-            transition: all 0.5s ease-out;
-        }
-
-        .blackhole-overlay.active .blackhole-svg {
-            width: 200px;
-            height: 200px;
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        @keyframes blackhole-suck {
-            0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(calc(50vw - var(--original-left, 0px) - var(--original-width, 0px) / 2), calc(50vh - var(--original-top, 0px) - var(--original-height, 0px) / 2)) scale(0.01);
-                opacity: 0;
-            }
-        }
-
-        @keyframes unblackhole-suck {
-            0% {
-                transform: translate(calc(50vw - var(--original-left, 0px) - var(--original-width, 0px) / 2), calc(50vh - var(--original-top, 0px) - var(--original-height, 0px) / 2)) scale(0.01);
-                opacity: 0;
-            }
-            100% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes screen-shake {
-            0%, 100% { transform: translate(0, 0); }
-            10%, 30%, 50%, 70%, 90% { transform: translate(-5px, -5px); }
-            20%, 40%, 60%, 80% { transform: translate(5px, 5px); }
-        }
-
-        @keyframes explosion-flash {
-            0% { background-color: transparent; }
-            25% { background-color: rgba(255, 0, 0, 0.8); } /* Contoh warna, akan di-override JS */
-            50% { background-color: transparent; }
-            75% { background-color: rgba(0, 255, 0, 0.8); } /* Contoh warna, akan di-override JS */
-            100% { background-color: transparent; }
-        }
-
-        .explosion-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10002;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.1s ease;
-        }
-
-        .explosion-overlay.active {
-            animation: explosion-flash 0.8s forwards;
-            opacity: 1;
-        }
-
-        /* Untuk semua konten di dalam mainContent */
-        #mainContent > div {
-            transition: all 0.8s ease-out; /* Transisi untuk posisi dan ukuran */
-            position: fixed; /* Penting untuk animasi hisap */
-        }
-
-        .full-screen-mode #mainContent > div {
-            transform: scale(0.8); /* 20% lebih kecil */
+            background-color: #00ff88;
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
         }
     </style>
 </head>
 <body>
+    <button id="fullscreenToggle" title="Toggle Fullscreen">&lt; &gt;</button>
+
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <h1 class="auth-title">elvi :</h1>
@@ -387,35 +261,6 @@
             <button class="auth-submit" id="authSubmit">Submit</button>
         </div>
     </div>
-
-    <div id="fullscreenToggle">
-        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-        </svg>
-    </div>
-
-    <div class="blackhole-overlay" id="blackholeOverlay">
-        <svg class="blackhole-svg" viewBox="0 0 100 100">
-            <defs>
-                <radialGradient id="blackholeGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                    <stop offset="0%" stop-color="black" />
-                    <stop offset="70%" stop-color="#333" />
-                    <stop offset="100%" stop-color="#000" stop-opacity="0" />
-                </radialGradient>
-            </defs>
-            <circle cx="50" cy="50" r="45" fill="url(#blackholeGradient)" filter="url(#glowFilter)"/>
-            <filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"></feGaussianBlur>
-                <feMerge>
-                    <feMergeNode in="blur"></feMergeNode>
-                    <feMergeNode in="SourceGraphic"></feMergeNode>
-                </feMerge>
-            </filter>
-        </svg>
-    </div>
-
-    <div class="explosion-overlay" id="explosionOverlay"></div>
-
     <div id="mainContent" class="hidden">
         <div id="video-middle-right">
             <video width="100%" autoplay loop muted>
@@ -435,13 +280,13 @@
         <div class="social-container tiktok-container">
             <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
             <div class="social-tab tiktok-tab">
-                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">
+                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        
             </div>
         </div>
         <div class="social-container instagram-container">
             <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
             <div class="social-tab instagram-tab">
-                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">
+                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        
             </div>
         </div>
         <div style="padding: 20px; margin-bottom: 50px;">
@@ -452,7 +297,6 @@
             <p> 2025 Dibuat dengan ❤ oleh kita</p>
         </footer>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const authOverlay = document.getElementById('authOverlay');
@@ -460,19 +304,38 @@
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
             const fullscreenToggle = document.getElementById('fullscreenToggle');
-            const fullscreenIcon = document.getElementById('fullscreenIcon');
-            const blackholeOverlay = document.getElementById('blackholeOverlay');
-            const blackholeSvg = document.getElementById('blackholeSvg');
-            const explosionOverlay = document.getElementById('explosionOverlay');
-
-            let isFullscreen = false;
-            const originalPositions = new Map(); // Untuk menyimpan posisi asli elemen
 
             secretAnswer.focus();
             authSubmit.addEventListener('click', checkSecret);
             secretAnswer.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     checkSecret();
+                }
+            });
+
+            // Fungsi untuk mengaktifkan/menonaktifkan mode fullscreen
+            fullscreenToggle.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().then(() => {
+                        fullscreenToggle.innerHTML = '&lt;/&gt;'; // Ganti ikon saat fullscreen
+                    }).catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen().then(() => {
+                        fullscreenToggle.innerHTML = '&lt; &gt;'; // Ganti ikon saat keluar fullscreen
+                    }).catch(err => {
+                        console.error(`Error attempting to disable fullscreen: ${err.message} (${err.name})`);
+                    });
+                }
+            });
+
+            // Perbarui ikon saat mode fullscreen berubah (misalnya, jika pengguna keluar dengan ESC)
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    fullscreenToggle.innerHTML = '&lt;/&gt;';
+                } else {
+                    fullscreenToggle.innerHTML = '&lt; &gt;';
                 }
             });
 
@@ -515,7 +378,6 @@
                     }, 1000);
                 }
             }
-
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes fadeOut {
@@ -528,164 +390,28 @@
                 }
             `;
             document.head.appendChild(style);
-
-            function openTikTok() {
-                window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
-            }
-
-            function openInstagram() {
-                window.location.href = "https://www.instagram.com/elvizill/";
-            }
-
-            function maintainAspectRatio() {
-                // Keep this function if it's used elsewhere for other elements.
-                // For fullscreen toggle, individual elements within mainContent are handled.
-            }
-
-            window.addEventListener('resize', maintainAspectRatio);
-            maintainAspectRatio();
-
-            // --- Fullscreen Logic ---
-            fullscreenToggle.addEventListener('click', toggleFullscreen);
-
-            function toggleFullscreen() {
-                if (!document.fullscreenElement) {
-                    enterFullscreen();
-                } else {
-                    exitFullscreen();
-                }
-            }
-
-            function enterFullscreen() {
-                const elementsToAnimate = Array.from(mainContent.children);
-
-                // Simpan posisi asli sebelum animasi hisap
-                elementsToAnimate.forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    originalPositions.set(el, {
-                        top: rect.top,
-                        left: rect.left,
-                        width: rect.width,
-                        height: rect.height,
-                        currentTransform: window.getComputedStyle(el).transform // Ambil transform saat ini
-                    });
-                });
-
-                // Tampilkan blackhole dan mulai animasi hisap
-                blackholeOverlay.classList.add('active');
-                mainContent.style.animation = 'screen-shake 0.8s forwards'; // Layar bergetar
-
-                elementsToAnimate.forEach((el, index) => {
-                    const rect = originalPositions.get(el);
-                    el.style.setProperty('--original-top', `${rect.top}px`);
-                    el.style.setProperty('--original-left', `${rect.left}px`);
-                    el.style.setProperty('--original-width', `${rect.width}px`);
-                    el.style.setProperty('--original-height', `${rect.height}px`);
-
-                    el.style.animation = `blackhole-suck 0.8s forwards ease-in-out ${index * 0.05}s`;
-                });
-
-                setTimeout(() => {
-                    // Setelah terhisap, efek ledakan/kedipan
-                    blackholeOverlay.classList.remove('active');
-                    mainContent.style.animation = ''; // Hapus animasi getar
-                    triggerExplosionEffect();
-
-                    // Setelah ledakan, konten kembali ke posisi semula (fullscreen dan 20% lebih kecil)
-                    document.documentElement.requestFullscreen().then(() => {
-                        mainContent.classList.add('full-screen-mode');
-                        elementsToAnimate.forEach(el => {
-                            el.style.animation = 'none'; // Hapus animasi hisap
-                            // Reset transform ke default (position fixed) agar skala 0.8 bisa diterapkan
-                            el.style.transform = 'none'; // Penting: hapus transform dari animasi hisap
-                        });
-                        isFullscreen = true;
-                        updateFullscreenIcon();
-                    });
-                }, 1000); // Durasi hisap + sedikit jeda
-            }
-
-            function exitFullscreen() {
-                const elementsToAnimate = Array.from(mainContent.children);
-
-                // Simpan posisi saat ini (sudah 20% lebih kecil) untuk animasi hisap keluar
-                elementsToAnimate.forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    originalPositions.set(el, {
-                        top: rect.top,
-                        left: rect.left,
-                        width: rect.width,
-                        height: rect.height,
-                        currentTransform: window.getComputedStyle(el).transform
-                    });
-                });
-
-                // Tampilkan blackhole dan mulai animasi hisap
-                blackholeOverlay.classList.add('active');
-                mainContent.style.animation = 'screen-shake 0.8s forwards'; // Layar bergetar
-
-                elementsToAnimate.forEach((el, index) => {
-                    const rect = originalPositions.get(el);
-                    el.style.setProperty('--original-top', `${rect.top}px`);
-                    el.style.setProperty('--original-left', `${rect.left}px`);
-                    el.style.setProperty('--original-width', `${rect.width}px`);
-                    el.style.setProperty('--original-height', `${rect.height}px`);
-
-                    el.style.animation = `blackhole-suck 0.8s forwards ease-in-out ${index * 0.05}s`;
-                });
-
-                setTimeout(() => {
-                    // Setelah terhisap, efek ledakan/kedipan
-                    blackholeOverlay.classList.remove('active');
-                    mainContent.style.animation = ''; // Hapus animasi getar
-                    triggerExplosionEffect();
-
-                    // Setelah ledakan, konten kembali ke posisi semula (ukuran normal)
-                    document.exitFullscreen().then(() => {
-                        mainContent.classList.remove('full-screen-mode');
-                        elementsToAnimate.forEach(el => {
-                            el.style.animation = 'none'; // Hapus animasi hisap
-                            el.style.transform = 'none'; // Kembalikan ke posisi awal
-                        });
-                        isFullscreen = false;
-                        updateFullscreenIcon();
-                    });
-                }, 1000); // Durasi hisap + sedikit jeda
-            }
-
-            function triggerExplosionEffect() {
-                explosionOverlay.classList.add('active');
-                const colors = ['purple', 'blue', 'yellow'];
-                let flashCount = 0;
-
-                const flashInterval = setInterval(() => {
-                    if (flashCount < 5) { // Misalnya 5 kedipan
-                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                        explosionOverlay.style.backgroundColor = randomColor;
-                        setTimeout(() => {
-                            explosionOverlay.style.backgroundColor = 'transparent';
-                        }, 100); // Durasi kedip
-                        flashCount++;
-                    } else {
-                        clearInterval(flashInterval);
-                        explosionOverlay.classList.remove('active');
-                        explosionOverlay.style.backgroundColor = ''; // Reset
-                    }
-                }, 200); // Interval antar kedipan
-            }
-
-            function updateFullscreenIcon() {
-                if (document.fullscreenElement) {
-                    // Icon untuk keluar dari fullscreen
-                    fullscreenIcon.innerHTML = `<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>`;
-                } else {
-                    // Icon untuk masuk fullscreen
-                    fullscreenIcon.innerHTML = `<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>`;
-                }
-            }
-
-            updateFullscreenIcon(); // Setel icon awal
         });
+        function openTikTok() {
+            window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
+        }
+        function openInstagram() {
+            window.location.href = "https://www.instagram.com/elvizill/";
+        }
+        function maintainAspectRatio() {
+            const content = document.querySelector('.verification-box');
+            if (!content) return; // Tambahkan pengecekan null
+            const aspectRatio = 16 / 9;
+            const windowRatio = window.innerWidth / window.innerHeight;
+            if (windowRatio > aspectRatio) {
+                const scale = window.innerHeight / 900;
+                content.style.transform = `scale(${scale})`;
+            } else {
+                const scale = window.innerWidth / 1600;
+                content.style.transform = `scale(${scale})`;
+            }
+        } 
+        window.addEventListener('resize', maintainAspectRatio);
+        maintainAspectRatio();
     </script>
 </body>
 </html>
