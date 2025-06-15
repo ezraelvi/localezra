@@ -9,6 +9,7 @@
         /* Base styles for all screen sizes (Mobile-First Approach) */
         :root {
             font-size: 16px; /* Base font size, 1rem = 16px. Users can override this in browser settings. */
+            --dynamic-scale-factor: 1; /* Default scale factor */
         }
 
         body {
@@ -25,6 +26,53 @@
             line-height: 1.6; /* Improve readability */
         }
 
+        /* Sentinel Element for Font Detection */
+        #font-size-detector {
+            position: absolute;
+            width: 1rem; /* Use a base rem unit for detection */
+            height: 1rem;
+            opacity: 0; /* Make it invisible */
+            pointer-events: none; /* Make it non-interactive */
+            font-size: 1rem; /* Ensure it takes on the root font size */
+        }
+
+        /* Applying the dynamic scale factor to main content */
+        #mainContent > * {
+            transform: scale(var(--dynamic-scale-factor));
+            transform-origin: top left; /* Scale from top-left corner */
+            will-change: transform; /* Hint for browser optimization */
+            transition: transform 0.3s ease-out; /* Smooth transition for scaling */
+        }
+
+        /* Adjusting specific elements to scale differently or not at all */
+        .auth-overlay, .auth-modal {
+            /* Auth elements might not need full scaling, or need custom scaling */
+            transform: none !important; /* Override general mainContent scaling */
+            transition: none !important;
+        }
+
+        /* Specific scaling for fixed elements when scaled */
+        #video-container,
+        #video-middle-right,
+        #video-bottom-right,
+        .social-container,
+        .btn,
+        footer {
+            /* These fixed elements need their positions and sizes recalculated if scaled,
+               or adjust their sizing with 'rem' to respond to user font settings.
+               For simplicity, we'll try to let rem/responsive CSS handle them
+               or adjust them slightly if the main content scales.
+            */
+            /* Example: Adjusting their 'fixed' positions based on scale.
+               This can get tricky quickly. A simpler approach is to rely on rem units
+               and let the browser handle their intrinsic sizing.
+               For this example, let's ensure they are not scaled by the global mainContent scale.
+            */
+            transform: none !important; /* Override global scaling */
+            transition: none !important;
+        }
+
+        /* Common styles for modal */
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -43,42 +91,37 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid #ff69b4;
             border-radius: 15px;
-            padding: 2rem; /* Use rem for padding */
-            width: 90vw; /* Responsive width based on viewport */
-            max-width: 400px; /* Max width for larger screens */
+            padding: 2rem;
+            width: 90vw;
+            max-width: 400px;
             box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
             text-align: center;
             animation: glow 2s infinite alternate;
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            box-sizing: border-box;
         }
 
         @keyframes glow {
-            from {
-                box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
-            }
-            to {
-                box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
-                            0 0 40px rgba(255, 105, 180, 0.6);
-            }
+            from { box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); }
+            to { box-shadow: 0 0 30px rgba(255, 105, 180, 0.8), 0 0 40px rgba(255, 105, 180, 0.6); }
         }
 
         .auth-title {
             color: #ff69b4;
-            font-size: 1.8rem; /* Use rem for font size */
-            margin-bottom: 1.25rem; /* Use rem for margin */
+            font-size: 1.8rem;
+            margin-bottom: 1.25rem;
             text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
         }
 
         .auth-input {
             width: 100%;
-            padding: 0.75rem 1rem; /* Use rem for padding */
-            margin: 0.9375rem 0; /* Use rem for margin */
+            padding: 0.75rem 1rem;
+            margin: 0.9375rem 0;
             border: 2px solid #ff69b4;
-            border-radius: 0.5rem; /* Use rem for border-radius */
+            border-radius: 0.5rem;
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
             font-family: 'Courier New', monospace;
-            font-size: 1rem; /* Use rem for font size */
+            font-size: 1rem;
             outline: none;
             transition: all 0.3s;
             box-sizing: border-box;
@@ -93,14 +136,14 @@
             background: linear-gradient(to right, #ff69b4, #ff1493);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem; /* Use rem for padding */
-            border-radius: 0.5rem; /* Use rem for border-radius */
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 1rem; /* Use rem for font size */
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 0.625rem; /* Use rem for margin */
+            margin-top: 0.625rem;
         }
 
         .auth-submit:hover {
@@ -114,9 +157,9 @@
 
         /* Social containers and buttons */
         .social-container {
-            position: fixed; /* Default fixed for desktop */
+            position: fixed;
             left: 1rem;
-            width: 10rem; /* Use rem */
+            width: 10rem;
             z-index: 100;
         }
 
@@ -132,44 +175,29 @@
 
         .check-btn {
             width: 100%;
-            padding: 0.5rem; /* Use rem */
+            padding: 0.5rem;
             background: transparent;
             border: 2px solid;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            border-radius: 0.3125rem; /* Use rem */
+            border-radius: 0.3125rem;
             cursor: pointer;
-            margin-bottom: 0.3125rem; /* Use rem */
+            margin-bottom: 0.3125rem;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
-            font-size: 1rem; /* Use rem */
+            font-size: 1rem;
         }
 
-        .tiktok-btn {
-            border-color: #00a8ff;
-            color: #00a8ff;
-            box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
-        }
-        .tiktok-btn:hover {
-            background: #00a8ff;
-            color: #0d1b2a;
-        }
-
-        .instagram-btn {
-            border-color: #E1306C;
-            color: #E1306C;
-            box-shadow: 0 0 10px rgba(225, 48, 108, 0.5);
-        }
-        .instagram-btn:hover {
-            background: #E1306C;
-            color: white;
-        }
+        .tiktok-btn { border-color: #00a8ff; color: #00a8ff; box-shadow: 0 0 10px rgba(0, 168, 255, 0.5); }
+        .tiktok-btn:hover { background: #00a8ff; color: #0d1b2a; }
+        .instagram-btn { border-color: #E1306C; color: #E1306C; box-shadow: 0 0 10px rgba(225, 48, 108, 0.5); }
+        .instagram-btn:hover { background: #E1306C; color: white; }
 
         .social-tab {
             width: 100%;
-            height: 12.5rem; /* Use rem for height */
+            height: 12.5rem;
             border: 2px solid;
-            border-radius: 0.3125rem; /* Use rem */
+            border-radius: 0.3125rem;
             overflow: hidden;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
             background: black;
@@ -182,74 +210,42 @@
             padding: 0;
             box-sizing: border-box;
         }
-        .tiktok-tab {
-            border-color: #00a8ff;
-            box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
-        }
-        .instagram-tab {
-            border-color: #E1306C;
-            box-shadow: 0 0 15px rgba(225, 48, 108, 0.7);
-        }
-        .tab-image {
-            max-width: 100%; /* Ensure image is responsive */
-            height: auto; /* Maintain aspect ratio */
-            display: block; /* Remove extra space below image */
-        }
+        .tiktok-tab { border-color: #00a8ff; box-shadow: 0 0 15px rgba(0, 168, 255, 0.7); }
+        .instagram-tab { border-color: #E1306C; box-shadow: 0 0 15px rgba(225, 48, 108, 0.7); }
+        .tab-image { max-width: 100%; height: auto; display: block; }
 
         /* Video containers */
-        #video-container,
-        #video-middle-right,
-        #video-bottom-right {
-            position: fixed; /* Default fixed for desktop */
-            width: 11rem; /* Use rem for width */
-            max-width: 175px; /* Max width for consistency */
-            border-radius: 0.625rem; /* Use rem */
+        #video-container, #video-middle-right, #video-bottom-right {
+            position: fixed;
+            width: 11rem;
+            max-width: 175px;
+            border-radius: 0.625rem;
             overflow: hidden;
-            z-index: 50; /* Ensure videos are behind the modal/overlay */
+            z-index: 50;
         }
-        #video-container {
-            top: 1rem;
-            right: 1rem;
-            border: 3px solid blue;
-        }
-        #video-middle-right {
-            top: 47%;
-            right: 1rem;
-            transform: translateY(-50%);
-            border: 3px solid red;
-        }
-        #video-bottom-right {
-            bottom: 1rem;
-            right: 1rem;
-            border: 3px solid green;
-        }
-        video {
-            width: 100%;
-            height: auto; /* Maintain aspect ratio */
-            display: block; /* Remove extra space below video */
-        }
+        #video-container { top: 1rem; right: 1rem; border: 3px solid blue; }
+        #video-middle-right { top: 47%; right: 1rem; transform: translateY(-50%); border: 3px solid red; }
+        #video-bottom-right { bottom: 1rem; right: 1rem; border: 3px solid green; }
+        video { width: 100%; height: auto; display: block; }
 
         /* Button */
         .btn {
             background: rgba(0, 123, 255, 0.7);
-            position: fixed; /* Default fixed for desktop */
-            bottom: 1.875rem; /* Use rem */
-            left: 50%; /* Center the button horizontally */
+            position: fixed;
+            bottom: 1.875rem;
+            left: 50%;
             transform: translateX(-50%);
-            color: green; /* Consider adjusting for better contrast */
+            color: green;
             border: none;
-            padding: 0.625rem 1.25rem; /* Use rem */
-            border-radius: 3.125rem; /* Use rem (50px) */
+            padding: 0.625rem 1.25rem;
+            border-radius: 3.125rem;
             cursor: pointer;
-            font-size: 1.125rem; /* Use rem */
+            font-size: 1.125rem;
             transition: 0.1s;
             animation: pulse 3s infinite;
             z-index: 100;
         }
-        .btn:hover {
-            background: rgba(0, 86, 179, 0.9);
-            transform: translateX(-50%) scale(1.05); /* Adjust transform with centering */
-        }
+        .btn:hover { background: rgba(0, 86, 179, 0.9); transform: translateX(-50%) scale(1.05); }
         @keyframes pulse {
             0% { transform: translateX(-50%) scale(1); }
             50% { transform: translateX(-50%) scale(1.1); }
@@ -258,133 +254,78 @@
 
         /* Footer */
         footer {
-            position: fixed; /* Default fixed for desktop */
+            position: fixed;
             bottom: 0;
-            width: 50%; /* Set width relative to its container for desktop */
-            left: 50%; /* Center the footer */
+            width: 50%;
+            left: 50%;
             transform: translateX(-50%);
             text-align: center;
-            padding: 0.3125rem; /* Use rem */
+            padding: 0.3125rem;
             background: rgba(0, 0, 0, 0.5);
-            font-size: 0.875rem; /* Use rem */
+            font-size: 0.875rem;
         }
-        footer img {
-            max-width: 50px; /* Example, adjust as needed */
-            height: auto;
-            display: block;
-            margin: 0 auto; /* Center image */
-        }
+        footer img { max-width: 50px; height: auto; display: block; margin: 0 auto; }
 
         /* --- Media Queries for Responsiveness --- */
+        /* These media queries will still apply, but the JS will add an additional layer of scaling */
 
         /* Tablets and larger phones */
         @media (max-width: 768px) {
-            .auth-modal {
-                width: 95vw;
-                padding: 1.5rem;
-            }
+            .auth-modal { width: 95vw; padding: 1.5rem; }
+            .auth-title { font-size: 1.6rem; }
 
-            .auth-title {
-                font-size: 1.6rem;
-            }
-
-            /* Adjust social containers to be static and stacked */
             .social-container {
-                position: static; /* No longer fixed */
-                width: 90%; /* Take up more width */
-                margin: 1rem auto; /* Center and add vertical spacing */
-                transform: none; /* Remove transform */
+                position: static;
+                width: 90%;
+                margin: 1rem auto;
+                transform: none;
                 display: flex;
-                flex-direction: column; /* Stack button and tab */
-                align-items: center; /* Center items horizontally */
+                flex-direction: column;
+                align-items: center;
             }
+            .tiktok-container, .instagram-container { top: auto; left: auto; right: auto; }
+            .social-tab { height: 10rem; width: 100%; }
 
-            .tiktok-container, .instagram-container {
-                top: auto; /* Remove fixed positioning effects */
-                left: auto;
-                right: auto;
-            }
-
-            .social-tab {
-                height: 10rem; /* Smaller height for tabs */
-                width: 100%; /* Ensure it fills parent */
-            }
-
-            /* Adjust video containers to be static and stacked */
-            #video-container,
-            #video-middle-right,
-            #video-bottom-right {
-                position: static; /* No longer fixed */
-                width: 90%; /* Take up more width */
-                margin: 1rem auto; /* Center and add vertical spacing */
-                border: none; /* Remove border for cleaner mobile look */
+            #video-container, #video-middle-right, #video-bottom-right {
+                position: static;
+                width: 90%;
+                margin: 1rem auto;
+                border: none;
             }
 
             .btn {
-                position: static; /* No longer fixed */
-                transform: none; /* Remove transform */
+                position: static;
+                transform: none;
                 width: 90%;
-                margin: 1rem auto; /* Center and add vertical spacing */
-                display: block; /* Make it a block element */
+                margin: 1rem auto;
+                display: block;
             }
 
             footer {
-                position: static; /* No longer fixed */
-                transform: none; /* Remove transform */
+                position: static;
+                transform: none;
                 width: 100%;
                 padding: 0.5rem;
-                margin-top: 2rem; /* Add some space above footer */
+                margin-top: 2rem;
             }
         }
 
         /* Smaller phones */
         @media (max-width: 480px) {
-            .auth-modal {
-                padding: 1rem;
-            }
-
-            .auth-title {
-                font-size: 1.4rem;
-            }
-
-            .auth-input {
-                padding: 0.6rem 0.8rem;
-                font-size: 0.9rem;
-            }
-
-            .auth-submit {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.9rem;
-            }
-
-            .social-container {
-                width: 95%;
-            }
-
-            .social-tab {
-                height: 8rem;
-            }
-
-            #video-container,
-            #video-middle-right,
-            #video-bottom-right {
-                width: 95%;
-            }
-
-            .btn {
-                width: 95%;
-                font-size: 1rem;
-                padding: 0.5rem 1rem;
-            }
-
-            footer {
-                font-size: 0.75rem;
-            }
+            .auth-modal { padding: 1rem; }
+            .auth-title { font-size: 1.4rem; }
+            .auth-input { padding: 0.6rem 0.8rem; font-size: 0.9rem; }
+            .auth-submit { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+            .social-container { width: 95%; }
+            .social-tab { height: 8rem; }
+            #video-container, #video-middle-right, #video-bottom-right { width: 95%; }
+            .btn { width: 95%; font-size: 1rem; padding: 0.5rem 1rem; }
+            footer { font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
-    <div class="auth-overlay" id="authOverlay">
+    <div id="font-size-detector">A</div> <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <h1 class="auth-title">elvi :</h1>
             <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter the secret word..." autocomplete="off">
@@ -394,15 +335,18 @@
     <div id="mainContent" class="hidden">
         <div id="video-middle-right">
             <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/FDownloader.Net_13.mp4" type="video/mp4" /> </video>
+                <source src="Video Elvi/FDownloader.Net_13.mp4" type="video/mp4" />
+            </video>
         </div>
         <div id="video-container">
             <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="video/mp4" /> </video>
+                <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="video/mp4" />
+            </video>
         </div>
         <div id="video-bottom-right">
             <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/FDownloader.Net 4.mp4" type="video/mp4" /> </video>
+                <source src="Video Elvi/FDownloader.Net 4.mp4" type="video/mp4" />
+            </video>
         </div>
         <div class="social-container tiktok-container">
             <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
@@ -416,8 +360,9 @@
                 <img src="Advanced Files Elvi/Instagram Elvi.png" class="tab-image" alt="Instagram Profile">
             </div>
         </div>
-        <div style="padding: 20px; margin-bottom: 50px; text-align: center;"> <h1>Welcome</h1>
-            <p>Ini adalah bagian konten utama website Anda. Pastikan konten ini juga responsif!</p>
+        <div style="padding: 2rem; margin-bottom: 50px; text-align: center;">
+            <h1>Welcome</h1>
+            <p>Ini adalah bagian konten utama website Anda. Ukuran elemen ini akan menyesuaikan dengan pengaturan font HP Anda setelah Anda mengetuk layar!</p>
             <p>Tambahkan lebih banyak teks atau elemen di sini untuk menguji scrollability dan responsivitas.</p>
             <p>Contoh paragraf panjang untuk menguji bagaimana teks menyesuaikan dengan lebar layar. Di layar kecil, teks ini akan membungkus dengan rapi, sementara di layar besar, akan terlihat lebih lebar.</p>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
@@ -430,11 +375,16 @@
         </footer>
     </div>
     <script>
+        let hasTapped = false; // Flag to check if a tap has occurred
+
         document.addEventListener('DOMContentLoaded', function() {
             const authOverlay = document.getElementById('authOverlay');
             const mainContent = document.getElementById('mainContent');
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
+            const root = document.documentElement; // HTML element for CSS variables
+            const fontSizeDetector = document.getElementById('font-size-detector');
+
             secretAnswer.focus();
 
             authSubmit.addEventListener('click', checkSecret);
@@ -462,7 +412,7 @@
                         celebration.style.display = 'flex';
                         celebration.style.justifyContent = 'center';
                         celebration.style.alignItems = 'center';
-                        celebration.style.fontSize = '3rem'; /* Use rem */
+                        celebration.style.fontSize = '3rem';
                         celebration.style.color = '#ff69b4';
                         celebration.style.textShadow = '0 0 10px white';
                         celebration.innerHTML = '❤️ Selamat datang bidadari ❤️';
@@ -486,9 +436,7 @@
 
             const style = document.createElement('style');
             style.textContent = `
-                @keyframes fadeOut {
-                    to { opacity: 0; }
-                }
+                @keyframes fadeOut { to { opacity: 0; } }
                 @keyframes shake {
                     0%, 100% { transform: translateX(0); }
                     20%, 60% { transform: translateX(-10px); }
@@ -496,6 +444,59 @@
                 }
             `;
             document.head.appendChild(style);
+
+            // --- Font size detection and scaling ---
+            function adjustContentScale() {
+                if (!hasTapped) { // Only adjust if not already adjusted by a tap
+                    // Measure the actual rendered size of 1rem on the page
+                    const actualRemSize = parseFloat(getComputedStyle(fontSizeDetector).width);
+                    const defaultRemSize = 16; // Our defined 1rem in :root is 16px
+
+                    let scaleFactor = 1;
+                    if (actualRemSize > defaultRemSize) {
+                        scaleFactor = defaultRemSize / actualRemSize;
+                        // To avoid making elements too small on very large user font settings
+                        // We might cap the minimum scale or adjust it differently
+                        if (scaleFactor < 0.7) { // Example: don't scale down more than 30%
+                            scaleFactor = 0.7;
+                        }
+                    } else if (actualRemSize < defaultRemSize) {
+                        // If user font is smaller, we might scale up slightly, or keep 1
+                        // For "HP emak-emak yang font nya besar", focus on scaling down.
+                        // You can adjust this logic based on desired behavior for smaller user fonts.
+                        scaleFactor = 1; // Default to 1 if user font is smaller or equal
+                    }
+
+                    // Apply the scale factor using a CSS variable
+                    root.style.setProperty('--dynamic-scale-factor', scaleFactor);
+                }
+            }
+
+            // Listen for the first touch/click event on the document
+            let firstInteraction = true;
+            document.addEventListener('touchstart', function handler() {
+                if (firstInteraction) {
+                    adjustContentScale();
+                    hasTapped = true;
+                    firstInteraction = false; // Remove listener after first interaction
+                    document.removeEventListener('touchstart', handler);
+                    document.removeEventListener('click', handler);
+                }
+            }, { once: true }); // Use { once: true } for modern browsers
+            document.addEventListener('click', function handler() {
+                if (firstInteraction) {
+                    adjustContentScale();
+                    hasTapped = true;
+                    firstInteraction = false; // Remove listener after first interaction
+                    document.removeEventListener('touchstart', handler);
+                    document.removeEventListener('click', handler);
+                }
+            }, { once: true });
+
+
+            // Initial check on load (though it won't apply the scale until tap)
+            // This is just to ensure the detector element is ready
+            adjustContentScale();
         });
 
         function openTikTok() {
@@ -505,11 +506,6 @@
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
-
-        // The maintainAspectRatio function is mostly unnecessary with good responsive CSS,
-        // but if there's a specific element that needs fixed aspect ratio scaling,
-        // it might still be useful. For general layout, stick to CSS.
-        // I've removed it for simplicity, as most elements are now handled by CSS.
     </script>
 </body>
 </html>
