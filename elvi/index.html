@@ -6,9 +6,9 @@
     <title>Website ezraVelvi</title>
     <link rel="icon" type="image/png" href="Advanced files elvi/iconelvi.png">
     <style>
-        /* Base styles for all screen sizes (Mobile-First Approach) */
+        /* Base styles for all screen sizes */
         :root {
-            font-size: 16px; /* Base font size, 1rem = 16px. Users can override this. */
+            font-size: 16px; /* 1rem = 16px */
         }
 
         body {
@@ -22,7 +22,7 @@
             background-position: center;
             color: yellow;
             text-shadow: 2px 2px 4px #000;
-            line-height: 1.6; /* Improves readability */
+            line-height: 1.6;
         }
 
         /* --- Autentikasi Awal (Login Modal) --- */
@@ -44,13 +44,15 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid #ff69b4;
             border-radius: 15px;
-            padding: 1.5rem; /* DIKECILKAN: Padding lebih kecil */
-            width: 80vw; /* DIKECILKAN: Lebih kecil di layar kecil */
-            max-width: 350px; /* DIKECILKAN: Max width untuk layar besar juga lebih kecil */
+            /* PERUBAHAN: Padding lebih kecil */
+            padding: 1.5rem;
+            /* PERUBAHAN: Lebar responsif, tapi max-width lebih kecil */
+            width: 80vw;
+            max-width: 350px;
             box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
             text-align: center;
             animation: glow 2s infinite alternate;
-            box-sizing: border-box; /* Ensures padding and border are included in width */
+            box-sizing: border-box;
         }
 
         @keyframes glow {
@@ -60,21 +62,26 @@
 
         .auth-title {
             color: #ff69b4;
-            font-size: 1.6rem; /* DIKECILKAN: Ukuran font judul */
-            margin-bottom: 1rem; /* DIKECILKAN: Margin bawah lebih kecil */
+            /* PERUBAHAN: Ukuran font judul lebih kecil */
+            font-size: 1.6rem;
+            /* PERUBAHAN: Margin bawah lebih kecil */
+            margin-bottom: 1rem;
             text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
         }
 
         .auth-input {
             width: 100%;
-            padding: 0.6rem 0.8rem; /* DIKECILKAN: Padding input */
-            margin: 0.75rem 0; /* DIKECILKAN: Margin input */
+            /* PERUBAHAN: Padding input lebih kecil */
+            padding: 0.6rem 0.8rem;
+            /* PERUBAHAN: Margin input lebih kecil */
+            margin: 0.75rem 0;
             border: 2px solid #ff69b4;
             border-radius: 0.5rem;
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
             font-family: 'Courier New', monospace;
-            font-size: 0.95rem; /* DIKECILKAN: Ukuran font input */
+            /* PERUBAHAN: Ukuran font input lebih kecil */
+            font-size: 0.95rem;
             outline: none;
             transition: all 0.3s;
             box-sizing: border-box;
@@ -89,11 +96,13 @@
             background: linear-gradient(to right, #ff69b4, #ff1493);
             color: white;
             border: none;
-            padding: 0.6rem 1.2rem; /* DIKECILKAN: Padding tombol submit */
+            /* PERUBAHAN: Padding tombol submit lebih kecil */
+            padding: 0.6rem 1.2rem;
             border-radius: 0.5rem;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 0.95rem; /* DIKECILKAN: Ukuran font tombol submit */
+            /* PERUBAHAN: Ukuran font tombol submit lebih kecil */
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 0.625rem;
@@ -108,22 +117,21 @@
             display: none !important;
         }
 
-        /* --- Social Containers (TikTok & Instagram) --- */
+        /* --- Social containers and buttons (TETAP FIXED SEPERTI ASLI) --- */
         .social-container {
-            position: fixed; /* Tetap fixed untuk desktop */
-            width: 10rem; /* Lebar dalam rem */
+            position: fixed;
+            left: 1rem;
+            width: 10rem;
             z-index: 100;
         }
 
         .tiktok-container {
             top: 40%;
-            left: 1rem; /* Jarak dari kiri */
             transform: translateY(-50%);
         }
 
         .instagram-container {
             top: 65%;
-            left: 1rem; /* Jarak dari kiri */
             transform: translateY(-50%);
         }
 
@@ -149,7 +157,7 @@
 
         .social-tab {
             width: 100%;
-            height: 10rem; /* Sedikit dikecilkan agar proporsional */
+            height: 12.5rem; /* Tetap ukuran aslinya */
             border: 2px solid;
             border-radius: 0.3125rem;
             overflow: hidden;
@@ -168,24 +176,24 @@
         .instagram-tab { border-color: #E1306C; box-shadow: 0 0 15px rgba(225, 48, 108, 0.7); }
         .tab-image { max-width: 100%; height: auto; display: block; }
 
-        /* --- Video Containers --- */
+        /* --- Video containers (TETAP FIXED SEPERTI ASLI) --- */
         #video-container, #video-middle-right, #video-bottom-right {
-            position: fixed; /* Tetap fixed untuk desktop */
-            width: 11rem; /* Lebar dalam rem */
-            max-width: 175px; /* Batas lebar agar tidak terlalu besar */
+            position: fixed;
+            width: 11rem;
+            max-width: 175px;
             border-radius: 0.625rem;
             overflow: hidden;
-            z-index: 50; /* Pastikan di belakang modal/overlay */
+            z-index: 50;
         }
         #video-container { top: 1rem; right: 1rem; border: 3px solid blue; }
         #video-middle-right { top: 47%; right: 1rem; transform: translateY(-50%); border: 3px solid red; }
         #video-bottom-right { bottom: 1rem; right: 1rem; border: 3px solid green; }
         video { width: 100%; height: auto; display: block; }
 
-        /* --- Tombol Tengah --- */
+        /* --- Button (TETAP FIXED SEPERTI ASLI) --- */
         .btn {
             background: rgba(0, 123, 255, 0.7);
-            position: fixed; /* Tetap fixed untuk desktop */
+            position: fixed;
             bottom: 1.875rem;
             left: 50%;
             transform: translateX(-50%);
@@ -206,138 +214,69 @@
             100% { transform: translateX(-50%) scale(1); }
         }
 
-        /* --- Footer --- */
+        /* --- Footer (TETAP FIXED SEPERTI ASLI) --- */
         footer {
-            position: fixed; /* Tetap fixed untuk desktop */
+            position: fixed;
             bottom: 0;
-            width: 50%; /* Lebar relatif terhadap viewport */
+            width: 50%;
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
             padding: 0.3125rem;
             background: rgba(0, 0, 0, 0.5);
             font-size: 0.875rem;
-            z-index: 90; /* Pastikan di atas konten tetapi di bawah modal */
+            z-index: 90;
         }
         footer img { max-width: 50px; height: auto; display: block; margin: 0 auto; }
 
-        /* --- Area Konten Utama (Welcome) --- */
+        /* --- Main Content Area --- */
+        /* Konten utama perlu padding agar tidak tertutup oleh elemen fixed */
         #mainContent > div:not([id^="video-"], .social-container, .btn, footer) {
-            /* Ini menargetkan div 'Welcome' Anda agar tidak tumpang tindih dengan fixed elements */
-            margin-top: 2rem; /* Ruang dari atas, mungkin ada video di atas */
-            margin-bottom: 7rem; /* Ruang untuk footer dan tombol di bawah */
-            padding: 1rem;
+            padding: 20px;
+            margin-bottom: 50px; /* Ruang agar tidak tumpang tindih dengan footer/button */
             text-align: center;
-            /* Tambahkan background agar teks terlihat jika fixed elements melayang di atasnya */
-            background-color: rgba(0, 0, 0, 0.4);
+            /* Tambahan untuk memastikan konten terlihat di atas background jika fixed elements tidak menutupi */
+            background-color: rgba(0, 0, 0, 0.3); /* Transparan gelap */
             border-radius: 10px;
-            max-width: 800px; /* Batasi lebar konten */
-            margin-left: auto; /* Pusatkan konten */
-            margin-right: auto; /* Pusatkan konten */
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
             box-sizing: border-box;
-        }
-        #mainContent h1, #mainContent p {
-            color: white; /* Pastikan teks di konten utama terlihat jelas */
+            color: white; /* Memastikan teks terlihat jelas */
             text-shadow: 1px 1px 2px #000;
         }
 
 
-        /* --- Media Queries for Responsiveness --- */
+        /* --- Media Queries (HANYA untuk modal autentikasi, sisanya TETAP MELAYANG) --- */
 
-        /* Tablets and larger phones (max-width: 768px) */
+        /* Tablets and larger phones */
         @media (max-width: 768px) {
-            /* Autentikasi Modal (tetap kecil) */
+            /* PERUBAHAN: Autentikasi Modal tetap kecil di perangkat yang lebih kecil */
             .auth-modal {
-                width: 90vw; /* Lebih lebar di ponsel tapi tetap kecil */
-                max-width: 300px; /* Batas maksimal lebih kecil */
+                width: 90vw;
+                max-width: 300px;
                 padding: 1rem;
             }
             .auth-title { font-size: 1.4rem; margin-bottom: 0.8rem; }
             .auth-input, .auth-submit { font-size: 0.9rem; padding: 0.5rem 1rem; }
 
-            /* Semua Fixed Elements jadi Static dan Tumpang Tindih */
-            /* Ini adalah bagian paling KRITIS untuk memastikan tidak ada yang tumpang tindih */
-            .social-container,
-            #video-container,
-            #video-middle-right,
-            #video-bottom-right,
-            .btn,
-            footer {
-                position: static; /* Ubah ke static agar mengikuti alur dokumen */
-                transform: none; /* Hapus transformasi */
-                width: 95%; /* Ambil hampir seluruh lebar */
-                margin: 1rem auto; /* Beri margin atas/bawah dan pusatkan */
-                display: block; /* Buat elemen blok agar menempati baris baru */
-                clear: both; /* Pastikan tidak ada elemen float di sampingnya */
-                right: auto; /* Hapus properti right */
-                left: auto; /* Hapus properti left */
-                top: auto; /* Hapus properti top */
-                bottom: auto; /* Hapus properti bottom */
-            }
-
-            /* Penyesuaian khusus untuk beberapa elemen setelah menjadi static */
-            .social-container {
-                display: flex; /* Tetap pakai flexbox untuk tombol dan tab */
-                flex-direction: column; /* Susun vertikal */
-                align-items: center; /* Pusatkan item */
-                margin-top: 2rem; /* Beri jarak lebih setelah konten utama */
-            }
-            .social-tab {
-                height: 8rem; /* Tinggi tab sosial lebih kecil */
-                width: 100%; /* Pastikan tab mengisi lebar penuh */
-            }
-            #video-container, #video-middle-right, #video-bottom-right {
-                border: none; /* Hilangkan border video di ponsel agar lebih rapi */
-                height: auto; /* Pastikan tinggi auto untuk video */
-            }
-            .btn {
-                margin-top: 2rem; /* Jarak dari elemen di atasnya */
-                margin-bottom: 2rem; /* Jarak ke footer */
-            }
-            footer {
-                margin-top: 2rem; /* Jarak dari elemen di atasnya */
-                width: 100%; /* Lebar penuh */
-                padding: 1rem;
-                box-sizing: border-box;
-            }
-
-            /* Sesuaikan padding/margin konten utama saat semua fixed element jadi static */
-            #mainContent > div:not([id^="video-"], .social-container, .btn, footer) {
-                margin-top: 1rem; /* Tidak perlu terlalu banyak margin atas jika tidak ada fixed video */
-                margin-bottom: 1rem; /* Margin cukup */
-                padding: 1rem;
-                width: 95%; /* Lebar lebih besar di ponsel */
-            }
+            /* Semua elemen fixed lainnya TETAP FIXED di media query ini */
+            /* Ini berarti di tablet atau ponsel, mereka akan tetap melayang dan mungkin tumpang tindih */
         }
 
-        /* Smaller phones (max-width: 480px) */
+        /* Smaller phones */
         @media (max-width: 480px) {
+            /* PERUBAHAN: Autentikasi Modal makin kecil di ponsel sangat kecil */
             .auth-modal {
                 padding: 0.8rem;
-                width: 95vw; /* Lebih lebar di ponsel sangat kecil */
+                width: 95vw;
                 max-width: 280px;
             }
             .auth-title { font-size: 1.2rem; }
             .auth-input, .auth-submit { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
 
-            .social-container,
-            #video-container,
-            #video-middle-right,
-            #video-bottom-right,
-            .btn,
-            footer {
-                width: 98%; /* Sedikit lebih lebar lagi */
-                margin: 0.8rem auto;
-            }
-
-            .social-tab { height: 7rem; }
-            .btn { font-size: 0.95rem; }
-            footer { font-size: 0.7rem; }
-
-            #mainContent > div:not([id^="video-"], .social-container, .btn, footer) {
-                width: 98%;
-                padding: 0.8rem;
-            }
+            /* Semua elemen fixed lainnya TETAP FIXED di media query ini */
+            /* Ini berarti di ponsel, mereka akan tetap melayang dan mungkin tumpang tindih */
         }
     </style>
 </head>
@@ -350,21 +289,21 @@
         </div>
     </div>
     <div id="mainContent" class="hidden">
-        <div style="padding: 1rem; margin-bottom: 1rem; text-align: center;">
+        <div style="padding: 20px; margin-bottom: 50px; text-align: center;">
             <h1>Welcome</h1>
             <p>Ini adalah bagian konten utama website Anda. Nikmati tampilannya di berbagai perangkat!</p>
-            <p>Jika Anda melihat ini di ponsel, Anda akan melihat video dan tautan sosial tersusun secara vertikal di bawah konten utama, tidak lagi melayang di samping layar.</p>
+            <p>Video dan tombol sosial akan tetap melayang di samping layar, bahkan di perangkat seluler.</p>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
         </div>
 
-        <div id="video-container">
-            <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="video/mp4" />
-            </video>
-        </div>
         <div id="video-middle-right">
             <video width="100%" autoplay loop muted>
                 <source src="Video Elvi/FDownloader.Net_13.mp4" type="video/mp4" />
+            </video>
+        </div>
+        <div id="video-container">
+            <video width="100%" autoplay loop muted>
+                <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="video/mp4" />
             </video>
         </div>
         <div id="video-bottom-right">
@@ -400,7 +339,7 @@
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
 
-            secretAnswer.focus(); // Fokus otomatis pada input saat halaman dimuat
+            secretAnswer.focus();
 
             authSubmit.addEventListener('click', checkSecret);
             secretAnswer.addEventListener('keypress', function(e) {
@@ -443,14 +382,12 @@
                 } else {
                     secretAnswer.style.borderColor = '#ff0000';
                     secretAnswer.style.animation = 'shake 0.5s';
-                    // Mengarahkan ke halaman lain setelah sedikit delay jika salah
                     setTimeout(() => {
                         window.location.href = 'https://localezra.netlify.app';
                     }, 1000);
                 }
             }
 
-            // Menambahkan animasi fadeOut dan shake melalui JavaScript
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes fadeOut {
@@ -465,12 +402,10 @@
             document.head.appendChild(style);
         });
 
-        // Fungsi untuk membuka link TikTok
         function openTikTok() {
             window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
         }
 
-        // Fungsi untuk membuka link Instagram
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
