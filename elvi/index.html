@@ -3,7 +3,8 @@
 <head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>elvi.id</title> <link rel="icon" type="image/png" href="Advanced files elvi/iconelvi.png">
+    <title>elvi.id</title>
+    <link rel="icon" type="image/png" href="Advanced files elvi/iconelvi.png">
     <style>
         /* Variabel CSS untuk konsistensi warna ala Instagram Dark Mode */
         :root {
@@ -21,17 +22,17 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Font ala Instagram */
-            background: var(--ig-bg-dark) url('backgroundelvi.png'); /* Background utama */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--ig-bg-dark) url('backgroundelvi.png');
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center;
             color: var(--ig-text-light);
-            min-height: 100vh; /* Pastikan body setinggi viewport */
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden; /* Mencegah scroll horizontal yang tidak diinginkan */
+            overflow-x: hidden;
         }
 
         /* --- Autentifikasi Awal --- */
@@ -137,16 +138,16 @@
 
         /* --- Main Content Container (Mirip Instagram) --- */
         #mainContent {
-            max-width: 935px; /* Lebar max seperti Instagram */
+            max-width: 935px;
             width: 100%;
-            margin: 20px auto; /* Tengah di layar lebar */
+            margin: 20px auto;
             padding: 20px;
-            background-color: var(--ig-bg-dark); /* Latar belakang konten */
+            background-color: var(--ig-bg-dark);
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            opacity: 0; /* Awalnya tersembunyi */
-            transition: opacity 1s ease-in; /* Transisi fade-in profesional */
-            flex-grow: 1; /* Agar konten utama mengisi ruang sisa */
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            flex-grow: 1;
         }
         #mainContent.show {
             opacity: 1;
@@ -165,10 +166,10 @@
             height: 150px;
             border-radius: 50%;
             overflow: hidden;
-            border: 2px solid var(--ig-pink); /* Border ala Instagram stories */
-            padding: 3px; /* Padding untuk border */
+            border: 2px solid var(--ig-pink);
+            padding: 3px;
             margin-right: 50px;
-            flex-shrink: 0; /* Jangan menyusut */
+            flex-shrink: 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -193,6 +194,7 @@
             margin-right: 20px;
             color: var(--ig-text-light);
         }
+        /* Tombol Follow/Private Content */
         .profile-action-btn {
             background-color: var(--ig-blue);
             color: white;
@@ -203,6 +205,7 @@
             cursor: pointer;
             transition: background-color 0.2s;
             font-size: 0.9rem;
+            min-width: 100px; /* Agar tombol tidak terlalu kecil saat teks berubah */
         }
         .profile-action-btn:hover {
             background-color: #007bb6;
@@ -235,20 +238,20 @@
         /* --- Profile Highlights --- */
         .profile-highlights {
             display: flex;
-            overflow-x: auto; /* Bisa digulir horizontal */
+            overflow-x: auto;
             padding: 10px 0 20px 0;
             border-bottom: 1px solid var(--ig-border);
             margin-bottom: 20px;
-            scrollbar-width: none; /* Hide scrollbar for Firefox */
-            -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
-        .profile-highlights::-webkit-scrollbar { /* Hide scrollbar for Chrome/Safari */
+        .profile-highlights::-webkit-scrollbar {
             display: none;
         }
         .highlight-item {
             text-align: center;
             margin-right: 20px;
-            flex-shrink: 0; /* Jangan menyusut */
+            flex-shrink: 0;
             cursor: pointer;
         }
         .highlight-circle {
@@ -270,7 +273,7 @@
             border-radius: 50%;
         }
         .highlight-circle:hover {
-            border-color: var(--ig-pink); /* Efek hover */
+            border-color: var(--ig-pink);
         }
         .highlight-label {
             font-size: 0.75rem;
@@ -297,8 +300,8 @@
         }
         .profile-tab-item.active {
             color: var(--ig-text-light);
-            border-top: 1px solid var(--ig-text-light); /* Garis aktif di atas */
-            margin-top: -11px; /* Kompensasi untuk garis border-top */
+            border-top: 1px solid var(--ig-text-light);
+            margin-top: -11px;
         }
         .profile-tab-item:hover {
             color: var(--ig-text-light);
@@ -307,13 +310,13 @@
         /* --- Post Grid (Content Area) --- */
         .post-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 kolom */
-            gap: 28px; /* Jarak antar postingan */
+            grid-template-columns: repeat(3, 1fr); /* Tetap 3 kolom di semua ukuran */
+            gap: 28px;
         }
         .post-item {
             position: relative;
             width: 100%;
-            padding-top: 100%; /* Rasio aspek 1:1 untuk kotak persegi */
+            padding-top: 100%; /* Rasio aspek 1:1 */
             background-color: var(--ig-bg-medium);
             overflow: hidden;
             cursor: pointer;
@@ -324,11 +327,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Video/gambar mengisi penuh kotak */
+            object-fit: cover;
         }
-        /* Overlay hover untuk ikon */
         .post-item::before {
-            content: ''; /* Placeholder untuk ikon (misal ikon play untuk video) */
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
@@ -341,16 +343,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2em; /* Ukuran ikon */
+            font-size: 2em;
             color: white;
         }
-        /* Jika ingin ikon spesifik untuk video, bisa tambahkan di JS atau class terpisah */
         .post-item:hover::before {
             opacity: 1;
         }
 
         /* --- Highlight Story Modal --- */
-        .story-modal-overlay {
+        .story-modal-overlay, .private-content-modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -365,14 +366,14 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .story-modal-overlay.active {
+        .story-modal-overlay.active, .private-content-modal-overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        .story-content-wrapper {
+        .story-content-wrapper, .private-content-wrapper {
             position: relative;
             width: 100%;
-            max-width: 400px; /* Ukuran story seperti di ponsel */
+            max-width: 400px;
             height: 100%;
             max-height: 700px;
             display: flex;
@@ -382,13 +383,54 @@
             border-radius: 10px;
             background-color: black;
         }
-        .story-content {
+        .private-content-wrapper {
+            max-width: 800px; /* Private content bisa lebih lebar */
+            max-height: 80vh;
+            background-color: var(--ig-bg-medium);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .story-content, .private-content-item {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Agar konten tidak terpotong */
-            background-color: black; /* Latar belakang untuk mengisi ruang */
+            object-fit: contain;
+            background-color: black;
         }
-        .story-close-btn {
+        .private-content-item { /* Untuk gambar/video di private content */
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            max-height: 80%;
+            width: auto;
+            max-width: 100%;
+        }
+        .private-content-text {
+            color: var(--ig-text-light);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            max-width: 90%;
+            overflow-y: auto; /* Bisa di-scroll jika teksnya panjang */
+            padding-right: 5px; /* Untuk scrollbar */
+        }
+        .private-content-text::-webkit-scrollbar {
+            width: 8px;
+        }
+        .private-content-text::-webkit-scrollbar-track {
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+        .private-content-text::-webkit-scrollbar-thumb {
+            background: var(--ig-text-dark);
+            border-radius: 10px;
+        }
+
+
+        .story-close-btn, .private-close-btn {
             position: absolute;
             top: 15px;
             right: 15px;
@@ -400,7 +442,7 @@
             z-index: 10001;
             padding: 5px;
         }
-        .story-nav-btn {
+        .story-nav-btn, .private-nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
@@ -413,19 +455,51 @@
             font-size: 1.5rem;
             z-index: 10001;
         }
-        .story-nav-btn.prev { left: 10px; }
-        .story-nav-btn.next { right: 10px; }
+        .story-nav-btn.prev, .private-nav-btn.prev { left: 10px; }
+        .story-nav-btn.next, .private-nav-btn.next { right: 10px; }
 
-        /* --- Footer (Tidak Fixed Lagi) --- */
+        /* --- Social Media Containers (Sidebars) --- */
+        .social-container {
+            position: fixed;
+            left: 10px;
+            width: 160px;
+            z-index: 100;
+        }
+        .tiktok-container { top: 40%; transform: translateY(-50%); }    
+        .instagram-container { top: 65%; transform: translateY(-50%); }
+
+        .check-btn {
+            width: 100%; padding: 8px; background: transparent; border: 2px solid;
+            font-family: 'Courier New', monospace; font-weight: bold; border-radius: 5px;
+            cursor: pointer; margin-bottom: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }      
+        .tiktok-btn { border-color: #00a8ff; color: #00a8ff; box-shadow: 0 0 10px rgba(0, 168, 255, 0.5); }
+        .tiktok-btn:hover { background: #00a8ff; color: #0d1b2a; }  
+        .instagram-btn { border-color: #E1306C; color: #E1306C; box-shadow: 0 0 10px rgba(225, 48, 108, 0.5); }
+        .instagram-btn:hover { background: #E1306C; color: white; }
+
+        .social-tab {
+            width: 100%; height: 120px; border: 2px solid; border-radius: 5px;
+            overflow: hidden; box-shadow: 0 0 15px rgba(0, 0, 0, 0.7); background: black;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-family: 'Courier New', monospace; text-align: center; padding: 0; box-sizing: border-box;
+        }    
+        .tiktok-tab { border-color: #00a8ff; box-shadow: 0 0 15px rgba(0, 168, 255, 0.7); }
+        .instagram-tab { border-color: #E1306C; box-shadow: 0 0 15px rgba(225, 48, 108, 0.7); }
+        .tab-image { width: 100%; height: 100%; object-fit: cover; }
+
+
+        /* --- Footer --- */
         footer {
             width: 100%;
             text-align: center;
-            padding: 20px; /* Padding lebih besar */
-            background: var(--ig-bg-medium); /* Latar belakang footer */
+            padding: 20px;
+            background: var(--ig-bg-medium);
             color: var(--ig-text-dark);
             border-top: 1px solid var(--ig-border);
             font-size: 0.8rem;
-            margin-top: 40px; /* Jarak dari grid postingan */
+            margin-top: 40px;
             box-sizing: border-box;
         }
         footer img {
@@ -433,7 +507,7 @@
             height: auto;
             margin-bottom: 5px;
             opacity: 0.7;
-            /* filter: grayscale(100%); */ /* Hapus ini jika ingin gambar berwarna */
+            /* filter: grayscale(100%); <-- DIHAPUS */
         }
         footer p {
             margin: 0;
@@ -450,114 +524,7 @@
             40%, 80% { transform: translateX(10px); }
         }
 
-        /* --- Responsivitas --- */
-        @media (max-width: 768px) {
-            .auth-modal {
-                padding: 15px; max-width: 300px;
-            }
-            .auth-title { font-size: 1.4rem; }
-            .auth-input, .auth-submit { font-size: 0.85rem; padding: 10px; }
-
-            #mainContent {
-                padding: 10px;
-                margin: 10px auto;
-            }
-
-            .profile-header {
-                flex-direction: column; /* Susun vertikal di mobile */
-                text-align: center;
-                align-items: center;
-            }
-            .profile-pic-container {
-                width: 100px; /* Ukuran lebih kecil */
-                height: 100px;
-                margin-right: 0;
-                margin-bottom: 20px;
-            }
-            .profile-username-actions {
-                flex-direction: column;
-                margin-bottom: 15px;
-            }
-            .profile-username {
-                font-size: 1.5rem;
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            .profile-action-btn {
-                width: 100%; /* Tombol full width */
-            }
-            .profile-stats {
-                justify-content: space-around; /* Rata tengah dan menyebar */
-                width: 100%;
-                margin-bottom: 15px;
-            }
-            .profile-stats li {
-                margin-right: 0;
-                font-size: 0.9rem;
-            }
-            .profile-bio-text {
-                font-size: 0.8rem;
-            }
-
-            .profile-highlights {
-                padding: 5px 0 15px 0;
-            }
-            .highlight-item {
-                margin-right: 15px;
-            }
-            .highlight-circle {
-                width: 50px;
-                height: 50px;
-            }
-            .highlight-label {
-                font-size: 0.65rem;
-            }
-
-            .profile-tabs {
-                margin-bottom: 15px;
-                padding-top: 5px;
-            }
-            .profile-tab-item {
-                padding: 10px 15px;
-                font-size: 0.75rem;
-            }
-
-            .post-grid {
-                grid-template-columns: repeat(2, 1fr); /* 2 kolom di mobile */
-                gap: 5px;
-            }
-            
-            /* Untuk social container, di mobile lebih baik diintegrasikan atau disembunyikan */
-            /* Saya memutuskan untuk menyembunyikannya di mobile agar tidak mengganggu layout utama */
-            .social-container {
-                display: none; 
-            }
-
-            footer {
-                padding: 15px;
-                font-size: 0.7rem;
-            }
-            footer img {
-                max-width: 50px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-stats {
-                flex-direction: column; /* Stack vertikal */
-                align-items: center;
-            }
-            .profile-stats li {
-                margin-bottom: 10px;
-            }
-            .story-modal-overlay {
-                padding: 10px;
-            }
-            .story-content-wrapper {
-                max-width: 95%;
-                max-height: 95%;
-            }
-        }
+        /* Tidak ada media queries untuk mobile lagi, agar tampilan konsisten */
     </style>
 </head>
 <body>
@@ -579,7 +546,7 @@
             <div class="profile-info">
                 <div class="profile-username-actions">
                     <h2 class="profile-username" id="profileUsername"></h2>
-                    <button class="profile-action-btn">Follow</button>
+                    <button class="profile-action-btn" id="followButton">Follow</button>
                 </div>
                 <ul class="profile-stats">
                     <li><strong id="postCount"></strong> posts</li>
@@ -626,6 +593,19 @@
         <button class="story-nav-btn next" id="storyNextBtn">&#10095;</button>
     </div>
 
+    <div class="private-content-modal-overlay" id="privateContentModalOverlay">
+        <button class="private-close-btn" id="privateCloseBtn">&times;</button>
+        <button class="private-nav-btn prev" id="privatePrevBtn">&#10094;</button>
+        <div class="private-content-wrapper">
+            <h3 style="color:var(--ig-blue); margin-bottom: 20px;">Exclusive Content for You!</h3>
+            <img id="privateImage" class="private-content-item hidden" src="" alt="Private Content">
+            <video id="privateVideo" class="private-content-item hidden" src="" autoplay loop muted></video>
+            <p id="privateText" class="private-content-text hidden"></p>
+        </div>
+        <button class="private-nav-btn next" id="privateNextBtn">&#10095;</button>
+    </div>
+
+
     <footer>
         <img src="Advanced files elvi/October 25, 2024 at 8.11 AM.png">
         <p>© 2025 Dibuat dengan ❤ oleh kita</p>
@@ -648,6 +628,7 @@
             const profileName = document.getElementById('profileName');
             const profileBio = document.getElementById('profileBio');
             const profileHighlightsContainer = document.getElementById('profileHighlightsContainer');
+            const followButton = document.getElementById('followButton'); // New: Follow button
 
             // Story Modal Elements
             const storyModalOverlay = document.getElementById('storyModalOverlay');
@@ -660,6 +641,19 @@
             let currentHighlightStories = [];
             let currentStoryIndex = 0;
 
+            // Private Content Modal Elements
+            const privateContentModalOverlay = document.getElementById('privateContentModalOverlay');
+            const privateCloseBtn = document.getElementById('privateCloseBtn');
+            const privatePrevBtn = document.getElementById('privatePrevBtn');
+            const privateNextBtn = document.getElementById('privateNextBtn');
+            const privateImage = document.getElementById('privateImage');
+            const privateVideo = document.getElementById('privateVideo');
+            const privateText = document.getElementById('privateText');
+
+            let currentPrivateContents = [];
+            let currentPrivateIndex = 0;
+            let hasAccessedPrivateContent = false; // Flag to check if private content has been accessed
+
             // --- Data Konten Website Anda (DISINILAH SEMUA SUMBER ISI BERADA) ---
             const profileData = {
                 username: "elvi_velvi_007",
@@ -668,30 +662,31 @@
                 profilePic: "Advanced files Elvi/Instagram Elvi.png", // Ganti dengan path foto profil Anda
                 stats: {
                     posts: 123,
-                    followers: "4.5K", // Bisa string jika ingin format K, M, dll.
+                    followers: "4.5K",
                     following: 321
                 }
             };
 
             const postsData = [
-                { id: 'p1', type: 'video', src: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4', thumbnailUrl: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4' }, // Thumbnail bisa pakai frame dari video
-                { id: 'p2', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4', thumbnailUrl: 'Video Elvi/FDownloader.Net_13.mp4' },
-                { id: 'p3', type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4', thumbnailUrl: 'Video Elvi/FDownloader.Net 4.mp4' },
+                { id: 'p1', type: 'video', src: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4' },
+                { id: 'p2', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4' },
+                { id: 'p3', type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4' },
+                { id: 'p4', type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' },
+                { id: 'p5', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4' },
+                { id: 'p6', type: 'image', src: 'Advanced files Elvi/Instagram Elvi.png' },
                 // Tambahkan lebih banyak postingan di sini
-                { id: 'p4', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4', thumbnailUrl: 'Video Elvi/FDownloader.Net_13.mp4' },
-                { id: 'p5', type: 'video', src: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4', thumbnailUrl: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4' },
-                { id: 'p6', type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4', thumbnailUrl: 'Video Elvi/FDownloader.Net 4.mp4' },
-                { id: 'p7', type: 'image', src: 'Advanced files Elvi/Instagram Elvi.png', thumbnailUrl: 'Advanced files Elvi/Instagram Elvi.png' }, // Contoh gambar
             ];
 
             const reelsData = [
-                { id: 'r1', type: 'video', src: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4', thumbnailUrl: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4' },
-                { id: 'r2', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4', thumbnailUrl: 'Video Elvi/FDownloader.Net_13.mp4' },
+                { id: 'r1', type: 'video', src: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4' },
+                { id: 'r2', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4' },
+                { id: 'r3', type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4' },
                 // Tambahkan video reels lainnya di sini. Idealnya ini adalah video vertikal.
             ];
 
             const taggedData = [
-                { id: 't1', type: 'image', src: 'Advanced Files Elvi/TikTok Elvi.png', thumbnailUrl: 'Advanced Files Elvi/TikTok Elvi.png' },
+                { id: 't1', type: 'image', src: 'Advanced Files Elvi/TikTok Elvi.png' },
+                { id: 't2', type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' },
                 // Tambahkan gambar/video di mana akun Anda ditandai
             ];
 
@@ -708,7 +703,7 @@
                 { 
                     id: 'h2', 
                     label: 'Coding', 
-                    icon: 'https://via.placeholder.com/60/00ff88/000000?text=</>', // Ikon placeholder
+                    icon: 'https://via.placeholder.com/60/00ff88/000000?text=</>', 
                     stories: [
                         { type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' }
                     ]
@@ -718,7 +713,7 @@
                     label: 'Cats', 
                     icon: 'https://via.placeholder.com/60/ff69b4/FFFFFF?text=🐱', 
                     stories: [
-                        { type: 'image', src: 'https://via.placeholder.com/400x700/ff69b4/FFFFFF?text=Cute+Cat' } // Story contoh
+                        { type: 'image', src: 'https://via.placeholder.com/400x700/ff69b4/FFFFFF?text=Cute+Cat' }
                     ]
                 },
                 { 
@@ -731,6 +726,15 @@
                 },
             ];
 
+            // New: Private Content Data
+            const privateContentData = [
+                { type: 'text', content: "Hi! Ini adalah ruang spesial kita berdua. Terima kasih sudah sampai di sini! 💖" },
+                { type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' }, // Ganti dengan gambar private Anda
+                { type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4' }, // Ganti dengan video private Anda
+                { type: 'text', content: "Semoga momen-momen ini bisa lebih dekatkan kita. Kamu adalah sosok yang paling istimewa. Selalu. ❤" },
+            ];
+
+
             // --- Fungsionalitas Website ---
 
             // 1. Inisialisasi Konten Profil
@@ -741,15 +745,15 @@
                 followerCount.textContent = profileData.stats.followers;
                 followingCount.textContent = profileData.stats.following;
                 profileName.textContent = profileData.fullName;
-                profileBio.innerHTML = profileData.bio.replace(/\n/g, '<br>'); // Mengganti \n dengan <br> untuk baris baru
+                profileBio.innerHTML = profileData.bio.replace(/\n/g, '<br>');
 
-                renderHighlights(); // Render highlights saat profil dimuat
+                renderHighlights();
                 renderPosts(postsData); // Tampilkan posts secara default
             }
 
             // 2. Render Postingan di Grid
             function renderPosts(data) {
-                postGridContainer.innerHTML = ''; // Bersihkan grid
+                postGridContainer.innerHTML = '';
                 data.forEach(item => {
                     const postItem = document.createElement('div');
                     postItem.classList.add('post-item');
@@ -760,6 +764,7 @@
                         video.autoplay = true;
                         video.loop = true;
                         video.muted = true;
+                        video.playsInline = true; // Penting untuk autoplay di iOS
                         postItem.appendChild(video);
                     } else if (item.type === 'image') {
                         const img = document.createElement('img');
@@ -777,7 +782,7 @@
                 highlightsData.forEach(highlight => {
                     const highlightItem = document.createElement('div');
                     highlightItem.classList.add('highlight-item');
-                    highlightItem.dataset.highlightId = highlight.id; // Untuk identifikasi saat diklik
+                    highlightItem.dataset.highlightId = highlight.id;
 
                     const highlightCircle = document.createElement('div');
                     highlightCircle.classList.add('highlight-circle');
@@ -794,7 +799,6 @@
                     highlightItem.appendChild(highlightLabel);
                     profileHighlightsContainer.appendChild(highlightItem);
 
-                    // Event listener untuk membuka modal highlight
                     highlightItem.addEventListener('click', () => openStoryModal(highlight.id));
                 });
             }
@@ -802,14 +806,12 @@
             // 4. Fungsionalitas Tab (Posts, Reels, Tagged)
             profileTabsContainer.addEventListener('click', function(event) {
                 const targetTab = event.target.closest('.profile-tab-item');
-                if (!targetTab) return; // Klik bukan pada tab
+                if (!targetTab) return;
 
-                // Hapus kelas 'active' dari semua tab
                 document.querySelectorAll('.profile-tab-item').forEach(tab => {
                     tab.classList.remove('active');
                 });
 
-                // Tambahkan kelas 'active' ke tab yang diklik
                 targetTab.classList.add('active');
 
                 const tabType = targetTab.dataset.tab;
@@ -818,10 +820,10 @@
                         renderPosts(postsData);
                         break;
                     case 'reels':
-                        renderPosts(reelsData); // Reels juga ditampilkan di grid untuk saat ini
+                        renderPosts(reelsData);
                         break;
                     case 'tagged':
-                        renderPosts(taggedData); // Tagged juga ditampilkan di grid
+                        renderPosts(taggedData);
                         break;
                     default:
                         renderPosts(postsData);
@@ -843,7 +845,7 @@
                 const story = currentHighlightStories[currentStoryIndex];
                 storyImage.classList.add('hidden');
                 storyVideo.classList.add('hidden');
-                storyVideo.pause(); // Pastikan video sebelumnya berhenti
+                storyVideo.pause();
 
                 if (story.type === 'image') {
                     storyImage.src = story.src;
@@ -854,7 +856,6 @@
                     storyVideo.play().catch(e => console.log("Video autoplay blocked for story:", e));
                 }
 
-                // Sembunyikan/tampilkan tombol navigasi jika di awal/akhir
                 storyPrevBtn.style.display = (currentStoryIndex === 0) ? 'none' : 'block';
                 storyNextBtn.style.display = (currentStoryIndex === currentHighlightStories.length - 1) ? 'none' : 'block';
             }
@@ -875,16 +876,89 @@
 
             storyCloseBtn.addEventListener('click', () => {
                 storyModalOverlay.classList.remove('active');
-                storyVideo.pause(); // Hentikan video saat modal ditutup
-                storyVideo.currentTime = 0; // Reset waktu video
+                storyVideo.pause();
+                storyVideo.currentTime = 0;
             });
 
-            // Tutup modal jika klik di luar konten (tapi di overlay)
             storyModalOverlay.addEventListener('click', (event) => {
                 if (event.target === storyModalOverlay) {
                     storyModalOverlay.classList.remove('active');
                     storyVideo.pause();
                     storyVideo.currentTime = 0;
+                }
+            });
+
+            // 6. Fungsionalitas Private Content Modal
+            followButton.addEventListener('click', function() {
+                if (!hasAccessedPrivateContent) {
+                    // Logic to show an intermediate message or confirm before showing private content
+                    const confirmation = confirm("Would you like to unlock exclusive content meant only for special people? (This action will change the 'Follow' button)");
+                    if (confirmation) {
+                        hasAccessedPrivateContent = true;
+                        followButton.textContent = "View Private Content";
+                        followButton.style.backgroundColor = var(--ig-pink); /* Warna pink untuk private content */
+                        openPrivateContentModal();
+                    }
+                } else {
+                    openPrivateContentModal();
+                }
+            });
+
+            function openPrivateContentModal() {
+                currentPrivateContents = privateContentData;
+                currentPrivateIndex = 0;
+                displayCurrentPrivateContent();
+                privateContentModalOverlay.classList.add('active');
+            }
+
+            function displayCurrentPrivateContent() {
+                const content = currentPrivateContents[currentPrivateIndex];
+                privateImage.classList.add('hidden');
+                privateVideo.classList.add('hidden');
+                privateText.classList.add('hidden');
+                privateVideo.pause();
+
+                if (content.type === 'image') {
+                    privateImage.src = content.src;
+                    privateImage.classList.remove('hidden');
+                } else if (content.type === 'video') {
+                    privateVideo.src = content.src;
+                    privateVideo.classList.remove('hidden');
+                    privateVideo.play().catch(e => console.log("Video autoplay blocked for private content:", e));
+                } else if (content.type === 'text') {
+                    privateText.innerHTML = content.content.replace(/\n/g, '<br>');
+                    privateText.classList.remove('hidden');
+                }
+
+                privatePrevBtn.style.display = (currentPrivateIndex === 0) ? 'none' : 'block';
+                privateNextBtn.style.display = (currentPrivateIndex === currentPrivateContents.length - 1) ? 'none' : 'block';
+            }
+
+            privatePrevBtn.addEventListener('click', () => {
+                if (currentPrivateIndex > 0) {
+                    currentPrivateIndex--;
+                    displayCurrentPrivateContent();
+                }
+            });
+
+            privateNextBtn.addEventListener('click', () => {
+                if (currentPrivateIndex < currentPrivateContents.length - 1) {
+                    currentPrivateIndex++;
+                    displayCurrentPrivateContent();
+                }
+            });
+
+            privateCloseBtn.addEventListener('click', () => {
+                privateContentModalOverlay.classList.remove('active');
+                privateVideo.pause();
+                privateVideo.currentTime = 0;
+            });
+
+            privateContentModalOverlay.addEventListener('click', (event) => {
+                if (event.target === privateContentModalOverlay) {
+                    privateContentModalOverlay.classList.remove('active');
+                    privateVideo.pause();
+                    privateVideo.currentTime = 0;
                 }
             });
 
@@ -905,12 +979,11 @@
                     setTimeout(() => {
                         authOverlay.remove();
                         mainContent.classList.remove('hidden');
-                        mainContent.classList.add('show'); // Aktifkan transisi fade-in
+                        mainContent.classList.add('show');
 
-                        // Load dan render konten setelah autentifikasi berhasil
                         loadProfileContent();
 
-                        // Pastikan semua video di grid autoplay setelah konten utama terlihat
+                        // Memulai autoplay untuk video di grid setelah autentifikasi
                         mainContent.querySelectorAll('.post-item video').forEach(video => {
                             video.play().catch(error => {
                                 console.log("Video autoplay failed (muted ok):", error);
