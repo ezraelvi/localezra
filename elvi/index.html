@@ -8,71 +8,24 @@
     <style>
         /* Base styles for all screen sizes (Mobile-First Approach) */
         :root {
-            font-size: 16px; /* Base font size, 1rem = 16px. Users can override this in browser settings. */
-            --dynamic-scale-factor: 1; /* Default scale factor */
+            font-size: 16px; /* Base font size, 1rem = 16px. Users can override this. */
         }
 
         body {
             margin: 0;
             padding: 0;
             font-family: 'Courier New', monospace;
-            background: url('backgroundelvi.png');
+            background: url('backgroundelvi.png'); /* Pastikan path gambar ini benar */
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center;
             color: yellow;
             text-shadow: 2px 2px 4px #000;
-            line-height: 1.6; /* Improve readability */
+            line-height: 1.6; /* Improves readability */
         }
 
-        /* Sentinel Element for Font Detection */
-        #font-size-detector {
-            position: absolute;
-            width: 1rem; /* Use a base rem unit for detection */
-            height: 1rem;
-            opacity: 0; /* Make it invisible */
-            pointer-events: none; /* Make it non-interactive */
-            font-size: 1rem; /* Ensure it takes on the root font size */
-        }
-
-        /* Applying the dynamic scale factor to main content */
-        #mainContent > * {
-            transform: scale(var(--dynamic-scale-factor));
-            transform-origin: top left; /* Scale from top-left corner */
-            will-change: transform; /* Hint for browser optimization */
-            transition: transform 0.3s ease-out; /* Smooth transition for scaling */
-        }
-
-        /* Adjusting specific elements to scale differently or not at all */
-        .auth-overlay, .auth-modal {
-            /* Auth elements might not need full scaling, or need custom scaling */
-            transform: none !important; /* Override general mainContent scaling */
-            transition: none !important;
-        }
-
-        /* Specific scaling for fixed elements when scaled */
-        #video-container,
-        #video-middle-right,
-        #video-bottom-right,
-        .social-container,
-        .btn,
-        footer {
-            /* These fixed elements need their positions and sizes recalculated if scaled,
-               or adjust their sizing with 'rem' to respond to user font settings.
-               For simplicity, we'll try to let rem/responsive CSS handle them
-               or adjust them slightly if the main content scales.
-            */
-            /* Example: Adjusting their 'fixed' positions based on scale.
-               This can get tricky quickly. A simpler approach is to rely on rem units
-               and let the browser handle their intrinsic sizing.
-               For this example, let's ensure they are not scaled by the global mainContent scale.
-            */
-            transform: none !important; /* Override global scaling */
-            transition: none !important;
-        }
-
-        /* Common styles for modal */
+        /* --- Autentikasi Awal (Login Modal) --- */
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -91,13 +44,13 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid #ff69b4;
             border-radius: 15px;
-            padding: 2rem;
-            width: 90vw;
-            max-width: 400px;
+            padding: 1.5rem; /* DIKECILKAN: Padding lebih kecil */
+            width: 80vw; /* DIKECILKAN: Lebih kecil di layar kecil */
+            max-width: 350px; /* DIKECILKAN: Max width untuk layar besar juga lebih kecil */
             box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
             text-align: center;
             animation: glow 2s infinite alternate;
-            box-sizing: border-box;
+            box-sizing: border-box; /* Ensures padding and border are included in width */
         }
 
         @keyframes glow {
@@ -107,21 +60,21 @@
 
         .auth-title {
             color: #ff69b4;
-            font-size: 1.8rem;
-            margin-bottom: 1.25rem;
+            font-size: 1.6rem; /* DIKECILKAN: Ukuran font judul */
+            margin-bottom: 1rem; /* DIKECILKAN: Margin bawah lebih kecil */
             text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
         }
 
         .auth-input {
             width: 100%;
-            padding: 0.75rem 1rem;
-            margin: 0.9375rem 0;
+            padding: 0.6rem 0.8rem; /* DIKECILKAN: Padding input */
+            margin: 0.75rem 0; /* DIKECILKAN: Margin input */
             border: 2px solid #ff69b4;
             border-radius: 0.5rem;
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
             font-family: 'Courier New', monospace;
-            font-size: 1rem;
+            font-size: 0.95rem; /* DIKECILKAN: Ukuran font input */
             outline: none;
             transition: all 0.3s;
             box-sizing: border-box;
@@ -136,11 +89,11 @@
             background: linear-gradient(to right, #ff69b4, #ff1493);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem; /* DIKECILKAN: Padding tombol submit */
             border-radius: 0.5rem;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem; /* DIKECILKAN: Ukuran font tombol submit */
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 0.625rem;
@@ -155,21 +108,22 @@
             display: none !important;
         }
 
-        /* Social containers and buttons */
+        /* --- Social Containers (TikTok & Instagram) --- */
         .social-container {
-            position: fixed;
-            left: 1rem;
-            width: 10rem;
+            position: fixed; /* Tetap fixed untuk desktop */
+            width: 10rem; /* Lebar dalam rem */
             z-index: 100;
         }
 
         .tiktok-container {
             top: 40%;
+            left: 1rem; /* Jarak dari kiri */
             transform: translateY(-50%);
         }
 
         .instagram-container {
             top: 65%;
+            left: 1rem; /* Jarak dari kiri */
             transform: translateY(-50%);
         }
 
@@ -195,7 +149,7 @@
 
         .social-tab {
             width: 100%;
-            height: 12.5rem;
+            height: 10rem; /* Sedikit dikecilkan agar proporsional */
             border: 2px solid;
             border-radius: 0.3125rem;
             overflow: hidden;
@@ -214,24 +168,24 @@
         .instagram-tab { border-color: #E1306C; box-shadow: 0 0 15px rgba(225, 48, 108, 0.7); }
         .tab-image { max-width: 100%; height: auto; display: block; }
 
-        /* Video containers */
+        /* --- Video Containers --- */
         #video-container, #video-middle-right, #video-bottom-right {
-            position: fixed;
-            width: 11rem;
-            max-width: 175px;
+            position: fixed; /* Tetap fixed untuk desktop */
+            width: 11rem; /* Lebar dalam rem */
+            max-width: 175px; /* Batas lebar agar tidak terlalu besar */
             border-radius: 0.625rem;
             overflow: hidden;
-            z-index: 50;
+            z-index: 50; /* Pastikan di belakang modal/overlay */
         }
         #video-container { top: 1rem; right: 1rem; border: 3px solid blue; }
         #video-middle-right { top: 47%; right: 1rem; transform: translateY(-50%); border: 3px solid red; }
         #video-bottom-right { bottom: 1rem; right: 1rem; border: 3px solid green; }
         video { width: 100%; height: auto; display: block; }
 
-        /* Button */
+        /* --- Tombol Tengah --- */
         .btn {
             background: rgba(0, 123, 255, 0.7);
-            position: fixed;
+            position: fixed; /* Tetap fixed untuk desktop */
             bottom: 1.875rem;
             left: 50%;
             transform: translateX(-50%);
@@ -252,80 +206,143 @@
             100% { transform: translateX(-50%) scale(1); }
         }
 
-        /* Footer */
+        /* --- Footer --- */
         footer {
-            position: fixed;
+            position: fixed; /* Tetap fixed untuk desktop */
             bottom: 0;
-            width: 50%;
+            width: 50%; /* Lebar relatif terhadap viewport */
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
             padding: 0.3125rem;
             background: rgba(0, 0, 0, 0.5);
             font-size: 0.875rem;
+            z-index: 90; /* Pastikan di atas konten tetapi di bawah modal */
         }
         footer img { max-width: 50px; height: auto; display: block; margin: 0 auto; }
 
+        /* --- Area Konten Utama (Welcome) --- */
+        #mainContent > div:not([id^="video-"], .social-container, .btn, footer) {
+            /* Ini menargetkan div 'Welcome' Anda agar tidak tumpang tindih dengan fixed elements */
+            margin-top: 2rem; /* Ruang dari atas, mungkin ada video di atas */
+            margin-bottom: 7rem; /* Ruang untuk footer dan tombol di bawah */
+            padding: 1rem;
+            text-align: center;
+            /* Tambahkan background agar teks terlihat jika fixed elements melayang di atasnya */
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            max-width: 800px; /* Batasi lebar konten */
+            margin-left: auto; /* Pusatkan konten */
+            margin-right: auto; /* Pusatkan konten */
+            box-sizing: border-box;
+        }
+        #mainContent h1, #mainContent p {
+            color: white; /* Pastikan teks di konten utama terlihat jelas */
+            text-shadow: 1px 1px 2px #000;
+        }
+
+
         /* --- Media Queries for Responsiveness --- */
-        /* These media queries will still apply, but the JS will add an additional layer of scaling */
 
-        /* Tablets and larger phones */
+        /* Tablets and larger phones (max-width: 768px) */
         @media (max-width: 768px) {
-            .auth-modal { width: 95vw; padding: 1.5rem; }
-            .auth-title { font-size: 1.6rem; }
-
-            .social-container {
-                position: static;
-                width: 90%;
-                margin: 1rem auto;
-                transform: none;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
+            /* Autentikasi Modal (tetap kecil) */
+            .auth-modal {
+                width: 90vw; /* Lebih lebar di ponsel tapi tetap kecil */
+                max-width: 300px; /* Batas maksimal lebih kecil */
+                padding: 1rem;
             }
-            .tiktok-container, .instagram-container { top: auto; left: auto; right: auto; }
-            .social-tab { height: 10rem; width: 100%; }
+            .auth-title { font-size: 1.4rem; margin-bottom: 0.8rem; }
+            .auth-input, .auth-submit { font-size: 0.9rem; padding: 0.5rem 1rem; }
 
-            #video-container, #video-middle-right, #video-bottom-right {
-                position: static;
-                width: 90%;
-                margin: 1rem auto;
-                border: none;
-            }
-
-            .btn {
-                position: static;
-                transform: none;
-                width: 90%;
-                margin: 1rem auto;
-                display: block;
-            }
-
+            /* Semua Fixed Elements jadi Static dan Tumpang Tindih */
+            /* Ini adalah bagian paling KRITIS untuk memastikan tidak ada yang tumpang tindih */
+            .social-container,
+            #video-container,
+            #video-middle-right,
+            #video-bottom-right,
+            .btn,
             footer {
-                position: static;
-                transform: none;
-                width: 100%;
-                padding: 0.5rem;
-                margin-top: 2rem;
+                position: static; /* Ubah ke static agar mengikuti alur dokumen */
+                transform: none; /* Hapus transformasi */
+                width: 95%; /* Ambil hampir seluruh lebar */
+                margin: 1rem auto; /* Beri margin atas/bawah dan pusatkan */
+                display: block; /* Buat elemen blok agar menempati baris baru */
+                clear: both; /* Pastikan tidak ada elemen float di sampingnya */
+                right: auto; /* Hapus properti right */
+                left: auto; /* Hapus properti left */
+                top: auto; /* Hapus properti top */
+                bottom: auto; /* Hapus properti bottom */
+            }
+
+            /* Penyesuaian khusus untuk beberapa elemen setelah menjadi static */
+            .social-container {
+                display: flex; /* Tetap pakai flexbox untuk tombol dan tab */
+                flex-direction: column; /* Susun vertikal */
+                align-items: center; /* Pusatkan item */
+                margin-top: 2rem; /* Beri jarak lebih setelah konten utama */
+            }
+            .social-tab {
+                height: 8rem; /* Tinggi tab sosial lebih kecil */
+                width: 100%; /* Pastikan tab mengisi lebar penuh */
+            }
+            #video-container, #video-middle-right, #video-bottom-right {
+                border: none; /* Hilangkan border video di ponsel agar lebih rapi */
+                height: auto; /* Pastikan tinggi auto untuk video */
+            }
+            .btn {
+                margin-top: 2rem; /* Jarak dari elemen di atasnya */
+                margin-bottom: 2rem; /* Jarak ke footer */
+            }
+            footer {
+                margin-top: 2rem; /* Jarak dari elemen di atasnya */
+                width: 100%; /* Lebar penuh */
+                padding: 1rem;
+                box-sizing: border-box;
+            }
+
+            /* Sesuaikan padding/margin konten utama saat semua fixed element jadi static */
+            #mainContent > div:not([id^="video-"], .social-container, .btn, footer) {
+                margin-top: 1rem; /* Tidak perlu terlalu banyak margin atas jika tidak ada fixed video */
+                margin-bottom: 1rem; /* Margin cukup */
+                padding: 1rem;
+                width: 95%; /* Lebar lebih besar di ponsel */
             }
         }
 
-        /* Smaller phones */
+        /* Smaller phones (max-width: 480px) */
         @media (max-width: 480px) {
-            .auth-modal { padding: 1rem; }
-            .auth-title { font-size: 1.4rem; }
-            .auth-input { padding: 0.6rem 0.8rem; font-size: 0.9rem; }
-            .auth-submit { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
-            .social-container { width: 95%; }
-            .social-tab { height: 8rem; }
-            #video-container, #video-middle-right, #video-bottom-right { width: 95%; }
-            .btn { width: 95%; font-size: 1rem; padding: 0.5rem 1rem; }
-            footer { font-size: 0.75rem; }
+            .auth-modal {
+                padding: 0.8rem;
+                width: 95vw; /* Lebih lebar di ponsel sangat kecil */
+                max-width: 280px;
+            }
+            .auth-title { font-size: 1.2rem; }
+            .auth-input, .auth-submit { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+
+            .social-container,
+            #video-container,
+            #video-middle-right,
+            #video-bottom-right,
+            .btn,
+            footer {
+                width: 98%; /* Sedikit lebih lebar lagi */
+                margin: 0.8rem auto;
+            }
+
+            .social-tab { height: 7rem; }
+            .btn { font-size: 0.95rem; }
+            footer { font-size: 0.7rem; }
+
+            #mainContent > div:not([id^="video-"], .social-container, .btn, footer) {
+                width: 98%;
+                padding: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="font-size-detector">A</div> <div class="auth-overlay" id="authOverlay">
+    <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <h1 class="auth-title">elvi :</h1>
             <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter the secret word..." autocomplete="off">
@@ -333,14 +350,21 @@
         </div>
     </div>
     <div id="mainContent" class="hidden">
-        <div id="video-middle-right">
-            <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/FDownloader.Net_13.mp4" type="video/mp4" />
-            </video>
+        <div style="padding: 1rem; margin-bottom: 1rem; text-align: center;">
+            <h1>Welcome</h1>
+            <p>Ini adalah bagian konten utama website Anda. Nikmati tampilannya di berbagai perangkat!</p>
+            <p>Jika Anda melihat ini di ponsel, Anda akan melihat video dan tautan sosial tersusun secara vertikal di bawah konten utama, tidak lagi melayang di samping layar.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
         </div>
+
         <div id="video-container">
             <video width="100%" autoplay loop muted>
                 <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="video/mp4" />
+            </video>
+        </div>
+        <div id="video-middle-right">
+            <video width="100%" autoplay loop muted>
+                <source src="Video Elvi/FDownloader.Net_13.mp4" type="video/mp4" />
             </video>
         </div>
         <div id="video-bottom-right">
@@ -348,6 +372,7 @@
                 <source src="Video Elvi/FDownloader.Net 4.mp4" type="video/mp4" />
             </video>
         </div>
+
         <div class="social-container tiktok-container">
             <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
             <div class="social-tab tiktok-tab">
@@ -360,13 +385,7 @@
                 <img src="Advanced Files Elvi/Instagram Elvi.png" class="tab-image" alt="Instagram Profile">
             </div>
         </div>
-        <div style="padding: 2rem; margin-bottom: 50px; text-align: center;">
-            <h1>Welcome</h1>
-            <p>Ini adalah bagian konten utama website Anda. Ukuran elemen ini akan menyesuaikan dengan pengaturan font HP Anda setelah Anda mengetuk layar!</p>
-            <p>Tambahkan lebih banyak teks atau elemen di sini untuk menguji scrollability dan responsivitas.</p>
-            <p>Contoh paragraf panjang untuk menguji bagaimana teks menyesuaikan dengan lebar layar. Di layar kecil, teks ini akan membungkus dengan rapi, sementara di layar besar, akan terlihat lebih lebar.</p>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-        </div>
+        
         <button class="btn" onclick="alert('Tombol berhasil diklik!')">KLIK AKU!</button>
 
         <footer>
@@ -375,17 +394,13 @@
         </footer>
     </div>
     <script>
-        let hasTapped = false; // Flag to check if a tap has occurred
-
         document.addEventListener('DOMContentLoaded', function() {
             const authOverlay = document.getElementById('authOverlay');
             const mainContent = document.getElementById('mainContent');
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
-            const root = document.documentElement; // HTML element for CSS variables
-            const fontSizeDetector = document.getElementById('font-size-detector');
 
-            secretAnswer.focus();
+            secretAnswer.focus(); // Fokus otomatis pada input saat halaman dimuat
 
             authSubmit.addEventListener('click', checkSecret);
             secretAnswer.addEventListener('keypress', function(e) {
@@ -428,15 +443,19 @@
                 } else {
                     secretAnswer.style.borderColor = '#ff0000';
                     secretAnswer.style.animation = 'shake 0.5s';
+                    // Mengarahkan ke halaman lain setelah sedikit delay jika salah
                     setTimeout(() => {
                         window.location.href = 'https://localezra.netlify.app';
                     }, 1000);
                 }
             }
 
+            // Menambahkan animasi fadeOut dan shake melalui JavaScript
             const style = document.createElement('style');
             style.textContent = `
-                @keyframes fadeOut { to { opacity: 0; } }
+                @keyframes fadeOut {
+                    to { opacity: 0; }
+                }
                 @keyframes shake {
                     0%, 100% { transform: translateX(0); }
                     20%, 60% { transform: translateX(-10px); }
@@ -444,65 +463,14 @@
                 }
             `;
             document.head.appendChild(style);
-
-            // --- Font size detection and scaling ---
-            function adjustContentScale() {
-                if (!hasTapped) { // Only adjust if not already adjusted by a tap
-                    // Measure the actual rendered size of 1rem on the page
-                    const actualRemSize = parseFloat(getComputedStyle(fontSizeDetector).width);
-                    const defaultRemSize = 16; // Our defined 1rem in :root is 16px
-
-                    let scaleFactor = 1;
-                    if (actualRemSize > defaultRemSize) {
-                        scaleFactor = defaultRemSize / actualRemSize;
-                        // To avoid making elements too small on very large user font settings
-                        // We might cap the minimum scale or adjust it differently
-                        if (scaleFactor < 0.7) { // Example: don't scale down more than 30%
-                            scaleFactor = 0.7;
-                        }
-                    } else if (actualRemSize < defaultRemSize) {
-                        // If user font is smaller, we might scale up slightly, or keep 1
-                        // For "HP emak-emak yang font nya besar", focus on scaling down.
-                        // You can adjust this logic based on desired behavior for smaller user fonts.
-                        scaleFactor = 1; // Default to 1 if user font is smaller or equal
-                    }
-
-                    // Apply the scale factor using a CSS variable
-                    root.style.setProperty('--dynamic-scale-factor', scaleFactor);
-                }
-            }
-
-            // Listen for the first touch/click event on the document
-            let firstInteraction = true;
-            document.addEventListener('touchstart', function handler() {
-                if (firstInteraction) {
-                    adjustContentScale();
-                    hasTapped = true;
-                    firstInteraction = false; // Remove listener after first interaction
-                    document.removeEventListener('touchstart', handler);
-                    document.removeEventListener('click', handler);
-                }
-            }, { once: true }); // Use { once: true } for modern browsers
-            document.addEventListener('click', function handler() {
-                if (firstInteraction) {
-                    adjustContentScale();
-                    hasTapped = true;
-                    firstInteraction = false; // Remove listener after first interaction
-                    document.removeEventListener('touchstart', handler);
-                    document.removeEventListener('click', handler);
-                }
-            }, { once: true });
-
-
-            // Initial check on load (though it won't apply the scale until tap)
-            // This is just to ensure the detector element is ready
-            adjustContentScale();
         });
 
+        // Fungsi untuk membuka link TikTok
         function openTikTok() {
             window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
         }
 
+        // Fungsi untuk membuka link Instagram
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
