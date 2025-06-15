@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
+<head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website ezraVelvi</title>
@@ -17,7 +17,7 @@
             background-position: center;
             color: yellow;
             text-shadow: 2px 2px 4px #000;
-        }
+        }           
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -30,18 +30,19 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-        }
+        }        
         .auth-modal {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid #ff69b4;
-            border-radius: 15px;
-            padding: 20px; /* Diperkecil dari 30px */
-            width: 80%; /* Diperkecil dari 90% */
-            max-width: 300px; /* Diperkecil dari 400px */
-            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
-            text-align: center;
-            animation: glow 2s infinite alternate;
-        }
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #ff69b4;
+    border-radius: 15px;
+    padding: 20px; /* Dulu 30px */
+    width: 90%;
+    max-width: 300px; /* Dulu 400px */
+    box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+    text-align: center;
+    animation: glow 2s infinite alternate;
+}
+        
         @keyframes glow {
             from {
                 box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
@@ -50,47 +51,49 @@
                 box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
                             0 0 40px rgba(255, 105, 180, 0.6);
             }
-        }
+        }        
         .auth-title {
-            color: #ff69b4;
-            font-size: 1.5rem; /* Diperkecil dari 1.8rem */
-            margin-bottom: 15px; /* Diperkecil dari 20px */
-            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
-        }
+    color: #ff69b4;
+    font-size: 1.5rem; /* Dulu 1.8rem */
+    margin-bottom: 15px; /* Dulu 20px */
+    text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+}
+        
         .auth-input {
-            width: calc(100% - 20px); /* Menyesuaikan dengan padding */
-            padding: 10px 10px; /* Diperkecil dari 12px 15px */
-            margin: 10px 0; /* Diperkecil dari 15px 0 */
-            border: 2px solid #ff69b4;
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem; /* Diperkecil dari 1rem */
-            outline: none;
-            transition: all 0.3s;
-        }
+    width: 100%;
+    padding: 10px 12px; /* Dulu 12px 15px */
+    margin: 10px 0; /* Dulu 15px 0 */
+    border: 2px solid #ff69b4;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem; /* Dulu 1rem */
+    outline: none;
+    transition: all 0.3s;
+}
+        
         .auth-input:focus {
             border-color: #00ff88;
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
+        }        
         .auth-submit {
-            background: linear-gradient(to right, #ff69b4, #ff1493);
-            color: white;
-            border: none;
-            padding: 10px 20px; /* Diperkecil dari 12px 25px */
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 0.9rem; /* Diperkecil dari 1rem */
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
+    background: linear-gradient(to right, #ff69b4, #ff1493);
+    color: white;
+    border: none;
+    padding: 10px 20px; /* Dulu 12px 25px */
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 0.9rem; /* Dulu 1rem */
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 5px; /* Dulu 10px */
+}        
         .auth-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-        }
+        }        
         .hidden {
             display: none !important;
         }
@@ -100,10 +103,10 @@
             transform: translateY(-50%);
             width: 160px;
             z-index: 100;
-        }
+        }        
         .tiktok-container {
             top: 40%;
-        }
+        }    
         .instagram-container {
             top: 65%;
         }
@@ -119,7 +122,7 @@
             margin-bottom: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
-        }
+        }      
         .tiktok-btn {
             border-color: #00a8ff;
             color: #00a8ff;
@@ -128,13 +131,13 @@
         .tiktok-btn:hover {
             background: #00a8ff;
             color: #0d1b2a;
-        }
+        }  
         .instagram-btn {
             border-color: #E1306C;
             color: #E1306C;
             box-shadow: 0 0 10px rgba(225, 48, 108, 0.5);
         }
-        .instagram-btn:hover {
+       .instagram-btn:hover {
             background: #E1306C;
             color: white;
         }
@@ -154,7 +157,7 @@
             text-align: center;
             padding: 0;
             box-sizing: border-box;
-        }
+        }    
         .tiktok-tab {
             border-color: #00a8ff;
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
@@ -185,7 +188,7 @@
             border: 3px solid red;
             border-radius: 10px;
             width: 175px;
-        }
+        } 
         #video-bottom-right {
             position: fixed;
             bottom: 0px;
@@ -254,13 +257,13 @@
         <div class="social-container tiktok-container">
             <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
             <div class="social-tab tiktok-tab">
-                <img src="Advanced Files Elvi/TikTok Elvi.png" style="max-width: 100%; height: auto;">
+                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        
             </div>
         </div>
         <div class="social-container instagram-container">
             <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
             <div class="social-tab instagram-tab">
-                <img src="Advanced Files Elvi/Instagram Elvi.png" style="max-width: 100%; height: auto;">
+                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        
             </div>
         </div>
         <div style="padding: 20px; margin-bottom: 50px;">
@@ -342,22 +345,18 @@
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
-        // Fungsi maintainAspectRatio tidak lagi diperlukan untuk autentikasi awal,
-        // tetapi saya biarkan jika Anda ingin menggunakannya untuk elemen lain.
         function maintainAspectRatio() {
             const content = document.querySelector('.verification-box');
-            if (content) { // Cek jika elemen ada
-                const aspectRatio = 16 / 9;
-                const windowRatio = window.innerWidth / window.innerHeight;
-                if (windowRatio > aspectRatio) {
-                    const scale = window.innerHeight / 900;
-                    content.style.transform = `scale(${scale})`;
-                } else {
-                    const scale = window.innerWidth / 1600;
-                    content.style.transform = `scale(${scale})`;
-                }
+            const aspectRatio = 16 / 9;
+            const windowRatio = window.innerWidth / window.innerHeight;
+            if (windowRatio > aspectRatio) {
+                const scale = window.innerHeight / 900;
+                content.style.transform = `scale(${scale})`;
+            } else {
+                const scale = window.innerWidth / 1600;
+                content.style.transform = `scale(${scale})`;
             }
-        }
+        } 
         window.addEventListener('resize', maintainAspectRatio);
         maintainAspectRatio();
     </script>
