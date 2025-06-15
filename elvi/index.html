@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
+<head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website ezraVelvi</title>
@@ -17,8 +17,8 @@
             background-position: center;
             color: yellow;
             text-shadow: 2px 2px 4px #000;
-            overflow: hidden; /* Prevent scroll during animations */
-        }
+            overflow: hidden; /* Prevent scrollbar during animation */
+        }           
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -31,7 +31,7 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-        }
+        }        
         .auth-modal {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid #ff69b4;
@@ -42,7 +42,7 @@
             box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
             text-align: center;
             animation: glow 2s infinite alternate;
-        }
+        }        
         @keyframes glow {
             from {
                 box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
@@ -51,13 +51,13 @@
                 box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
                             0 0 40px rgba(255, 105, 180, 0.6);
             }
-        }
+        }        
         .auth-title {
             color: #ff69b4;
             font-size: 1.8rem;
             margin-bottom: 20px;
             text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
-        }
+        }        
         .auth-input {
             width: 100%;
             padding: 12px 15px;
@@ -70,11 +70,11 @@
             font-size: 1rem;
             outline: none;
             transition: all 0.3s;
-        }
+        }        
         .auth-input:focus {
             border-color: #00ff88;
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
+        }        
         .auth-submit {
             background: linear-gradient(to right, #ff69b4, #ff1493);
             color: white;
@@ -87,11 +87,11 @@
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 10px;
-        }
+        }        
         .auth-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-        }
+        }        
         .hidden {
             display: none !important;
         }
@@ -101,10 +101,10 @@
             transform: translateY(-50%);
             width: 160px;
             z-index: 100;
-        }
+        }        
         .tiktok-container {
             top: 40%;
-        }
+        }    
         .instagram-container {
             top: 65%;
         }
@@ -120,7 +120,7 @@
             margin-bottom: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             transition: all 0.3s;
-        }
+        }      
         .tiktok-btn {
             border-color: #00a8ff;
             color: #00a8ff;
@@ -129,7 +129,7 @@
         .tiktok-btn:hover {
             background: #00a8ff;
             color: #0d1b2a;
-        }
+        }  
         .instagram-btn {
             border-color: #E1306C;
             color: #E1306C;
@@ -155,7 +155,7 @@
             text-align: center;
             padding: 0;
             box-sizing: border-box;
-        }
+        }    
         .tiktok-tab {
             border-color: #00a8ff;
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
@@ -186,7 +186,7 @@
             border: 3px solid red;
             border-radius: 10px;
             width: 175px;
-        }
+        } 
         #video-bottom-right {
             position: fixed;
             bottom: 0px;
@@ -198,7 +198,7 @@
         .btn {
             background: rgba(0, 123, 255, 0.7);
             position: fixed;
-            bottom: 30px; /* Changed from 30 to 30px for consistency */
+            bottom: 30px; /* Adjusted to avoid overlap with footer */
             color: green;
             border: none;
             padding: 10px 20px;
@@ -225,100 +225,113 @@
             text-align: center;
             padding: 5px;
             background: rgba(0, 0, 0, 0.5);
+            left: 50%; /* Center the footer */
+            transform: translateX(-50%); /* Center the footer */
         }
 
-        /* Fullscreen Toggle Button */
+        /* --- Fullscreen Toggle Button --- */
         #fullscreenToggle {
             position: fixed;
             top: 10px;
             left: 10px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            font-size: 0.8em;
-            padding: 5px 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #ff69b4;
             border-radius: 5px;
+            padding: 8px 12px;
+            color: #ff69b4;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
             cursor: pointer;
             z-index: 10000;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background 0.3s, border-color 0.3s, color 0.3s;
         }
 
         #fullscreenToggle:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 105, 180, 0.2);
+            border-color: #00ff88;
+            color: #00ff88;
         }
 
-        /* Blackhole effect and explosion */
+        /* --- Black Hole Animation --- */
         #blackhole-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            display: none;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            pointer-events: none; /* Allows clicks to pass through when not active */
-        }
-
-        .blackhole-center {
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background-color: black;
-            transition: all 0.5s ease-out;
-            transform-origin: center center;
-        }
-
-        .explosion {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
+            z-index: 99999;
             opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        #blackhole-svg {
+            width: 0px;
+            height: 0px;
             transform: scale(0);
+            transition: all 0.8s ease-in-out;
         }
 
-        /* Animation for content being sucked in */
-        @keyframes suck-in {
-            to {
-                transform: translate(calc(50vw - var(--center-x)), calc(50vh - var(--center-y))) scale(0);
-                opacity: 0;
-            }
+        #blackhole-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
-        /* Animation for explosion flash */
-        @keyframes explosion-flash {
-            0% {
-                opacity: 1;
-                transform: scale(0);
-                background-color: purple;
-            }
-            33% {
-                background-color: blue;
-            }
-            66% {
-                background-color: yellow;
-            }
-            100% {
-                opacity: 0;
-                transform: scale(3); /* Bigger flash */
-            }
+        #blackhole-svg.active {
+            width: 200px;
+            height: 200px;
+            transform: scale(1);
         }
 
-        /* Animation for content returning smaller */
-        @keyframes return-content {
-            from {
-                transform: translate(calc(50vw - var(--center-x)), calc(50vh - var(--center-y))) scale(0);
-                opacity: 0;
-            }
-            to {
-                transform: translate(var(--original-x), var(--original-y)) scale(0.8); /* 20% smaller */
-                opacity: 1;
-            }
+        @keyframes absorbContent {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
+
+        @keyframes screenShake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-5px, 5px); }
+            50% { transform: translate(5px, -5px); }
+            75% { transform: translate(-5px, -5px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes screenFlash {
+            0% { background-color: rgba(0,0,0,0); }
+            10% { background-color: rgba(128, 0, 128, 0.8); } /* Purple */
+            20% { background-color: rgba(0, 0, 255, 0.8); } /* Blue */
+            30% { background-color: rgba(255, 255, 0, 0.8); } /* Yellow */
+            40% { background-color: rgba(128, 0, 128, 0.8); }
+            50% { background-color: rgba(0, 0, 255, 0.8); }
+            60% { background-color: rgba(255, 255, 0, 0.8); }
+            70% { background-color: rgba(128, 0, 128, 0.8); }
+            80% { background-color: rgba(0, 0, 0, 0); } /* Fade out */
+            100% { background-color: rgba(0,0,0,0); }
+        }
+
+        .screen-shaking {
+            animation: screenShake 0.1s infinite;
+        }
+
+        .blackhole-explosion-effect {
+            animation: screenFlash 0.8s forwards; /* Increased duration for better effect */
+        }
+
+        /* Styles for content scaling */
+        .content-scaled {
+            transform: scale(0.8); /* 20% smaller */
+            transform-origin: center center;
+            transition: transform 0.5s ease-out;
+        }
+
+        /* Initial content state for animation */
+        .main-content-wrapper > * {
+            transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+            position: relative; /* Ensure elements are positioned for translation */
         }
     </style>
 </head>
@@ -331,48 +344,66 @@
         </div>
     </div>
 
-    <button id="fullscreenToggle">Toggle Fullscreen</button>
-
     <div id="blackhole-overlay">
-        <div class="blackhole-center"></div>
-        <div class="explosion" id="explosionFlash"></div>
+        <svg id="blackhole-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <filter id="blackhole-blur">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+                </filter>
+                <radialGradient id="blackhole-gradient" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#000" />
+                    <stop offset="70%" stop-color="#111" />
+                    <stop offset="100%" stop-color="#333" />
+                </radialGradient>
+            </defs>
+            <circle cx="100" cy="100" r="90" fill="url(#blackhole-gradient)" filter="url(#blackhole-blur)" />
+            <path d="M100 10a90 90 0 0 0 0 180 90 90 0 0 0 0-180Z" fill="black" opacity="0.8" />
+            <path d="M100 20a80 80 0 0 0 0 160 80 80 0 0 0 0-160Z" fill="#1a1a1a" opacity="0.7" />
+            <path d="M100 30a70 70 0 0 0 0 140 70 70 0 0 0 0-140Z" fill="#2a2a2a" opacity="0.6" />
+            <path d="M100 40a60 60 0 0 0 0 120 60 60 0 0 0 0-120Z" fill="#3a3a3a" opacity="0.5" />
+            <path d="M100 50a50 50 0 0 0 0 100 50 50 0 0 0 0-100Z" fill="#4a4a4a" opacity="0.4" />
+        </svg>
     </div>
 
+    <button id="fullscreenToggle">Fullscreen</button>
+
     <div id="mainContent" class="hidden">
-        <div id="video-middle-right" class="content-item">
-            <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/FDownloader.Net_13.mp4" type="audio/mpeg" />
-            </video>
-        </div>
-        <div id="video-container" class="content-item">
-            <video width="100%" autoplay loop muted>
-              <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
-            </video>
-        </div>
-        <div id="video-bottom-right" class="content-item">
-            <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/FDownloader.Net 4.mp4" type="audio/mpeg" />
-            </video>
-        </div>
-        <div class="social-container tiktok-container content-item">
-            <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
-            <div class="social-tab tiktok-tab">
-                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">
+        <div class="main-content-wrapper">
+            <div id="video-middle-right">
+                <video width="100%" autoplay loop muted>
+                    <source src="Video Elvi/FDownloader.Net_13.mp4" type="audio/mpeg" />
+                </video>
             </div>
-        </div>
-        <div class="social-container instagram-container content-item">
-            <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
-            <div class="social-tab instagram-tab">
-                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">
+            <div id="video-container">
+                <video width="100%" autoplay loop muted>
+                  <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
+                </video>
             </div>
+            <div id="video-bottom-right">
+                <video width="100%" autoplay loop muted>
+                    <source src="Video Elvi/FDownloader.Net 4.mp4" type="audio/mpeg" />
+                </video>
+            </div>
+            <div class="social-container tiktok-container">
+                <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
+                <div class="social-tab tiktok-tab">
+                    <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        
+                </div>
+            </div>
+            <div class="social-container instagram-container">
+                <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
+                <div class="social-tab instagram-tab">
+                    <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        
+                </div>
+            </div>
+            <div style="padding: 20px; margin-bottom: 50px;">
+                <h1>Welcome</h1>
+            </div>
+            <footer>
+                <img src="Advanced Files Elvi/October 25, 2024 at 8.11 AM.png">
+                <p> 2025 Dibuat dengan ❤ oleh kita</p>
+            </footer>
         </div>
-        <div style="padding: 20px; margin-bottom: 50px;" class="content-item">
-            <h1>Welcome</h1>
-        </div>
-        <footer class="content-item">
-            <img src="Advanced Files Elvi/October 25, 2024 at 8.11 AM.png">
-            <p> 2025 Dibuat dengan ❤ oleh kita</p>
-        </footer>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -382,12 +413,8 @@
             const authSubmit = document.getElementById('authSubmit');
             const fullscreenToggle = document.getElementById('fullscreenToggle');
             const blackholeOverlay = document.getElementById('blackhole-overlay');
-            const blackholeCenter = document.querySelector('.blackhole-center');
-            const explosionFlash = document.getElementById('explosionFlash');
-            const contentItems = document.querySelectorAll('.content-item'); // Select all main content elements
-
-            let isFullscreen = false;
-            let originalPositions = new Map(); // To store original positions and sizes
+            const blackholeSVG = document.getElementById('blackhole-svg');
+            const mainContentWrapper = document.querySelector('.main-content-wrapper');
 
             secretAnswer.focus();
             authSubmit.addEventListener('click', checkSecret);
@@ -450,186 +477,159 @@
             `;
             document.head.appendChild(style);
 
-            // Fullscreen Toggle Logic
-            fullscreenToggle.addEventListener('click', () => {
-                if (!isFullscreen) {
-                    enterFullscreenAnimation();
-                } else {
-                    exitFullscreenAnimation();
-                }
-            });
-
-            function enterFullscreenAnimation() {
-                // Store original positions
-                contentItems.forEach(item => {
-                    const rect = item.getBoundingClientRect();
-                    originalPositions.set(item, {
-                        top: rect.top,
-                        left: rect.left,
-                        width: rect.width,
-                        height: rect.height,
-                        transform: item.style.transform || ''
-                    });
-
-                    // Set initial state for animation
-                    item.style.position = 'fixed'; // Change to fixed to allow absolute positioning for animation
-                    item.style.top = `${rect.top}px`;
-                    item.style.left = `${rect.left}px`;
-                    item.style.margin = '0'; // Remove any conflicting margins
-                    item.style.transition = 'transform 1s ease-in-out, opacity 1s ease-in-out';
-                });
-
-                blackholeOverlay.style.display = 'flex';
-                blackholeCenter.style.width = '0';
-                blackholeCenter.style.height = '0';
-                blackholeCenter.style.opacity = '0';
-                explosionFlash.style.opacity = '0';
-                explosionFlash.style.transform = 'scale(0)';
-
-                // Animate content being sucked in
-                contentItems.forEach(item => {
-                    const rect = item.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-
-                    item.style.setProperty('--center-x', `${centerX}px`);
-                    item.style.setProperty('--center-y', `${centerY}px`);
-                    item.style.animation = 'suck-in 1s forwards';
-                });
-
-                setTimeout(() => {
-                    // Blackhole grows
-                    blackholeCenter.style.width = '200px';
-                    blackholeCenter.style.height = '200px';
-                    blackholeCenter.style.opacity = '1';
-                    blackholeCenter.style.transition = 'all 0.5s ease-out';
-
-                    setTimeout(() => {
-                        // Explosion flash
-                        explosionFlash.style.animation = 'explosion-flash 0.5s forwards';
-
-                        // Hide content for a moment
-                        contentItems.forEach(item => {
-                            item.style.opacity = '0';
-                        });
-
-                        setTimeout(() => {
-                            // Reset blackhole and explosion
-                            blackholeOverlay.style.display = 'none';
-                            blackholeCenter.style.width = '0';
-                            blackholeCenter.style.height = '0';
-                            blackholeCenter.style.opacity = '0';
-                            explosionFlash.style.animation = 'none'; // Clear animation
-                            explosionFlash.style.opacity = '0';
-                            explosionFlash.style.transform = 'scale(0)';
-
-                            // Animate content returning smaller
-                            contentItems.forEach(item => {
-                                const original = originalPositions.get(item);
-                                item.style.setProperty('--original-x', `${original.left}px`);
-                                item.style.setProperty('--original-y', `${original.top}px`);
-                                item.style.transform = original.transform; // Reset original transform before applying new scale
-                                item.style.animation = 'return-content 0.8s forwards'; // Animation to return smaller
-                                item.style.opacity = '1'; // Make visible again after explosion
-                            });
-
-                            isFullscreen = true;
-                            document.documentElement.requestFullscreen();
-                            document.body.style.overflow = 'auto'; // Re-enable scroll if needed
-                        }, 500); // After explosion
-                    }, 500); // Blackhole fully grown
-                }, 1000); // After content is sucked in
-            }
-
-            function exitFullscreenAnimation() {
-                // Similar "suck-in" animation, then explosion, then return to normal size
-                // For simplicity, let's just reverse the effect or create a new one.
-                // For this example, we'll use a simplified version for exiting fullscreen.
-
-                contentItems.forEach(item => {
-                    const rect = item.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-
-                    item.style.setProperty('--center-x', `${centerX}px`);
-                    item.style.setProperty('--center-y', `${centerY}px`);
-                    item.style.animation = 'suck-in 1s forwards';
-                });
-
-                blackholeOverlay.style.display = 'flex';
-                blackholeCenter.style.width = '0';
-                blackholeCenter.style.height = '0';
-                blackholeCenter.style.opacity = '0';
-                explosionFlash.style.opacity = '0';
-                explosionFlash.style.transform = 'scale(0)';
-
-                setTimeout(() => {
-                    blackholeCenter.style.width = '200px';
-                    blackholeCenter.style.height = '200px';
-                    blackholeCenter.style.opacity = '1';
-                    blackholeCenter.style.transition = 'all 0.5s ease-out';
-
-                    setTimeout(() => {
-                        explosionFlash.style.animation = 'explosion-flash 0.5s forwards';
-
-                        contentItems.forEach(item => {
-                            item.style.opacity = '0';
-                        });
-
-                        setTimeout(() => {
-                            blackholeOverlay.style.display = 'none';
-                            blackholeCenter.style.width = '0';
-                            blackholeCenter.style.height = '0';
-                            blackholeCenter.style.opacity = '0';
-                            explosionFlash.style.animation = 'none';
-                            explosionFlash.style.opacity = '0';
-                            explosionFlash.style.transform = 'scale(0)';
-
-                            contentItems.forEach(item => {
-                                const original = originalPositions.get(item);
-                                if (original) {
-                                    item.style.position = ''; // Revert to original positioning
-                                    item.style.top = '';
-                                    item.style.left = '';
-                                    item.style.margin = '';
-                                    item.style.animation = 'none'; // Clear animation
-                                    item.style.transform = original.transform; // Restore original transform
-                                    item.style.opacity = '1'; // Make visible again
-                                }
-                            });
-
-                            isFullscreen = false;
-                            document.exitFullscreen();
-                            document.body.style.overflow = 'auto'; // Re-enable scroll if needed
-                        }, 500);
-                    }, 500);
-                }, 1000);
-            }
-
             function openTikTok() {
                 window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
             }
             function openInstagram() {
                 window.location.href = "https://www.instagram.com/elvizill/";
             }
-            function maintainAspectRatio() {
-                // This function might need adjustment if you want the content itself to scale with the blackhole effect.
-                // For now, it maintains the original aspect ratio logic for the verification box if it were to exist.
-                // Since the prompt specifies not to disturb existing content positions, this function's scope
-                // is limited to its original purpose.
-                const content = document.querySelector('.verification-box'); // This element doesn't seem to exist in your HTML
-                if (content) {
-                    const aspectRatio = 16 / 9;
-                    const windowRatio = window.innerWidth / window.innerHeight;
-                    if (windowRatio > aspectRatio) {
-                        const scale = window.innerHeight / 900;
-                        content.style.transform = `scale(${scale})`;
-                    } else {
-                        const scale = window.innerWidth / 1600;
-                        content.style.transform = `scale(${scale})`;
-                    }
+
+            // --- Fullscreen/Unfullscreen Logic with Black Hole Effect ---
+            let isFullscreen = false;
+
+            fullscreenToggle.addEventListener('click', toggleFullscreen);
+
+            function toggleFullscreen() {
+                if (!isFullscreen) {
+                    enterFullscreenMode();
+                } else {
+                    exitFullscreenMode();
                 }
             }
+
+            function enterFullscreenMode() {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) { /* Firefox */
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
+                    document.documentElement.msRequestFullscreen();
+                }
+                fullscreenToggle.textContent = 'Unfullscreen';
+                isFullscreen = true;
+            }
+
+            function exitFullscreenMode() {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { /* Firefox */
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE/Edge */
+                    document.documentElement.msExitFullscreen();
+                }
+                fullscreenToggle.textContent = 'Fullscreen';
+                isFullscreen = false;
+            }
+
+            // Listen for fullscreen change to update button text
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    fullscreenToggle.textContent = 'Unfullscreen';
+                    isFullscreen = true;
+                } else {
+                    fullscreenToggle.textContent = 'Fullscreen';
+                    isFullscreen = false;
+                }
+            });
+
+            document.addEventListener('mozfullscreenchange', () => {
+                if (document.mozFullScreenElement) {
+                    fullscreenToggle.textContent = 'Unfullscreen';
+                    isFullscreen = true;
+                } else {
+                    fullscreenToggle.textContent = 'Fullscreen';
+                    isFullscreen = false;
+                }
+            });
+
+            document.addEventListener('webkitfullscreenchange', () => {
+                if (document.webkitFullscreenElement) {
+                    fullscreenToggle.textContent = 'Unfullscreen';
+                    isFullscreen = true;
+                } else {
+                    fullscreenToggle.textContent = 'Fullscreen';
+                    isFullscreen = false;
+                }
+            });
+
+            document.addEventListener('msfullscreenchange', () => {
+                if (document.msFullscreenElement) {
+                    fullscreenToggle.textContent = 'Unfullscreen';
+                    isFullscreen = true;
+                } else {
+                    fullscreenToggle.textContent = 'Fullscreen';
+                    isFullscreen = false;
+                }
+            });
+
+
+            fullscreenToggle.addEventListener('click', () => {
+                // Only trigger blackhole animation when entering fullscreen
+                if (!isFullscreen) { // If it's currently NOT fullscreen, meaning it's about to become fullscreen
+                    triggerBlackholeAnimation();
+                } else { // If it's currently fullscreen, meaning it's about to exit fullscreen
+                    // No specific animation for exiting fullscreen as per request, just revert.
+                    mainContentWrapper.classList.remove('content-scaled');
+                }
+            });
+
+            function triggerBlackholeAnimation() {
+                blackholeOverlay.classList.add('active');
+                blackholeSVG.classList.add('active');
+                document.body.classList.add('screen-shaking');
+
+                // Get all elements within mainContentWrapper (excluding the wrapper itself)
+                const contentElements = Array.from(mainContentWrapper.children);
+                const blackholeCenterX = window.innerWidth / 2;
+                const blackholeCenterY = window.innerHeight / 2;
+
+                contentElements.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const elCenterX = rect.left + rect.width / 2;
+                    const elCenterY = rect.top + rect.height / 2;
+
+                    const dx = blackholeCenterX - elCenterX;
+                    const dy = blackholeCenterY - elCenterY;
+
+                    el.style.setProperty('--dx', `${dx}px`);
+                    el.style.setProperty('--dy', `${dy}px`);
+                    el.style.animation = 'absorbContent 0.8s forwards';
+                });
+
+                setTimeout(() => {
+                    // Content fully absorbed, start explosion/flash
+                    document.body.classList.remove('screen-shaking');
+                    document.body.classList.add('blackhole-explosion-effect');
+
+                    // Reset content elements and apply scaled transformation
+                    contentElements.forEach(el => {
+                        el.style.animation = 'none'; // Remove absorb animation
+                        el.style.transform = ''; // Reset transform for scale
+                        el.style.opacity = '1'; // Make visible again
+                    });
+                    mainContentWrapper.classList.add('content-scaled');
+
+                    setTimeout(() => {
+                        // After explosion, hide blackhole overlay and remove flash effect
+                        blackholeOverlay.classList.remove('active');
+                        blackholeSVG.classList.remove('active');
+                        document.body.classList.remove('blackhole-explosion-effect');
+                        // Ensure all elements are back to scaled state and fixed
+                        // Their initial positioning (fixed) remains, only scale changes
+                    }, 800); // Duration of screenFlash animation
+                }, 800); // Duration of absorbContent animation
+            }
+
+            // Ensure content scales correctly on resize for consistency
+            function maintainAspectRatio() {
+                // This function might need adjustment if you want the scaling to *only* happen after blackhole.
+                // For now, it will apply to content, which is okay if it's already in the scaled state.
+                // If mainContentWrapper has .content-scaled, the scaling will be managed by that class.
+            } 
             window.addEventListener('resize', maintainAspectRatio);
             maintainAspectRatio();
         });
