@@ -210,6 +210,14 @@
         .profile-action-btn:hover {
             background-color: #007bb6;
         }
+        /* Warna khusus untuk tombol private content */
+        .profile-action-btn.private-btn {
+            background-color: var(--ig-pink);
+        }
+        .profile-action-btn.private-btn:hover {
+            background-color: #d12f71; /* Slightly darker pink on hover */
+        }
+
         .profile-stats {
             display: flex;
             list-style: none;
@@ -350,7 +358,7 @@
             opacity: 1;
         }
 
-        /* --- Highlight Story Modal --- */
+        /* --- Highlight Story Modal & Private Content Modal --- */
         .story-modal-overlay, .private-content-modal-overlay {
             position: fixed;
             top: 0;
@@ -373,9 +381,9 @@
         .story-content-wrapper, .private-content-wrapper {
             position: relative;
             width: 100%;
-            max-width: 400px;
+            max-width: 400px; /* Lebar standar untuk story di mobile */
             height: 100%;
-            max-height: 700px;
+            max-height: 700px; /* Tinggi standar untuk story di mobile */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -383,6 +391,14 @@
             border-radius: 10px;
             background-color: black;
         }
+        /* Penyesuaian ukuran modal agar tetap baik di layar kecil */
+        @media (max-width: 500px) {
+            .story-content-wrapper, .private-content-wrapper {
+                max-width: 95%;
+                max-height: 95%;
+            }
+        }
+
         .private-content-wrapper {
             max-width: 800px; /* Private content bisa lebih lebar */
             max-height: 80vh;
@@ -507,7 +523,6 @@
             height: auto;
             margin-bottom: 5px;
             opacity: 0.7;
-            /* filter: grayscale(100%); <-- DIHAPUS */
         }
         footer p {
             margin: 0;
@@ -523,8 +538,6 @@
             20%, 60% { transform: translateX(-10px); }
             40%, 80% { transform: translateX(10px); }
         }
-
-        /* Tidak ada media queries untuk mobile lagi, agar tampilan konsisten */
     </style>
 </head>
 <body>
@@ -628,7 +641,7 @@
             const profileName = document.getElementById('profileName');
             const profileBio = document.getElementById('profileBio');
             const profileHighlightsContainer = document.getElementById('profileHighlightsContainer');
-            const followButton = document.getElementById('followButton'); // New: Follow button
+            const followButton = document.getElementById('followButton');
 
             // Story Modal Elements
             const storyModalOverlay = document.getElementById('storyModalOverlay');
@@ -652,14 +665,14 @@
 
             let currentPrivateContents = [];
             let currentPrivateIndex = 0;
-            let hasAccessedPrivateContent = false; // Flag to check if private content has been accessed
+            let hasAccessedPrivateContent = false;
 
             // --- Data Konten Website Anda (DISINILAH SEMUA SUMBER ISI BERADA) ---
             const profileData = {
                 username: "elvi_velvi_007",
                 fullName: "Velvi Ezra",
                 bio: "Welcome to my world! 💖\nJust a girl trying to make a difference.\nLover of coding, cats, and coffee.",
-                profilePic: "Advanced files Elvi/Instagram Elvi.png", // Ganti dengan path foto profil Anda
+                profilePic: "Advanced files Elvi/Instagram Elvi.png",
                 stats: {
                     posts: 123,
                     followers: "4.5K",
@@ -674,20 +687,17 @@
                 { id: 'p4', type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' },
                 { id: 'p5', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4' },
                 { id: 'p6', type: 'image', src: 'Advanced files Elvi/Instagram Elvi.png' },
-                // Tambahkan lebih banyak postingan di sini
             ];
 
             const reelsData = [
                 { id: 'r1', type: 'video', src: 'Video Elvi/March 03, 2025 at 11.22 PM.mp4' },
                 { id: 'r2', type: 'video', src: 'Video Elvi/FDownloader.Net_13.mp4' },
                 { id: 'r3', type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4' },
-                // Tambahkan video reels lainnya di sini. Idealnya ini adalah video vertikal.
             ];
 
             const taggedData = [
                 { id: 't1', type: 'image', src: 'Advanced Files Elvi/TikTok Elvi.png' },
                 { id: 't2', type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' },
-                // Tambahkan gambar/video di mana akun Anda ditandai
             ];
 
             const highlightsData = [
@@ -729,8 +739,8 @@
             // New: Private Content Data
             const privateContentData = [
                 { type: 'text', content: "Hi! Ini adalah ruang spesial kita berdua. Terima kasih sudah sampai di sini! 💖" },
-                { type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' }, // Ganti dengan gambar private Anda
-                { type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4' }, // Ganti dengan video private Anda
+                { type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' },
+                { type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4' },
                 { type: 'text', content: "Semoga momen-momen ini bisa lebih dekatkan kita. Kamu adalah sosok yang paling istimewa. Selalu. ❤" },
             ];
 
@@ -748,7 +758,7 @@
                 profileBio.innerHTML = profileData.bio.replace(/\n/g, '<br>');
 
                 renderHighlights();
-                renderPosts(postsData); // Tampilkan posts secara default
+                renderPosts(postsData);
             }
 
             // 2. Render Postingan di Grid
@@ -764,7 +774,7 @@
                         video.autoplay = true;
                         video.loop = true;
                         video.muted = true;
-                        video.playsInline = true; // Penting untuk autoplay di iOS
+                        video.playsInline = true;
                         postItem.appendChild(video);
                     } else if (item.type === 'image') {
                         const img = document.createElement('img');
@@ -891,12 +901,11 @@
             // 6. Fungsionalitas Private Content Modal
             followButton.addEventListener('click', function() {
                 if (!hasAccessedPrivateContent) {
-                    // Logic to show an intermediate message or confirm before showing private content
                     const confirmation = confirm("Would you like to unlock exclusive content meant only for special people? (This action will change the 'Follow' button)");
                     if (confirmation) {
                         hasAccessedPrivateContent = true;
                         followButton.textContent = "View Private Content";
-                        followButton.style.backgroundColor = var(--ig-pink); /* Warna pink untuk private content */
+                        followButton.classList.add('private-btn'); // Add new class for styling
                         openPrivateContentModal();
                     }
                 } else {
@@ -983,7 +992,6 @@
 
                         loadProfileContent();
 
-                        // Memulai autoplay untuk video di grid setelah autentifikasi
                         mainContent.querySelectorAll('.post-item video').forEach(video => {
                             video.play().catch(error => {
                                 console.log("Video autoplay failed (muted ok):", error);
