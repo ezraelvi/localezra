@@ -35,9 +35,9 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid #ff69b4;
             border-radius: 15px;
-            padding: 20px; /* Diperkecil dari 30px */
-            width: 80%; /* Diperkecil dari 90% */
-            max-width: 350px; /* Diperkecil dari 400px */
+            padding: 20px;
+            width: 80%;
+            max-width: 350px;
             box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
             text-align: center;
             animation: glow 2s infinite alternate;
@@ -53,20 +53,20 @@
         }        
         .auth-title {
             color: #ff69b4;
-            font-size: 1.5rem; /* Diperkecil dari 1.8rem */
-            margin-bottom: 15px; /* Diperkecil dari 20px */
+            font-size: 1.5rem;
+            margin-bottom: 15px;
             text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
         }        
         .auth-input {
             width: 100%;
-            padding: 10px 12px; /* Diperkecil dari 12px 15px */
-            margin: 10px 0; /* Diperkecil dari 15px 0 */
+            padding: 10px 12px;
+            margin: 10px 0;
             border: 2px solid #ff69b4;
             border-radius: 8px;
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem; /* Diperkecil dari 1rem */
+            font-size: 0.9rem;
             outline: none;
             transition: all 0.3s;
         }        
@@ -78,11 +78,11 @@
             background: linear-gradient(to right, #ff69b4, #ff1493);
             color: white;
             border: none;
-            padding: 10px 20px; /* Diperkecil dari 12px 25px */
+            padding: 10px 20px;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 0.9rem; /* Diperkecil dari 1rem */
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 10px;
@@ -225,25 +225,22 @@
             padding: 5px;
             background: rgba(0, 0, 0, 0.5);
         }
-
-        /* Gaya untuk tombol Fullscreen/Unfullscreen */
         #fullscreenToggle {
             position: fixed;
             top: 10px;
             left: 10px;
             background-color: rgba(0, 0, 0, 0.7);
-            color: #00ff88; /* Warna hijau neon khas hacker */
+            color: #00ff88;
             border: 1px solid #00ff88;
             padding: 5px 10px;
             border-radius: 5px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem; /* Diperkecil agar sesuai dengan ukuran baru */
+            font-size: 0.9rem;
             cursor: pointer;
-            z-index: 10000; /* Pastikan di atas semua elemen lain */
+            z-index: 10000;
             transition: all 0.2s ease-in-out;
             box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
         }
-
         #fullscreenToggle:hover {
             background-color: #00ff88;
             color: #000;
@@ -304,7 +301,6 @@
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
             const fullscreenToggle = document.getElementById('fullscreenToggle');
-
             secretAnswer.focus();
             authSubmit.addEventListener('click', checkSecret);
             secretAnswer.addEventListener('keypress', function(e) {
@@ -312,25 +308,21 @@
                     checkSecret();
                 }
             });
-
-            // Fungsi untuk mengaktifkan/menonaktifkan mode fullscreen
             fullscreenToggle.addEventListener('click', function() {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().then(() => {
-                        fullscreenToggle.innerHTML = '&lt;/&gt;'; // Ganti ikon saat fullscreen
+                        fullscreenToggle.innerHTML = '&lt;/&gt;';
                     }).catch(err => {
                         console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
                     });
                 } else {
                     document.exitFullscreen().then(() => {
-                        fullscreenToggle.innerHTML = '&lt; &gt;'; // Ganti ikon saat keluar fullscreen
+                        fullscreenToggle.innerHTML = '&lt; &gt;';
                     }).catch(err => {
                         console.error(`Error attempting to disable fullscreen: ${err.message} (${err.name})`);
                     });
                 }
             });
-
-            // Perbarui ikon saat mode fullscreen berubah (misalnya, jika pengguna keluar dengan ESC)
             document.addEventListener('fullscreenchange', () => {
                 if (document.fullscreenElement) {
                     fullscreenToggle.innerHTML = '&lt;/&gt;';
@@ -338,7 +330,6 @@
                     fullscreenToggle.innerHTML = '&lt; &gt;';
                 }
             });
-
             function checkSecret() {
                 const answer = secretAnswer.value.trim().toLowerCase();
                 if (answer === 'love') {
