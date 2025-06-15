@@ -32,64 +32,69 @@
             z-index: 9999;
         }        
         .auth-modal {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid #ff69b4;
-            border-radius: 15px;
+            background: #000; /* Latar belakang hitam pekat */
+            border: 2px solid #00ff88; /* Border hijau neon */
+            border-radius: 8px; /* Sudut lebih tajam, ala terminal */
             padding: 20px;
             width: 80%;
             max-width: 350px;
-            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.7); /* Glow hijau */
             text-align: center;
-            animation: glow 2s infinite alternate;
+            animation: hackerGlow 2s infinite alternate; /* Animasi glow baru */
         }        
-        @keyframes glow {
+        @keyframes hackerGlow {
             from {
-                box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
             }
             to {
-                box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
-                            0 0 40px rgba(255, 105, 180, 0.6);
+                box-shadow: 0 0 25px rgba(0, 255, 136, 0.8),
+                            0 0 35px rgba(0, 255, 136, 0.6);
             }
         }        
         .auth-title {
-            color: #ff69b4;
+            color: #00ff88; /* Warna teks hijau neon */
             font-size: 1.5rem;
             margin-bottom: 15px;
-            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.7); /* Shadow hijau */
+            font-weight: bold;
         }        
         .auth-input {
             width: 100%;
             padding: 10px 12px;
             margin: 10px 0;
-            border: 2px solid #ff69b4;
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
+            border: 1px solid #00ff88; /* Border hijau neon */
+            border-radius: 3px; /* Sudut lebih tajam */
+            background-color: rgba(0, 0, 0, 0.8); /* Latar belakang transparan gelap */
+            color: #00ff88; /* Warna teks hijau neon */
             font-family: 'Courier New', monospace;
             font-size: 0.9rem;
             outline: none;
             transition: all 0.3s;
         }        
         .auth-input:focus {
-            border-color: #00ff88;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            border-color: #00ffcc; /* Border hijau lebih terang saat fokus */
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
         }        
         .auth-submit {
-            background: linear-gradient(to right, #ff69b4, #ff1493);
-            color: white;
-            border: none;
+            background: #008844; /* Warna hijau gelap untuk tombol */
+            color: #00ff88; /* Warna teks hijau neon */
+            border: 1px solid #00ff88; /* Border hijau neon */
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 5px; /* Sudut agak bulat */
             font-family: 'Courier New', monospace;
             font-weight: bold;
             font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 10px;
+            text-transform: uppercase; /* Teks kapital */
+            letter-spacing: 1px;
         }        
         .auth-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+            background: #00ff88; /* Warna hijau neon saat hover */
+            color: #000; /* Teks hitam saat hover */
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
+            transform: translateY(-1px);
         }        
         .hidden {
             display: none !important;
@@ -225,26 +230,34 @@
             padding: 5px;
             background: rgba(0, 0, 0, 0.5);
         }
+
+        /* Gaya untuk tombol Fullscreen/Unfullscreen */
         #fullscreenToggle {
             position: fixed;
             top: 10px;
             left: 10px;
             background-color: rgba(0, 0, 0, 0.7);
-            color: #00ff88;
+            color: #00ff88; /* Warna hijau neon khas hacker */
             border: 1px solid #00ff88;
             padding: 5px 10px;
             border-radius: 5px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+            font-size: 0.9rem; /* Diperkecil agar sesuai dengan ukuran baru */
             cursor: pointer;
-            z-index: 10000;
+            z-index: 10000; /* Pastikan di atas semua elemen lain */
             transition: all 0.2s ease-in-out;
             box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
         }
+
         #fullscreenToggle:hover {
             background-color: #00ff88;
             color: #000;
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+        /* Perubahan untuk teks perayaan */
+        .celebration-text {
+            color: #00ff88 !important; /* Hijau neon */
+            text-shadow: 0 0 15px #00ffcc !important; /* Shadow lebih kuat */
         }
     </style>
 </head>
@@ -253,10 +266,7 @@
 
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
-            <h1 class="auth-title">elvi :</h1>
-            <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter the secret word..." autocomplete="off">
-            <button class="auth-submit" id="authSubmit">Submit</button>
-        </div>
+            <h1 class="auth-title">ACCESS_REQUIRED:</h1> <input type="text" class="auth-input" id="secretAnswer" placeholder="ENTER_PASSKEY..." autocomplete="off"> <button class="auth-submit" id="authSubmit">EXECUTE</button> </div>
     </div>
     <div id="mainContent" class="hidden">
         <div id="video-middle-right">
@@ -301,6 +311,7 @@
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
             const fullscreenToggle = document.getElementById('fullscreenToggle');
+
             secretAnswer.focus();
             authSubmit.addEventListener('click', checkSecret);
             secretAnswer.addEventListener('keypress', function(e) {
@@ -308,21 +319,25 @@
                     checkSecret();
                 }
             });
+
+            // Fungsi untuk mengaktifkan/menonaktifkan mode fullscreen
             fullscreenToggle.addEventListener('click', function() {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().then(() => {
-                        fullscreenToggle.innerHTML = '&lt;/&gt;';
+                        fullscreenToggle.innerHTML = '&lt;/&gt;'; // Ganti ikon saat fullscreen
                     }).catch(err => {
                         console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
                     });
                 } else {
                     document.exitFullscreen().then(() => {
-                        fullscreenToggle.innerHTML = '&lt; &gt;';
+                        fullscreenToggle.innerHTML = '&lt; &gt;'; // Ganti ikon saat keluar fullscreen
                     }).catch(err => {
                         console.error(`Error attempting to disable fullscreen: ${err.message} (${err.name})`);
                     });
                 }
             });
+
+            // Perbarui ikon saat mode fullscreen berubah (misalnya, jika pengguna keluar dengan ESC)
             document.addEventListener('fullscreenchange', () => {
                 if (document.fullscreenElement) {
                     fullscreenToggle.innerHTML = '&lt;/&gt;';
@@ -330,6 +345,7 @@
                     fullscreenToggle.innerHTML = '&lt; &gt;';
                 }
             });
+
             function checkSecret() {
                 const answer = secretAnswer.value.trim().toLowerCase();
                 if (answer === 'love') {
@@ -343,15 +359,15 @@
                         celebration.style.left = '0';
                         celebration.style.width = '100%';
                         celebration.style.height = '100%';
-                        celebration.style.background = 'rgba(255, 105, 180, 0.2)';
+                        celebration.style.background = 'rgba(0, 0, 0, 0.8)'; /* Latar belakang lebih gelap */
                         celebration.style.zIndex = '9998';
                         celebration.style.display = 'flex';
                         celebration.style.justifyContent = 'center';
                         celebration.style.alignItems = 'center';
-                        celebration.style.fontSize = '3rem';
-                        celebration.style.color = '#ff69b4';
-                        celebration.style.textShadow = '0 0 10px white';
-                        celebration.innerHTML = '❤️ Selamat datang bidadari ❤️';
+                        celebration.style.fontSize = '2.5rem'; /* Ukuran font disesuaikan */
+                        celebration.style.fontFamily = "'Courier New', monospace"; /* Font ala hacker */
+                        celebration.classList.add('celebration-text'); /* Class baru untuk style */
+                        celebration.innerHTML = 'ACCESS GRANTED: WELCOME, QUEEN'; /* Teks ala hacker */
                         document.body.appendChild(celebration);
                         setTimeout(() => {
                             celebration.style.transition = 'opacity 1s';
