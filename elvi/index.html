@@ -50,6 +50,7 @@
             z-index: 9999;
         }        
         .auth-modal {
+            position: relative; /* Untuk posisi tombol close */
             background: linear-gradient(135deg, #0d1b2a, #1a2a3e);
             border: 2px solid var(--ig-green-neon);
             border-radius: 10px;
@@ -96,7 +97,6 @@
             border: none;
             padding: 12px 30px;
             border-radius: 5px;
-            font-family: 'Courier New', monospace;
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
@@ -116,8 +116,9 @@
         /* --- Main Content Container (Mirip Instagram) --- */
         #mainContent {
             /* Pastikan konten utama mengisi lebar yang wajar dan di tengah */
-            width: 100%; /* Default 100% */
-            max-width: 935px; /* Lebar maksimum khas Instagram */
+            /* Menggunakan vw untuk responsivitas yang lebih baik terhadap viewport */
+            width: 90vw; /* Mengambil 90% dari lebar viewport */
+            max-width: 935px; /* Batasan lebar maksimum seperti Instagram */
             margin: 20px auto; /* Auto margin untuk tengah, 20px atas-bawah */
             padding: 20px; /* Padding internal */
             box-sizing: border-box; /* Pastikan padding dihitung dalam width/max-width */
@@ -126,19 +127,20 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 1s ease-in;
-            flex-grow: 1;
+            flex-grow: 1; /* Penting agar mengisi ruang yang tersedia di flex container (body) */
         }
         #mainContent.show {
             opacity: 1;
         }
 
         /* Media query untuk layar lebih kecil */
-        @media (max-width: 960px) { /* Jika layar lebih kecil dari 960px (935px + 2*20px padding) */
+        /* Hapus media query sebelumnya karena vw sudah cukup responsif */
+        /* @media (max-width: 960px) { 
             #mainContent {
-                width: calc(100% - 40px); /* Kurangi 40px untuk padding kiri-kanan */
-                margin: 20px auto; /* Tetap di tengah */
+                width: calc(100% - 40px);
+                margin: 20px auto;
             }
-        }
+        } */
 
         /* --- Profile Header (Top Section) --- */
         .profile-header {
@@ -147,6 +149,9 @@
             padding-bottom: 20px;
             border-bottom: 1px solid var(--ig-border);
             margin-bottom: 20px;
+            flex-wrap: wrap; /* Agar elemen wrap di layar kecil */
+            justify-content: center; /* Pusatkan di layar kecil */
+            text-align: center; /* Pusatkan teks di layar kecil */
         }
         .profile-pic-container {
             width: 150px;
@@ -161,6 +166,28 @@
             justify-content: center;
             align-items: center;
         }
+        @media (max-width: 768px) {
+            .profile-pic-container {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            .profile-info {
+                width: 100%; /* Mengisi lebar penuh */
+            }
+            .profile-username-actions {
+                flex-direction: column; /* Tumpuk username dan tombol */
+                align-items: center;
+            }
+            .profile-username {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            .profile-stats {
+                justify-content: center; /* Pusatkan statistik */
+            }
+        }
+
+
         .profile-pic-container img {
             width: 100%;
             height: 100%;
@@ -308,6 +335,19 @@
             grid-template-columns: repeat(3, 1fr); /* Tetap 3 kolom di semua ukuran */
             gap: 28px;
         }
+        @media (max-width: 768px) {
+            .post-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 kolom di tablet */
+                gap: 15px;
+            }
+        }
+        @media (max-width: 480px) {
+            .post-grid {
+                grid-template-columns: repeat(1, 1fr); /* 1 kolom di mobile kecil */
+                gap: 10px;
+            }
+        }
+
         .post-item {
             position: relative;
             width: 100%;
@@ -399,6 +439,7 @@
         }
         /* Style untuk modal autentifikasi private content */
         .private-auth-modal {
+            position: relative; /* Untuk tombol close */
             background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
             border: 2px solid var(--ig-pink);
             border-radius: 10px;
@@ -451,6 +492,24 @@
             background: linear-gradient(to right, #d12f71, #ff3388);
         }
 
+        /* Tombol Close Umum untuk Modal */
+        .modal-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--ig-text-dark); /* Warna abu-abu yang lebih halus */
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 10002; /* Pastikan di atas modal content */
+            padding: 5px;
+            transition: color 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            color: var(--ig-text-light); /* Lebih terang saat hover */
+        }
+
 
         .story-content, .private-content-item {
             width: 100%;
@@ -487,7 +546,7 @@
             border-radius: 10px;
         }
 
-        .story-close-btn, .private-close-btn {
+        .story-close-btn, .private-close-btn { /* Style khusus untuk close story/private display modal, bisa diganti dengan .modal-close-btn */
             position: absolute;
             top: 15px;
             right: 15px;
@@ -648,7 +707,7 @@
 
     <div class="private-content-modal-overlay" id="privateAuthModalOverlay">
         <div class="private-auth-modal">
-            <h3 class="private-auth-title">Kode Kita Berdua</h3>
+            <button class="modal-close-btn" id="privateAuthCloseBtn">&times;</button> <h3 class="private-auth-title">Kode Kita Berdua</h3>
             <input type="password" class="private-auth-input" id="privateAuthAnswer" placeholder="Masukkan jawaban..." autocomplete="off">
             <button class="private-auth-submit" id="privateAuthSubmit">Masuk</button>
         </div>
@@ -705,6 +764,7 @@
             const privateAuthModalOverlay = document.getElementById('privateAuthModalOverlay');
             const privateAuthAnswer = document.getElementById('privateAuthAnswer');
             const privateAuthSubmit = document.getElementById('privateAuthSubmit');
+            const privateAuthCloseBtn = document.getElementById('privateAuthCloseBtn'); // Elemen baru untuk tombol close
 
             // Private Content Display Modal Elements
             const privateContentDisplayModalOverlay = document.getElementById('privateContentDisplayModalOverlay');
@@ -960,6 +1020,13 @@
                 }
             });
 
+            // Tambahkan event listener untuk tombol close pada modal autentifikasi private
+            privateAuthCloseBtn.addEventListener('click', () => {
+                privateAuthModalOverlay.classList.remove('active');
+                privateAuthAnswer.value = ''; // Bersihkan input saat ditutup
+            });
+
+
             privateAuthSubmit.addEventListener('click', checkPrivateAuth);
             privateAuthAnswer.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
@@ -978,10 +1045,10 @@
                     privateAuthAnswer.value = ''; // Bersihkan input
                     openPrivateContentDisplayModal(); // Tampilkan konten private
                 } else {
-                    privateAuthAnswer.style.borderColor = '#ff0000';
+                    privateAuthAnswer.style.borderColor = '#ff0000'; // Merah untuk salah
                     privateAuthAnswer.style.animation = 'shake 0.5s';
                     setTimeout(() => {
-                        privateAuthAnswer.style.borderColor = '#ff69b4'; // Kembalikan warna border
+                        privateAuthAnswer.style.borderColor = '#ff69b4'; // Kembali ke warna pink asalnya (nilai hex dari --ig-pink)
                         privateAuthAnswer.style.animation = 'none'; // Hapus animasi
                         alert("Jawaban salah! Silakan coba lagi.");
                     }, 500);
