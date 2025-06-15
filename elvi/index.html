@@ -10,14 +10,17 @@
             margin: 0;
             padding: 0;
             font-family: 'Courier New', monospace;
-            background: url('backgroundelvi.png');
+            background: url('backgroundelvi.png'); /* Pastikan path ini benar */
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center;
             color: yellow;
             text-shadow: 2px 2px 4px #000;
+            overflow-x: hidden; /* Mencegah scroll horizontal yang tidak diinginkan */
         }           
+
+        /* --- Autentifikasi Awal (Gaya Hacker & Responsif) --- */
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -25,87 +28,154 @@
             width: 100%;
             height: 100%;
             backdrop-filter: blur(10px);
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
         }        
         .auth-modal {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid #ff69b4;
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            background: linear-gradient(135deg, #0d1b2a, #1a2a3e); /* Latar belakang lebih gelap ala hacker */
+            border: 2px solid #00ff88; /* Border hijau neon */
+            border-radius: 10px; /* Sedikit lebih tajam */
+            padding: 25px; /* Disesuaikan */
+            width: 85%; /* Disesuaikan */
+            max-width: 380px; /* Disesuaikan */
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.7), 0 0 50px rgba(0, 255, 136, 0.3); /* Bayangan hijau neon */
             text-align: center;
-            animation: glow 2s infinite alternate;
+            animation: hackerGlow 1.5s infinite alternate; /* Animasi glow baru */
         }        
-        @keyframes glow {
+        @keyframes hackerGlow {
             from {
-                box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.7), 0 0 30px rgba(0, 255, 136, 0.3);
             }
             to {
-                box-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
-                            0 0 40px rgba(255, 105, 180, 0.6);
+                box-shadow: 0 0 25px rgba(0, 255, 136, 0.9), 0 0 60px rgba(0, 255, 136, 0.5);
             }
         }        
         .auth-title {
-            color: #ff69b4;
-            font-size: 1.8rem;
+            color: #00ff88; /* Warna hijau neon */
+            font-size: 1.7rem; /* Disesuaikan */
             margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8); /* Text shadow hijau neon */
+            text-transform: uppercase; /* ala hacker */
+            letter-spacing: 2px;
         }        
         .auth-input {
-            width: 100%;
-            padding: 12px 15px;
+            width: calc(100% - 24px); /* Sesuaikan padding agar pas */
+            padding: 12px;
             margin: 15px 0;
-            border: 2px solid #ff69b4;
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
+            border: 2px solid #00ff88; /* Border hijau neon */
+            border-radius: 5px; /* Sedikit lebih tajam */
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #00ff88; /* Teks hijau neon */
             font-family: 'Courier New', monospace;
             font-size: 1rem;
             outline: none;
             transition: all 0.3s;
+            box-sizing: border-box; /* Penting untuk lebar yang pas */
         }        
         .auth-input:focus {
-            border-color: #00ff88;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            border-color: #ff69b4; /* Fokus ke pink saat aktif */
+            box-shadow: 0 0 12px rgba(255, 105, 180, 0.7);
         }        
         .auth-submit {
-            background: linear-gradient(to right, #ff69b4, #ff1493);
-            color: white;
+            background: linear-gradient(to right, #00ff88, #00b36e); /* Gradient hijau */
+            color: #0d1b2a; /* Teks gelap */
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 12px 30px;
+            border-radius: 5px;
             font-family: 'Courier New', monospace;
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 10px;
+            margin-top: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
         }        
         .auth-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.8);
+            background: linear-gradient(to right, #00e676, #00995c); /* Gradient lebih terang saat hover */
         }        
         .hidden {
             display: none !important;
         }
+
+        /* --- Fullscreen Toggle Button --- */
+        #fullscreenToggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #00ff88; /* Warna hijau neon khas hacker */
+            border: 1px solid #00ff88;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 10000; 
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+        }
+        #fullscreenToggle:hover {
+            background-color: #00ff88;
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+
+        /* --- Kontainer Video (Bulat Sempurna & Responsif) --- */
+        .video-wrapper {
+            position: fixed;
+            width: 150px; /* Ukuran default untuk desktop */
+            height: 150px; /* Harus sama dengan width agar bulat */
+            border-radius: 50%; /* Membuat kontainer bulat */
+            overflow: hidden; /* Penting untuk memotong video agar bulat */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            z-index: 50; /* Di bawah social media */
+            border: 3px solid; /* Border asli video akan dipindah ke sini */
+        }
+        .video-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Memastikan video mengisi penuh dan terpotong bulat */
+        }
+
+        #video-top-right { /* Mengganti #video-container agar nama lebih jelas */
+            top: 10px;
+            right: 10px;
+            border-color: blue; /* Border untuk video ini */
+        }
+        #video-middle-right {
+            top: 50%; /* Tengah vertikal */
+            right: 10px;
+            transform: translateY(-50%);
+            border-color: red; /* Border untuk video ini */
+        } 
+        #video-bottom-right {
+            bottom: 10px;
+            right: 10px;
+            border-color: green; /* Border untuk video ini */
+        }
+
+        /* --- Kontainer Sosial Media (Responsif) --- */
         .social-container {
             position: fixed;
             left: 10px;
-            transform: translateY(-50%);
-            width: 160px;
+            width: 160px; /* Lebar tetap */
             z-index: 100;
         }        
         .tiktok-container {
             top: 40%;
+            transform: translateY(-50%); /* Posisi vertikal tengah */
         }    
         .instagram-container {
             top: 65%;
+            transform: translateY(-50%); /* Posisi vertikal tengah */
         }
         .check-btn {
             width: 100%;
@@ -140,7 +210,7 @@
         }
         .social-tab {
             width: 100%;
-            height: 200px;
+            height: 120px; /* Disesuaikan agar gambar proporsional di dalam tab */
             border: 2px solid;
             border-radius: 5px;
             overflow: hidden;
@@ -166,196 +236,377 @@
         .tab-image {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover; /* Memastikan gambar mengisi penuh tanpa distorsi */
         }
-        #video-container {
-            position: fixed;
-            top: 0px;
-            right: 10px;
-            width: 175px;
-            border: 3px solid blue;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        #video-middle-right {
-            position: fixed;
-            top: 47%;
-            right: 10px;
-            transform: translateY(-50%);
-            border: 3px solid red;
-            border-radius: 10px;
-            width: 175px;
-        } 
-        #video-bottom-right {
-            position: fixed;
-            bottom: 0px;
-            right: 10px;
-            width: 175px;
-            border: 3px solid green;
-            border-radius: 10px;
-        }
-        .btn {
-            background: rgba(0, 123, 255, 0.7);
-            position: fixed;
-            bottom: 30;
-            color: green;
-            border: none;
-            padding: 10px 20px;
-            margin: 7px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: 0.1s;
-            animation: pulse 3s infinite;
-        }
-        .btn:hover {
-            background: rgba(0, 86, 179, 0.9);
-            transform: scale(1.05);
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+
+        /* --- Footer --- */
         footer {
             position: fixed;
             bottom: 0;
-            width: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%; /* Lebar relatif terhadap parent */
+            max-width: 600px; /* Batasan lebar agar tidak terlalu besar di layar lebar */
             text-align: center;
-            padding: 5px;
-            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 5px; /* Padding sedikit lebih besar */
+            background: rgba(0, 0, 0, 0.6); /* Sedikit lebih gelap */
+            color: white; /* Warna teks footer */
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.85rem;
+            box-sizing: border-box; /* Termasuk padding dalam lebar */
+            z-index: 10; /* Pastikan di atas background */
+        }
+        footer img {
+            max-width: 80px; /* Ukuran gambar di footer */
+            height: auto;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        /* --- Konten Utama (Welcome) --- */
+        .main-content-section {
+            padding: 20px;
+            margin-bottom: 70px; /* Beri ruang untuk footer */
+            text-align: center;
+            color: #00ff88; /* Warna hijau neon untuk teks Welcome */
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+        }
+
+        /* --- Efek Setelah Autentifikasi Berhasil --- */
+        .celebration-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+            z-index: 9998;
+            background: rgba(0, 0, 0, 0.9); /* Lebih gelap untuk fokus efek */
+            backdrop-filter: blur(8px); /* Blur lebih kuat */
+        }
+
+        /* Efek Hacker */
+        .hacker-effect {
+            color: #00ff88;
+            font-size: 3.5rem;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.9);
+            animation: glitch 0.8s infinite alternate, fadeOut 0.5s forwards 1.5s;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.7);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0 0 15px rgba(0, 255, 136, 0.9), 5px -5px 0px rgba(255, 0, 0, 0.7), -5px 5px 0px rgba(0, 0, 255, 0.7); transform: translate(0); }
+            25% { text-shadow: 0 0 15px rgba(0, 255, 136, 0.9), -5px -5px 0px rgba(255, 0, 0, 0.7), 5px 5px 0px rgba(0, 0, 255, 0.7); transform: translate(2px, 2px); }
+            50% { text-shadow: 0 0 15px rgba(0, 255, 136, 0.9), 5px 5px 0px rgba(255, 0, 0, 0.7), -5px -5px 0px rgba(0, 0, 255, 0.7); transform: translate(-2px, -2px); }
+            75% { text-shadow: 0 0 15px rgba(0, 255, 136, 0.9), -5px 5px 0px rgba(255, 0, 0, 0.7), 5px -5px 0px rgba(0, 0, 255, 0.7); transform: translate(2px, -2px); }
+            100% { text-shadow: 0 0 15px rgba(0, 255, 136, 0.9), 0 0 0 rgba(255, 0, 0, 0), 0 0 0 rgba(0, 0, 255, 0); transform: translate(0); }
+        }
+
+        /* Efek Percintaan */
+        .love-effect {
+            color: #ff69b4;
+            font-size: 4rem;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.9);
+            animation: fadeInOut 2s ease-in-out forwards 0.5s; /* muncul dan hilang */
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Efek Campuran Powerfull */
+        .powerfull-effect {
+            color: #00ff88; /* Warna utama hijau */
+            font-size: 3rem;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8), 0 0 20px rgba(255, 105, 180, 0.8); /* Campuran hijau dan pink */
+            animation: pulseAndGlitch 3s infinite alternate, fadeIn 1s forwards;
+            background: rgba(13, 27, 42, 0.95); /* Latar belakang sangat gelap */
+            padding: 30px 40px;
+            border-radius: 15px;
+            border: 3px solid;
+            border-image: linear-gradient(to right, #00ff88, #ff69b4) 1; /* Border gradient */
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(255, 105, 180, 0.8);
+            letter-spacing: 3px;
+        }
+
+        @keyframes pulseAndGlitch {
+            0% { transform: scale(1); text-shadow: 0 0 10px #00ff88, 0 0 20px #ff69b4; }
+            25% { transform: scale(1.05); text-shadow: 0 0 15px #00ff88, 0 0 25px #ff69b4, 2px 2px 0px rgba(255,0,0,0.5); }
+            50% { transform: scale(1); text-shadow: 0 0 10px #00ff88, 0 0 20px #ff69b4, -2px -2px 0px rgba(0,0,255,0.5); }
+            75% { transform: scale(1.05); text-shadow: 0 0 15px #00ff88, 0 0 25px #ff69b4, 2px -2px 0px rgba(255,0,0,0.5); }
+            100% { transform: scale(1); text-shadow: 0 0 10px #00ff88, 0 0 20px #ff69b4; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* --- Animasi Umum --- */
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        /* --- Responsivitas untuk Layar Kecil (Mobile) --- */
+        @media (max-width: 768px) {
+            .auth-modal {
+                padding: 15px;
+                max-width: 300px;
+            }
+            .auth-title {
+                font-size: 1.4rem;
+            }
+            .auth-input, .auth-submit {
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+
+            .video-wrapper {
+                width: 100px; /* Ukuran video lebih kecil di mobile */
+                height: 100px;
+            }
+
+            #video-top-right,
+            #video-middle-right,
+            #video-bottom-right {
+                right: 5px; /* Sedikit ke dalam */
+                width: 100px;
+                height: 100px;
+            }
+
+            .social-container {
+                left: 5px; /* Sedikit ke dalam */
+                width: 120px; /* Lebar tombol sosial lebih kecil */
+            }
+            .check-btn {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .social-tab {
+                height: 80px; /* Tinggi tab sosial lebih kecil */
+            }
+
+            .hacker-effect {
+                font-size: 2rem;
+                padding: 15px 20px;
+            }
+            .love-effect {
+                font-size: 2.5rem;
+            }
+            .powerfull-effect {
+                font-size: 1.8rem;
+                padding: 20px 30px;
+            }
+            
+            footer {
+                width: 90%; /* Footer lebih lebar di mobile */
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 0.75rem;
+                padding: 8px;
+            }
+            footer img {
+                max-width: 60px;
+            }
         }
     </style>
 </head>
 <body>
+    <button id="fullscreenToggle" title="Toggle Fullscreen">&lt; &gt;</button>
+
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
-            <h1 class="auth-title">elvi :</h1>
-            <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter the secret word..." autocomplete="off">
-            <button class="auth-submit" id="authSubmit">Submit</button>
+            <h1 class="auth-title">System Auth Required</h1>
+            <input type="text" class="auth-input" id="secretAnswer" placeholder="Enter security key..." autocomplete="off">
+            <button class="auth-submit" id="authSubmit">Authenticate</button>
         </div>
     </div>
+
     <div id="mainContent" class="hidden">
-        <div id="video-middle-right">
-            <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/FDownloader.Net_13.mp4" type="audio/mpeg" />
+        <div id="video-top-right" class="video-wrapper">
+            <video autoplay loop muted>
+              <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="video/mp4" />
+              </video>
+        </div>
+        <div id="video-middle-right" class="video-wrapper">
+            <video autoplay loop muted>
+                <source src="Video Elvi/FDownloader.Net_13.mp4" type="video/mp4" />
             </video>
         </div>
-        <div id="video-container">
-            <video width="100%" autoplay loop muted>
-              <source src="Video Elvi/March 03, 2025 at 11.22 PM.mp4" type="audio/mpeg" />
+        <div id="video-bottom-right" class="video-wrapper">
+            <video autoplay loop muted>
+                <source src="Video Elvi/FDownloader.Net 4.mp4" type="video/mp4" />
             </video>
         </div>
-        <div id="video-bottom-right">
-            <video width="100%" autoplay loop muted>
-                <source src="Video Elvi/FDownloader.Net 4.mp4" type="audio/mpeg" />
-            </video>
-        </div>
+
         <div class="social-container tiktok-container">
-            <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK</button>
+            <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK TIKTOK</button>
             <div class="social-tab tiktok-tab">
-                <img src="Advanced Files Elvi/TikTok Elvi.png"  style="max-width: 100%; height: auto;">        
+                <img src="Advanced Files Elvi/TikTok Elvi.png" class="tab-image">        
             </div>
         </div>
         <div class="social-container instagram-container">
-            <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK</button>
+            <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK INSTAGRAM</button>
             <div class="social-tab instagram-tab">
-                <img src="Advanced Files Elvi/Instagram Elvi.png"  style="max-width: 100%; height: auto;">        
+                <img src="Advanced Files Elvi/Instagram Elvi.png" class="tab-image">        
             </div>
         </div>
-        <div style="padding: 20px; margin-bottom: 50px;">
+        
+        <div class="main-content-section">
             <h1>Welcome</h1>
         </div>
+
         <footer>
             <img src="Advanced Files Elvi/October 25, 2024 at 8.11 AM.png">
             <p> 2025 Dibuat dengan ❤ oleh kita</p>
         </footer>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const authOverlay = document.getElementById('authOverlay');
             const mainContent = document.getElementById('mainContent');
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
+            const fullscreenToggle = document.getElementById('fullscreenToggle');
+
+            // Set fokus ke input awal saat DOMContentLoaded
             secretAnswer.focus();
+
+            // Event listener untuk submit dan Enter key
             authSubmit.addEventListener('click', checkSecret);
             secretAnswer.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     checkSecret();
                 }
             });
+
+            // Fungsi Fullscreen Toggle
+            fullscreenToggle.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().then(() => {
+                        fullscreenToggle.innerHTML = '&lt;/&gt;'; // Ganti ikon saat fullscreen
+                    }).catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen().then(() => {
+                        fullscreenToggle.innerHTML = '&lt; &gt;'; // Ganti ikon saat keluar fullscreen
+                    }).catch(err => {
+                        console.error(`Error attempting to disable fullscreen: ${err.message} (${err.name})`);
+                    });
+                }
+            });
+
+            // Perbarui ikon saat mode fullscreen berubah (misalnya, jika pengguna keluar dengan ESC)
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    fullscreenToggle.innerHTML = '&lt;/&gt;';
+                } else {
+                    fullscreenToggle.innerHTML = '&lt; &gt;';
+                }
+            });
+
+            // Fungsi untuk memeriksa jawaban rahasia
             function checkSecret() {
                 const answer = secretAnswer.value.trim().toLowerCase();
                 if (answer === 'love') {
+                    // Animasi fadeOut untuk overlay autentifikasi
                     authOverlay.style.animation = 'fadeOut 0.5s forwards';
                     setTimeout(() => {
-                        authOverlay.remove();
-                        mainContent.classList.remove('hidden');
-                        const celebration = document.createElement('div');
-                        celebration.style.position = 'fixed';
-                        celebration.style.top = '0';
-                        celebration.style.left = '0';
-                        celebration.style.width = '100%';
-                        celebration.style.height = '100%';
-                        celebration.style.background = 'rgba(255, 105, 180, 0.2)';
-                        celebration.style.zIndex = '9998';
-                        celebration.style.display = 'flex';
-                        celebration.style.justifyContent = 'center';
-                        celebration.style.alignItems = 'center';
-                        celebration.style.fontSize = '3rem';
-                        celebration.style.color = '#ff69b4';
-                        celebration.style.textShadow = '0 0 10px white';
-                        celebration.innerHTML = '❤️ Selamat datang bidadari ❤️';
-                        document.body.appendChild(celebration);
+                        authOverlay.remove(); // Hapus overlay dari DOM
+
+                        // --- Efek Hacker (ACCESS GRANTED) ---
+                        const hackerCelebration = document.createElement('div');
+                        hackerCelebration.classList.add('celebration-message', 'hacker-effect');
+                        hackerCelebration.innerHTML = 'ACCESS GRANTED';
+                        document.body.appendChild(hackerCelebration);
+                        hackerCelebration.style.opacity = 1; // Tampilkan elemen
+
                         setTimeout(() => {
-                            celebration.style.transition = 'opacity 1s';
-                            celebration.style.opacity = '0';
+                            hackerCelebration.style.opacity = 0; // Mulai memudar
                             setTimeout(() => {
-                                celebration.remove();
-                            }, 1000);
-                        }, 1500);
-                    }, 500);
+                                hackerCelebration.remove();
+
+                                // --- Efek Percintaan (Selamat datang bidadari) ---
+                                const loveCelebration = document.createElement('div');
+                                loveCelebration.classList.add('celebration-message', 'love-effect');
+                                loveCelebration.innerHTML = '❤️ Selamat datang bidadari ❤️';
+                                document.body.appendChild(loveCelebration);
+                                loveCelebration.style.opacity = 1;
+
+                                setTimeout(() => {
+                                    loveCelebration.style.opacity = 0; // Mulai memudar
+                                    setTimeout(() => {
+                                        loveCelebration.remove();
+
+                                        // --- Efek Campuran Powerfull (Love Protocol Engaged) ---
+                                        const powerfullCelebration = document.createElement('div');
+                                        powerfullCelebration.classList.add('celebration-message', 'powerfull-effect');
+                                        powerfullCelebration.innerHTML = 'System Initialized: <br>Love Protocol Engaged';
+                                        document.body.appendChild(powerfullCelebration);
+                                        powerfullCelebration.style.opacity = 1;
+
+                                        setTimeout(() => {
+                                            powerfullCelebration.style.opacity = 0; // Mulai memudar
+                                            setTimeout(() => {
+                                                powerfullCelebration.remove();
+                                                mainContent.classList.remove('hidden'); // Tampilkan konten utama setelah semua efek selesai
+                                            }, 1000); // Waktu fadeOut powerfull effect
+                                        }, 3000); // Durasi powerfull effect
+                                    }, 1000); // Waktu fadeOut love effect
+                                }, 2000); // Durasi love effect
+                            }, 500); // Waktu fadeOut hacker effect
+                        }, 2000); // Durasi hacker effect
+                        
+                    }, 500); // Durasi fadeOut auth overlay
                 } else {
                     secretAnswer.style.borderColor = '#ff0000';
                     secretAnswer.style.animation = 'shake 0.5s';
                     setTimeout(() => {
-                        window.location.href = '/whoareyou.html';
+                        window.location.href = '/whoareyou.html'; // Redirect jika salah
                     }, 1000);
                 }
             }
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes fadeOut {
-                    to { opacity: 0; }
-                }
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    20%, 60% { transform: translateX(-10px); }
-                    40%, 80% { transform: translateX(10px); }
-                }
-            `;
-            document.head.appendChild(style);
         });
+
+        // Fungsi untuk membuka link sosial media
         function openTikTok() {
             window.location.href = "https://vm.tiktok.com/ZShf4GMgT/";
         }
         function openInstagram() {
             window.location.href = "https://www.instagram.com/elvizill/";
         }
+
+        // Fungsi maintainAspectRatio yang disesuaikan
+        // Dengan pendekatan fixed positioning dan media queries, fungsi ini mungkin tidak se-relevan sebelumnya,
+        // namun saya tinggalkan jika ada elemen lain yang memerlukannya.
         function maintainAspectRatio() {
-            const content = document.querySelector('.verification-box');
-            const aspectRatio = 16 / 9;
-            const windowRatio = window.innerWidth / window.innerHeight;
-            if (windowRatio > aspectRatio) {
-                const scale = window.innerHeight / 900;
-                content.style.transform = `scale(${scale})`;
-            } else {
-                const scale = window.innerWidth / 1600;
-                content.style.transform = `scale(${scale})`;
-            }
+            // Contoh: Jika ada elemen konten yang perlu diskalakan secara proporsional.
+            // Saat ini, dengan fixed positioning, elemen seperti video dan social media akan responsif
+            // melalui CSS @media query dan persentase width/height.
+            // Untuk kontainer utama "Welcome", padding-nya sudah relatif.
         } 
         window.addEventListener('resize', maintainAspectRatio);
-        maintainAspectRatio();
+        maintainAspectRatio(); // Panggil saat load pertama kali
     </script>
 </body>
 </html>
