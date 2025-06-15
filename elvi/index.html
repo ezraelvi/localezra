@@ -115,11 +115,12 @@
 
         /* --- Main Content Container (Mirip Instagram) --- */
         #mainContent {
-            /* Max-width bisa diatur lebih fleksibel atau dihapus jika ingin 100% */
-            max-width: 935px; /* Pertahankan lebar khas Instagram */
-            width: calc(100% - 40px); /* Mengisi lebih banyak lebar dengan padding */
-            margin: 20px auto;
-            padding: 20px;
+            /* Pastikan konten utama mengisi lebar yang wajar dan di tengah */
+            width: 100%; /* Default 100% */
+            max-width: 935px; /* Lebar maksimum khas Instagram */
+            margin: 20px auto; /* Auto margin untuk tengah, 20px atas-bawah */
+            padding: 20px; /* Padding internal */
+            box-sizing: border-box; /* Pastikan padding dihitung dalam width/max-width */
             background-color: var(--ig-bg-dark);
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
@@ -129,6 +130,14 @@
         }
         #mainContent.show {
             opacity: 1;
+        }
+
+        /* Media query untuk layar lebih kecil */
+        @media (max-width: 960px) { /* Jika layar lebih kecil dari 960px (935px + 2*20px padding) */
+            #mainContent {
+                width: calc(100% - 40px); /* Kurangi 40px untuk padding kiri-kanan */
+                margin: 20px auto; /* Tetap di tengah */
+            }
         }
 
         /* --- Profile Header (Top Section) --- */
@@ -388,6 +397,61 @@
             align-items: center;
             text-align: center;
         }
+        /* Style untuk modal autentifikasi private content */
+        .private-auth-modal {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 2px solid var(--ig-pink);
+            border-radius: 10px;
+            padding: 25px;
+            width: 85%;
+            max-width: 380px;
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.7), 0 0 50px rgba(255, 105, 180, 0.3);
+            text-align: center;
+            color: var(--ig-text-light);
+            z-index: 10001; /* Pastikan di atas overlay */
+        }
+        .private-auth-title {
+            color: var(--ig-pink);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .private-auth-input {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid var(--ig-pink);
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: var(--ig-pink);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        .private-auth-input:focus {
+            border-color: var(--ig-green-neon);
+            box-shadow: 0 0 12px rgba(0, 255, 136, 0.7);
+        }
+        .private-auth-submit {
+            background: linear-gradient(to right, var(--ig-pink), #d12f71);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+        }
+        .private-auth-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.8);
+            background: linear-gradient(to right, #d12f71, #ff3388);
+        }
+
+
         .story-content, .private-content-item {
             width: 100%;
             height: 100%;
@@ -582,7 +646,15 @@
         <button class="story-nav-btn next" id="storyNextBtn">&#10095;</button>
     </div>
 
-    <div class="private-content-modal-overlay" id="privateContentModalOverlay">
+    <div class="private-content-modal-overlay" id="privateAuthModalOverlay">
+        <div class="private-auth-modal">
+            <h3 class="private-auth-title">Kode Kita Berdua</h3>
+            <input type="password" class="private-auth-input" id="privateAuthAnswer" placeholder="Masukkan jawaban..." autocomplete="off">
+            <button class="private-auth-submit" id="privateAuthSubmit">Masuk</button>
+        </div>
+    </div>
+
+    <div class="private-content-modal-overlay" id="privateContentDisplayModalOverlay">
         <button class="private-close-btn" id="privateCloseBtn">&times;</button>
         <button class="private-nav-btn prev" id="privatePrevBtn">&#10094;</button>
         <div class="private-content-wrapper">
@@ -606,7 +678,6 @@
             const mainContent = document.getElementById('mainContent');
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
-            // const fullscreenToggle = document.getElementById('fullscreenToggle'); // Dihapus
             const profileTabsContainer = document.getElementById('profileTabs');
             const postGridContainer = document.getElementById('postGridContainer');
             const profilePic = document.getElementById('profilePic');
@@ -630,8 +701,13 @@
             let currentHighlightStories = [];
             let currentStoryIndex = 0;
 
-            // Private Content Modal Elements
-            const privateContentModalOverlay = document.getElementById('privateContentModalOverlay');
+            // Private Content Autentification Modal Elements
+            const privateAuthModalOverlay = document.getElementById('privateAuthModalOverlay');
+            const privateAuthAnswer = document.getElementById('privateAuthAnswer');
+            const privateAuthSubmit = document.getElementById('privateAuthSubmit');
+
+            // Private Content Display Modal Elements
+            const privateContentDisplayModalOverlay = document.getElementById('privateContentDisplayModalOverlay');
             const privateCloseBtn = document.getElementById('privateCloseBtn');
             const privatePrevBtn = document.getElementById('privatePrevBtn');
             const privateNextBtn = document.getElementById('privateNextBtn');
@@ -641,7 +717,7 @@
 
             let currentPrivateContents = [];
             let currentPrivateIndex = 0;
-            let hasAccessedPrivateContent = false;
+            let hasAccessedPrivateContent = false; // Flag to track if private content has been unlocked
 
             // --- Data Konten Website Anda (DISINILAH SEMUA SUMBER ISI BERADA) ---
             const profileData = {
@@ -874,26 +950,49 @@
                 }
             });
 
-            // 6. Fungsionalitas Private Content Modal
+            // 6. Fungsionalitas Private Content Autentikasi dan Tampilan
             followButton.addEventListener('click', function() {
                 if (!hasAccessedPrivateContent) {
-                    const confirmation = confirm("Would you like to unlock exclusive content meant only for special people? (This action will change the 'Follow' button)");
-                    if (confirmation) {
-                        hasAccessedPrivateContent = true;
-                        followButton.textContent = "View Private Content";
-                        followButton.classList.add('private-btn');
-                        openPrivateContentModal();
-                    }
+                    privateAuthModalOverlay.classList.add('active');
+                    privateAuthAnswer.focus(); // Fokus ke input saat modal muncul
                 } else {
-                    openPrivateContentModal();
+                    openPrivateContentDisplayModal();
                 }
             });
 
-            function openPrivateContentModal() {
+            privateAuthSubmit.addEventListener('click', checkPrivateAuth);
+            privateAuthAnswer.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkPrivateAuth();
+                }
+            });
+
+            function checkPrivateAuth() {
+                const answer = privateAuthAnswer.value.trim().toLowerCase();
+                if (answer === 'aku sayang kita') {
+                    hasAccessedPrivateContent = true;
+                    followButton.textContent = "View Private Content";
+                    followButton.classList.add('private-btn'); // Add new class for styling
+                    
+                    privateAuthModalOverlay.classList.remove('active'); // Sembunyikan modal autentifikasi
+                    privateAuthAnswer.value = ''; // Bersihkan input
+                    openPrivateContentDisplayModal(); // Tampilkan konten private
+                } else {
+                    privateAuthAnswer.style.borderColor = '#ff0000';
+                    privateAuthAnswer.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        privateAuthAnswer.style.borderColor = var(--ig-pink); // Kembalikan warna border
+                        privateAuthAnswer.style.animation = 'none'; // Hapus animasi
+                        alert("Jawaban salah! Silakan coba lagi.");
+                    }, 500);
+                }
+            }
+
+            function openPrivateContentDisplayModal() {
                 currentPrivateContents = privateContentData;
                 currentPrivateIndex = 0;
                 displayCurrentPrivateContent();
-                privateContentModalOverlay.classList.add('active');
+                privateContentDisplayModalOverlay.classList.add('active');
             }
 
             function displayCurrentPrivateContent() {
@@ -934,14 +1033,14 @@
             });
 
             privateCloseBtn.addEventListener('click', () => {
-                privateContentModalOverlay.classList.remove('active');
+                privateContentDisplayModalOverlay.classList.remove('active');
                 privateVideo.pause();
                 privateVideo.currentTime = 0;
             });
 
-            privateContentModalOverlay.addEventListener('click', (event) => {
-                if (event.target === privateContentModalOverlay) {
-                    privateContentModalOverlay.classList.remove('active');
+            privateContentDisplayModalOverlay.addEventListener('click', (event) => {
+                if (event.target === privateContentDisplayModalOverlay) {
+                    privateContentDisplayModalOverlay.classList.remove('active');
                     privateVideo.pause();
                     privateVideo.currentTime = 0;
                 }
