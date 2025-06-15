@@ -32,7 +32,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Mencegah scroll horizontal yang tidak diinginkan */
         }
 
         /* --- Autentifikasi Awal --- */
@@ -113,33 +113,11 @@
             display: none !important;
         }
 
-        /* --- Fullscreen Toggle Button (Posisi Instagram-friendly) --- */
-        #fullscreenToggle {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: var(--ig-green-neon);
-            border: 1px solid var(--ig-green-neon);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            cursor: pointer;
-            z-index: 10000;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
-        }
-        #fullscreenToggle:hover {
-            background-color: var(--ig-green-neon);
-            color: #000;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
-        }
-
         /* --- Main Content Container (Mirip Instagram) --- */
         #mainContent {
-            max-width: 935px;
-            width: 100%;
+            /* Max-width bisa diatur lebih fleksibel atau dihapus jika ingin 100% */
+            max-width: 935px; /* Pertahankan lebar khas Instagram */
+            width: calc(100% - 40px); /* Mengisi lebih banyak lebar dengan padding */
             margin: 20px auto;
             padding: 20px;
             background-color: var(--ig-bg-dark);
@@ -445,7 +423,6 @@
             border-radius: 10px;
         }
 
-
         .story-close-btn, .private-close-btn {
             position: absolute;
             top: 15px;
@@ -474,41 +451,52 @@
         .story-nav-btn.prev, .private-nav-btn.prev { left: 10px; }
         .story-nav-btn.next, .private-nav-btn.next { right: 10px; }
 
-        /* --- Social Media Containers (Sidebars) --- */
-        .social-container {
+        /* --- Social Media Buttons (Fixed Posisi Baru) --- */
+        .social-fixed-btn {
             position: fixed;
-            left: 10px;
-            width: 160px;
-            z-index: 100;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            z-index: 999; /* Di atas konten utama tapi di bawah modal */
         }
-        .tiktok-container { top: 40%; transform: translateY(-50%); }    
-        .instagram-container { top: 65%; transform: translateY(-50%); }
 
-        .check-btn {
-            width: 100%; padding: 8px; background: transparent; border: 2px solid;
-            font-family: 'Courier New', monospace; font-weight: bold; border-radius: 5px;
-            cursor: pointer; margin-bottom: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s;
-        }      
-        .tiktok-btn { border-color: #00a8ff; color: #00a8ff; box-shadow: 0 0 10px rgba(0, 168, 255, 0.5); }
-        .tiktok-btn:hover { background: #00a8ff; color: #0d1b2a; }  
-        .instagram-btn { border-color: #E1306C; color: #E1306C; box-shadow: 0 0 10px rgba(225, 48, 108, 0.5); }
-        .instagram-btn:hover { background: #E1306C; color: white; }
+        /* TikTok Button - Bottom Right */
+        .tiktok-fixed-btn {
+            bottom: 20px;
+            right: 20px;
+            background-color: #00a8ff; /* TikTok blue */
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.5);
+        }
+        .tiktok-fixed-btn:hover {
+            background-color: #0093e0;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 168, 255, 0.7);
+        }
 
-        .social-tab {
-            width: 100%; height: 120px; border: 2px solid; border-radius: 5px;
-            overflow: hidden; box-shadow: 0 0 15px rgba(0, 0, 0, 0.7); background: black;
-            display: flex; align-items: center; justify-content: center; color: white;
-            font-family: 'Courier New', monospace; text-align: center; padding: 0; box-sizing: border-box;
-        }    
-        .tiktok-tab { border-color: #00a8ff; box-shadow: 0 0 15px rgba(0, 168, 255, 0.7); }
-        .instagram-tab { border-color: #E1306C; box-shadow: 0 0 15px rgba(225, 48, 108, 0.7); }
-        .tab-image { width: 100%; height: 100%; object-fit: cover; }
-
+        /* Instagram Button - Bottom Left */
+        .instagram-fixed-btn {
+            bottom: 20px;
+            left: 20px;
+            background-image: linear-gradient(to right, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5); /* Instagram gradient */
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(214, 41, 118, 0.5);
+        }
+        .instagram-fixed-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(214, 41, 118, 0.7);
+        }
 
         /* --- Footer --- */
         footer {
-            width: 100%;
+            width: 100%; /* Memastikan lebar 100% */
             text-align: center;
             padding: 20px;
             background: var(--ig-bg-medium);
@@ -516,7 +504,7 @@
             border-top: 1px solid var(--ig-border);
             font-size: 0.8rem;
             margin-top: 40px;
-            box-sizing: border-box;
+            box-sizing: border-box; /* Pastikan padding dihitung dalam lebar */
         }
         footer img {
             max-width: 80px;
@@ -541,8 +529,6 @@
     </style>
 </head>
 <body>
-    <button id="fullscreenToggle" title="Toggle Fullscreen">&lt; &gt;</button>
-
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <h1 class="auth-title">System Auth Required</h1>
@@ -583,20 +569,10 @@
         <section class="post-grid" id="postGridContainer">
             </section>
 
-        <div class="social-container tiktok-container">
-            <button class="check-btn tiktok-btn" onclick="openTikTok()">CHECK TIKTOK</button>
-            <div class="social-tab tiktok-tab">
-                <img src="Advanced Files Elvi/TikTok Elvi.png" class="tab-image">        
-            </div>
-        </div>
-        <div class="social-container instagram-container">
-            <button class="check-btn instagram-btn" onclick="openInstagram()">CHECK INSTAGRAM</button>
-            <div class="social-tab instagram-tab">
-                <img src="Advanced Files Elvi/Instagram Elvi.png" class="tab-image">        
-            </div>
-        </div>
+    </div> <button class="social-fixed-btn tiktok-fixed-btn" onclick="openTikTok()">CHECK TIKTOK</button>
+    <button class="social-fixed-btn instagram-fixed-btn" onclick="openInstagram()">CHECK INSTAGRAM</button>
 
-    </div> <div class="story-modal-overlay" id="storyModalOverlay">
+    <div class="story-modal-overlay" id="storyModalOverlay">
         <button class="story-close-btn" id="storyCloseBtn">&times;</button>
         <button class="story-nav-btn prev" id="storyPrevBtn">&#10094;</button>
         <div class="story-content-wrapper">
@@ -630,7 +606,7 @@
             const mainContent = document.getElementById('mainContent');
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
-            const fullscreenToggle = document.getElementById('fullscreenToggle');
+            // const fullscreenToggle = document.getElementById('fullscreenToggle'); // Dihapus
             const profileTabsContainer = document.getElementById('profileTabs');
             const postGridContainer = document.getElementById('postGridContainer');
             const profilePic = document.getElementById('profilePic');
@@ -905,7 +881,7 @@
                     if (confirmation) {
                         hasAccessedPrivateContent = true;
                         followButton.textContent = "View Private Content";
-                        followButton.classList.add('private-btn'); // Add new class for styling
+                        followButton.classList.add('private-btn');
                         openPrivateContentModal();
                     }
                 } else {
@@ -1006,31 +982,6 @@
                     }, 1000);
                 }
             }
-
-            // --- Fungsionalitas Fullscreen Toggle ---
-            fullscreenToggle.addEventListener('click', function() {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().then(() => {
-                        fullscreenToggle.innerHTML = '&lt;/&gt;';
-                    }).catch(err => {
-                        console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
-                    });
-                } else {
-                    document.exitFullscreen().then(() => {
-                        fullscreenToggle.innerHTML = '&lt; &gt;';
-                    }).catch(err => {
-                        console.error(`Error attempting to disable fullscreen: ${err.message} (${err.name})`);
-                    });
-                }
-            });
-
-            document.addEventListener('fullscreenchange', () => {
-                if (document.fullscreenElement) {
-                    fullscreenToggle.innerHTML = '&lt;/&gt;';
-                } else {
-                    fullscreenToggle.innerHTML = '&lt; &gt;';
-                }
-            });
         });
 
         // --- Fungsi Untuk Membuka Link Sosial Media ---
