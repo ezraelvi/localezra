@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Content Site</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        #content { border: 1px solid #ccc; padding: 15px; min-height: 200px; }
+        button { margin-top: 10px; padding: 8px 15px; cursor: pointer; }
+        #imageUploadContainer { margin-top: 20px; border-top: 1px dashed #eee; padding-top: 20px; }
+        img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>My Editable Site</h1>
+
+    <div id="content" contenteditable="true">
+        </div>
+
+    <button id="saveContent">Save Content</button>
+
+    <div id="imageUploadContainer">
+        <h2>Upload Image</h2>
+        <input type="file" id="imageInput" accept="image/*">
+        <button id="uploadImage">Upload Image</button>
+        <p>Image URL: <span id="imageUrlDisplay"></span></p>
+        <img id="uploadedImagePreview" style="display:none;" alt="Uploaded Image Preview">
+    </div>
+
+    <script>
+        const contentDiv = document.getElementById('content');
+        const saveButton = document.getElementById('saveContent');
+        const imageInput = document.getElementById('imageInput');
+        const uploadImageButton = document.getElementById('uploadImage');
+        const imageUrlDisplay = document.getElementById('imageUrlDisplay');
+        const uploadedImagePreview = document.getElementById('uploadedImagePreview');
+
+        // Ganti dengan URL Worker Anda jika frontend dihosting terpisah
+        const API_BASE_URL = 'https://your-worker-name.your-worker-subdomain.workers.dev'; 
+
+        // Fungsi untuk memuat konten
+        async function loadContent() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/content/homepage`); // 'homepage' sebagai key default
+                if (response.ok) {
+                    const content = await response.text();
+                    contentDiv.innerHTML = content;
+                } else if (response.status === 404) {
+                    contentDiv.innerHTML = '<p>No content found. Start typing!</p>';
+                } else {
+                    console.error('Failed to load content:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error loading content:', error);
+            }
+        }
+
+        // Fungsi untuk menyimpan konten
+        saveButton.addEventListener('click', async () => {
+            const newContent = contentDiv.innerHTML;
+            try {
+                const response = await fetch(`${API_BASE_URL}/content/homepage`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'text/html',
+                    },
+                    body: newContent,
+                });
+                if (response.ok) {
+                    alert('Content saved successfully!');
+                } else {
+                    alert('Failed to save content.');
+                    console.error('Failed to save content:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error saving content:', error);
+                alert('Error saving content.');
+            }
+        });
+
+        // Fungsi untuk mengunggah gambar
+        uploadImageButton.addEventListener('click', async () => {
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please select an image to upload.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/upload-image`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const imageUrl = data.link;
+                    imageUrlDisplay.textContent = imageUrl;
+                    uploadedImagePreview.src = imageUrl;
+                    uploadedImagePreview.style.display = 'block';
+
+                    // Opsional: Langsung masukkan gambar ke dalam konten yang diedit
+                    const imgTag = `<img src="${imageUrl}" alt="Uploaded Image" style="max-width:100%;">`;
+                    contentDiv.innerHTML += imgTag; // Menambahkan ke akhir konten
+                    alert('Image uploaded and added to content!');
+                } else {
+                    const errorText = await response.text();
+                    alert(`Image upload failed: ${errorText}`);
+                    console.error('Image upload failed:', response.statusText, errorText);
+                }
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('Error uploading image.');
+            }
+        });
+
+        // Muat konten saat halaman dimuat
+        loadContent();
+    </script>
+</body>
+</html>
