@@ -177,13 +177,18 @@ class BioVAuth {
     }
     return response.json();
   }
-  handleSuccessfulLogin(token, email) {
-    localStorage.setItem(this.securityConfig.localStorageKey, token);
+  handleSuccessfulLogin(response, email) {
+    localStorage.setItem(this.securityConfig.localStorageKey, response.token);
+    if (response.specialUser) {
+        localStorage.setItem('isSpecialUser', 'true');
+    } else {
+        localStorage.removeItem('isSpecialUser');
+    }
     this.securitySystem.resetAttempts();
     this.updateStatus('Authentication successful!', 'success');
     this.elements.errorMsg.textContent = '';
-    window.location.href = 'vfiles';
-  }
+    window.location.href = 'dashboard.html';
+}
   handleFailedLogin(error) {
     this.securitySystem.recordFailedAttempt();
     const attemptsLeft = this.securitySystem.maxAttempts - this.securitySystem.attemptData.attempts;
