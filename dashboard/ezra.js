@@ -1,7 +1,6 @@
 class BioVAuth {
     constructor() {
         this.env = {
-            // URL Cloudflare Worker untuk autentikasi. Ini HARUS URL Worker Anda.
             WORKER_URL: 'https://auth-logs.ezvvel.workers.dev/',
             RATE_LIMIT_WINDOW: 5 * 60 * 1000,
             RATE_LIMIT_MAX_ATTEMPTS: 5
@@ -14,7 +13,7 @@ class BioVAuth {
             fallbackBtn: document.getElementById('fallbackBtn'),
             visitBtn: document.getElementById('visitBtn'),
             webauthnBtn: document.getElementById('webauthnBtn'),
-            emailInput: document.getElementById('email'), // Ini akan menjadi 'username'
+            emailInput: document.getElementById('email'),
             passwordInput: document.getElementById('password'),
             submitLogin: document.getElementById('submitLogin'),
             loadingSpinner: document.getElementById('loadingSpinner'),
@@ -27,7 +26,7 @@ class BioVAuth {
             maxAttempts: 3,
             blockDuration: 5 * 60 * 1000,
             cookieName: 'bioVAuthSecurity',
-            localStorageKey: 'isEzraLoggedIn' // Menggunakan kunci yang jelas untuk status login Ezra
+            localStorageKey: 'isEzraLoggedIn'
         };
         this.state = {
             webauthnSupported: false,
@@ -38,8 +37,7 @@ class BioVAuth {
 
     async init() {
         this.startBiometricAnimation();
-        // collectClientInfo ini adalah sumber error "failed to load ip", kita tangani lebih baik.
-        await this.collectClientInfo(); 
+        await this.collectClientInfo();
         this.setupEventListeners();
         this.checkWebAuthnSupport();
         this.securitySystem = new SecuritySystem(
@@ -52,12 +50,11 @@ class BioVAuth {
 
     async collectClientInfo() {
         try {
-            // Menggunakan timeout agar tidak stuck jika ipify.org lambat atau down
             const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), 3000); // Batas waktu 3 detik
+            const id = setTimeout(() => controller.abort(), 3000);
 
             const ipResponse = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
-            clearTimeout(id); // Bersihkan timeout jika berhasil
+            clearTimeout(id);
 
             if (!ipResponse.ok) {
                 throw new Error(`HTTP error! status: ${ipResponse.status}`);
@@ -73,10 +70,9 @@ class BioVAuth {
             };
             this.elements.ipDisplay.textContent = `IP: ${ipData.ip} • ${navigator.platform}`;
         } catch (error) {
-            console.error('Error collecting client info (likely network or timeout):', error);
-            // Ini akan memastikan ip dan userAgent tetap terisi bahkan jika ipify.org gagal
+            console.error('Error collecting client info:', error);
             this.state.clientInfo = {
-                ip: 'unavailable', // Ubah dari 'unknown' ke 'unavailable'
+                ip: 'unavailable',
                 userAgent: navigator.userAgent,
                 platform: navigator.platform || 'unknown',
                 timestamp: new Date().toISOString(),
@@ -107,9 +103,8 @@ class BioVAuth {
         this.elements.fallbackBtn.addEventListener('click', () => {
             this.showLoginForm();
         });
-        // Kita arahkan ke dashboard/index.html secara eksplisit
         this.elements.visitBtn.addEventListener('click', () => {
-            window.location.href = 'dashboard/index.html'; 
+            window.location.href = 'dashboard/index.html';
         });
         this.elements.webauthnBtn.addEventListener('click', () => {
             if (this.state.webauthnSupported) {
@@ -160,8 +155,7 @@ class BioVAuth {
             return;
         }
 
-        // Menggunakan 'username' alih-alih 'email' untuk konsistensi dengan Worker
-        const username = this.elements.emailInput.value.trim().toLowerCase(); 
+        const username = this.elements.emailInput.value.trim().toLowerCase();
         const password = this.elements.passwordInput.value;
 
         if (!username || !password) {
@@ -175,23 +169,20 @@ class BioVAuth {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Kirim clientInfo apa adanya, bahkan jika ada yang 'unavailable'
-                    'X-Client-IP': this.state.clientInfo.ip, 
+                    'X-Client-IP': this.state.clientInfo.ip,
                     'X-Client-UA': this.state.clientInfo.userAgent
                 },
                 body: JSON.stringify({ username: username, password: password })
             });
 
-            const responseData = await response.json(); // Selalu parse JSON, karena Worker akan selalu kirim JSON
+            const responseData = await response.json();
 
             if (responseData.authenticated) {
-                // Autentikasi sukses, kita simpan status dan redirect dari frontend
-                localStorage.setItem(this.securityConfig.localStorageKey, 'true'); // Simpan 'true' sebagai string
+                localStorage.setItem(this.securityConfig.localStorageKey, 'true');
                 this.securitySystem.resetAttempts();
                 this.updateStatus('Authentication successful! Redirecting...', 'success');
-                window.location.href = 'dashboard/index.html'; // Redirect di frontend
+                window.location.href = 'dashboard/index.html';
             } else {
-                // Autentikasi gagal
                 this.handleFailedLogin(responseData.message || 'Invalid username or password.');
             }
 
@@ -204,13 +195,12 @@ class BioVAuth {
         }
     }
 
-    // handleSuccessfulLogin diubah untuk mencerminkan redirect di frontend
-    handleSuccessfulLogin(token, username) { // 'token' dan 'email' tidak lagi relevan dari Worker sederhana ini
-        localStorage.setItem(this.securityConfig.localStorageKey, 'true'); // Set status login Ezra
+    handleSuccessfulLogin(token, username) {
+        localStorage.setItem(this.securityConfig.localStorageKey, 'true');
         this.securitySystem.resetAttempts();
         this.updateStatus('Authentication successful!', 'success');
         this.elements.errorMsg.textContent = '';
-        window.location.href = 'dashboard/index.html'; // Redirect ke dashboard
+        window.location.href = 'dashboard/index.html';
     }
 
     handleFailedLogin(errorMessage) {
@@ -287,7 +277,7 @@ class BioVAuth {
     togglePasswordVisibility() {
         const isPassword = this.elements.passwordInput.type === 'password';
         this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-        this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
+        this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️'; 
         this.elements.togglePassword.setAttribute('aria-label',
             isPassword ? 'Hide password' : 'Show password');
     }
@@ -373,7 +363,6 @@ class SecuritySystem {
         return Math.round((blockUntil - now) / 1000);
     }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     new BioVAuth();
 });
