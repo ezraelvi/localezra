@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elvi Ezra - Cosmic Nexus</title>
+    <title>Elvi Ezra - Cosmic Orb Nexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         /* General Body Styles */
@@ -12,28 +13,16 @@
             margin: 0;
             font-family: 'Space Mono', monospace; /* Futuristic font */
             color: #E0E0E0; /* Light gray for text on dark background */
-            overflow-x: auto; /* Allow horizontal scroll for fixed width */
-            overflow-y: auto;
+            overflow: hidden; /* Hide overflow from the massive orb */
             position: relative;
             min-height: 100vh;
             background-color: #050510; /* Very dark blue/black for deep space */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* --- Fixed Website Width --- */
-        #site-wrapper {
-            width: 1400px; /* Fixed width - adjust as desired for your "layar tancap" feel */
-            margin: 0 auto; /* Center the content */
-            position: relative;
-            z-index: 10; /* Ensure content is above background */
-            min-height: 100vh; /* Ensure wrapper takes full height */
-            background: rgba(0, 0, 15, 0.75); /* Semi-transparent dark overlay for content readability */
-            box-shadow: 0 0 80px rgba(0, 255, 255, 0.15); /* Subtle global glow */
-            padding-bottom: 50px; /* Space at the bottom */
-            border-left: 2px solid rgba(0, 255, 255, 0.1); /* Subtle border */
-            border-right: 2px solid rgba(0, 255, 255, 0.1);
-        }
-
-        /* --- Cosmic Background --- */
+        /* --- Cosmic Background (Fixed, behind everything) --- */
         .cosmic-background {
             position: fixed;
             top: 0;
@@ -41,15 +30,14 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            z-index: -1; /* Send to background */
+            z-index: -2; /* Deepest background */
             background-image: url('https://images.unsplash.com/photo-1462331940025-a60ad075c345?q=80&w=1920&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* Unsplash: Nebula/galaxy */
-            background-size: cover; /* Cover the entire viewport */
+            background-size: cover;
             background-position: center;
-            animation: cosmicZoom 60s linear infinite alternate; /* Slow zoom effect */
-            filter: brightness(0.8) contrast(1.2); /* Enhance colors */
+            animation: cosmicZoom 60s linear infinite alternate;
+            filter: brightness(0.7) contrast(1.3); /* Darken and enhance */
         }
 
-        /* Adding a secondary layer for more depth/subtle movement if needed */
         .cosmic-background::before {
             content: '';
             position: absolute;
@@ -57,16 +45,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('http://www.script-tutorials.com/demos/360/images/twinkling.png') repeat top center; /* Twinkling stars overlay */
-            background-size: 1000px 1000px; /* Smaller pattern to make stars visible */
+            background: url('http://www.script-tutorials.com/demos/360/images/twinkling.png') repeat top center;
+            background-size: 1000px 1000px;
             animation: moveStars 150s linear infinite;
-            opacity: 0.3; /* Subtle */
+            opacity: 0.4;
             z-index: 1; /* Above main background but below content */
         }
 
         @keyframes cosmicZoom {
             0% { background-size: 100% 100%; background-position: center center; }
-            100% { background-size: 120% 120%; background-position: 60% 60%; } /* Slight shift and zoom */
+            100% { background-size: 120% 120%; background-position: 60% 60%; }
         }
 
         @keyframes moveStars {
@@ -74,73 +62,145 @@
             to { background-position: -10000px 5000px; }
         }
 
-
-        /* --- Authentication Portal (More Antariksa) --- */
-        .auth-overlay {
-            background-color: rgba(0, 0, 0, 0.98); /* Almost black void */
-            backdrop-filter: blur(15px) brightness(0.7); /* Stronger blur, darken */
-            animation: portalEntrance 1.5s ease-out forwards;
+        /* --- Cosmic Orb Container --- */
+        #cosmicOrbContainer {
+            width: 300vh; /* Make it very wide and tall to create a massive circle */
+            height: 300vh;
+            border-radius: 50%; /* The key to the circle shape */
+            background: radial-gradient(circle at center, rgba(10, 0, 30, 0.9), rgba(0, 0, 10, 0.95)); /* Dark inner orb */
+            position: relative; /* For absolute positioning of content inside */
+            overflow: hidden; /* Crucial: Hides content outside the circle */
+            border: 10px solid #8A2BE2; /* Violet border for the orb */
+            box-shadow: 0 0 100px rgba(138, 43, 226, 0.7), inset 0 0 50px rgba(138, 43, 226, 0.4); /* Strong orb glow */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Content inside will stack vertically by default */
+            transition: transform 1s ease-out; /* For wormhole exit */
+            transform: scale(0.1); /* Start small for wormhole entry */
+            opacity: 0;
+            will-change: transform, opacity; /* Optimize animation */
+            z-index: 10;
         }
 
-        @keyframes portalEntrance {
-            0% { opacity: 0; backdrop-filter: blur(50px) brightness(0.5); transform: scale(0.8); }
-            100% { opacity: 1; backdrop-filter: blur(15px) brightness(0.7); transform: scale(1); }
+        /* --- Main Content inside Orb --- */
+        .main-content-orb {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Adjust vertical alignment if needed */
+            width: 80%; /* Width relative to the *visible* part of the orb */
+            max-width: 1200px; /* Max width for content readability */
+            height: 80%; /* Height relative to orb */
+            position: relative; /* For profile header absolute positioning */
+            padding: 50px; /* Inner padding for content */
+            box-sizing: border-box;
+            opacity: 0; /* Hidden until wormhole animation finishes */
+            transition: opacity 1s ease-in;
+            overflow-y: auto; /* Allow scrolling inside the content area if it gets too long */
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #8A2BE2 #0a001a; /* Firefox */
+        }
+
+        .main-content-orb::-webkit-scrollbar {
+            width: 8px;
+        }
+        .main-content-orb::-webkit-scrollbar-track {
+            background: #0a001a;
+            border-radius: 10px;
+        }
+        .main-content-orb::-webkit-scrollbar-thumb {
+            background-color: #8A2BE2;
+            border-radius: 10px;
+            border: 2px solid #0a001a;
+        }
+
+
+        /* --- Authentication Overlay & Wormhole --- */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.98);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease;
         }
 
         .auth-container {
-            background: radial-gradient(circle at center, #1e0033, #0a001a); /* Deep purple/black radial gradient */
-            border: 3px solid #6A0DAD; /* Deep purple outline */
-            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), inset 0 0 20px rgba(138, 43, 226, 0.3); /* Glowing portal effect */
-            animation: activatePortal 1s ease-out 1.2s forwards; /* Delayed activation animation */
+            background: radial-gradient(circle at center, #1e0033, #0a001a);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), inset 0 0 20px rgba(138, 43, 226, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            color: #E0E0E0;
+            position: relative;
+            transform: scale(0.9);
             opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        @keyframes activatePortal {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            animation: activatePortal 1s ease-out 0.2s forwards; /* So it appears after initial screen */
         }
 
         .auth-container h2 {
-            color: #E6E6FA; /* Lavender for title */
+            color: #E6E6FA;
             font-size: 2.8em;
-            text-shadow: 0 0 15px #DA70D6; /* Orchid glow */
+            text-shadow: 0 0 15px #DA70D6;
             letter-spacing: 2px;
             text-transform: uppercase;
+            margin-bottom: 20px;
         }
 
         .auth-container p {
             color: #C0C0C0;
             font-size: 1.1em;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        .auth-input {
-            border: 2px solid #8A2BE2; /* Blue violet border */
-            background-color: rgba(25, 0, 40, 0.7); /* Dark transparent purple */
-            color: #DDA0DD; /* Plum for text */
+        .auth-input, .private-auth-input {
+            width: calc(100% - 24px);
+            padding: 14px;
+            margin-bottom: 25px;
+            border: 2px solid #8A2BE2;
+            border-radius: 8px;
             font-size: 1.3em;
+            background-color: rgba(25, 0, 40, 0.7);
+            color: #DDA0DD;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
             text-align: center;
             box-shadow: inset 0 0 10px rgba(138, 43, 226, 0.3);
         }
 
-        .auth-input::placeholder {
-            color: #B068D8; /* Lighter purple placeholder */
+        .auth-input::placeholder, .private-auth-input::placeholder {
+            color: #B068D8;
         }
 
-        .auth-input:focus {
-            border-color: #DA70D6; /* Orchid on focus */
+        .auth-input:focus, .private-auth-input:focus {
+            border-color: #DA70D6;
             box-shadow: 0 0 15px rgba(218, 112, 214, 0.7), inset 0 0 10px rgba(218, 112, 214, 0.5);
+            outline: none;
         }
 
         .auth-button {
-            background: linear-gradient(90deg, #DA70D6, #8A2BE2); /* Orchid to Blue Violet */
+            background: linear-gradient(90deg, #DA70D6, #8A2BE2);
+            color: white;
             padding: 18px 40px;
+            border: none;
             border-radius: 40px;
+            cursor: pointer;
             font-size: 1.5em;
+            font-weight: bold;
+            text-transform: uppercase;
             letter-spacing: 2px;
-            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.5);
             transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.5);
+            width: 100%;
         }
 
         .auth-button:hover {
@@ -149,13 +209,87 @@
             box-shadow: 0 12px 30px rgba(138, 43, 226, 0.7);
         }
 
+
+        /* Wormhole Animation */
+        #wormholeOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0a001a, #000); /* Dark center */
+            z-index: 1001; /* Above auth overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none; /* Allow clicks to pass through when inactive */
+        }
+
+        .wormhole-effect {
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(0, 255, 255, 0.5) 0%, rgba(0, 191, 255, 0.3) 30%, rgba(138, 43, 226, 0.2) 60%, transparent 100%);
+            box-shadow: 0 0 80px rgba(0, 255, 255, 0.8);
+            animation: wormholePulse 1s infinite alternate, wormholeSpin 2s linear infinite;
+            filter: blur(10px);
+            position: absolute; /* Allow multiple layers */
+        }
+
+        .wormhole-effect::before, .wormhole-effect::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            animation: wormholeExpand 3s linear infinite;
+        }
+        .wormhole-effect::after {
+            animation-delay: 1.5s;
+        }
+
+        @keyframes wormholePulse {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.1); opacity: 0.8; }
+        }
+        @keyframes wormholeSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes wormholeExpand {
+            0% { transform: scale(0); opacity: 1; border-width: 2px; }
+            100% { transform: scale(2); opacity: 0; border-width: 0; }
+        }
+
+        .wormhole-active #wormholeOverlay {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .wormhole-active .auth-overlay {
+            opacity: 0; /* Hide auth modal during wormhole */
+            pointer-events: none;
+        }
+        .wormhole-active #cosmicOrbContainer {
+            animation: wormholeEntry 2s forwards cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Fast, bouncy entry */
+        }
+
+        @keyframes wormholeEntry {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; } /* Overshoot for bounce */
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         /* --- General Button Styles (Plasma/Chrome) --- */
         .astro-button {
             background: linear-gradient(45deg, #00C9FF, #92FE9D); /* Sky blue to light green plasma */
             color: #000; /* Black text on bright buttons */
             padding: 15px 30px;
             border: none;
-            border-radius: 50px; /* Super rounded, almost circular if small enough */
+            border-radius: 50px;
             cursor: pointer;
             font-size: 1.1em;
             font-weight: bold;
@@ -169,15 +303,16 @@
             align-items: center;
             justify-content: center;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            white-space: nowrap; /* Prevent wrapping */
         }
 
         .astro-button:hover {
-            background: linear-gradient(45deg, #92FE9D, #00C9FF); /* Invert for shimmer */
-            transform: scale(1.05); /* Slight enlarge */
+            background: linear-gradient(45deg, #92FE9D, #00C9FF);
+            transform: scale(1.05);
             box-shadow: 0 8px 30px rgba(0, 201, 255, 0.6);
         }
 
-        .astro-button::before { /* Chrome/plasma shimmer effect */
+        .astro-button::before {
             content: '';
             position: absolute;
             top: 0;
@@ -195,14 +330,15 @@
         .astro-button i {
             margin-right: 10px;
             font-size: 1.4em;
-            color: #000; /* Keep icon black */
+            color: #000;
         }
 
         /* Specific Button Styles */
         .follow-button {
-            background: linear-gradient(45deg, #FF6F61, #DE6262); /* Coral to Red for "Launch Mission" */
+            background: linear-gradient(45deg, #FF6F61, #DE6262);
             color: white;
             box-shadow: 0 5px 20px rgba(255, 111, 97, 0.5);
+            margin-left: 20px; /* Space from username */
         }
 
         .follow-button:hover {
@@ -211,7 +347,7 @@
         }
 
         .follow-button.private-btn {
-            background: linear-gradient(45deg, #4CAF50, #8BC34A); /* Green for "Enter Forbidden Zone" */
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
             box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5);
         }
 
@@ -221,7 +357,7 @@
         }
 
         .social-button {
-            background: linear-gradient(45deg, #BA68C8, #9C27B0); /* Light Purple to Deep Purple */
+            background: linear-gradient(45deg, #BA68C8, #9C27B0);
             color: white;
             box-shadow: 0 5px 20px rgba(186, 104, 200, 0.5);
         }
@@ -231,35 +367,19 @@
             box-shadow: 0 8px 30px rgba(186, 104, 200, 0.7);
         }
 
-        /* --- Main Content Visibility --- */
-        .hidden {
-            display: none !important;
-        }
-
-        .main-content {
-            padding-bottom: 20px;
-        }
-
-        .show {
-            animation: fadeInContent 1.2s forwards;
-        }
-
-        @keyframes fadeInContent {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- Profile Header (Cosmic Command Center) --- */
+        /* --- Main Content Layout inside Orb --- */
         .profile-header {
-            display: flex;
             flex-direction: column;
             align-items: center;
             padding: 40px 30px;
-            background: linear-gradient(180deg, rgba(10,0,30,0.9), rgba(10,0,30,0.5)); /* Darker, slightly purple gradient */
-            border-bottom: 2px solid rgba(138, 43, 226, 0.3); /* Purple separator */
-            border-top: 5px solid #8A2BE2; /* Top highlight */
+            background: linear-gradient(180deg, rgba(10,0,30,0.9), rgba(10,0,30,0.5));
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+            border-top: 5px solid #8A2BE2;
             position: relative;
-            z-index: 20;
+            width: 100%; /* Take full width of main-content-orb */
+            box-sizing: border-box;
+            border-radius: 15px; /* Rounded corners for header */
+            margin-bottom: 30px;
         }
 
         .profile-pic-container {
@@ -268,9 +388,9 @@
             border-radius: 50%;
             overflow: hidden;
             margin-bottom: 25px;
-            border: 5px solid #00FFFF; /* Bright Cyan ring */
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), inset 0 0 15px rgba(0, 255, 255, 0.5); /* Intense cyan glow */
-            background: radial-gradient(circle at center, #00FFFF, #00BFFF); /* Inner glow */
+            border: 5px solid #00FFFF;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), inset 0 0 15px rgba(0, 255, 255, 0.5);
+            background: radial-gradient(circle at center, #00FFFF, #00BFFF);
         }
 
         .profile-pic-container img {
@@ -284,46 +404,46 @@
             align-items: center;
             gap: 20px;
             margin-bottom: 20px;
-            flex-wrap: wrap; /* Allow wrapping on small screens */
+            flex-wrap: wrap;
             justify-content: center;
         }
 
         .username-section h1 {
             font-size: 2.5em;
-            color: #00FFFF; /* Cyan username */
+            color: #00FFFF;
             text-shadow: 0 0 12px rgba(0, 255, 255, 0.7);
             margin: 0;
-            font-weight: normal; /* Less bold, more techy */
+            font-weight: normal;
         }
 
         .profile-stats {
             display: flex;
-            justify-content: center; /* Center stats */
+            justify-content: center;
             width: 100%;
             max-width: 500px;
             margin-bottom: 30px;
-            gap: 40px; /* Wider gap between stats */
+            gap: 40px;
             flex-wrap: wrap;
         }
 
         .stat-item {
             text-align: center;
             color: #B0C4DE;
-            min-width: 90px; /* Ensure space for each stat */
+            min-width: 90px;
         }
 
         .stat-item .count {
             font-weight: bold;
             font-size: 1.6em;
-            color: #FFD700; /* Gold for counts */
+            color: #FFD700;
             text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
-            display: block; /* Make count block for better spacing */
+            display: block;
             margin-bottom: 5px;
         }
 
         .stat-item .label {
             font-size: 1em;
-            color: #87CEEB; /* Sky blue for labels */
+            color: #87CEEB;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -336,7 +456,7 @@
         .profile-info .full-name {
             font-size: 1.8em;
             margin-bottom: 10px;
-            color: #FFD700; /* Gold for full name */
+            color: #FFD700;
             font-weight: 500;
         }
 
@@ -352,20 +472,23 @@
             margin-top: 30px;
             display: flex;
             justify-content: center;
-            gap: 25px; /* Larger gap */
+            gap: 25px;
             flex-wrap: wrap;
         }
 
-        /* --- Profile Highlights (Orbital Navigation Array) --- */
+        /* --- Profile Highlights (Circular Arrangement) --- */
         .profile-highlights-container {
             display: flex;
-            justify-content: center; /* Center the highlights */
-            flex-wrap: wrap; /* Allow wrapping */
-            gap: 30px; /* Spacing between highlights */
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping if too many */
+            gap: 30px;
             padding: 30px 20px;
-            border-bottom: 2px solid rgba(138, 43, 226, 0.1);
-            background: rgba(10,5,20,0.8); /* Darker purple transparent */
-            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.05); /* Inner glow */
+            background: rgba(10,5,20,0.8);
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.05);
+            border-radius: 15px; /* Rounded corners for the container */
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 30px;
         }
 
         .highlight-item {
@@ -376,7 +499,7 @@
         }
 
         .highlight-item:hover {
-            transform: scale(1.1) rotate(5deg); /* Spin and grow on hover */
+            transform: scale(1.1) rotate(5deg);
             filter: brightness(1.3);
         }
 
@@ -384,18 +507,18 @@
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: radial-gradient(circle at center, #2a004a, #0d002a); /* Dark purple radial */
+            background: radial-gradient(circle at center, #2a004a, #0d002a);
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            border: 4px solid #DA70D6; /* Orchid outer ring */
+            border: 4px solid #DA70D6;
             box-shadow: 0 0 25px rgba(218, 112, 214, 0.6), inset 0 0 15px rgba(218, 112, 214, 0.3);
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .highlight-item:hover .highlight-circle {
-            border-color: #00FFFF; /* Cyan on hover */
+            border-color: #00FFFF;
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.8), inset 0 0 20px rgba(0, 255, 255, 0.5);
         }
 
@@ -413,7 +536,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 120px; /* Allow longer labels */
+            max-width: 120px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -421,21 +544,21 @@
         /* --- Profile Tabs (Galactic View Selector) --- */
         .profile-tabs {
             display: flex;
-            justify-content: center; /* Center the tabs */
-            border-bottom: 2px solid rgba(0, 255, 255, 0.2);
-            background: rgba(0,0,30,0.9); /* Darker, almost opaque for tabs */
-            position: sticky;
-            top: 0;
-            z-index: 900;
+            justify-content: center;
+            background: rgba(0,0,30,0.9);
             box-shadow: 0 8px 30px rgba(0, 255, 255, 0.15);
-            padding: 10px 0; /* More padding */
+            padding: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 15px; /* Rounded corners for the container */
+            margin-bottom: 30px;
         }
 
         .profile-tab-item {
-            flex: none; /* Do not stretch */
-            min-width: 180px; /* Minimum width for each tab */
+            flex: none;
+            min-width: 180px;
             text-align: center;
-            padding: 20px 30px; /* More generous padding */
+            padding: 20px 30px;
             cursor: pointer;
             color: #88AABB;
             font-weight: 600;
@@ -452,12 +575,12 @@
             color: #00FFFF;
             border-bottom: 4px solid #00FFFF;
             background-color: rgba(0, 255, 255, 0.1);
-            transform: translateY(-2px); /* Slight lift */
+            transform: translateY(-2px);
             box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.2);
         }
 
         .profile-tab-item:hover:not(.active) {
-            color: #FFD700; /* Gold on hover for inactive */
+            color: #FFD700;
             background-color: rgba(255, 215, 0, 0.05);
             transform: translateY(-1px);
         }
@@ -470,12 +593,13 @@
         /* --- Post Grid (Cosmic Portfolios) --- */
         .post-grid-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Always 3 columns for fixed width */
-            gap: 15px; /* More space between cosmic views */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             padding: 25px;
-            background: rgba(0,0,10,0.6); /* Slightly transparent dark background */
-            border-radius: 10px;
-            margin: 25px; /* Margin from the edges of #site-wrapper */
+            background: rgba(0,0,10,0.6);
+            border-radius: 15px;
+            width: 100%;
+            box-sizing: border-box;
             box-shadow: inset 0 0 30px rgba(0, 255, 255, 0.05);
         }
 
@@ -484,7 +608,7 @@
             padding-bottom: 100%;
             position: relative;
             overflow: hidden;
-            background-color: #1a1a2e; /* Darker placeholder */
+            background-color: #1a1a2e;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 255, 255, 0.1);
             transition: transform 0.4s ease, box-shadow 0.4s ease;
@@ -492,7 +616,7 @@
         }
 
         .post-item:hover {
-            transform: scale(1.05) rotate(2deg); /* Dynamic hover */
+            transform: scale(1.05) rotate(2deg);
             box-shadow: 0 10px 35px rgba(0, 255, 255, 0.4), inset 0 0 20px rgba(0, 255, 255, 0.3);
             border-color: #00FFFF;
         }
@@ -506,32 +630,53 @@
             height: 100%;
             object-fit: cover;
             display: block;
-            border-radius: 10px; /* Slightly smaller than parent for inner border effect */
+            border-radius: 10px;
         }
 
         /* --- Story/Private Content Modals (Interstellar Viewscreen) --- */
         .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(0, 0, 0, 0.98);
             backdrop-filter: blur(12px) brightness(0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
         .modal-content {
-            background: linear-gradient(160deg, #0f1f3a, #050f1a); /* Deep blue gradient */
-            border: 4px solid #00FFFF; /* Cyan border */
-            box-shadow: 0 0 45px rgba(0, 255, 255, 0.8), inset 0 0 25px rgba(0, 255, 255, 0.4); /* Stronger glow */
-            height: 90vh; /* Taller modal */
-            max-width: 700px; /* Wider modal */
-            border-radius: 20px; /* More rounded */
+            background: linear-gradient(160deg, #0f1f3a, #050f1a);
+            border: 4px solid #00FFFF;
+            box-shadow: 0 0 45px rgba(0, 255, 255, 0.8), inset 0 0 25px rgba(0, 255, 255, 0.4);
+            height: 90vh;
+            max-width: 700px;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px; /* Inner padding */
+            padding: 20px;
+            box-sizing: border-box;
+            transform: scale(0.9);
+            opacity: 0;
+            animation: enterFromSpace 0.6s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .story-media, .private-media {
-            max-width: 95%; /* Slightly smaller for padding */
-            max-height: calc(100% - 120px); /* Leave space for buttons/padding */
+            max-width: 95%;
+            max-height: calc(100% - 120px);
             object-fit: contain;
             display: block;
             margin: auto;
@@ -540,7 +685,10 @@
         }
 
         .story-navigation-btn, .private-navigation-btn {
-            background: rgba(0, 191, 255, 0.7); /* Semi-transparent deep sky blue */
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 191, 255, 0.7);
             color: white;
             border: none;
             padding: 15px 22px;
@@ -554,23 +702,40 @@
 
         .story-navigation-btn:hover, .private-navigation-btn:hover {
             background-color: rgba(0, 191, 255, 1);
-            transform: scale(1.15) rotate(10deg); /* Spin slightly */
+            transform: scale(1.15) rotate(10deg);
             box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
         }
 
+        #storyPrevBtn, #privatePrevBtn {
+            left: 10px;
+        }
+        #storyNextBtn, #privateNextBtn {
+            right: 10px;
+        }
+
         .modal-close-btn {
-            background: rgba(255, 69, 0, 0.7); /* Orange-red for close */
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 69, 0, 0.7);
             color: white;
+            border: none;
             border-radius: 50%;
             width: 40px;
             height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-size: 1.8em;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s ease, transform 0.3s ease;
             box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
         }
 
         .modal-close-btn:hover {
             background-color: rgba(255, 69, 0, 1);
-            transform: rotate(180deg) scale(1.1); /* Full spin on close hover */
+            transform: rotate(180deg) scale(1.1);
         }
 
         .private-text-content {
@@ -579,16 +744,18 @@
             line-height: 1.8;
             color: #C0C0C0;
             text-align: center;
-            background: rgba(0, 0, 20, 0.7); /* Darker, slightly blue for text background */
+            background: rgba(0, 0, 20, 0.7);
             border-radius: 15px;
             margin: 30px;
             white-space: pre-wrap;
             word-wrap: break-word;
             box-shadow: inset 0 0 25px rgba(0, 255, 255, 0.1);
             border: 1px solid rgba(0, 255, 255, 0.2);
+            max-height: calc(100% - 60px); /* Adjust max-height to fit within modal */
+            overflow-y: auto; /* Allow text to scroll if too long */
         }
 
-        /* --- Animations --- */
+        /* --- Animations (re-used and new) --- */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
@@ -600,76 +767,108 @@
             to { opacity: 0; }
         }
 
-        /* --- Responsive Considerations for Fixed Width (Min-width only) --- */
-        /* Note: For fixed width, responsiveness mostly means scrolling on smaller screens.
-           These media queries would adjust layout WITHIN the fixed width,
-           or provide slight adjustments if the fixed width is too large for *some* mobile screens (unlikely). */
-        @media (max-width: 1450px) { /* Adjust if content overflows slightly before scroll */
-             #site-wrapper {
-                width: 100%; /* Go full width if screen is smaller than intended fixed width */
-                min-width: 900px; /* But keep a minimum for good layout */
-                box-shadow: none; /* Remove side shadows when full width */
-                border-left: none;
-                border-right: none;
-             }
-             .post-grid-container {
-                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Adapt grid */
-             }
+        @keyframes activatePortal { /* For initial auth container */
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @media (max-width: 900px) { /* Mobile small adjustments */
-            #site-wrapper {
-                min-width: unset; /* Allow it to shrink below 900px on very small screens */
+        /* --- Responsive Considerations --- */
+        @media (max-width: 1200px) {
+            .main-content-orb {
+                width: 90%;
             }
             .profile-header {
-                padding: 30px 15px;
-            }
-            .profile-pic-container {
-                width: 120px;
-                height: 120px;
-                border-width: 4px;
+                padding: 30px 20px;
             }
             .username-section h1 {
-                font-size: 2em;
+                font-size: 2.2em;
             }
-            .astro-button {
-                padding: 12px 25px;
+            .profile-stats {
+                gap: 30px;
+            }
+            .post-grid-container {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller desktop */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content-orb {
+                width: 95%;
+                padding: 20px;
+            }
+            .profile-pic-container {
+                width: 100px;
+                height: 100px;
+                border-width: 3px;
+            }
+            .username-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .username-section h1 {
+                font-size: 1.8em;
+            }
+            .follow-button {
+                margin-left: 0; /* Remove margin for stacked layout */
+                width: 90%; /* Make button wider */
+            }
+            .profile-stats {
+                gap: 20px;
+                flex-wrap: wrap; /* Ensure wrapping */
+            }
+            .stat-item .count {
+                font-size: 1.4em;
+            }
+            .stat-item .label {
+                font-size: 0.9em;
+            }
+            .profile-info .full-name {
+                font-size: 1.5em;
+            }
+            .profile-info .bio {
                 font-size: 1em;
             }
             .social-links {
-                gap: 15px;
+                flex-direction: column;
+                gap: 10px;
+                width: 90%;
+            }
+            .social-button {
+                width: 100%;
             }
             .highlight-circle {
-                width: 80px;
-                height: 80px;
+                width: 70px;
+                height: 70px;
                 border-width: 3px;
             }
             .highlight-circle img {
-                width: 70px;
-                height: 70px;
+                width: 60px;
+                height: 60px;
+            }
+            .highlight-label {
+                font-size: 0.85em;
+            }
+            .profile-tabs {
+                flex-wrap: wrap;
+                justify-content: space-around;
             }
             .profile-tab-item {
-                padding: 15px 15px;
-                font-size: 0.9em;
                 min-width: unset;
+                padding: 15px 10px;
+                font-size: 0.9em;
             }
             .post-grid-container {
-                grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller screens */
-                gap: 10px;
+                grid-template-columns: repeat(1, 1fr); /* Single column on mobile */
                 padding: 15px;
-                margin: 15px;
             }
             .modal-content {
-                max-width: 90%;
+                width: 95%;
+                max-width: 95%;
+                padding: 15px;
             }
-            .story-navigation-btn, .private-navigation-btn {
-                padding: 10px 15px;
-                font-size: 1.4em;
-            }
-            .modal-close-btn {
-                width: 35px;
-                height: 35px;
-                font-size: 1.5em;
+            .private-text-content {
+                font-size: 1.1em;
+                padding: 20px;
             }
         }
     </style>
@@ -678,17 +877,21 @@
 
     <div class="cosmic-background"></div>
 
-    <div id="site-wrapper">
-        <div id="authOverlay" class="auth-overlay active">
-            <div class="auth-container">
-                <h2>Galactic Portal</h2>
-                <p>Enter the Cosmic Frequency to initiate access:</p>
-                <input type="password" id="secretAnswer" class="auth-input" placeholder="Cosmic Key...">
-                <button id="authSubmit" class="auth-button">Activate Stargates</button>
-            </div>
-        </div>
+    <div id="wormholeOverlay">
+        <div class="wormhole-effect"></div>
+    </div>
 
-        <div id="mainContent" class="main-content hidden">
+    <div id="authOverlay" class="auth-overlay active">
+        <div class="auth-container">
+            <h2>Cosmic Access Initiated</h2>
+            <p>Enter the Stardust Key to proceed:</p>
+            <input type="password" id="secretAnswer" class="auth-input" placeholder="Stardust Key...">
+            <button id="authSubmit" class="auth-button">Unlock Galaxy</button>
+        </div>
+    </div>
+
+    <div id="cosmicOrbContainer">
+        <div id="mainContent" class="main-content-orb">
             <header class="profile-header">
                 <div class="profile-pic-container">
                     <img id="profilePic" src="" alt="Profile Picture">
@@ -741,42 +944,44 @@
             <div id="postGridContainer" class="post-grid-container">
                 </div>
         </div>
-
-        <div id="storyModalOverlay" class="modal-overlay">
-            <div class="modal-content">
-                <button id="storyCloseBtn" class="modal-close-btn">&times;</button>
-                <img id="storyImage" class="story-media hidden" src="" alt="Story Image">
-                <video id="storyVideo" class="story-media hidden" src="" controls muted playsinline></video>
-                <button id="storyPrevBtn" class="story-navigation-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
-                <button id="storyNextBtn" class="story-navigation-btn next-btn"><i class="fas fa-chevron-right"></i></button>
-            </div>
+    </div> <div id="storyModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="storyCloseBtn" class="modal-close-btn">&times;</button>
+            <img id="storyImage" class="story-media hidden" src="" alt="Story Image">
+            <video id="storyVideo" class="story-media hidden" src="" controls muted playsinline></video>
+            <button id="storyPrevBtn" class="story-navigation-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+            <button id="storyNextBtn" class="story-navigation-btn next-btn"><i class="fas fa-chevron-right"></i></button>
         </div>
+    </div>
 
-        <div id="privateAuthModalOverlay" class="modal-overlay">
-            <div class="auth-container modal-content">
-                <button id="privateAuthCloseBtn" class="modal-close-btn">&times;</button>
-                <h3>Restricted Zone Access</h3>
-                <p>Enter the secret quantum password:</p>
-                <input type="password" id="privateAuthAnswer" class="auth-input private-auth-input" placeholder="Quantum Key...">
-                <button id="privateAuthSubmit" class="astro-button private-auth-submit-btn">Unlock Gate</button>
-            </div>
+    <div id="privateAuthModalOverlay" class="modal-overlay">
+        <div class="auth-container modal-content">
+            <button id="privateAuthCloseBtn" class="modal-close-btn">&times;</button>
+            <h3>Restricted Zone Access</h3>
+            <p>Enter the secret quantum password:</p>
+            <input type="password" id="privateAuthAnswer" class="auth-input private-auth-input" placeholder="Quantum Key...">
+            <button id="privateAuthSubmit" class="astro-button private-auth-submit-btn">Unlock Gate</button>
         </div>
+    </div>
 
-        <div id="privateContentDisplayModalOverlay" class="modal-overlay">
-            <div class="modal-content">
-                <button id="privateCloseBtn" class="modal-close-btn">&times;</button>
-                <img id="privateImage" class="private-media hidden" src="" alt="Private Content Image">
-                <video id="privateVideo" class="private-media hidden" src="" controls muted playsinline></video>
-                <p id="privateText" class="private-text-content hidden"></p>
-                <button id="privatePrevBtn" class="private-navigation-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
-                <button id="privateNextBtn" class="private-navigation-btn next-btn"><i class="fas fa-chevron-right"></i></button>
-            </div>
+    <div id="privateContentDisplayModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="privateCloseBtn" class="modal-close-btn">&times;</button>
+            <img id="privateImage" class="private-media hidden" src="" alt="Private Content Image">
+            <video id="privateVideo" class="private-media hidden" src="" controls muted playsinline></video>
+            <p id="privateText" class="private-text-content hidden"></p>
+            <button id="privatePrevBtn" class="private-navigation-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+            <button id="privateNextBtn" class="private-navigation-btn next-btn"><i class="fas fa-chevron-right"></i></button>
         </div>
-    </div> <script>
+    </div>
+
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
             const authOverlay = document.getElementById('authOverlay');
-            const mainContent = document.getElementById('mainContent');
+            const wormholeOverlay = document.getElementById('wormholeOverlay');
+            const cosmicOrbContainer = document.getElementById('cosmicOrbContainer');
+            const mainContentOrb = document.getElementById('mainContent'); // Renamed to avoid conflict
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
 
@@ -1041,19 +1246,8 @@
                     storyVideo.src = story.src;
                     storyVideo.classList.remove('hidden');
                     storyVideo.play().catch(e => console.log("Video autoplay blocked for story:", e)); // Handle autoplay policy
-                } else if (story.type === 'text') {
-                    // If text story is added, handle it
-                    storyImage.classList.add('hidden');
-                    storyVideo.classList.add('hidden');
-                    const textElement = document.createElement('p'); // Create a p tag for text
-                    textElement.classList.add('story-text-content'); // Add a class for styling
-                    textElement.innerHTML = story.content.replace(/\n/g, '<br>');
-                    // Need a specific place for text in the story modal or a generic content holder
-                    // For now, let's assume it replaces image/video or you add a separate div for it
-                    // This might need adjustment in HTML for story modal to hold text directly.
-                    // For simplicity, let's stick to image/video for stories, or you'd need a new element in the HTML for story text.
-                    // For this example, I'll assume text stories are primarily for private content.
                 }
+                // If text story is needed for highlights, would require a new element in story modal HTML
 
                 // Show/hide navigation buttons
                 storyPrevBtn.style.display = (currentStoryIndex === 0) ? 'none' : 'block';
@@ -1212,19 +1406,28 @@
             function checkSecret() {
                 const answer = secretAnswer.value.trim().toLowerCase();
                 if (answer === 'love') {
-                    authOverlay.style.animation = 'fadeOut 0.7s forwards'; // Fade out animation
+                    // Start wormhole animation
+                    document.body.classList.add('wormhole-active');
+                    authOverlay.style.animation = 'fadeOut 0.5s forwards'; // Fade out auth modal
+                    
+                    // After wormhole animation, show orb content
                     setTimeout(() => {
-                        authOverlay.remove(); // Remove overlay from DOM
-                        mainContent.classList.remove('hidden');
-                        mainContent.classList.add('show'); // Trigger fade-in for main content
+                        authOverlay.remove(); // Remove auth overlay completely
+                        wormholeOverlay.style.animation = 'fadeOut 0.7s forwards'; // Fade out wormhole
+                        
+                        cosmicOrbContainer.style.transform = 'scale(1)'; // Bring orb to full size
+                        cosmicOrbContainer.style.opacity = '1';
+
+                        mainContentOrb.style.opacity = '1'; // Show content inside orb
+                        
                         loadProfileContent(); // Load profile data after authentication
                         // Attempt to play all muted videos on the main content
-                        mainContent.querySelectorAll('.post-item video').forEach(video => {
+                        mainContentOrb.querySelectorAll('.post-item video').forEach(video => {
                             video.play().catch(error => {
                                 console.log("Video autoplay failed (muted ok):", error);
                             });
                         });
-                    }, 700); // Wait for fadeOut animation
+                    }, 2000); // Duration of wormhole animation (adjust as needed)
                 } else {
                     secretAnswer.style.borderColor = '#ff0000'; // Red border for wrong answer
                     secretAnswer.style.animation = 'shake 0.5s'; // Shake animation
