@@ -225,107 +225,6 @@ body.desktop-layout #private-user-panel {
     opacity: 1; /* Always visible in desktop layout if implemented as a static panel */
     pointer-events: all;
 }
-        /* Dalam elvi.css (atau CSS dashboard Anda) */
-
-.panel {
-    position: fixed; /* Atau absolute, tergantung tata letak Anda */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    max-width: 600px;
-    max-height: 80%;
-    background: rgba(10, 10, 18, 0.95); /* Background gelap transparan */
-    border: 1px solid var(--primary); /* Atau warna border sesuai tema Anda */
-    border-radius: var(--border-radius);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-    z-index: 1000; /* Pastikan di atas elemen lain */
-    display: flex; /* Untuk tata letak header dan content */
-    flex-direction: column;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.panel.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.panel.hidden { /* Tambahkan ini jika belum ada */
-    display: none;
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-    color: var(--primary);
-}
-
-.panel-header h2 {
-    margin: 0;
-    font-size: 1.2em;
-}
-
-.panel-close-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1.5em;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.panel-close-btn:hover {
-    color: var(--error);
-}
-
-.panel-content {
-    padding: 15px;
-    flex-grow: 1;
-    overflow-y: auto; /* Jika konten panjang, bisa di-scroll */
-    color: var(--text);
-    font-size: 0.9em;
-}
-
-.visitor-entry {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    border-left: 3px solid var(--primary);
-}
-.visitor-entry:last-child {
-    margin-bottom: 0;
-}
-.visitor-entry p {
-    margin: 5px 0;
-}
-.visitor-entry strong {
-    color: var(--primary);
-}
-.visitor-entry small {
-    color: var(--text-secondary);
-    font-size: 0.8em;
-}
-
-/* Jika Anda ingin efek blur pada background saat panel terbuka */
-body.panel-open::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Overlay gelap */
-    backdrop-filter: blur(5px); /* Efek blur */
-    z-index: 999;
-}
     </style>
 </head>
 <body class=""> <canvas id="interactive-bg"></canvas> 
@@ -445,19 +344,6 @@ body.panel-open::before {
         <a href="https://instagram.com/ezravvv" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
         <a href="https://alkitab.me/in-tb/Matius/5/13" target="_blank" title="Alkitab"><i class="fab fa-github"></i></a>
     </div>
-    <div id="main-content">
-        <div id="secret-panel" class="panel hidden">
-            <div class="panel-header">
-                <h2><i class="fas fa-eye-slash"></i> Classified Visitor Logs</h2>
-                <button class="panel-close-btn" data-panel="secret-panel">✖</button>
-            </div>
-            <div class="panel-content">
-                <p>Loading visitor data...</p>
-                <div id="visitor-logs-display">
-                    </div>
-            </div>
-        </div>
-        </div>
 <script>
 const SECRET_CODE = "wherewe";
 const CONTRIBUTIONS_WORKER_URL = 'https://contributions-workerjs.ezvvel.workers.dev/';
@@ -472,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initMusicPlayer();
     trackVisitor();
     initPrivateUserAuth();
-    initSecretAdminPanel();
 });
 function initParticleBackground() {
     const canvas = document.getElementById('interactive-bg');
@@ -848,133 +733,8 @@ function trackVisitor() {
             body: JSON.stringify(data),
             mode: 'no-cors'
         });
-        let userId = localStorage.getItem('bioVAuthSession') || 'anonymous_user'; // Atau ID user sebenarnya jika ada
-        let browserId = localStorage.getItem('browserId'); // ID unik untuk browser
-
-        if (!browserId) {
-            browserId = 'b-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            localStorage.setItem('browserId', browserId);
-        }
-        // ============================
-
-        const data = {
-            userId: userId,
-            browserId: browserId,
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            screenResolution: `${window.screen.width}x${window.screen.height}`,
-            language: navigator.language,
-            timestamp: new Date().toISOString()
-        };
-
-        // Kirim data ke Worker log yang baru
-        fetch(`${VISITOR_LOG_WORKER_URL}/log`, { // Kirim ke endpoint /log
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-            mode: 'no-cors' // Tetap no-cors jika Worker tidak mengembalikan CORS headers
-        });
-    } catch(e) {
-        console.error('Error tracking visitor:', e);
-    }
-}
     } catch(e) { }
 }
-    // dashboard.js (di bagian bawah file Anda)
-
-// ... fungsi-fungsi yang sudah ada seperti initParticleBackground, initSecretCodeListener, dll. ...
-
-// === FUNGSI UNTUK PANEL RAHASIA BARU ===
-function initSecretAdminPanel() {
-    const secretPanel = document.getElementById('secret-panel');
-    const visitorLogsDisplay = document.getElementById('visitor-logs-display');
-
-    // 1. Cek apakah pengguna adalah "Special User" dari Local Storage
-    const isSpecialUser = localStorage.getItem('isSpecialUser') === 'true';
-
-    if (isSpecialUser) {
-        // Jika special user, hapus kelas 'hidden'
-        secretPanel.classList.remove('hidden');
-        // Panggil fungsi untuk memuat log pengunjung
-        fetchVisitorLogs();
-
-        // Tambahkan event listener untuk tombol close panel rahasia
-        const closeSecretPanelBtn = secretPanel.querySelector('.panel-close-btn');
-        if (closeSecretPanelBtn) {
-            closeSecretPanelBtn.addEventListener('click', () => {
-                secretPanel.classList.remove('active');
-                document.body.classList.remove('panel-open'); // Hapus blur jika Anda menambahkannya
-            });
-        }
-
-        // Opsional: Buat tombol untuk membuka panel rahasia ini jika Anda ingin mengontrolnya secara manual
-        // Misalnya, Anda bisa menambahkan tombol FAB baru untuk ini, atau mengaktifkan dengan kode rahasia tertentu
-        // Untuk saat ini, kita akan membuatnya muncul secara default bagi special user.
-        
-        // Agar panel muncul secara otomatis saat special user masuk
-        setTimeout(() => { // Beri sedikit delay agar transisi terlihat
-            secretPanel.classList.add('active');
-            document.body.classList.add('panel-open'); // Tambahkan kelas untuk efek blur jika digunakan
-        }, 1000); // Muncul setelah 1 detik
-        
-    } else {
-        // Jika bukan special user, pastikan panel tersembunyi sepenuhnya dan tidak bisa diakses
-        secretPanel.remove(); // Hapus elemen dari DOM agar tidak bisa di-inspect
-        console.warn("Access denied: Not a special user.");
-    }
-}
-
-// === FUNGSI BARU UNTUK MENGAMBIL LOG PENGUNJUNG DARI WORKER ===
-// Anda perlu membuat Cloudflare Worker baru untuk ini, misal: 'https://visitor-log-worker.ezvvel.workers.dev/'
-const VISITOR_LOG_WORKER_URL = 'https://visitor-log-worker.ezvvel.workers.dev/'; // URL Worker baru Anda
-
-async function fetchVisitorLogs() {
-    const visitorLogsDisplay = document.getElementById('visitor-logs-display');
-    visitorLogsDisplay.innerHTML = `<p>Fetching classified data...</p>`;
-
-    try {
-        const response = await fetch(VISITOR_LOG_WORKER_URL, {
-            method: 'GET',
-            headers: {
-                'X-Auth-Key': 'ADMIN' // Penting: Ini untuk otentikasi Worker
-            }
-        });
-
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                throw new Error('Unauthorized access to visitor logs.');
-            }
-            throw new Error(`Failed to fetch visitor logs: ${response.statusText}`);
-        }
-
-        const logs = await response.json();
-
-        if (logs && logs.length > 0) {
-            visitorLogsDisplay.innerHTML = logs.reverse().map(log => { // Tampilkan yang terbaru di atas
-                const timestamp = new Date(log.timestamp).toLocaleString();
-                return `
-                    <div class="visitor-entry">
-                        <p><strong>User ID:</strong> ${log.userId || 'N/A'}</p>
-                        <p><strong>Browser ID:</strong> ${log.browserId || 'N/A'}</p>
-                        <p><strong>IP Address:</strong> ${log.ip || 'N/A'}</p>
-                        <p><strong>User Agent:</strong> <small>${log.userAgent || 'N/A'}</small></p>
-                        <p><strong>Platform:</strong> <small>${log.platform || 'N/A'}</small></p>
-                        <p><strong>Resolution:</strong> <small>${log.screenResolution || 'N/A'}</small></p>
-                        <p><strong>Language:</strong> <small>${log.language || 'N/A'}</small></p>
-                        <p><strong>Visited At:</strong> ${timestamp}</p>
-                    </div>
-                `;
-            }).join('');
-        } else {
-            visitorLogsDisplay.innerHTML = `<p>No visitor logs found yet.</p>`;
-        }
-
-    } catch (error) {
-        console.error('Error fetching visitor logs:', error);
-        visitorLogsDisplay.innerHTML = `<p style="color:var(--error);">Error: ${error.message || 'Could not load visitor logs.'}</p>`;
-    }
-}
-// ====================================================================
 </script>
 </body>
 </html>
