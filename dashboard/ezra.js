@@ -44,6 +44,7 @@ class BioVAuth {
       this.securityConfig.blockDuration,
       this.securityConfig.cookieName
     );
+    this.initPasswordToggle();
   }
   async collectClientInfo() {
     try {
@@ -177,18 +178,16 @@ class BioVAuth {
     }
     return response.json();
   }
-  handleSuccessfulLogin(response, email) {
-    localStorage.setItem(this.securityConfig.localStorageKey, response.token);
-    if (response.specialUser) {
-        localStorage.setItem('isSpecialUser', 'true');
-    } else {
-        localStorage.removeItem('isSpecialUser');
-    }
+  handleSuccessfulLogin(token, email) {
+    localStorage.setItem(this.securityConfig.localStorageKey, token);
     this.securitySystem.resetAttempts();
     this.updateStatus('Authentication successful!', 'success');
     this.elements.errorMsg.textContent = '';
-    window.location.href = 'dashboard.html';
-}
+    if (email === 'ezra'
+    localStorage.setItem('isEzraLoggedIn', 'true'); {
+    }
+    window.location.href = 'dashboard';
+  }
   handleFailedLogin(error) {
     this.securitySystem.recordFailedAttempt();
     const attemptsLeft = this.securitySystem.maxAttempts - this.securitySystem.attemptData.attempts;
@@ -244,12 +243,21 @@ class BioVAuth {
       this.elements.submitLogin.querySelector('.btn-text').textContent = 'Login';
     }
   }
+  initPasswordToggle() {
+    this.elements.togglePassword.addEventListener('click', () => {
+      const isPassword = this.elements.passwordInput.type === 'password';
+      this.elements.passwordInput.type = isPassword ? 'text' : 'password';
+      this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
+      this.elements.togglePassword.setAttribute('aria-label', 
+        isPassword ? 'Hide password' : 'Show password');
+    });
+  }
   togglePasswordVisibility() {
     const isPassword = this.elements.passwordInput.type === 'password';
     this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-    this.elements.togglePassword.textContent = isPassword ? '👁️' : '🙈';
+    this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
     this.elements.togglePassword.setAttribute('aria-label', 
-      isPassword ? 'Show password' : 'Hide password');
+      isPassword ? 'Hide password' : 'Show password');
   }
   initiateWebAuthn() {
     if (!this.state.webauthnSupported) return;
