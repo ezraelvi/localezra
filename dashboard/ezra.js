@@ -2,8 +2,8 @@ class BioVAuth {
     constructor() {
         this.env = {
             // URL Cloudflare Worker untuk autentikasi
-            // GANTI DENGAN URL WORKER AUTENTIKASI ANDA YANG BARU
-            AUTH_WORKER_URL: 'https://auth-logs.ezvvel.workers.dev/',
+            // GANTI DENGAN URL WORKER AUTENTIKASI ANDA YANG BARU jika perlu
+            AUTH_WORKER_URL: 'https://auth-logs.ezvvel.workers.dev/', // Pastikan ini URL Worker Anda
             RATE_LIMIT_WINDOW: 5 * 60 * 1000,
             RATE_LIMIT_MAX_ATTEMPTS: 5
         };
@@ -13,9 +13,11 @@ class BioVAuth {
             btnContainer: document.getElementById('btnContainer'),
             loginForm: document.getElementById('loginForm'),
             fallbackBtn: document.getElementById('fallbackBtn'),
-            visitBtn: document.document.getElementById('visitBtn'), // Menuju halaman publik (jika ada)
+            // --- PERBAIKAN DI SINI ---
+            visitBtn: document.getElementById('visitBtn'), // Menuju halaman publik (jika ada)
+            // --- AKHIR PERBAIKAN ---
             webauthnBtn: document.getElementById('webauthnBtn'),
-            emailInput: document.getElementById('email'), // Ini akan menjadi 'username' di sisi JS
+            emailInput: document.getElementById('email'),
             passwordInput: document.getElementById('password'),
             submitLogin: document.getElementById('submitLogin'),
             loadingSpinner: document.getElementById('loadingSpinner'),
@@ -166,31 +168,21 @@ class BioVAuth {
                 body: JSON.stringify({ username: username, password: password })
             });
 
-            // Worker akan menangani redirect dengan status 302/303, jadi kita TIDAK PERLU
-            // mengurai JSON jika respons adalah redirect.
-            // Jika Worker mengembalikan status non-redirect (misal 200 OK untuk gagal login)
-            // maka kita akan memproses body JSON-nya.
             if (response.redirected) {
-                // Jika redirect terjadi, browser otomatis mengikuti.
-                // Kita hanya perlu mengatur localStorage untuk 'isEzraLoggedIn' jika login berhasil
-                // sebelum redirect selesai.
-                if (username === 'ezra') { // Asumsi redirect berarti login sukses
+                if (username === 'ezra') {
                     localStorage.setItem('isEzraLoggedIn', 'true');
                 } else {
                     localStorage.removeItem('isEzraLoggedIn');
                 }
                 this.securitySystem.resetAttempts();
                 this.updateStatus('Authentication successful! Redirecting...', 'success');
-                // Tidak perlu window.location.href di sini karena Worker sudah melakukan redirect.
-                return; // Keluar dari fungsi setelah redirect dimulai
+                return;
             }
 
-            // Jika tidak ada redirect (berarti login gagal atau ada error lain dari worker)
-            const responseData = await response.json(); // Ambil body JSON
-            if (responseData.authenticated === false) { // Worker akan mengirim authenticated: false
+            const responseData = await response.json();
+            if (responseData.authenticated === false) {
                 this.handleFailedLogin(responseData.message || 'Invalid username or password.');
             } else {
-                // Ini bisa terjadi jika Worker mengembalikan format yang tidak diharapkan
                 this.handleFailedLogin('Unexpected response from server. Please try again.');
                 console.error('Unexpected Worker response:', responseData);
             }
@@ -204,17 +196,15 @@ class BioVAuth {
         }
     }
 
-    // handleSuccessfulLogin tidak akan melakukan redirect lagi, hanya mengatur localStorage
-    handleSuccessfulLogin(token, username, redirectUrl) { // redirectUrl parameter tidak lagi digunakan untuk redirect
+    handleSuccessfulLogin(token, username, redirectUrl) {
         this.securitySystem.resetAttempts();
-        this.elements.errorMsg.textContent = ''; // Hapus pesan error
+        this.elements.errorMsg.textContent = '';
 
         if (username === 'ezra') {
             localStorage.setItem('isEzraLoggedIn', 'true');
         } else {
-            localStorage.removeItem('isEzraLoggedIn'); // Hapus jika user bukan ezra
+            localStorage.removeItem('isEzraLoggedIn');
         }
-        // Status dan redirect sudah ditangani di handleLogin, jadi tidak perlu di sini
     }
 
     handleFailedLogin(errorMessage) {
