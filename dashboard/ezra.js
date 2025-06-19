@@ -183,8 +183,8 @@ class BioVAuth {
     this.securitySystem.resetAttempts();
     this.updateStatus('Authentication successful!', 'success');
     this.elements.errorMsg.textContent = '';
-    if (email === 'ezra'
-    localStorage.setItem('isEzraLoggedIn', 'true'); {
+    if (email === 'ezra' /* && password logic if needed, but assuming success means correct pass */) {
+        localStorage.setItem('isEzraLoggedIn', 'true');
     }
     window.location.href = 'dashboard';
   }
