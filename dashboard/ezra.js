@@ -13,7 +13,7 @@ class BioVAuth {
             btnContainer: document.getElementById('btnContainer'),
             loginForm: document.getElementById('loginForm'),
             fallbackBtn: document.getElementById('fallbackBtn'),
-            visitBtn: document: document.getElementById('visitBtn'), // Menuju halaman publik (jika ada)
+            visitBtn: document.document.getElementById('visitBtn'), // Menuju halaman publik (jika ada)
             webauthnBtn: document.getElementById('webauthnBtn'),
             emailInput: document.getElementById('email'), // Ini akan menjadi 'username' di sisi JS
             passwordInput: document.getElementById('password'),
