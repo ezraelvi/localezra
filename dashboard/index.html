@@ -225,6 +225,76 @@ body.desktop-layout #private-user-panel {
     opacity: 1; /* Always visible in desktop layout if implemented as a static panel */
     pointer-events: all;
 }
+/* dashboard.html -> di dalam tag <style> */
+
+/* Styling for the new Live Visitors FAB */
+#fab-live-visitors {
+    bottom: 20px; /* Atur posisi sesuai keinginan, contoh di kanan bawah */
+    right: 90px; /* Agar tidak tumpang tindih dengan fab-theme */
+}
+
+/* Styling for the Live Visitors panel */
+#live-visitors-panel {
+    top: 50%;
+    left: 50%;
+    width: 350px; /* Sesuaikan lebar */
+    max-width: 90vw;
+    height: 60vh; /* Sesuaikan tinggi */
+    transform: translate(-50%, -50%) scale(0.8); /* Awalnya lebih kecil dan tidak di tengah */
+    opacity: 0;
+    pointer-events: none; /* Tidak bisa diklik saat tidak aktif */
+    border-radius: 15px;
+    padding: 0; /* Padding sudah diatur di inner div */
+    display: flex; /* Untuk flexbox layout di dalamnya */
+    flex-direction: column;
+}
+
+#live-visitors-panel.active {
+    transform: translate(-50%, -50%) scale(1); /* Penuh dan di tengah saat aktif */
+    opacity: 1;
+    pointer-events: all; /* Bisa diklik saat aktif */
+}
+
+/* Adjust desktop layout to hide the new FAB */
+body.desktop-layout #fab-live-visitors {
+    display: none;
+}
+
+/* Ensure desktop panel style for consistency */
+body.desktop-layout #live-visitors-panel {
+    position: static;
+    transform: none !important;
+    height: auto;
+    width: auto;
+    max-height: none;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    opacity: 1; /* Selalu terlihat dalam tata letak desktop jika diimplementasikan sebagai panel statis */
+    pointer-events: all;
+}
+
+/* Styling for individual visitor list items */
+#visitor-list li {
+    background: rgba(0, 168, 255, 0.1); /* Warna latar belakang item */
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.9em;
+    color: var(--text-primary);
+}
+
+#visitor-list li strong {
+    color: var(--accent); /* Warna untuk label */
+}
+
+#visitor-list li span {
+    word-break: break-all; /* Agar teks panjang tidak keluar dari container */
+}
     </style>
 </head>
 <body class=""> <canvas id="interactive-bg"></canvas> 
@@ -313,6 +383,23 @@ body.desktop-layout #private-user-panel {
         <p id="private-user-message" style="margin-top: 15px; font-size: 0.9em;"></p>
     </div>
 </div>
+<div class="fab-container" id="fab-live-visitors" style="display: none;">
+    <button class="fab" data-panel="live-visitors-panel" title="Live Visitors"><i class="fas fa-eye"></i></button>
+</div>
+<div class="panel" id="live-visitors-panel">
+    <button class="panel-close-btn" data-panel="live-visitors-panel"><i class="fas fa-times"></i></button>
+    <div style="padding: 20px; height: 100%; display: flex; flex-direction: column;">
+        <h3 style="margin-bottom: 15px; color: var(--accent); text-align: center;">Live Visitors</h3>
+        <div id="visitor-list-container" style="flex-grow: 1; overflow-y: auto; padding-right: 10px;">
+            <p style="text-align: center; color: var(--text-secondary);">Loading visitors...</p>
+            <ul id="visitor-list" style="list-style: none; padding: 0; margin: 0;">
+                </ul>
+        </div>
+        <div style="margin-top: 15px; text-align: center; font-size: 0.85em; color: var(--text-secondary);">
+            Last updated: <span id="last-updated-time">N/A</span>
+        </div>
+    </div>
+</div>
     <div class="fab-container" id="fab-editor">
         <button class="fab" data-panel="editor-panel" title="Code Editor"><i class="fas fa-code"></i></button>
     </div>
@@ -340,14 +427,21 @@ body.desktop-layout #private-user-panel {
         </div>
     </div>
     <div class="social-links">
-        <a href="https://wa.me/6281434046148" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://instagram.com/ezravvv" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/0838 4495 9380" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://instagram.com/I_dont_care_now" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
         <a href="https://alkitab.me/in-tb/Matius/5/13" target="_blank" title="Alkitab"><i class="fab fa-github"></i></a>
     </div>
 <script>
 const SECRET_CODE = "wherewe";
 const CONTRIBUTIONS_WORKER_URL = 'https://contributions-workerjs.ezvvel.workers.dev/';
 const VISITOR_TRACKER_WORKER_URL = 'https://visitor-tracker-workerjs.ezvvel.workers.dev/';
+
+// --- START: Tambahan dan Perubahan Utama ---
+const LIVE_VISITORS_WORKER_URL = 'https://live-visitors.ezvvel.workers.dev/'; // GANTI DENGAN URL CLOUDFLARE WORKER ANDA
+const REFRESH_INTERVAL_MS = 5000; // Refresh data setiap 5 detik
+let visitorRefreshInterval; // Variabel untuk menyimpan ID interval agar bisa di-clear
+// --- END: Tambahan dan Perubahan Utama ---
+
 document.addEventListener('DOMContentLoaded', () => {
     initParticleBackground();
     initSecretCodeListener();
@@ -356,9 +450,18 @@ document.addEventListener('DOMContentLoaded', () => {
     initVideoPlayer();
     initEditor();
     initMusicPlayer();
-    trackVisitor();
+    
+    // --- START: Perubahan trackVisitor ---
+    trackVisitor(); // Panggil fungsi ini untuk merekam kunjungan awal
+    // --- END: Perubahan trackVisitor ---
+
     initPrivateUserAuth();
+
+    // --- START: Tambahan untuk mengecek login Ezra ---
+    checkEzraLoginAndShowVisitorsButton();
+    // --- END: Tambahan untuk mengecek login Ezra ---
 });
+
 function initParticleBackground() {
     const canvas = document.getElementById('interactive-bg');
     const ctx = canvas.getContext('2d');
@@ -432,6 +535,7 @@ function initParticleBackground() {
     initParticles();
     animateParticles();
 }
+
 let keySequence = [];
 function initSecretCodeListener() {
     window.addEventListener('keydown', (e) => {
@@ -443,6 +547,7 @@ function initSecretCodeListener() {
         }
     });
 }
+
 function unlockTrackingSystem() {
     const lockScreen = document.getElementById('map-lock-screen');
     if (!lockScreen.classList.contains('hidden')) {
@@ -454,6 +559,7 @@ function unlockTrackingSystem() {
         info.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success);"></i> System Activated. Initializing tracker...`;
     }
 }
+
 let map, marker;
 function getLocation() {
     if (navigator.geolocation) {
@@ -464,6 +570,7 @@ function getLocation() {
         );
     }
 }
+
 function initMap(lat, lon, isDefault = false) {
     if (!map) {
         map = L.map('map').setView([lat, lon], 13);
@@ -482,20 +589,50 @@ function initMap(lat, lon, isDefault = false) {
         locationInfoEl.innerHTML = `Tracking... Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
     }
 }
-// Add the new panel to the initPanelControls function
+
+// --- START: Perubahan initPanelControls ---
 function initPanelControls() {
     document.querySelectorAll('[data-panel]').forEach(button => {
         button.addEventListener('click', () => {
             const panelId = button.getAttribute('data-panel');
             const panel = document.getElementById(panelId);
+
+            // Toggle active class for the clicked panel
             panel.classList.toggle('active');
+
+            // Handle specific logic for Live Visitors Panel
+            if (panelId === 'live-visitors-panel') {
+                if (panel.classList.contains('active')) {
+                    fetchLiveVisitors(); // Ambil data saat panel dibuka
+                    visitorRefreshInterval = setInterval(fetchLiveVisitors, REFRESH_INTERVAL_MS); // Mulai refresh berkala
+                } else {
+                    clearInterval(visitorRefreshInterval); // Hentikan refresh saat panel ditutup
+                    const visitorList = document.getElementById('visitor-list');
+                    visitorList.innerHTML = ''; // Kosongkan daftar saat ditutup
+                }
+            } else { // Jika panel lain yang dibuka, pastikan Live Visitors Panel ditutup
+                const liveVisitorsPanel = document.getElementById('live-visitors-panel');
+                if (liveVisitorsPanel.classList.contains('active')) {
+                    liveVisitorsPanel.classList.remove('active');
+                    clearInterval(visitorRefreshInterval);
+                    document.getElementById('visitor-list').innerHTML = '';
+                }
+            }
+
+            // Handle specific logic for Contribution Panel
             if (panelId === 'contribution-panel' && panel.classList.contains('active')) {
                 fetchContributions();
             }
-            // Close other panels when one opens
+
+            // Close other panels when one opens (kecuali panel yang sedang dibuka)
             document.querySelectorAll('.panel').forEach(otherPanel => {
                 if (otherPanel.id !== panelId) {
                     otherPanel.classList.remove('active');
+                    // Tambahan: Pastikan interval refresh juga dihentikan jika panel Live Visitors ditutup oleh panel lain
+                    if (otherPanel.id === 'live-visitors-panel') {
+                        clearInterval(visitorRefreshInterval);
+                        document.getElementById('visitor-list').innerHTML = '';
+                    }
                 }
             });
         });
@@ -507,12 +644,19 @@ function initPanelControls() {
             const panelId = button.getAttribute('data-panel');
             const panel = document.getElementById(panelId);
             panel.classList.remove('active');
+
+            // Hentikan refresh saat panel Live Visitors ditutup via tombol close
+            if (panelId === 'live-visitors-panel') {
+                clearInterval(visitorRefreshInterval);
+                const visitorList = document.getElementById('visitor-list');
+                visitorList.innerHTML = ''; // Kosongkan daftar saat ditutup
+            }
         });
     });
 }
+// --- END: Perubahan initPanelControls ---
 
-
-// New function for private user authentication
+// New function for private user authentication (kode Anda tidak berubah, tapi tetap saya sertakan untuk konteks)
 function initPrivateUserAuth() {
     const privateUserFab = document.querySelector('#fab-private-user .fab');
     const privateUserPanel = document.getElementById('private-user-panel');
@@ -571,7 +715,7 @@ function initPrivateUserAuth() {
         }
     });
 }
-    
+
 function initLayoutAndThemeToggles() {
     const layoutBtn = document.querySelector('#fab-layout .fab');
     const themeBtn = document.querySelector('#fab-theme .fab');
@@ -591,6 +735,7 @@ function initLayoutAndThemeToggles() {
     themeBtn.addEventListener('click', toggleTheme);
     desktopThemeBtn.addEventListener('click', toggleTheme);
 }
+
 function initVideoPlayer() {
     const video = document.getElementById('widget-video');
     const playBtn = document.getElementById('video-play-pause');
@@ -610,6 +755,7 @@ function initVideoPlayer() {
         muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
     });
 }
+
 function initMusicPlayer() {
     const player = document.getElementById('audio-player');
     const playlistEl = document.getElementById('playlist');
@@ -632,6 +778,7 @@ function initMusicPlayer() {
         playlistEl.appendChild(item);
     });
 }
+
 function initEditor() {
     const htmlEditor = document.getElementById('html-editor');
     const cssEditor = document.getElementById('css-editor');
@@ -673,6 +820,7 @@ function initEditor() {
     });
     loadCode();
 }
+
 async function fetchContributions() {
     const display = document.getElementById('contribution-display');
     display.innerHTML = `<p>Loading...</p>`;
@@ -686,7 +834,7 @@ async function fetchContributions() {
                     if(c.fileType.startsWith('image/')) {
                         mediaHTML = `<img src="${c.fileUrl}" style="max-width:100%; border-radius:5px; margin-top:10px;">`;
                     } else if(c.fileType.startsWith('video/')) {
-                         mediaHTML = `<video src="${c.fileUrl}" controls style="max-width:100%; border-radius:5px; margin-top:10px;"></video>`;
+                           mediaHTML = `<video src="${c.fileUrl}" controls style="max-width:100%; border-radius:5px; margin-top:10px;"></video>`;
                     }
                 }
                 return `<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;">
@@ -701,6 +849,7 @@ async function fetchContributions() {
         display.innerHTML = `<p style="color:var(--danger);">Could not load contributions.</p>`;
     }
 }
+
 document.getElementById('contribution-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const statusEl = document.getElementById('contribution-status');
@@ -721,20 +870,121 @@ document.getElementById('contribution-form').addEventListener('submit', async (e
         statusEl.textContent = `Error: ${err.message}`;
     }
 });
-function trackVisitor() {
+
+// --- START: Fungsi Baru untuk Mendapatkan Browser ID Unik ---
+function getBrowserId() {
+    let browserId = localStorage.getItem('unique_browser_id');
+    if (!browserId) {
+        browserId = 'browser_' + Math.random().toString(36).substr(2, 9) + Date.now();
+        localStorage.setItem('unique_browser_id', browserId);
+    }
+    return browserId;
+}
+// --- END: Fungsi Baru ---
+
+// --- START: Modifikasi trackVisitor ---
+async function trackVisitor() {
     try {
+        const browserId = getBrowserId(); // Dapatkan ID browser unik
+        let ipAddress = 'unknown'; // Default value
+
+        // Fetch IP address
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            ipAddress = ipData.ip;
+        } catch (ipError) {
+            console.warn('Could not fetch IP address:', ipError);
+        }
+
         const data = {
+            browserId: browserId,
+            ip: ipAddress,
             userAgent: navigator.userAgent,
             timestamp: new Date().toISOString()
         };
+
+        // Mengirim data ke VISITOR_TRACKER_WORKER_URL (worker yang sudah ada untuk umum)
+        // Perhatikan `mode: 'no-cors'` jika worker di domain berbeda dan tidak perlu respons
         fetch(VISITOR_TRACKER_WORKER_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
-            mode: 'no-cors'
-        });
-    } catch(e) { }
+            mode: 'no-cors' // Sesuaikan jika worker di domain yang sama atau perlu respons
+        }).catch(e => console.error("Error sending to general visitor tracker:", e));
+
+        // Mengirim data ke LIVE_VISITORS_WORKER_URL (worker baru untuk live view)
+        // Penting: Pastikan CORS di worker ini diatur dengan benar jika domain berbeda.
+        // Jika Anda ingin melihat error atau respons, hapus 'no-cors' dan pastikan Worker merespons dengan header CORS yang benar.
+        fetch(LIVE_VISITORS_WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            // mode: 'no-cors' // Hapus ini jika ingin melihat respons/error dari worker
+        }).catch(e => console.error("Error sending to live visitors worker:", e));
+
+    } catch(e) {
+        console.error('Error in trackVisitor:', e);
+    }
 }
-</script>
+// --- END: Modifikasi trackVisitor ---
+
+// --- START: Fungsi Baru untuk Mengecek Login Ezra dan Menampilkan Tombol ---
+function checkEzraLoginAndShowVisitorsButton() {
+    const isEzra = localStorage.getItem('isEzraLoggedIn');
+    const fabLiveVisitors = document.getElementById('fab-live-visitors');
+
+    if (isEzra === 'true') {
+        fabLiveVisitors.style.display = 'block'; // Tampilkan FAB jika Ezra login
+    } else {
+        fabLiveVisitors.style.display = 'none'; // Pastikan tersembunyi jika bukan Ezra
+    }
+}
+// --- END: Fungsi Baru ---
+
+// --- START: Fungsi Baru untuk Mengambil dan Menampilkan Pengunjung Live ---
+async function fetchLiveVisitors() {
+    const visitorList = document.getElementById('visitor-list');
+    const lastUpdatedTime = document.getElementById('last-updated-time');
+    
+    // Tampilkan pesan loading jika list kosong atau pertama kali fetch
+    if (!visitorList.innerHTML.trim()) {
+        visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">Loading visitors...</li>'; 
+    }
+    
+    try {
+        // Mengirim GET request ke Cloudflare Worker dengan parameter query
+        const response = await fetch(LIVE_VISITORS_WORKER_URL + '?get_visitors=true'); 
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const visitors = await response.json();
+
+        if (visitors && visitors.length > 0) {
+            visitorList.innerHTML = visitors.map(visitor => {
+                const timestamp = new Date(visitor.timestamp).toLocaleString('id-ID', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+                return `
+                    <li>
+                        <strong>ID:</strong> <span>${visitor.browserId.substring(0, 10)}...</span><br>
+                        <strong>IP:</strong> <span>${visitor.ip || 'N/A'}</span><br>
+                        <strong>Waktu:</strong> <span>${timestamp}</span>
+                    </li>
+                `;
+            }).join('');
+        } else {
+            visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">No visitors online.</li>';
+        }
+        lastUpdatedTime.textContent = new Date().toLocaleTimeString('id-ID'); // Update waktu terakhir refresh
+
+    } catch (error) {
+        console.error('Error fetching live visitors:', error);
+        visitorList.innerHTML = '<li style="text-align: center; color: var(--danger);">Failed to load visitors.</li>';
+        lastUpdatedTime.textContent = 'Error';
+    }
+}
+// --- END: Fungsi Baru ---</script>
 </body>
 </html>
