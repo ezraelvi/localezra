@@ -341,9 +341,18 @@
             margin-bottom: 5px;
             font-size: 1.8em;
         }
+        /* New button style for "Create New Galaxy" */
+        #btn-create-galaxy {
+            background: linear-gradient(45deg, #FFA07A, #FF6F61); /* Orange/Red gradient */
+            border: 2px solid #FFA07A;
+            box-shadow: 0 5px 20px rgba(255, 160, 122, 0.5);
+        }
+        #btn-create-galaxy:hover {
+            background: linear-gradient(45deg, #FF6F61, #FFA07A);
+            box-shadow: 0 8px 30px rgba(255, 160, 122, 0.7);
+            border-color: #FF8C00;
+        }
 
-        /* Positions for circular layout */
-        /* These will be set by JS or dynamically */
 
         /* Stat Displays - Smaller circles orbiting the profile */
         .stat-display {
@@ -538,6 +547,18 @@
             display: block;
             border-radius: 50%; /* Make media inside circular */
         }
+        .post-item audio {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 50px; /* Adjust height for audio player */
+            background-color: rgba(0, 5, 20, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            padding: 5px;
+        }
 
         #close-content-view {
             position: absolute;
@@ -604,8 +625,14 @@
             opacity: 0;
             animation: enterFromSpace 0.6s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+        
+        .modal-content.large-content-modal {
+            max-width: 900px; /* Make it wider for upload form */
+            max-height: 95vh;
+        }
 
-        .story-media, .private-media {
+
+        .story-media, .private-media, .upload-preview-media {
             max-width: 95%;
             max-height: calc(100% - 120px);
             object-fit: contain;
@@ -613,6 +640,11 @@
             margin: auto;
             border-radius: 10px; /* Still rounded rectangles for media in modals */
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .upload-preview-media.audio-preview {
+            max-height: 80px; /* For audio player height */
+            width: 95%;
+            margin-top: 15px;
         }
 
         .story-navigation-btn, .private-navigation-btn {
@@ -917,7 +949,8 @@
         .editor-section input[type="text"],
         .editor-section input[type="number"],
         .editor-section input[type="file"],
-        .editor-section textarea {
+        .editor-section textarea,
+        .editor-section select {
             width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 15px;
@@ -935,7 +968,8 @@
 
         .editor-section input[type="text"]:focus,
         .editor-section input[type="number"]:focus,
-        .editor-section textarea:focus {
+        .editor-section textarea:focus,
+        .editor-section select:focus {
             border-color: #DA70D6;
             box-shadow: 0 0 10px rgba(218, 112, 214, 0.5);
             outline: none;
@@ -1022,6 +1056,16 @@
             object-fit: cover;
             border-radius: 50%;
         }
+        .media-item audio {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 30, 0.8);
+            border-radius: 50%; /* Keep circular container */
+            padding: 10px; /* Add padding for controls */
+        }
         .media-item .delete-media-btn {
             position: absolute;
             top: 2px;
@@ -1040,6 +1084,166 @@
             z-index: 5;
         }
 
+        /* --- New Upload Modal Styles --- */
+        #uploadModalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 1005; /* Higher than editor overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #uploadModalOverlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .upload-modal-content {
+            background: radial-gradient(circle at center, #1e0033, #0a001a);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 600px; /* Adjust size as needed */
+            color: #E0E0E0;
+            position: relative;
+            transform: scale(0.9);
+            animation: activatePortal 0.6s ease-out forwards;
+            border: 2px solid #00FFFF;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .upload-modal-content h3 {
+            color: #00FFFF;
+            font-size: 2.2em;
+            text-shadow: 0 0 10px #00FFFF;
+            margin-bottom: 25px;
+        }
+
+        .upload-section {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .upload-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #B0C4DE;
+        }
+
+        .upload-section input[type="text"],
+        .upload-section select,
+        .upload-section input[type="file"] {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #00FFFF;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 30, 0.7);
+            color: #E0E0E0;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .upload-section input[type="file"] {
+            padding: 0; /* file input styling is tricky, remove default padding */
+            border: none;
+            background: none;
+        }
+        /* Custom file input styling */
+        .custom-file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            border: 1px solid #00FFFF;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 30, 0.7);
+            color: #E0E0E0;
+            padding: 10px;
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .custom-file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            font-size: 100px; /* Make it large enough to cover the wrapper */
+        }
+        .file-name-display {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #C0C0C0;
+        }
+        .custom-file-input-wrapper i {
+            margin-right: 10px;
+            color: #00FFFF;
+        }
+
+        .upload-section input[type="text"]:focus,
+        .upload-section select:focus {
+            border-color: #DA70D6;
+            box-shadow: 0 0 10px rgba(218, 112, 214, 0.5);
+            outline: none;
+        }
+
+        .upload-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        .upload-btn:hover {
+            background: linear-gradient(90deg, #8BC34A, #4CAF50);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .upload-cancel-btn {
+            background: linear-gradient(90deg, #FF6F61, #DE6262);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
+        }
+        .upload-cancel-btn:hover {
+            background: linear-gradient(90deg, #DE6262, #FF6F61);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 111, 97, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -1071,10 +1275,10 @@
         <button id="btn-tiktok" class="orb-element action-button" onclick="openTikTok()"><i class="fab fa-tiktok"></i> TikTok Warp</button>
         <button id="btn-instagram" class="orb-element action-button" onclick="openInstagram()"><i class="fab fa-instagram"></i> Insta-Nexus</button>
 
-        <div id="stat-posts" class="orb-element stat-display">
-            <span id="postCount" class="count"></span>
-            <span class="label">Galaxies</span>
-        </div>
+        <button id="btn-create-galaxy" class="orb-element action-button">
+            <i class="fas fa-plus-circle"></i> Create New Galaxy
+        </button>
+
         <div id="stat-followers" class="orb-element stat-display">
             <span id="followerCount" class="count"></span>
             <span class="label">Cosmic Beings</span>
@@ -1130,6 +1334,7 @@
             <img id="privateImage" class="private-media hidden" src="" alt="Private Content Image">
             <video id="privateVideo" class="private-media hidden" src="" controls muted playsinline></video>
             <p id="privateText" class="private-text-content hidden"></p>
+            <audio id="privateAudio" class="private-media hidden" src="" controls></audio>
             <button id="privatePrevBtn" class="private-navigation-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
             <button id="privateNextBtn" class="private-navigation-btn next-btn"><i class="fas fa-chevron-right"></i></button>
         </div>
@@ -1154,8 +1359,6 @@
                 <input type="text" id="editFullName">
                 <label for="editBio">Bio:</label>
                 <textarea id="editBio" rows="3"></textarea>
-                <label for="editPostsCount">Posts Count:</label>
-                <input type="number" id="editPostsCount">
                 <label for="editFollowersCount">Followers Count:</label>
                 <input type="text" id="editFollowersCount">
                 <label for="editFollowingCount">Following Count:</label>
@@ -1166,14 +1369,7 @@
             <div class="editor-section">
                 <h4>Posts</h4>
                 <div id="editorPostsList" class="media-list"></div>
-                <label for="addPostType">Add New Post Type:</label>
-                <select id="addPostType">
-                    <option value="image">Image</option>
-                    <option value="video">Video</option>
-                </select>
-                <label for="addPostSrc">Add New Post URL:</label>
-                <input type="text" id="addPostSrc" placeholder="e.g., Video Elvi/my_new_video.mp4">
-                <button class="editor-add-btn" data-section="posts">Add Post</button>
+                <p style="margin-top:15px; color:#c0c0c0; font-size:0.9em;">(Use 'Create New Galaxy' button to add new posts/content.)</p>
             </div>
 
             <div class="editor-section">
@@ -1220,6 +1416,53 @@
         </div>
     </div>
 
+    <div id="uploadModalOverlay" class="modal-overlay">
+        <div class="upload-modal-content">
+            <button id="uploadCloseBtn" class="modal-close-btn">&times;</button>
+            <h3>Create New Galaxy</h3>
+
+            <div class="upload-section">
+                <label for="uploadContentType">Content Type:</label>
+                <select id="uploadContentType">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                    <option value="audio">Audio</option>
+                    <option value="text">Text (Private Content Only)</option>
+                </select>
+            </div>
+
+            <div class="upload-section">
+                <label for="uploadContentDestination">Destination:</label>
+                <select id="uploadContentDestination">
+                    <option value="posts">Portfolios (Public)</option>
+                    <option value="private">Forbidden Zone (Private)</option>
+                </select>
+            </div>
+
+            <div class="upload-section" id="uploadFileSection">
+                <label for="uploadFile">Upload File:</label>
+                <div class="custom-file-input-wrapper">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose File
+                    <span class="file-name-display" id="uploadFileName">No file chosen</span>
+                    <input type="file" id="uploadFile" accept="image/*,video/*,audio/*">
+                </div>
+                <div id="uploadPreview" style="margin-top: 15px;">
+                    </div>
+            </div>
+
+            <div class="upload-section hidden" id="uploadTextSection">
+                <label for="uploadTextContent">Text Content:</label>
+                <textarea id="uploadTextContent" rows="5" placeholder="Enter your private cosmic message here..."></textarea>
+            </div>
+            
+            <div class="upload-actions">
+                <button id="uploadSubmitBtn" class="upload-btn"><i class="fas fa-rocket"></i> Launch Content</button>
+                <button id="uploadCancelBtn" class="upload-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
@@ -1232,7 +1475,7 @@
             const profileOrb = document.getElementById('profile-orb');
             const profilePic = document.getElementById('profilePic');
             const profileUsername = document.getElementById('profileUsername');
-            const postCount = document.getElementById('postCount');
+            // const postCount = document.getElementById('postCount'); // Removed this element
             const followerCount = document.getElementById('followerCount');
             const followingCount = document.getElementById('followingCount');
             const profileName = document.getElementById('profileName');
@@ -1240,7 +1483,8 @@
             const btnFollow = document.getElementById('btn-follow'); 
             const btnTikTok = document.getElementById('btn-tiktok');
             const btnInstagram = document.getElementById('btn-instagram');
-            const statPosts = document.getElementById('stat-posts');
+            const btnCreateGalaxy = document.getElementById('btn-create-galaxy'); // New button
+            // const statPosts = document.getElementById('stat-posts'); // Removed this element
             const statFollowers = document.getElementById('stat-followers');
             const statFollowing = document.getElementById('stat-following');
 
@@ -1272,6 +1516,7 @@
             const privateImage = document.getElementById('privateImage');
             const privateVideo = document.getElementById('privateVideo');
             const privateText = document.getElementById('privateText');
+            const privateAudio = document.getElementById('privateAudio'); // New Audio element
             let currentPrivateContents = [];
             let currentPrivateIndex = 0;
             let hasAccessedPrivateContent = false; 
@@ -1288,14 +1533,14 @@
             const editUsername = document.getElementById('editUsername');
             const editFullName = document.getElementById('editFullName');
             const editBio = document.getElementById('editBio');
-            const editPostsCount = document.getElementById('editPostsCount');
+            // const editPostsCount = document.getElementById('editPostsCount'); // Removed this field from editor
             const editFollowersCount = document.getElementById('editFollowersCount');
             const editFollowingCount = document.getElementById('editFollowingCount');
 
             // Content Editor Lists
             const editorPostsList = document.getElementById('editorPostsList');
-            const addPostType = document.getElementById('addPostType');
-            const addPostSrc = document.getElementById('addPostSrc');
+            // const addPostType = document.getElementById('addPostType'); // Removed, handled by upload modal
+            // const addPostSrc = document.getElementById('addPostSrc');   // Removed, handled by upload modal
 
             const editorReelsList = document.getElementById('editorReelsList');
             const addReelType = document.getElementById('addReelType');
@@ -1309,6 +1554,21 @@
             const addHighlightLabel = document.getElementById('addHighlightLabel');
             const addHighlightIcon = document.getElementById('addHighlightIcon');
 
+            // New Upload Modal Elements
+            const uploadModalOverlay = document.getElementById('uploadModalOverlay');
+            const uploadCloseBtn = document.getElementById('uploadCloseBtn');
+            const uploadContentType = document.getElementById('uploadContentType');
+            const uploadContentDestination = document.getElementById('uploadContentDestination');
+            const uploadFileSection = document.getElementById('uploadFileSection');
+            const uploadFile = document.getElementById('uploadFile');
+            const uploadFileName = document.getElementById('uploadFileName');
+            const uploadPreview = document.getElementById('uploadPreview');
+            const uploadTextSection = document.getElementById('uploadTextSection');
+            const uploadTextContent = document.getElementById('uploadTextContent');
+            const uploadSubmitBtn = document.getElementById('uploadSubmitBtn');
+            const uploadCancelBtn = document.getElementById('uploadCancelBtn');
+
+
             // --- Data Storage (initially from local data, will be synced with backend) ---
             let profileData = {
                 username: "elvi_ezra_",
@@ -1316,7 +1576,7 @@
                 bio: "Greetings, fellow cosmic traveler! Welcome to my personal nebula where stars align and galaxies unfold. ✨🪐\nExploring the vastness of the digital universe.",
                 profilePic: "Advanced files Elvi/May 26, 2025 at 09.00 AM.png", 
                 stats: {
-                    posts: 13,
+                    // posts: 13, // This will be dynamic based on postsData.length
                     followers: "4.5K",
                     following: 321
                 }
@@ -1389,6 +1649,7 @@
                 { type: 'text', content: "Beyond the stars, in this sacred cosmic chamber, our connection shines brightest. Thank you for venturing this far! ✨\n\nThis is a private transmission, reserved for those who hold the key to my heart's galaxy." },
                 { type: 'image', src: 'Advanced files Elvi/October 25, 2024 at 8.11 AM.png' },
                 { type: 'video', src: 'Video Elvi/FDownloader.Net 4.mp4' },
+                { type: 'audio', src: 'Audio Elvi/Cosmic_Serenade.mp3' }, // New Audio example
                 { type: 'text', content: "May these cosmic moments bring us closer across the universe. You are the most unique celestial body in my orbit. Always. ❤\n\n- E.E." },
             ];
 
@@ -1397,7 +1658,7 @@
                 { element: btnFollow, angle: 225 }, // Top-left area
                 { element: btnTikTok, angle: 315 }, // Top-right area
                 { element: btnInstagram, angle: 45 }, // Bottom-right area
-                { element: statPosts, angle: 135 }, // Bottom-left area
+                { element: btnCreateGalaxy, angle: 135 }, // NEW: Replaces stat-posts, bottom-left area
                 { element: statFollowers, angle: 180 }, // Left-middle
                 { element: statFollowing, angle: 90 }, // Right-middle
                 { element: highlightsSection, angle: 0 } // Directly above
@@ -1434,7 +1695,7 @@
             function loadProfileContent() {
                 profilePic.src = profileData.profilePic;
                 profileUsername.textContent = profileData.username;
-                postCount.textContent = profileData.stats.posts;
+                // postCount.textContent = postsData.length; // Dynamic posts count
                 followerCount.textContent = profileData.stats.followers;
                 followingCount.textContent = profileData.stats.following;
                 profileName.textContent = profileData.fullName;
@@ -1443,7 +1704,7 @@
             }
 
             /**
-             * Renders posts (images/videos) into the content grid.
+             * Renders posts (images/videos/audio) into the content grid.
              * @param {Array<Object>} data - Array of post objects.
              */
             function renderContentGrid(data) {
@@ -1466,6 +1727,21 @@
                         img.src = item.src;
                         img.alt = 'Cosmic Image Post';
                         postItem.appendChild(img);
+                    } else if (item.type === 'audio') { // Handle audio type in content grid
+                        const audio = document.createElement('audio');
+                        audio.src = item.src;
+                        audio.controls = true;
+                        audio.preload = 'metadata'; // Preload metadata for faster loading
+                        postItem.appendChild(audio);
+                        // Add an icon or visual cue for audio if no custom image is available
+                        const audioIcon = document.createElement('i');
+                        audioIcon.classList.add('fas', 'fa-music', 'fa-4x');
+                        audioIcon.style.color = '#00FFFF';
+                        audioIcon.style.position = 'absolute';
+                        audioIcon.style.top = '25%';
+                        audioIcon.style.left = '50%';
+                        audioIcon.style.transform = 'translate(-50%, -50%)';
+                        postItem.appendChild(audioIcon);
                     }
                     contentGrid.appendChild(postItem);
                 });
@@ -1663,16 +1939,18 @@
             }
 
             /**
-             * Displays the current private content (image, video, or text) in the modal.
+             * Displays the current private content (image, video, audio, or text) in the modal.
              */
             function displayCurrentPrivateContent() {
                 const content = currentPrivateContents[currentPrivateIndex];
 
-                // Hide all content elements first
+                // Hide all content elements first and pause media
                 privateImage.classList.add('hidden');
                 privateVideo.classList.add('hidden');
                 privateText.classList.add('hidden');
+                privateAudio.classList.add('hidden');
                 privateVideo.pause(); 
+                privateAudio.pause();
 
                 if (content.type === 'image') {
                     privateImage.src = content.src;
@@ -1681,6 +1959,10 @@
                     privateVideo.src = content.src;
                     privateVideo.classList.remove('hidden');
                     privateVideo.play().catch(e => console.log("Video autoplay blocked for private content:", e));
+                } else if (content.type === 'audio') {
+                    privateAudio.src = content.src;
+                    privateAudio.classList.remove('hidden');
+                    privateAudio.play().catch(e => console.log("Audio autoplay blocked for private content:", e));
                 } else if (content.type === 'text') {
                     privateText.innerHTML = content.content.replace(/\n/g, '<br>'); 
                     privateText.classList.remove('hidden');
@@ -1708,12 +1990,16 @@
                 privateContentDisplayModalOverlay.classList.remove('active');
                 privateVideo.pause();
                 privateVideo.currentTime = 0;
+                privateAudio.pause();
+                privateAudio.currentTime = 0;
             });
             privateContentDisplayModalOverlay.addEventListener('click', (event) => {
                 if (event.target === privateContentDisplayModalOverlay) {
                     privateContentDisplayModalOverlay.classList.remove('active');
                     privateVideo.pause();
                     privateVideo.currentTime = 0;
+                    privateAudio.pause();
+                    privateAudio.currentTime = 0;
                 }
             });
 
@@ -1821,7 +2107,7 @@
                 editUsername.value = profileData.username;
                 editFullName.value = profileData.fullName;
                 editBio.value = profileData.bio;
-                editPostsCount.value = profileData.stats.posts;
+                // editPostsCount.value = profileData.stats.posts; // No longer editable, derived from postsData.length
                 editFollowersCount.value = profileData.stats.followers;
                 editFollowingCount.value = profileData.stats.following;
 
@@ -1854,6 +2140,17 @@
                         mediaElement.playsInline = true;
                         mediaElement.loop = true;
                         mediaElement.autoplay = true; // Auto-play for preview
+                    } else if (item.type === 'audio') {
+                        mediaElement = document.createElement('audio');
+                        mediaElement.src = item.src;
+                        mediaElement.controls = true;
+                        mediaElement.preload = 'metadata';
+                        // Style for audio preview to look good in a circular container
+                        mediaElement.style.width = '100%';
+                        mediaElement.style.height = '100%';
+                        mediaElement.style.borderRadius = '50%';
+                        mediaElement.style.objectFit = 'cover'; // May not work perfectly for audio, but tries to fill
+                        mediaElement.style.backgroundColor = 'rgba(0,0,30,0.8)';
                     }
                     mediaItemDiv.appendChild(mediaElement);
 
@@ -1918,24 +2215,13 @@
                 profileData.username = editUsername.value;
                 profileData.fullName = editFullName.value;
                 profileData.bio = editBio.value;
-                profileData.stats.posts = parseInt(editPostsCount.value) || 0;
+                // profileData.stats.posts = parseInt(editPostsCount.value) || 0; // No longer editable
                 profileData.stats.followers = editFollowersCount.value;
                 profileData.stats.following = parseInt(editFollowingCount.value) || 0;
                 alert('Profile data saved locally. Click "Publish All Changes" to sync.');
             });
 
-            // Add new post/reel/tagged item
-            document.querySelector('.editor-add-btn[data-section="posts"]').addEventListener('click', () => {
-                const src = addPostSrc.value.trim();
-                if (src) {
-                    postsData.push({ id: `p${Date.now()}`, type: addPostType.value, src: src });
-                    addPostSrc.value = '';
-                    populateEditorFields();
-                    alert('Post added locally. Click "Publish All Changes" to sync.');
-                } else {
-                    alert('Please provide a URL for the new post.');
-                }
-            });
+            // Add new reel/tagged item (Posts are now handled by the 'Create New Galaxy' button)
             document.querySelector('.editor-add-btn[data-section="reels"]').addEventListener('click', () => {
                 const src = addReelSrc.value.trim();
                 if (src) {
@@ -1975,6 +2261,150 @@
             });
 
 
+            // --- New Upload Content Modal Logic ---
+            btnCreateGalaxy.addEventListener('click', () => {
+                uploadModalOverlay.classList.add('active');
+                // Reset form on open
+                uploadContentType.value = 'image';
+                uploadContentDestination.value = 'posts';
+                uploadFile.value = ''; // Clear selected file
+                uploadFileName.textContent = 'No file chosen';
+                uploadTextContent.value = '';
+                uploadPreview.innerHTML = '';
+                uploadFileSection.classList.remove('hidden');
+                uploadTextSection.classList.add('hidden');
+                updateUploadModalVisibility(); // Initial check
+            });
+
+            uploadCloseBtn.addEventListener('click', () => {
+                uploadModalOverlay.classList.remove('active');
+            });
+            uploadCancelBtn.addEventListener('click', () => {
+                uploadModalOverlay.classList.remove('active');
+            });
+
+            uploadContentType.addEventListener('change', updateUploadModalVisibility);
+            uploadContentDestination.addEventListener('change', updateUploadModalVisibility);
+            uploadFile.addEventListener('change', updateUploadFileDisplayAndPreview);
+
+            function updateUploadModalVisibility() {
+                const contentType = uploadContentType.value;
+                const destination = uploadContentDestination.value;
+
+                // Toggle file upload vs text input
+                if (contentType === 'text') {
+                    uploadFileSection.classList.add('hidden');
+                    uploadTextSection.classList.remove('hidden');
+                } else {
+                    uploadFileSection.classList.remove('hidden');
+                    uploadTextSection.classList.add('hidden');
+                }
+
+                // Restrict text type to private content only
+                if (contentType === 'text') {
+                    // Force destination to private if text is selected
+                    if (destination !== 'private') {
+                        uploadContentDestination.value = 'private';
+                    }
+                    uploadContentDestination.querySelector('option[value="posts"]').disabled = true; // Disable public option
+                } else {
+                    uploadContentDestination.querySelector('option[value="posts"]').disabled = false; // Enable public option
+                }
+
+                // Clear preview if content type changes
+                uploadPreview.innerHTML = ''; 
+                uploadFileName.textContent = 'No file chosen';
+            }
+
+            function updateUploadFileDisplayAndPreview() {
+                const file = uploadFile.files[0];
+                if (file) {
+                    uploadFileName.textContent = file.name;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadPreview.innerHTML = ''; // Clear previous preview
+                        const contentType = uploadContentType.value;
+                        if (contentType === 'image') {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.classList.add('upload-preview-media');
+                            uploadPreview.appendChild(img);
+                        } else if (contentType === 'video') {
+                            const video = document.createElement('video');
+                            video.src = e.target.result;
+                            video.controls = true;
+                            video.muted = true;
+                            video.playsInline = true;
+                            video.classList.add('upload-preview-media');
+                            uploadPreview.appendChild(video);
+                        } else if (contentType === 'audio') {
+                            const audio = document.createElement('audio');
+                            audio.src = e.target.result;
+                            audio.controls = true;
+                            audio.classList.add('upload-preview-media', 'audio-preview');
+                            uploadPreview.appendChild(audio);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    uploadFileName.textContent = 'No file chosen';
+                    uploadPreview.innerHTML = '';
+                }
+            }
+
+            uploadSubmitBtn.addEventListener('click', async () => {
+                const contentType = uploadContentType.value;
+                const destination = uploadContentDestination.value;
+                let newContent = null;
+
+                if (contentType === 'text') {
+                    const text = uploadTextContent.value.trim();
+                    if (!text) {
+                        alert('Please enter text content.');
+                        return;
+                    }
+                    newContent = { id: `${contentType}${Date.now()}`, type: 'text', content: text };
+                } else {
+                    const file = uploadFile.files[0];
+                    if (!file) {
+                        alert('Please select a file to upload.');
+                        return;
+                    }
+
+                    // For this simplified demo, we'll assume a direct URL or path is provided
+                    // In a real scenario, you'd upload the file to a storage service (like Cloudflare R2, Google Cloud Storage, etc.)
+                    // and then get the public URL. Here, we'll just simulate by using a dummy URL.
+                    
+                    // IMPORTANT: In a real application, you CANNOT directly upload files to GitHub repos
+                    // using browser-side JavaScript without significant complexity (e.g., base64 encoding large files,
+                    // dealing with GitHub API limits, etc.). It's best to upload media files to dedicated storage
+                    // and store only their URLs in your data.json.
+                    
+                    // For demo purposes, we'll just create a placeholder URL based on file name.
+                    // REPLACE THIS LOGIC with actual file upload and URL retrieval!
+                    const dummyFileBaseUrl = "https://your-storage-cdn.com/elvi-content/"; // Change this to your actual CDN base URL
+                    const fileExtension = file.name.split('.').pop();
+                    const simulatedUrl = `${dummyFileBaseUrl}${file.name.replace(/ /g, '_')}`; // Simple URL generation
+
+                    newContent = { id: `${contentType}${Date.now()}`, type: contentType, src: simulatedUrl };
+                    alert(`Simulating file upload for: ${file.name}\n\nIn a real app, this file would be uploaded to storage (e.g., Cloudflare R2) and its public URL saved.`);
+                }
+
+                if (newContent) {
+                    if (destination === 'posts') {
+                        postsData.unshift(newContent); // Add to the beginning
+                        alert('New public post added locally! Click "Publish All Changes" to sync.');
+                    } else if (destination === 'private') {
+                        privateContentData.unshift(newContent); // Add to the beginning
+                        alert('New private content added locally! Click "Publish All Changes" to sync.');
+                    }
+                    uploadModalOverlay.classList.remove('active');
+                    populateEditorFields(); // Re-render editor lists
+                    loadProfileContent(); // Re-render main site (e.g., post count)
+                }
+            });
+
+
             // --- Backend Integration (Conceptual - Requires Cloudflare Worker & GitHub API) ---
 
             const GITHUB_REPO_OWNER = 'your-github-username'; // Replace with your GitHub username
@@ -2002,6 +2432,8 @@
                     reelsData = data.reelsData;
                     taggedData = data.taggedData;
                     highlightsData = data.highlightsData;
+                    // Also load private content data if you store it in data.json
+                    // privateContentData = data.privateContentData || []; 
 
                     console.log('Data fetched from backend:', data);
                     loadProfileContent(); // Re-render website with fetched data
@@ -2018,6 +2450,9 @@
              * file updates on GitHub and manage authentication securely.
              */
             async function publishChangesToBackend() {
+                // Update posts count before publishing
+                profileData.stats.posts = postsData.length;
+
                 const allData = {
                     profileData,
                     postsData,
@@ -2070,7 +2505,7 @@
             }
 
             // Call fetchDataFromBackend on initial load to populate the website with live data
-            // Commented out for local testing. Uncomment when Cloudflare Worker is ready.
+            // Uncomment when Cloudflare Worker is ready.
             // fetchDataFromBackend(); 
             loadProfileContent(); // Keep this for now to ensure local data is loaded on refresh
         });
