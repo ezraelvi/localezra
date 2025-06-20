@@ -7,38 +7,38 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://api.ipify.org; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.ipify.org https://auth-logs.ezvvel.workers.dev/; frame-src 'none';">
   <meta name="theme-color" content="#0a0a12">
   <title>Biometric | Authentication</title>
-  <link rel="preload" href="dashboard/elvi.css" as="style">
-  <link rel="preload" href="dashboard/ezra.js" as="script">
-  <link rel="stylesheet" href="dashboard/elvi.css">
-  <link rel="apple-touch-icon" sizes="180x180" href="dashboard/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="dashboard/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="dashboard/favicon-16x16.png">
+  <link rel="preload" href="index/elvi.css" as="style">
+  <link rel="preload" href="index/ezra.js" as="script">
+  <link rel="stylesheet" href="index/elvi.css">
+  <link rel="apple-touch-icon" sizes="180x180" href="index/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="index/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="index/favicon-16x16.png">
+  <link rel="manifest" href="index/site.webmanifest">
 </head>
 <body>
   <div class="container">
     <header class="auth-header">
-      <h1 class="sr-only">BioVAuth Authentication</h1>
+      <h1 class="sr-only">Authentication</h1>
       <div class="biometric-container">
-        <img src="dashboard/mix.svg" alt="Mix uai" class="biometric-scan" width="200" height="200">
+        <img src="index/mix.svg" alt="Mix uai" class="biometric-scan" width="200" height="200">
         <div class="scan-line" id="scanLine" aria-hidden="true"></div>
       </div>
-      <div class="status" id="status" aria-live="polite">Initializing authentication system...</div>
+      <div class="status" id="status" aria-live="polite">Initializing authentication system</div>
     </header>
     <main class="auth-main">
       <div class="btn-container" id="btnContainer">
         <button class="auth-btn" id="fallbackBtn">
-          <span class="icon">✉️</span> Email Login
+          <span class="icon">✉️</span> Username Login
         </button>
         <button class="auth-btn" id="visitBtn">
           <span class="icon">🚀</span> Visit Dashboard
         </button>
         <button class="auth-btn" id="webauthnBtn">
           <span class="icon">🔒</span> Login WebAuthn
-        </button>
-      </div>
+        </button></div>
       <form id="loginForm" class="login-form" novalidate>
         <div class="form-group">
-          <label for="email">Email or Username</label>
+          <label for="email">Username</label>
           <input type="text" id="email" name="email" required aria-required="true" autocomplete="username" autocapitalize="off">
         </div>
         <div class="form-group">
@@ -46,50 +46,24 @@
           <div class="password-wrapper">
             <input type="password" id="password" name="password" required aria-required="true" autocomplete="current-password">
             <button type="button" class="toggle-password" aria-label="Show password">🧑‍💻</button>
-          </div>
-        </div>
+            </div></div>
         <button type="submit" class="auth-btn primary" id="submitLogin">
           <span class="btn-text">Login</span>
           <span class="loading-spinner" id="loadingSpinner" aria-hidden="true"></span>
         </button>
-        <button type="button" class="auth-btn cancel" id="cancelLoginBtn">
-          Cancel
-        </button>
         <div id="errorMsg" class="error-msg" aria-live="assertive"></div>
       </form>
       <div id="webauthnUnsupported" class="unsupported-warning" style="display: none;">
-        <p>Your browser doesn't support WebAuthn. You can still login with email.</p>
+        <p>Your browser doesn't support WebAuthn. You can still login with username</p>
         <a href="https://webauthn.me/browser-support" target="_blank" rel="noopener noreferrer" class="auth-btn">
           Check Browser Compatibility
-        </a>
-      </div>
-    </main>
+        </a></div></main>
     <footer class="auth-footer">
       <div class="ip-display" id="ipDisplay">Detecting network</div>
       <div class="security-info">
         <span class="secure-icon">🔐</span>
-        <span>Secure Connection • TLS 1.3 • AES-256 <span class="ezra-link" id="ezraLink">🎖️Ezra</span> • 2025</span>
-      </div>
-    </footer>
-  </div>
-
-  <div class="ezra-profile-popup" id="ezraProfilePopup">
-    <img src="dashboard/ezra-profile.jpg" alt="Ezra Profile" class="profile-image">
-  </div>
-
-  <div class="secret-word-popup" id="secretWordPopup">
-    <button class="close-popup-btn" id="closeSecretPopup">&times;</button>
-    <h3>What's the secret?</h3>
-    <input type="text" id="secretWordInput" placeholder="Enter secret word">
-    <button class="auth-btn primary" id="submitSecretWord">Submit</button>
-    <div id="secretErrorMsg" class="error-msg"></div>
-    <div class="secret-photo-display" id="secretPhotoDisplay">
-      <img src="dashboard/ezra-profile.jpg" alt="Secret Photo" class="secret-photo-image">
-    </div>
-  </div>
-
-  <div class="scrolling-text-background" id="scrollingTextBackground"></div>
-
-  <script src="dashboard/ezra.js" defer></script>
-</body>
+        <span>Secure Connection • TLS 1.3 • AES-256 🎖️Ezra • 2025</span>
+      </div></footer></div>
+  <script src="index/ezra.js" defer></script>
+ </body>
 </html>
