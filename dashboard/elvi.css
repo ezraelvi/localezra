@@ -272,3 +272,59 @@ body {
 .shake {
   animation: shake 0.4s ease;
 }
+/* Styling untuk link Ezra */
+.ezra-link {
+    cursor: pointer; /* Menandakan bahwa elemen ini bisa diklik */
+    position: relative; /* Penting untuk penempatan popup */
+    display: inline-block; /* Agar bisa mengatur posisi popup relatif terhadapnya */
+    color: inherit; /* Menggunakan warna teks parent */
+    text-decoration: none; /* Menghilangkan garis bawah default link */
+}
+
+/* Styling untuk popup gambar profil */
+.ezra-profile-popup {
+    display: none; /* Awalnya sembunyikan popup */
+    position: absolute;
+    bottom: 120%; /* Posisikan di atas link Ezra */
+    left: 50%;
+    transform: translateX(-50%); /* Pusatkan popup secara horizontal */
+    background-color: var(--auth-bg-color, #1a1a2e); /* Warna background popup, sesuaikan dengan tema */
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 100; /* Pastikan popup muncul di atas elemen lain */
+    opacity: 0; /* Awalnya transparan */
+    transition: opacity 0.3s ease-in-out; /* Animasi fade in/out */
+    min-width: 100px; /* Lebar minimum popup */
+    text-align: center;
+}
+
+.ezra-profile-popup.visible {
+    display: block; /* Tampilkan popup saat kelas 'visible' ditambahkan */
+    opacity: 1; /* Fade in */
+}
+
+/* Styling untuk gambar di dalam popup */
+.ezra-profile-popup .profile-image {
+    width: 80px; /* Ukuran gambar, sesuaikan */
+    height: 80px; /* Ukuran gambar, sesuaikan */
+    border-radius: 50%; /* Membuat gambar menjadi bulat */
+    object-fit: cover; /* Pastikan gambar mengisi area tanpa terdistorsi */
+    border: 2px solid var(--primary-color, #4CAF50); /* Border di sekitar gambar, sesuaikan warna */
+}
+
+/* Optional: Animasi jika ingin ada sedikit "pop" saat muncul */
+.ezra-profile-popup.visible {
+    animation: fadeInScale 0.3s ease-out forwards;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
