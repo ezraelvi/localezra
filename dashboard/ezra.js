@@ -23,22 +23,19 @@ class BioVAuth {
             ipDisplay: document.getElementById('ipDisplay'),
             togglePassword: document.querySelector('.toggle-password'),
             webauthnUnsupported: document.getElementById('webauthnUnsupported'),
-            // Tambahkan elemen untuk popup Ezra
+            // Tambahan elemen untuk popup Ezra dan Secret Word
             ezraLink: document.getElementById('ezraLink'),
             ezraProfilePopup: document.getElementById('ezraProfilePopup'),
-            biometricScan: document.querySelector('.biometric-scan'), // Mengambil elemen mix.svg
-
-            // Elemen untuk fitur "Your" popup
-            yourText: document.getElementById('yourText'),
-            yourPopupContainer: document.getElementById('yourPopupContainer'),
+            biometricScan: document.querySelector('.biometric-scan'), // Elemen mix.svg
+            cancelLoginBtn: document.getElementById('cancelLoginBtn'), // Tombol Cancel
+            yourText: null, // Akan diinisialisasi setelah status berubah
+            secretWordPopup: document.getElementById('secretWordPopup'),
+            closeSecretPopup: document.getElementById('closeSecretPopup'),
             secretWordInput: document.getElementById('secretWordInput'),
             submitSecretWord: document.getElementById('submitSecretWord'),
-            closeSecretWordPopup: document.getElementById('closeSecretWordPopup'),
-            secretPhoto: document.querySelector('.secret-photo'),
-            // Tombol cancel login
-            cancelLoginBtn: document.getElementById('cancelLoginBtn'),
-            // Overlay background
-            backgroundTextOverlay: document.getElementById('backgroundTextOverlay')
+            secretErrorMsg: document.getElementById('secretErrorMsg'),
+            secretPhotoDisplay: document.getElementById('secretPhotoDisplay'),
+            scrollingTextBackground: document.getElementById('scrollingTextBackground')
         };
         this.securityConfig = {
             maxAttempts: 3,
@@ -49,108 +46,196 @@ class BioVAuth {
         this.state = {
             webauthnSupported: false,
             clientInfo: {},
-            isDesktop: false // Tambahkan state untuk deteksi desktop
+            isPinkModeActive: false // State untuk pink mode
         };
 
-        this.pressTimer = null; // Inisialisasi timer untuk tahan Ezra
-        this.PRESS_DURATION = 500; // Durasi tahan (milidetik)
-        this.SECRET_WORD = "jadi salting"; // Secret word untuk popup "Your"
-
         this.chatMessages = [
-            "👋", "jgn buat aku penasaran lagi ya, jadi jadilah dirimu seperti sebelum aku chat km, sebelum kenal aku",
-            "BTW, kalo preferensi boidata mu yg bs kusimpulakan ialah ( meskipun km gk tanya );1. km cantik cantik bgt, sampe aku tertarik, 2. km itu orgnya baik bgt, karna bisa mengedepankan ambisi org lain daripada perasaanmu sebernarnya, meskipun blkng ini mulai pudar, 3. km itu potensinya bagus, dari sikap yg km displinkan, km lebih cocoknya kian bisa jd pramugari, farmasi bagian obt, atau mgikuti impianmu (tapi berdasarkan kemampuan mu juga baik materi, atopun akdemismu dan persetujuan ortu), itu menurutku",
-            "Rasa cukup ini akan menjadi tanda bahwa, kita (aku) akan menutup operasi chatan ini, aku akan menganggap km asing, sebagai upayaku melepaskan mu sebagai narasumber ku",
-            "sudah saatnya aku menindaki dunia ini lebih facktual, dan mendasarinya dengan kuasa Tuhan, itu jauh lebih baik dan itu yg Tuhan minta",
-            "makasi vi, jadi teman chat yg menyenangkan sih buat ku, dan aneh buatmu", "jadi",
-            "bisa ajanya aku curhat sama yg lain, tapi orang lain begitu dominansi untukku, jadi disini lah aku bisa melimpahkan yg kurasakan saat ini",
-            "aminn", "ya Tuhan aku harap aku lepas dari masa² sperti ini, cukup lah kegabutannku, cukupkanlah juga pemahaman ku akan dunia ini",
-            "dan cukup jugalah rasa penasaran ku akan bgaimana diriku, dan prasaanmu", "okelah kurasa udah cukuplah semua info ini untukku",
-            "hmmmm", "kayaknya km mmng bosan yaa", "atau disuruh", "atau bosan", "dah ngantuk kah",
-            "2. mimpi ² elvi kekmana panya, perang, atu kayak lagi sekolah, atu jln² atau masa lalu?",
-            "ooo", "ngk pernah kayaknya", "1. pernah gk aku hadir dimimpimu?, kalo pernah brp x",
-            "pertanyaan ini agak psikologis dikit ya", "oooo", "lipat baju", "biasanya disuruh ngapain aja sih??",
-            "adaaa", "wah gilak², kalo disuruh² gitu ada??", "kadang belajar dan kadang jg main tiktok",
-            "5. spill kan dulu kegiatanmu, khusus km aja dimlm hri mulai dari jam 7 sampai jam 10 mlm, ngapain aja penasaran aku??, misalnya di suruh ini, belajar, atu main tiktok sampe dpt ujungnya",
-            "ouh", "udahh", "4. apa km diumur segini udah serius memikirkan masa dpn?? misal, udah pernah dibahas masa depanmu di depan keluargamu pas lagi ngumpul??",
-            "okey, i come back", "Iyaa", "bntar", "iyaaaa",
-            "salah 1 upaya yg km lakukan apakah dengan berdandan untuk mulai mengejarnya?? (edited)",
-            "salah 1 upaya yg km lakukan apakah dengan berdandan ( km kan kayknya lebih cantik kl berdanda ) sekarang sih menurutku",
-            "ouhh", "Enggak jg sih", "bahkan jika km begitu menginginkannya??", "Iya lah aku nyerahh",
-            "3. jadi misal ada cowok populer dan ganteng, ( km udah umur 22 thn misalnya ), trus km suka dia, hbs itu km tau ada yg lain suka samnya dan lebih agresif darimu, km nyerah aja gitu, dan lepasin?? ( ini aku mau bhs soal percintaan dulu, soal ms depan kpn kpn )",
-            "oalahh", "akukan ninja", "hmpir setiap pergerakanmu aku liati", "km fine² aja gitu",
-            "masa sih, aku liat km kalem aja kayk percaya diri gitunya, dan gk ada masalh yg membebanimu",
-            "Iya serius", "seriusssss !?", "Iya",
-            "serius km bilang km lemahh?? kamu memang merasa km itu lemah dibandingkan sekitar mu gitu??",
-            "Iya aku memang lemah", "lemahnya ahh", "ngk bisaaa", "2 stengah tahun kemudian",
-            "dah tua aku, pnsaran aku kekmana dirikibdari salah 1 aspek",
-            "dari hati yg murniiii, lepaskan semha ktakutan mu", "jwb lah coyy", "iya coy",
-            "hmpir stengah tahun coyy, nicee sih", "2. kenapa banyak pertannyaan kyk gini gk bisa km jawab??",
-            "Ngk bisaa ku jawab", "itu aja lah dulu, jawab yaa bre", "tunngu agak bnyak aku maunnayk lagi",
-            "1. aku tipe cowok yg kekman mnurutmu setelah berlama lama kita chatan??",
-            "heheh", "blummm", "iya, trus", "apa yaa pertama", "bolehh",
-            "vi aku mulai bertanya tanya boleh ya", "okey", "ngk tau lucu aja gitu", "knp mnurutmu aku lucu??",
-            "hehe arigato", "iyaaaaa", "kalo lucu, kasilah dulu waktumu untuk temani aku yaa, chatan",
-            "lucu banget malahan", "hehe lucu kali kurasa leh aku ini", "lah kok bingung",
-            "bingung aku bree", "kan gini bree", "apanya yg bisa", "jadi, kekmana brei, bisa bre?",
-            "karena aku mencintaimu elvi", "Knp", "❤️", "Iyaa", "elvi", "Iyaa", "elvi", "Iyelah tuu",
-            "takpelah", "Ngk tau aku, lupaa", "siapa musik skm di warta kmrin viiii", "= begitu ya, sedih",
-            "= iya", "Ngk tau", "soka, 😟", "haikk", "iya jg sih", "siapa, akuu",
-            "entalah, kurang yakin aku dia mau", "eee orangnya yang ninggalin aku pas nungguin chat tdi malam",
-            "iyaa", "Maaf yaaa", "Emang siapa rupanya", "Coba aja",
-            "km gitulah kalo mau off gk bilang, kasian org nungguin (edited)",
-            "km gitulah kalo mau off bilang, kasian org nungguin", "lalap bilangnya blum siap aku",
-            "Tapi takut aku ditolaknya, kekmana itu",
-            "Kek gini, sebenarnya aku dah lama suka samamu, hmm km mau ngk jadi pacar ku gituu",
-            "cara nembak cewe gimana vi?", "uhh gitu", "Dia jrang da cerita",
-            "apa, apa lah yg km tau kl gitu", "Yaa tau lah", "ai cemananya ko ini vi, abg mu yh terbaik gk km tau ceritanya/dia",
-            "Yaa ngk tau", "knp gk tau", "Ngk tau", "abg mu jadi tes tentara dia?", "Udah",
-            "kerjaan/belajar udah siap?", "Lagi ddk", "lagi ngapain", "elvi", "kalau ngk begitu, ya begitu",
-            "memang begitu", "yaaa begitulah manusia", "hm", "enggak",
-            "awas diculik org km nanti gara² pp mu itu daaa, nanti gk ad lagi cewekku (edited)",
-            "awas diculik org km nanti gara² pp itu daaa, nanti gk ad lagi cewekku (edited)",
-            "awas diculik org km nanti gara² pp itu daaa", "dan knp km gk ngasi no wa mu samaku?? kenapa",
-            "for your new pp = 😍", "btw, kalo misal nanti ada cowok yg suka samamu di dunia nyata atau maya gimana tindakan km??",
-            "untuk apa cintaku??, dah ku hapus kemarin cinta, malas aku main fb", "apa nama fbmu",
-            "yaudah deh", "percaya kok", "malamm", "gk apaa, percaya juga km samaku?? (edited)",
-            "gk apaa, percaya juga kmsamaku?? (edited)", "kalo malu knp di post??, itu namanya org lain km kasi tengok aku enggak",
-            "gk apaa, percaya juga ko samaku??", "iya cubit ajaa, gpp itu", "jangan ko tengok² fbku malu aku",
-            "cubit aja", "apanya", "oalahh", "jadi gimana vi?", "feeling ku aja pasti namanya mirip sam ig nya, jadi gitulah ketemu",
-            "yappp", "cubit muncung nya itu vi, klo bilangnua km gk cantik", "tapi knp ko bisa tau namaku",
-            "ouh ok", "ouh gitu yaa", "wkwkkw ntah, berat memang samaku vi, tapi the true mengejarmu itu adalah first time bagiku",
-            "kebetulan aku perlu fb jadi ku buat, trus aku liat akun km, disitulah aku cemburu vii",
-            "ohh", "emang bisaa", "kok tau, ngk bisa di hapus itu", "adaa", "biar aku aja yg jagain km"
-        ].join(' '); // Gabungkan semua pesan menjadi satu string
+            "Elvii Zil Feb 04, 2025 7:13 am questionviu 👋",
+            "Feb 04, 2025 7:13 am questionviu jgn buat aku penasaran lagi ya, jadi jadilah dirimu seperti sebelum aku chat km, sebelum kenal aku",
+            "Feb 04, 2025 7:13 am questionviu BTW, kalo preferensi boidata mu yg bs kusimpulakan ialah ( meskipun km gk tanya );1. km cantik cantik bgt, sampe aku tertarik, 2. km itu orgnya baik bgt, karna bisa mengedepankan ambisi org lain daripada perasaanmu sebernarnya, meskipun blkng ini mulai pudar, 3.km itu potensinya bagus, dari sikap yg km displinkan, km lebih cocoknya kian bisa jd pramugari, farmasi bagian obt, atau mgikuti impianmu (tapi berdasarkan kemampuan mu juga baik materi, atopun akdemismu dan persetujuan ortu), itu menurutku",
+            "Feb 04, 2025 7:02 am questionviu Rasa cukup ini akan menjadi tanda bahwa, kita (aku) akan menutup operasi chatan ini, aku akan menganggap km asing, sebagai upayaku melepaskan mu sebagai narasumber ku",
+            "Feb 04, 2025 6:59 am questionviu sudah saatnya aku menindaki dunia ini lebih facktual, dan mendasarinya dengan kuasa Tuhan, itu jauh lebih baik dan itu yg Tuhan minta",
+            "Feb 04, 2025 6:57 am questionviu makasi vi, jadi teman chat yg menyenangkan sih buat ku, dan aneh buatmu",
+            "Feb 04, 2025 6:57 am questionviu jadi",
+            "Feb 04, 2025 6:56 am questionviu bisa ajanya aku curhat sama yg lain, tapi orang lain begitu dominansi untukku, jadi disini lah aku bisa melimpahkan yg kurasakan saat ini",
+            "Feb 04, 2025 6:55 am questionviu aminn",
+            "Feb 04, 2025 6:55 am questionviu ya Tuhan aku harap aku lepas dari masa² sperti ini, cukup lah kegabutannku, cukupkanlah juga pemahaman ku akan dunia ini",
+            "Feb 04, 2025 6:53 am questionviu dan cukup jugalah rasa penasaran ku akan bgaimana diriku, dan prasaanmu",
+            "Feb 04, 2025 6:51 am questionviu okelah kurasa udah cukuplah semua info ini untukku",
+            "Feb 04, 2025 6:50 am questionviu hmmmm",
+            "Feb 04, 2025 6:50 am questionviu kayaknya km mmng bosan yaa",
+            "Feb 04, 2025 6:36 am questionviu atau disuruh",
+            "Feb 04, 2025 6:36 am questionviu atau bosan",
+            "Feb 04, 2025 6:36 am questionviu dah ngantuk kah",
+            "Feb 04, 2025 6:28 am questionviu 2. mimpi ² elvi kekmana panya, perang, atu kayak lagi sekolah, atu jln² atau masa lalu?",
+            "Feb 04, 2025 6:27 am questionviu ooo",
+            "Feb 04, 2025 6:26 am Elvii Zil ngk pernah kayaknya",
+            "Feb 04, 2025 6:26 am questionviu 1. pernah gk aku hadir dimimpimu?, kalo pernah brp x",
+            "Feb 04, 2025 6:25 am questionviu pertanyaan ini agak psikologis dikit ya",
+            "Feb 04, 2025 6:25 am questionviu oooo",
+            "Feb 04, 2025 6:24 am Elvii Zil lipat baju",
+            "Feb 04, 2025 6:22 am questionviu biasanya disuruh ngapain aja sih??",
+            "Feb 04, 2025 6:21 am Elvii Zil adaaa",
+            "Feb 04, 2025 6:20 am questionviu wah gilak², kalo disuruh² gitu ada??",
+            "Feb 04, 2025 6:18 am Elvii Zil kadang belajar dan kadang jg main tiktok",
+            "Feb 04, 2025 6:16 am questionviu 5. spill kan dulu kegiatanmu, khusus km aja dimlm hri mulai dari jam 7 sampai jam 10 mlm, ngapain aja penasaran aku??, misalnya di suruh ini, belajar, atu main tiktok sampe dpt ujungnya",
+            "Feb 04, 2025 6:14 am questionviu ouh",
+            "Feb 04, 2025 6:13 am Elvii Zil udahh",
+            "Feb 04, 2025 6:08 am questionviu 4. apa km diumur segini udah serius memikirkan masa dpn?? misal, udah pernah dibahas masa depanmu di depan keluargamu pas lagi ngumpul??",
+            "Feb 04, 2025 6:05 am questionviu okey, i come back",
+            "Feb 04, 2025 5:41 am Elvii Zil Iyaa",
+            "Feb 04, 2025 5:40 am questionviu bntar",
+            "Feb 04, 2025 5:39 am Elvii Zil iyaaaa",
+            "Feb 04, 2025 5:39 am questionviu salah 1 upaya yg km lakukan apakah dengan berdandan untuk mulai mengejarnya?? (edited)",
+            "Feb 04, 2025 5:38 am questionviu salah 1 upaya yg km lakukan apakah dengan berdandan ( km kan kayknya lebih cantik kl berdanda ) sekarang sih menurutku",
+            "Feb 04, 2025 5:38 am questionviu ouhh",
+            "Feb 04, 2025 5:36 am Elvii Zil Enggak jg sih",
+            "Feb 04, 2025 5:35 am questionviu bahkan jika km begitu menginginkannya??",
+            "Feb 04, 2025 5:34 am Elvii Zil Iya lah aku nyerahh",
+            "Feb 04, 2025 5:33 am questionviu 3. jadi misal ada cowok populer dan ganteng, ( km udah umur 22 thn misalnya ), trus km suka dia, hbs itu km tau ada yg lain suka samnya dan lebih agresif darimu, km nyerah aja gitu, dan lepasin?? ( ini aku mau bhs soal percintaan dulu, soal ms depan kpn kpn )",
+            "Feb 04, 2025 5:31 am Elvii Zil oalahh",
+            "Feb 04, 2025 5:30 am questionviu akukan ninja",
+            "Feb 04, 2025 5:29 am questionviu hmpir setiap pergerakanmu aku liati",
+            "Feb 04, 2025 5:29 am Elvii Zil jadi, selalu ya ko liat² aku",
+            "Feb 04, 2025 5:28 am questionviu km fine² aja gitu",
+            "Feb 04, 2025 5:27 am questionviu masa sih, aku liat km kalem aja kayk percaya diri gitunya, dan gk ada masalh yg membebanimu",
+            "Feb 04, 2025 5:26 am Elvii Zil Iya serius",
+            "Feb 04, 2025 5:25 am questionviu seriusssss !?",
+            "Feb 04, 2025 5:24 am Elvii Zil Iya",
+            "Feb 04, 2025 5:23 am questionviu serius km bilang km lemahh?? kamu memang merasa km itu lemah dibandingkan sekitar mu gitu??",
+            "Feb 04, 2025 5:22 am Elvii Zil Iya aku memang lemah",
+            "Feb 04, 2025 5:21 am questionviu lemahnya ahh",
+            "Feb 04, 2025 5:20 am Elvii Zil ngk bisaaa",
+            "Feb 04, 2025 5:20 am questionviu 2 stengah tahun kemudian",
+            "Feb 04, 2025 5:18 am questionviu dah tua aku, pnsaran aku kekmana dirikibdari salah 1 aspek",
+            "Feb 04, 2025 5:18 am questionviu dari hati yg murniiii, lepaskan semha ktakutan mu",
+            "Feb 04, 2025 5:17 am questionviu jwb lah coyy",
+            "Feb 04, 2025 5:16 am Elvii Zil iya coy",
+            "Feb 04, 2025 5:16 am questionviu hmpir stengah tahun coyy, nicee sih",
+            "Feb 04, 2025 5:15 am questionviu 2. kenapa banyak pertannyaan kyk gini gk bisa km jawab??",
+            "Feb 04, 2025 5:14 am Elvii Zil Ngk bisaa ku jawab",
+            "Feb 04, 2025 5:12 am questionviu itu aja lah dulu, jawab yaa bre",
+            "Feb 04, 2025 5:11 am questionviu tunngu agak bnyak aku maunnayk lagi",
+            "Feb 04, 2025 5:11 am questionviu 1. aku tipe cowok yg kekman mnurutmu setelah berlama lama kita chatan??",
+            "Feb 04, 2025 5:10 am Elvii Zil heheh",
+            "Feb 04, 2025 5:10 am questionviu blummm",
+            "Feb 04, 2025 5:09 am Elvii Zil iya, trus",
+            "Feb 04, 2025 5:09 am questionviu apa yaa pertama",
+            "Feb 04, 2025 5:08 am Elvii Zil bolehh",
+            "Feb 04, 2025 5:08 am questionviu vi aku mulai bertanya tanya boleh ya",
+            "Feb 04, 2025 5:07 am questionviu okey",
+            "Feb 04, 2025 5:06 am Elvii Zil ngk tau lucu aja gitu",
+            "Feb 04, 2025 5:05 am questionviu knp mnurutmu aku lucu??",
+            "Feb 04, 2025 5:05 am questionviu hehe arigato",
+            "Feb 04, 2025 5:04 am Elvii Zil iyaaaaa",
+            "Feb 04, 2025 4:58 am questionviu kalo lucu, kasilah dulu waktumu untuk temani aku yaa, chatan",
+            "Feb 04, 2025 4:57 am Elvii Zil lucu banget malahan",
+            "Feb 04, 2025 4:55 am questionviu hehe lucu kali kurasa leh aku ini",
+            "Feb 04, 2025 4:54 am Elvii Zil lah kok bingung",
+            "Feb 04, 2025 4:53 am questionviu bingung aku bree",
+            "Feb 04, 2025 4:53 am questionviu kan gini bree",
+            "Feb 04, 2025 4:49 am Elvii Zil apanya yg bisa",
+            "Feb 04, 2025 4:48 am questionviu jadi, kekmana brei, bisa bre?",
+            "Feb 03, 2025 4:35 pm questionviu karena aku mencintaimu elvi",
+            "Feb 03, 2025 4:44 am Elvii Zil Knp",
+            "Feb 03, 2025 4:19 am questionviu ❤️",
+            "Feb 03, 2025 3:14 am Elvii Zil Iyaa",
+            "Feb 03, 2025 3:04 am questionviu elvi",
+            "Feb 02, 2025 5:15 am Elvii Zil Iyaa",
+            "Feb 02, 2025 5:15 am questionviu elvi",
+            "Jan 31, 2025 10:39 pm Elvii Zil Iyelah tuu",
+            "Jan 31, 2025 10:22 pm questionviu takpelah",
+            "Jan 31, 2025 10:01 pm Elvii Zil Ngk tau aku, lupaa",
+            "Jan 31, 2025 4:34 pm questionviu siapa musik skm di warta kmrin viiii",
+            "Jan 31, 2025 4:33 pm questionviu = begitu ya, sedih",
+            "Jan 31, 2025 4:33 pm questionviu = iya",
+            "Jan 31, 2025 4:12 pm Elvii Zil Ngk tau",
+            "Jan 31, 2025 4:02 pm questionviu soka, 😟",
+            "Jan 31, 2025 4:01 pm questionviu haikk",
+            "Jan 31, 2025 3:25 pm Elvii Zil iya jg sih",
+            "Jan 31, 2025 3:25 pm Elvii Zil siapa, akuu",
+            "Jan 31, 2025 3:07 pm questionviu entalah, kurang yakin aku dia mau",
+            "Jan 31, 2025 3:06 pm questionviu eee orangnya yang ninggalin aku pas nungguin chat tdi malam",
+            "Jan 31, 2025 3:05 pm questionviu iyaa",
+            "Jan 31, 2025 6:28 am Elvii Zil Maaf yaaa",
+            "Jan 31, 2025 6:27 am Elvii Zil Emang siapa rupanya",
+            "Jan 31, 2025 6:27 am Elvii Zil Coba aja",
+            "Jan 31, 2025 6:09 am questionviu km gitulah kalo mau off gk bilang, kasian org nungguin (edited)",
+            "Jan 31, 2025 6:09 am questionviu km gitulah kalo mau off bilang, kasian org nungguin",
+            "Jan 31, 2025 6:00 am questionviu lalap bilangnya blum siap aku",
+            "Jan 31, 2025 5:59 am questionviu Tapi takut aku ditolaknya, kekmana itu",
+            "Jan 31, 2025 5:58 am Elvii Zil Kek gini, sebenarnya aku dah lama suka samamu, hmm km mau ngk jadi pacar ku gituu",
+            "Jan 31, 2025 5:56 am questionviu cara nembak cewe gimana vi?",
+            "Jan 31, 2025 5:51 am questionviu uhh gitu",
+            "Jan 31, 2025 5:48 am Elvii Zil Dia jrang da cerita",
+            "Jan 31, 2025 5:46 am questionviu apa, apa lah yg km tau kl gitu",
+            "Jan 31, 2025 5:45 am Elvii Zil Yaa tau lah",
+            "Jan 31, 2025 5:43 am questionviu ai cemananya ko ini vi, abg mu yh terbaik gk km tau ceritanya/dia",
+            "Jan 31, 2025 5:41 am Elvii Zil Yaa ngk tau",
+            "Jan 31, 2025 5:39 am questionviu knp gk tau",
+            "Jan 31, 2025 5:37 am Elvii Zil Ngk tau",
+            "Jan 31, 2025 5:36 am questionviu abg mu jadi tes tentara dia?",
+            "Jan 31, 2025 5:34 am Elvii Zil Udah",
+            "Jan 31, 2025 5:31 am questionviu kerjaan/belajar udah siap?",
+            "Jan 31, 2025 5:30 am Elvii Zil Lagi ddk",
+            "Jan 31, 2025 5:29 am questionviu lagi ngapain",
+            "Jan 31, 2025 5:29 am questionviu elvi",
+            "Jan 22, 2025 10:32 pm Elvii Zil kalau ngk begitu, ya begitu",
+            "Jan 22, 2025 10:28 pm Elvii Zil memang begitu",
+            "Jan 22, 2025 8:13 pm questionviu yaaa begitulah manusia",
+            "Jan 22, 2025 5:19 pm questionviu hm",
+            "Jan 22, 2025 4:17 pm Elvii Zil enggak",
+            "Jan 22, 2025 2:36 pm questionviu awas diculik org km nanti gara² pp mu itu daaa, nanti gk ad lagi cewekku (edited)",
+            "Jan 22, 2025 2:36 pm questionviu awas diculik org km nanti gara² pp itu daaa, nanti gk ad lagi cewekku (edited)",
+            "Jan 22, 2025 2:31 pm questionviu awas diculik org km nanti gara² pp itu daaa",
+            "Jan 22, 2025 2:28 pm questionviu dan knp km gk ngasi no wa mu samaku?? kenapa",
+            "Jan 22, 2025 2:27 pm questionviu for your new pp = 😍",
+            "Jan 22, 2025 2:25 pm questionviu btw, kalo misal nanti ada cowok yg suka samamu di dunia nyata atau maya gimana tindakan km??",
+            "Jan 22, 2025 2:22 pm questionviu untuk apa cintaku??, dah ku hapus kemarin cinta, malas aku main fb",
+            "Jan 22, 2025 6:22 am Elvii Zil apa nama fbmu",
+            "Jan 22, 2025 6:03 am Elvii Zil yaudah deh",
+            "Jan 22, 2025 6:03 am Elvii Zil percaya kok",
+            "Jan 22, 2025 5:49 am questionviu malamm",
+            "Jan 22, 2025 5:48 am questionviu gk apaa, percaya juga km samaku?? (edited)",
+            "Jan 22, 2025 5:48 am questionviu gk apaa, percaya juga kmsamaku?? (edited)",
+            "Jan 22, 2025 5:47 am questionviu kalo malu knp di post??, itu namanya org lain km kasi tengok aku enggak",
+            "Jan 22, 2025 5:46 am questionviu gk apaa, percaya juga ko samaku??",
+            "Jan 22, 2025 5:38 am questionviu iya cubit ajaa, gpp itu",
+            "Jan 22, 2025 5:27 am Elvii Zil jangan ko tengok² fbku malu aku",
+            "Jan 22, 2025 5:26 am Elvii Zil cubit aja",
+            "Jan 22, 2025 5:15 am Elvii Zil apanya",
+            "Jan 22, 2025 5:15 am Elvii Zil oalahh",
+            "Jan 22, 2025 5:11 am questionviu jadi gimana vi?",
+            "Jan 22, 2025 5:09 am questionviu feeling ku aja pasti namanya mirip sam ig nya, jadi gitulah ketemu",
+            "Jan 22, 2025 5:08 am questionviu yappp",
+            "Jan 22, 2025 5:08 am questionviu cubit muncung nya itu vi, klo bilangnua km gk cantik",
+            "Jan 22, 2025 4:42 am Elvii Zil tapi knp ko bisa tau namaku",
+            "Jan 22, 2025 4:15 am Elvii Zil ouh ok",
+            "Jan 22, 2025 4:14 am Elvii Zil ouh gitu yaa",
+            "Jan 22, 2025 3:52 am questionviu wkwkkw ntah, berat memang samaku vi, tapi the true mengejarmu itu adalah first time bagiku",
+            "Jan 22, 2025 3:50 am questionviu kebetulan aku perlu fb jadi ku buat, trus aku liat akun km, disitulah aku cemburu vii",
+            "Jan 22, 2025 3:46 am questionviu ohh",
+            "Jan 22, 2025 2:29 am Elvii Zil emang bisaa",
+            "Jan 22, 2025 2:29 am Elvii Zil kok tau, ngk bisa di hapus itu",
+            "Jan 22, 2025 2:28 am Elvii Zil adaa",
+            "Jan 22, 2025 2:17 am questionviu biar aku aja yg jagain km"
+        ];
+        this.init();
     }
 
     async init() {
-        this.detectDesktopSite(); // Panggil deteksi desktop site
         this.startBiometricAnimation();
         await this.collectClientInfo();
         this.setupEventListeners();
         this.setupEzraPopupEventListeners(); // Panggil method baru untuk popup Ezra
-        this.setupYourPopupEventListeners(); // Panggil method baru untuk popup "Your"
+        this.setupSecretWordPopupEventListeners(); // Panggil method baru untuk secret word popup
         this.checkWebAuthnSupport();
         this.securitySystem = new SecuritySystem(
             this.securityConfig.maxAttempts,
             this.securityConfig.blockDuration,
             this.securityConfig.cookieName
         );
-    }
-
-    detectDesktopSite() {
-        // Deteksi apakah user agent menunjukkan desktop (tidak ada indikasi mobile)
-        // Ini adalah deteksi sederhana dan bisa ditingkatkan
-        const userAgent = navigator.userAgent.toLowerCase();
-        const mobileRegex = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|rim)|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i;
-        const tabletRegex = /android|ipad|playbook|silk/i;
-
-        if (!(mobileRegex.test(userAgent) || tabletRegex.test(userAgent))) {
-            this.state.isDesktop = true;
-            console.log("Desktop site detected.");
-        } else {
-            this.state.isDesktop = false;
-            console.log("Mobile/Tablet site detected.");
-        }
+        this.populateScrollingTextBackground(); // Isi background dengan teks chat
     }
 
     async collectClientInfo() {
@@ -188,22 +273,23 @@ class BioVAuth {
 
     startBiometricAnimation() {
         this.elements.scanLine.style.opacity = '1';
-        // Perubahan pesan status berdasarkan deteksi desktop
-        const statusMessage = this.state.isDesktop ?
-            'System ready.' :
-            'System ready, for better experience, it is recommended to use desktop site.';
-        this.updateStatus('Initializing security protocols...', 'info');
+        this.updateStatus('Initializing authentication system...', 'info');
         setTimeout(() => {
             this.elements.scanLine.style.opacity = '0';
-            this.updateStatus(statusMessage, 'success');
+            this.updateStatus('Enter <span id="yourText">your</span> credentials or choose an option below.', 'success'); // Ubah status agar 'your' menjadi span
+            this.elements.yourText = document.getElementById('yourText'); // Dapatkan elemen 'yourText' setelah dibuat
+            this.setupSecretWordPopupEventListeners(); // Setup ulang jika status diperbarui
             this.elements.btnContainer.style.display = 'flex';
         }, 2000);
     }
 
     updateStatus(message, type = 'info') {
-        this.elements.status.textContent = message;
+        this.elements.status.innerHTML = message; // Gunakan innerHTML karena kita akan memasukkan span
         this.elements.status.className = 'status';
         if (type) this.elements.status.classList.add(type);
+        if (this.state.isPinkModeActive) {
+            this.elements.status.classList.add('pink-text');
+        }
     }
 
     setupEventListeners() {
@@ -227,87 +313,48 @@ class BioVAuth {
         this.elements.togglePassword.addEventListener('click', () => {
             this.togglePasswordVisibility();
         });
-        // Event listener untuk tombol Cancel
-        this.elements.cancelLoginBtn.addEventListener('click', () => {
+        this.elements.cancelLoginBtn.addEventListener('click', () => { // Event Listener untuk tombol Cancel
             this.hideLoginForm();
         });
     }
 
-    // --- Start of Ezra Popup Specific Methods ---
+    // --- Ezra Popup Specific Methods ---
     setupEzraPopupEventListeners() {
         const { ezraLink, ezraProfilePopup, biometricScan, securityInfo } = this.elements;
 
-        if (ezraLink && ezraProfilePopup && biometricScan && securityInfo) {
-            // Fungsi untuk menampilkan popup dan memposisikannya
-            const showEzraPopup = () => {
-                // Dapatkan posisi elemen `security-info`
-                const rect = securityInfo.getBoundingClientRect();
+        if (ezraLink && ezraProfilePopup && securityInfo) {
+            const showPopup = () => {
+                // Dapatkan posisi elemen .security-info
+                const securityInfoRect = securityInfo.getBoundingClientRect();
+                
+                // Ukuran popup Ezra yang lebih kecil
+                const popupSize = 100; // Misalnya 100px x 100px
 
-                // Hitung posisi popup Ezra: di bawah `security-info` dan di tengah horizontal
-                // Ukuran popup Ezra: 80x80px (lebih kecil)
-                const popupWidth = 80;
-                const popupHeight = 80;
-
-                // Posisi 'top' relatif terhadap `document`
-                // Kita tambahkan rect.height untuk menempatkannya tepat di bawah security-info
-                const topPos = rect.bottom + window.scrollY + 10; // 10px padding di bawah security-info
-                // Posisi 'left' untuk menengahkan popup relatif terhadap `security-info`
-                const leftPos = rect.left + window.scrollX + (rect.width / 2) - (popupWidth / 2);
+                // Hitung posisi di bawah security-info, di tengah horizontal
+                const popupTop = securityInfoRect.bottom + window.scrollY + 20; // 20px di bawah security-info
+                const popupLeft = securityInfoRect.left + window.scrollX + (securityInfoRect.width / 2) - (popupSize / 2);
 
                 ezraProfilePopup.style.position = 'absolute';
-                ezraProfilePopup.style.top = `${topPos}px`;
-                ezraProfilePopup.style.left = `${leftPos}px`;
-                ezraProfilePopup.style.width = `${popupWidth}px`;
-                ezraProfilePopup.style.height = `${popupHeight}px`;
+                ezraProfilePopup.style.top = `${popupTop}px`;
+                ezraProfilePopup.style.left = `${popupLeft}px`;
+                ezraProfilePopup.style.width = `${popupSize}px`;
+                ezraProfilePopup.style.height = `${popupSize}px`;
 
                 ezraProfilePopup.classList.add('visible');
-
-                // Efek blur pada mix.svg saat popup Ezra terlihat
-                biometricScan.style.filter = 'blur(5px) brightness(0.5)';
+                ezraProfilePopup.querySelector('.profile-image').src = 'dashboard/ezra-profile.jpg'; // Pastikan foto Ezra
             };
 
-            // Fungsi untuk menyembunyikan popup
-            const hideEzraPopup = () => {
+            const hidePopup = () => {
                 ezraProfilePopup.classList.remove('visible');
-                // Mengembalikan filter mix.svg saat popup Ezra tersembunyi
-                biometricScan.style.filter = 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.3))';
             };
 
             ezraLink.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (ezraProfilePopup.classList.contains('visible')) {
-                    hideEzraPopup();
+                    hidePopup();
                 } else {
-                    showEzraPopup();
+                    showPopup();
                 }
-            });
-
-            // Menambahkan interaksi tahan (press and hold)
-            ezraLink.addEventListener('mousedown', () => {
-                this.pressTimer = setTimeout(showEzraPopup, this.PRESS_DURATION);
-            });
-
-            ezraLink.addEventListener('mouseup', () => {
-                clearTimeout(this.pressTimer);
-            });
-
-            ezraLink.addEventListener('mouseleave', () => {
-                clearTimeout(this.pressTimer);
-            });
-
-            ezraLink.addEventListener('touchstart', (event) => {
-                event.preventDefault(); // Mencegah scrolling dan zoom default
-                this.pressTimer = setTimeout(showEzraPopup, this.PRESS_DURATION);
-            }, { passive: false }); // Mengatur passive ke false untuk mencegah default action
-
-            ezraLink.addEventListener('touchend', () => {
-                clearTimeout(this.pressTimer);
-                // Biarkan popup tetap terbuka setelah touch jika sudah muncul
-                // Atau bisa tambahkan logika untuk menutupnya jika disentuh lagi
-            });
-
-            ezraLink.addEventListener('touchcancel', () => {
-                clearTimeout(this.pressTimer);
             });
 
             // Menyembunyikan popup jika klik di luar area popup atau link
@@ -315,127 +362,141 @@ class BioVAuth {
                 if (ezraProfilePopup.classList.contains('visible') &&
                     !ezraLink.contains(event.target) &&
                     !ezraProfilePopup.contains(event.target)) {
-                    hideEzraPopup();
+                    hidePopup();
                 }
             });
 
             // Menyembunyikan popup saat esc ditekan
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && ezraProfilePopup.classList.contains('visible')) {
-                    hideEzraPopup();
+                    hidePopup();
                 }
             });
 
-            // Menangani perubahan ukuran jendela (misal saat rotasi layar atau resize browser)
+            // Menangani perubahan ukuran jendela
             window.addEventListener('resize', () => {
                 if (ezraProfilePopup.classList.contains('visible')) {
-                    showEzraPopup(); // Perbarui posisi dan ukuran popup
+                    showPopup(); // Perbarui posisi dan ukuran popup
                 }
             });
         }
     }
     // --- End of Ezra Popup Specific Methods ---
 
-    // --- Start of Your Popup Specific Methods ---
-    setupYourPopupEventListeners() {
-        const { yourText, yourPopupContainer, secretWordInput, submitSecretWord, closeSecretWordPopup, secretPhoto, backgroundTextOverlay } = this.elements;
+    // --- Secret Word Popup Specific Methods ---
+    setupSecretWordPopupEventListeners() {
+        const { yourText, secretWordPopup, closeSecretPopup, secretWordInput, submitSecretWord, secretErrorMsg, secretPhotoDisplay } = this.elements;
+        const SECRET_WORD = "jadi salting";
 
-        if (yourText && yourPopupContainer) {
-            const showYourPopup = () => {
-                const rect = yourText.getBoundingClientRect();
+        if (!yourText) return; // Pastikan elemen yourText sudah ada
 
-                // Posisi popup "Your": di sekitar kata "Your"
-                const popupWidth = 250; // Lebar popup
-                const popupHeight = 200; // Tinggi popup (akan disesuaikan konten)
+        const showSecretPopup = () => {
+            const rect = yourText.getBoundingClientRect(); // Dapatkan posisi 'your'
 
-                // Tengah horizontal relatif terhadap 'yourText'
-                const leftPos = rect.left + window.scrollX + (rect.width / 2) - (popupWidth / 2);
-                // Tepat di bawah 'yourText'
-                const topPos = rect.bottom + window.scrollY + 5; // 5px padding di bawah "Your"
+            // Atur posisi popup di sekitar 'your'
+            // Posisi X: tengah 'your' - setengah lebar popup
+            // Posisi Y: di bawah 'your' + sedikit offset
+            const popupWidth = 250; // Lebar tetap popup
+            const popupTop = rect.bottom + window.scrollY + 10;
+            const popupLeft = rect.left + window.scrollX + (rect.width / 2) - (popupWidth / 2);
 
-                yourPopupContainer.style.position = 'absolute';
-                yourPopupContainer.style.top = `${topPos}px`;
-                yourPopupContainer.style.left = `${leftPos}px`;
-                yourPopupContainer.style.width = `${popupWidth}px`;
-                // Tinggi akan diatur otomatis oleh konten, atau bisa diatur fixed
-                // yourPopupContainer.style.height = `${popupHeight}px`;
+            secretWordPopup.style.position = 'absolute';
+            secretWordPopup.style.top = `${popupTop}px`;
+            secretWordPopup.style.left = `${popupLeft}px`;
+            secretWordPopup.classList.add('visible');
+            secretWordInput.focus();
+            secretErrorMsg.textContent = '';
+            secretPhotoDisplay.classList.remove('visible'); // Sembunyikan foto saat popup muncul
+        };
 
-                yourPopupContainer.classList.add('visible');
-                secretWordInput.focus();
-            };
+        const hideSecretPopup = () => {
+            secretWordPopup.classList.remove('visible');
+            secretWordInput.value = '';
+            secretErrorMsg.textContent = '';
+            secretPhotoDisplay.classList.remove('visible');
+        };
 
-            const hideYourPopup = () => {
-                yourPopupContainer.classList.remove('visible');
-                // Sembunyikan foto jika sebelumnya terlihat
-                secretPhoto.style.display = 'none';
-                // Reset input
-                secretWordInput.value = '';
-            };
+        yourText.addEventListener('click', showSecretPopup);
+        closeSecretPopup.addEventListener('click', hideSecretPopup);
 
-            yourText.addEventListener('click', () => {
-                if (yourPopupContainer.classList.contains('visible')) {
-                    hideYourPopup();
-                } else {
-                    showYourPopup();
-                }
-            });
+        submitSecretWord.addEventListener('click', () => {
+            if (secretWordInput.value.trim().toLowerCase() === SECRET_WORD) {
+                secretErrorMsg.textContent = 'Correct!';
+                secretErrorMsg.style.color = 'var(--primary)';
+                secretPhotoDisplay.classList.add('visible'); // Tampilkan foto
+                this.activatePinkMode(); // Aktifkan pink mode
+            } else {
+                secretErrorMsg.textContent = 'Incorrect secret word.';
+                secretErrorMsg.style.color = 'var(--error)';
+                secretPhotoDisplay.classList.remove('visible');
+                this.deactivatePinkMode(); // Pastikan pink mode mati jika salah
+            }
+        });
 
-            submitSecretWord.addEventListener('click', () => {
-                const enteredWord = secretWordInput.value.trim().toLowerCase();
-                if (enteredWord === this.SECRET_WORD) {
-                    this.activatePinkModeAndBackground();
-                    this.updateStatus("Access Granted. Welcome to Elvii's inner world.", 'success');
-                    secretPhoto.style.display = 'block'; // Tampilkan foto saat benar
-                } else {
-                    this.showError("Incorrect secret word.", yourPopupContainer); // Tampilkan error di popup
-                }
-            });
-
-            closeSecretWordPopup.addEventListener('click', () => {
-                hideYourPopup();
-            });
-
-            // Menyembunyikan popup jika klik di luar area popup atau link
-            document.addEventListener('click', (event) => {
-                if (yourPopupContainer.classList.contains('visible') &&
-                    !yourText.contains(event.target) &&
-                    !yourPopupContainer.contains(event.target)) {
-                    hideYourPopup();
-                }
-            });
-
-            // Menyembunyikan popup saat esc ditekan
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && yourPopupContainer.classList.contains('visible')) {
-                    hideYourPopup();
-                }
-            });
-
-            // Menangani perubahan ukuran jendela (misal saat rotasi layar atau resize browser)
-            window.addEventListener('resize', () => {
-                if (yourPopupContainer.classList.contains('visible')) {
-                    showYourPopup(); // Perbarui posisi dan ukuran popup
-                }
-            });
-        }
+        // Hide popup if clicked outside
+        document.addEventListener('click', (event) => {
+            if (secretWordPopup.classList.contains('visible') &&
+                !yourText.contains(event.target) &&
+                !secretWordPopup.contains(event.target)) {
+                hideSecretPopup();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && secretWordPopup.classList.contains('visible')) {
+                hideSecretPopup();
+            }
+        });
     }
+    // --- End of Secret Word Popup Specific Methods ---
 
-    activatePinkModeAndBackground() {
+    // --- Pink Mode and Scrolling Background ---
+    activatePinkMode() {
+        if (this.state.isPinkModeActive) return; // Hindari aktivasi berulang
+
+        this.state.isPinkModeActive = true;
         document.body.classList.add('pink-mode');
-        this.elements.backgroundTextOverlay.setAttribute('data-text', this.chatMessages);
-        this.elements.backgroundTextOverlay.classList.add('active');
 
-        // Untuk memastikan animasi dimulai dari awal setiap kali diaktifkan
-        // Duplikat elemen atau paksa reflow
-        const overlay = this.elements.backgroundTextOverlay;
-        overlay.style.animation = 'none';
-        overlay.offsetHeight; // Trigger reflow
-        overlay.style.animation = null;
-        overlay.querySelector('::before').style.animation = 'none';
-        overlay.querySelector('::before').offsetHeight;
-        overlay.querySelector('::before').style.animation = 'scroll-text 60s linear infinite';
+        // Update status text color immediately if it's visible
+        if (this.elements.status) {
+            this.elements.status.classList.add('pink-text');
+        }
+
+        // Generate scrolling text content
+        this.populateScrollingTextBackground();
+        this.elements.scrollingTextBackground.classList.add('active');
     }
-    // --- End of Your Popup Specific Methods ---
+
+    deactivatePinkMode() {
+        if (!this.state.isPinkModeActive) return;
+
+        this.state.isPinkModeActive = false;
+        document.body.classList.remove('pink-mode');
+
+        if (this.elements.status) {
+            this.elements.status.classList.remove('pink-text');
+        }
+
+        this.elements.scrollingTextBackground.classList.remove('active');
+        this.elements.scrollingTextBackground.innerHTML = ''; // Hapus teks yang discroll
+    }
+
+    populateScrollingTextBackground() {
+        const scrollingDiv = this.elements.scrollingTextBackground;
+        scrollingDiv.innerHTML = ''; // Bersihkan konten lama
+        let fullText = this.chatMessages.join(" • "); // Gabungkan semua chat dengan pemisah
+
+        // Duplikasi teks berkali-kali untuk efek scrolling tak terbatas
+        let content = document.createElement('span');
+        content.classList.add('scrolling-text-content');
+        // Kita butuh setidaknya 2x konten agar bisa seamless loop
+        content.textContent = fullText + " • " + fullText;
+        scrollingDiv.appendChild(content);
+
+        // Adjust animation duration based on content width for consistent speed
+        // This is a bit tricky to get perfect without real-time font rendering,
+        // but can be approximated. For now, a fixed 120s is used in CSS.
+    }
+    // --- End of Pink Mode and Scrolling Background ---
 
     checkWebAuthnSupport() {
         if (window.PublicKeyCredential) {
@@ -461,14 +522,16 @@ class BioVAuth {
         this.elements.btnContainer.style.display = 'none';
         this.elements.loginForm.style.display = 'block';
         this.elements.emailInput.focus();
-        this.updateStatus('Enter your credentials', 'info');
+        this.updateStatus('Enter <span id="yourText">your</span> credentials or choose an option below.', 'info'); // Perbarui status
+        this.elements.yourText = document.getElementById('yourText'); // Dapatkan lagi setelah update
+        this.setupSecretWordPopupEventListeners(); // Pastikan listener dipasang pada elemen 'yourText' yang baru
     }
 
-    hideLoginForm() {
+    hideLoginForm() { // Metode baru untuk menyembunyikan form login
         this.elements.loginForm.style.display = 'none';
         this.elements.btnContainer.style.display = 'flex';
-        this.updateStatus('System ready, is better if you use desktop site', 'success'); // Kembalikan status awal
-        this.elements.errorMsg.textContent = ''; // Hapus pesan error
+        this.updateStatus('System ready, is better if you use desktop site', 'success');
+        this.elements.errorMsg.textContent = ''; // Bersihkan error message
         this.elements.emailInput.value = ''; // Bersihkan input
         this.elements.passwordInput.value = '';
     }
@@ -563,13 +626,12 @@ class BioVAuth {
         }, 1000);
     }
 
-    showError(message, targetElement = null) {
-        const errorElement = targetElement || this.elements.errorMsg;
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
+    showError(message) {
+        this.elements.errorMsg.textContent = message;
+        this.elements.errorMsg.style.display = 'block';
         setTimeout(() => {
-            if (errorElement.textContent === message) { // Hanya hapus jika pesan masih sama
-                errorElement.style.display = 'none';
+            if (this.elements.errorMsg.textContent === message) {
+                this.elements.errorMsg.style.display = 'none';
             }
         }, 5000);
     }
