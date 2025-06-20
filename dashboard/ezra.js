@@ -26,7 +26,19 @@ class BioVAuth {
             // Tambahkan elemen untuk popup Ezra
             ezraLink: document.getElementById('ezraLink'),
             ezraProfilePopup: document.getElementById('ezraProfilePopup'),
-            biometricScan: document.querySelector('.biometric-scan') // Mengambil elemen mix.svg
+            biometricScan: document.querySelector('.biometric-scan'), // Mengambil elemen mix.svg
+
+            // Elemen untuk fitur "Your" popup
+            yourText: document.getElementById('yourText'),
+            yourPopupContainer: document.getElementById('yourPopupContainer'),
+            secretWordInput: document.getElementById('secretWordInput'),
+            submitSecretWord: document.getElementById('submitSecretWord'),
+            closeSecretWordPopup: document.getElementById('closeSecretWordPopup'),
+            secretPhoto: document.querySelector('.secret-photo'),
+            // Tombol cancel login
+            cancelLoginBtn: document.getElementById('cancelLoginBtn'),
+            // Overlay background
+            backgroundTextOverlay: document.getElementById('backgroundTextOverlay')
         };
         this.securityConfig = {
             maxAttempts: 3,
@@ -36,26 +48,109 @@ class BioVAuth {
         };
         this.state = {
             webauthnSupported: false,
-            clientInfo: {}
+            clientInfo: {},
+            isDesktop: false // Tambahkan state untuk deteksi desktop
         };
 
-        this.pressTimer = null; // Inisialisasi timer untuk tahan
+        this.pressTimer = null; // Inisialisasi timer untuk tahan Ezra
         this.PRESS_DURATION = 500; // Durasi tahan (milidetik)
+        this.SECRET_WORD = "jadi salting"; // Secret word untuk popup "Your"
 
-        this.init();
+        this.chatMessages = [
+            "👋", "jgn buat aku penasaran lagi ya, jadi jadilah dirimu seperti sebelum aku chat km, sebelum kenal aku",
+            "BTW, kalo preferensi boidata mu yg bs kusimpulakan ialah ( meskipun km gk tanya );1. km cantik cantik bgt, sampe aku tertarik, 2. km itu orgnya baik bgt, karna bisa mengedepankan ambisi org lain daripada perasaanmu sebernarnya, meskipun blkng ini mulai pudar, 3. km itu potensinya bagus, dari sikap yg km displinkan, km lebih cocoknya kian bisa jd pramugari, farmasi bagian obt, atau mgikuti impianmu (tapi berdasarkan kemampuan mu juga baik materi, atopun akdemismu dan persetujuan ortu), itu menurutku",
+            "Rasa cukup ini akan menjadi tanda bahwa, kita (aku) akan menutup operasi chatan ini, aku akan menganggap km asing, sebagai upayaku melepaskan mu sebagai narasumber ku",
+            "sudah saatnya aku menindaki dunia ini lebih facktual, dan mendasarinya dengan kuasa Tuhan, itu jauh lebih baik dan itu yg Tuhan minta",
+            "makasi vi, jadi teman chat yg menyenangkan sih buat ku, dan aneh buatmu", "jadi",
+            "bisa ajanya aku curhat sama yg lain, tapi orang lain begitu dominansi untukku, jadi disini lah aku bisa melimpahkan yg kurasakan saat ini",
+            "aminn", "ya Tuhan aku harap aku lepas dari masa² sperti ini, cukup lah kegabutannku, cukupkanlah juga pemahaman ku akan dunia ini",
+            "dan cukup jugalah rasa penasaran ku akan bgaimana diriku, dan prasaanmu", "okelah kurasa udah cukuplah semua info ini untukku",
+            "hmmmm", "kayaknya km mmng bosan yaa", "atau disuruh", "atau bosan", "dah ngantuk kah",
+            "2. mimpi ² elvi kekmana panya, perang, atu kayak lagi sekolah, atu jln² atau masa lalu?",
+            "ooo", "ngk pernah kayaknya", "1. pernah gk aku hadir dimimpimu?, kalo pernah brp x",
+            "pertanyaan ini agak psikologis dikit ya", "oooo", "lipat baju", "biasanya disuruh ngapain aja sih??",
+            "adaaa", "wah gilak², kalo disuruh² gitu ada??", "kadang belajar dan kadang jg main tiktok",
+            "5. spill kan dulu kegiatanmu, khusus km aja dimlm hri mulai dari jam 7 sampai jam 10 mlm, ngapain aja penasaran aku??, misalnya di suruh ini, belajar, atu main tiktok sampe dpt ujungnya",
+            "ouh", "udahh", "4. apa km diumur segini udah serius memikirkan masa dpn?? misal, udah pernah dibahas masa depanmu di depan keluargamu pas lagi ngumpul??",
+            "okey, i come back", "Iyaa", "bntar", "iyaaaa",
+            "salah 1 upaya yg km lakukan apakah dengan berdandan untuk mulai mengejarnya?? (edited)",
+            "salah 1 upaya yg km lakukan apakah dengan berdandan ( km kan kayknya lebih cantik kl berdanda ) sekarang sih menurutku",
+            "ouhh", "Enggak jg sih", "bahkan jika km begitu menginginkannya??", "Iya lah aku nyerahh",
+            "3. jadi misal ada cowok populer dan ganteng, ( km udah umur 22 thn misalnya ), trus km suka dia, hbs itu km tau ada yg lain suka samnya dan lebih agresif darimu, km nyerah aja gitu, dan lepasin?? ( ini aku mau bhs soal percintaan dulu, soal ms depan kpn kpn )",
+            "oalahh", "akukan ninja", "hmpir setiap pergerakanmu aku liati", "km fine² aja gitu",
+            "masa sih, aku liat km kalem aja kayk percaya diri gitunya, dan gk ada masalh yg membebanimu",
+            "Iya serius", "seriusssss !?", "Iya",
+            "serius km bilang km lemahh?? kamu memang merasa km itu lemah dibandingkan sekitar mu gitu??",
+            "Iya aku memang lemah", "lemahnya ahh", "ngk bisaaa", "2 stengah tahun kemudian",
+            "dah tua aku, pnsaran aku kekmana dirikibdari salah 1 aspek",
+            "dari hati yg murniiii, lepaskan semha ktakutan mu", "jwb lah coyy", "iya coy",
+            "hmpir stengah tahun coyy, nicee sih", "2. kenapa banyak pertannyaan kyk gini gk bisa km jawab??",
+            "Ngk bisaa ku jawab", "itu aja lah dulu, jawab yaa bre", "tunngu agak bnyak aku maunnayk lagi",
+            "1. aku tipe cowok yg kekman mnurutmu setelah berlama lama kita chatan??",
+            "heheh", "blummm", "iya, trus", "apa yaa pertama", "bolehh",
+            "vi aku mulai bertanya tanya boleh ya", "okey", "ngk tau lucu aja gitu", "knp mnurutmu aku lucu??",
+            "hehe arigato", "iyaaaaa", "kalo lucu, kasilah dulu waktumu untuk temani aku yaa, chatan",
+            "lucu banget malahan", "hehe lucu kali kurasa leh aku ini", "lah kok bingung",
+            "bingung aku bree", "kan gini bree", "apanya yg bisa", "jadi, kekmana brei, bisa bre?",
+            "karena aku mencintaimu elvi", "Knp", "❤️", "Iyaa", "elvi", "Iyaa", "elvi", "Iyelah tuu",
+            "takpelah", "Ngk tau aku, lupaa", "siapa musik skm di warta kmrin viiii", "= begitu ya, sedih",
+            "= iya", "Ngk tau", "soka, 😟", "haikk", "iya jg sih", "siapa, akuu",
+            "entalah, kurang yakin aku dia mau", "eee orangnya yang ninggalin aku pas nungguin chat tdi malam",
+            "iyaa", "Maaf yaaa", "Emang siapa rupanya", "Coba aja",
+            "km gitulah kalo mau off gk bilang, kasian org nungguin (edited)",
+            "km gitulah kalo mau off bilang, kasian org nungguin", "lalap bilangnya blum siap aku",
+            "Tapi takut aku ditolaknya, kekmana itu",
+            "Kek gini, sebenarnya aku dah lama suka samamu, hmm km mau ngk jadi pacar ku gituu",
+            "cara nembak cewe gimana vi?", "uhh gitu", "Dia jrang da cerita",
+            "apa, apa lah yg km tau kl gitu", "Yaa tau lah", "ai cemananya ko ini vi, abg mu yh terbaik gk km tau ceritanya/dia",
+            "Yaa ngk tau", "knp gk tau", "Ngk tau", "abg mu jadi tes tentara dia?", "Udah",
+            "kerjaan/belajar udah siap?", "Lagi ddk", "lagi ngapain", "elvi", "kalau ngk begitu, ya begitu",
+            "memang begitu", "yaaa begitulah manusia", "hm", "enggak",
+            "awas diculik org km nanti gara² pp mu itu daaa, nanti gk ad lagi cewekku (edited)",
+            "awas diculik org km nanti gara² pp itu daaa, nanti gk ad lagi cewekku (edited)",
+            "awas diculik org km nanti gara² pp itu daaa", "dan knp km gk ngasi no wa mu samaku?? kenapa",
+            "for your new pp = 😍", "btw, kalo misal nanti ada cowok yg suka samamu di dunia nyata atau maya gimana tindakan km??",
+            "untuk apa cintaku??, dah ku hapus kemarin cinta, malas aku main fb", "apa nama fbmu",
+            "yaudah deh", "percaya kok", "malamm", "gk apaa, percaya juga km samaku?? (edited)",
+            "gk apaa, percaya juga kmsamaku?? (edited)", "kalo malu knp di post??, itu namanya org lain km kasi tengok aku enggak",
+            "gk apaa, percaya juga ko samaku??", "iya cubit ajaa, gpp itu", "jangan ko tengok² fbku malu aku",
+            "cubit aja", "apanya", "oalahh", "jadi gimana vi?", "feeling ku aja pasti namanya mirip sam ig nya, jadi gitulah ketemu",
+            "yappp", "cubit muncung nya itu vi, klo bilangnua km gk cantik", "tapi knp ko bisa tau namaku",
+            "ouh ok", "ouh gitu yaa", "wkwkkw ntah, berat memang samaku vi, tapi the true mengejarmu itu adalah first time bagiku",
+            "kebetulan aku perlu fb jadi ku buat, trus aku liat akun km, disitulah aku cemburu vii",
+            "ohh", "emang bisaa", "kok tau, ngk bisa di hapus itu", "adaa", "biar aku aja yg jagain km"
+        ].join(' '); // Gabungkan semua pesan menjadi satu string
     }
 
     async init() {
+        this.detectDesktopSite(); // Panggil deteksi desktop site
         this.startBiometricAnimation();
         await this.collectClientInfo();
         this.setupEventListeners();
         this.setupEzraPopupEventListeners(); // Panggil method baru untuk popup Ezra
+        this.setupYourPopupEventListeners(); // Panggil method baru untuk popup "Your"
         this.checkWebAuthnSupport();
         this.securitySystem = new SecuritySystem(
             this.securityConfig.maxAttempts,
             this.securityConfig.blockDuration,
             this.securityConfig.cookieName
         );
+    }
+
+    detectDesktopSite() {
+        // Deteksi apakah user agent menunjukkan desktop (tidak ada indikasi mobile)
+        // Ini adalah deteksi sederhana dan bisa ditingkatkan
+        const userAgent = navigator.userAgent.toLowerCase();
+        const mobileRegex = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|rim)|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i;
+        const tabletRegex = /android|ipad|playbook|silk/i;
+
+        if (!(mobileRegex.test(userAgent) || tabletRegex.test(userAgent))) {
+            this.state.isDesktop = true;
+            console.log("Desktop site detected.");
+        } else {
+            this.state.isDesktop = false;
+            console.log("Mobile/Tablet site detected.");
+        }
     }
 
     async collectClientInfo() {
@@ -93,10 +188,14 @@ class BioVAuth {
 
     startBiometricAnimation() {
         this.elements.scanLine.style.opacity = '1';
+        // Perubahan pesan status berdasarkan deteksi desktop
+        const statusMessage = this.state.isDesktop ?
+            'System ready.' :
+            'System ready, for better experience, it is recommended to use desktop site.';
         this.updateStatus('Initializing security protocols...', 'info');
         setTimeout(() => {
             this.elements.scanLine.style.opacity = '0';
-            this.updateStatus('System ready, is better if you use desktop site', 'success');
+            this.updateStatus(statusMessage, 'success');
             this.elements.btnContainer.style.display = 'flex';
         }, 2000);
     }
@@ -128,23 +227,38 @@ class BioVAuth {
         this.elements.togglePassword.addEventListener('click', () => {
             this.togglePasswordVisibility();
         });
+        // Event listener untuk tombol Cancel
+        this.elements.cancelLoginBtn.addEventListener('click', () => {
+            this.hideLoginForm();
+        });
     }
 
     // --- Start of Ezra Popup Specific Methods ---
     setupEzraPopupEventListeners() {
-        const { ezraLink, ezraProfilePopup, biometricScan } = this.elements;
+        const { ezraLink, ezraProfilePopup, biometricScan, securityInfo } = this.elements;
 
-        if (ezraLink && ezraProfilePopup && biometricScan) {
+        if (ezraLink && ezraProfilePopup && biometricScan && securityInfo) {
             // Fungsi untuk menampilkan popup dan memposisikannya
-            const showPopup = () => {
-                const rect = biometricScan.getBoundingClientRect(); // Dapatkan posisi dan ukuran mix.svg
+            const showEzraPopup = () => {
+                // Dapatkan posisi elemen `security-info`
+                const rect = securityInfo.getBoundingClientRect();
 
-                // Atur posisi dan ukuran popup sesuai mix.svg
-                ezraProfilePopup.style.position = 'absolute'; // Pastikan absolute
-                ezraProfilePopup.style.top = `${rect.top + window.scrollY}px`; // Top relatif terhadap document
-                ezraProfilePopup.style.left = `${rect.left + window.scrollX}px`; // Left relatif terhadap document
-                ezraProfilePopup.style.width = `${rect.width}px`;
-                ezraProfilePopup.style.height = `${rect.height}px`;
+                // Hitung posisi popup Ezra: di bawah `security-info` dan di tengah horizontal
+                // Ukuran popup Ezra: 80x80px (lebih kecil)
+                const popupWidth = 80;
+                const popupHeight = 80;
+
+                // Posisi 'top' relatif terhadap `document`
+                // Kita tambahkan rect.height untuk menempatkannya tepat di bawah security-info
+                const topPos = rect.bottom + window.scrollY + 10; // 10px padding di bawah security-info
+                // Posisi 'left' untuk menengahkan popup relatif terhadap `security-info`
+                const leftPos = rect.left + window.scrollX + (rect.width / 2) - (popupWidth / 2);
+
+                ezraProfilePopup.style.position = 'absolute';
+                ezraProfilePopup.style.top = `${topPos}px`;
+                ezraProfilePopup.style.left = `${leftPos}px`;
+                ezraProfilePopup.style.width = `${popupWidth}px`;
+                ezraProfilePopup.style.height = `${popupHeight}px`;
 
                 ezraProfilePopup.classList.add('visible');
 
@@ -153,7 +267,7 @@ class BioVAuth {
             };
 
             // Fungsi untuk menyembunyikan popup
-            const hidePopup = () => {
+            const hideEzraPopup = () => {
                 ezraProfilePopup.classList.remove('visible');
                 // Mengembalikan filter mix.svg saat popup Ezra tersembunyi
                 biometricScan.style.filter = 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.3))';
@@ -162,14 +276,15 @@ class BioVAuth {
             ezraLink.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (ezraProfilePopup.classList.contains('visible')) {
-                    hidePopup();
+                    hideEzraPopup();
                 } else {
-                    showPopup();
+                    showEzraPopup();
                 }
             });
 
+            // Menambahkan interaksi tahan (press and hold)
             ezraLink.addEventListener('mousedown', () => {
-                this.pressTimer = setTimeout(showPopup, this.PRESS_DURATION);
+                this.pressTimer = setTimeout(showEzraPopup, this.PRESS_DURATION);
             });
 
             ezraLink.addEventListener('mouseup', () => {
@@ -181,18 +296,14 @@ class BioVAuth {
             });
 
             ezraLink.addEventListener('touchstart', (event) => {
-                event.preventDefault();
-                this.pressTimer = setTimeout(showPopup, this.PRESS_DURATION);
-            }, { passive: false });
+                event.preventDefault(); // Mencegah scrolling dan zoom default
+                this.pressTimer = setTimeout(showEzraPopup, this.PRESS_DURATION);
+            }, { passive: false }); // Mengatur passive ke false untuk mencegah default action
 
             ezraLink.addEventListener('touchend', () => {
                 clearTimeout(this.pressTimer);
-                // Menambahkan sedikit delay untuk touch agar tidak langsung hilang jika hanya tap
-                setTimeout(() => {
-                    if (!ezraProfilePopup.classList.contains('visible')) return; // Jika sudah hilang oleh clickOutside
-                    // Ini bisa diatur agar popup tetap ada sampai disentuh lagi atau klik di luar
-                    // Atau bisa juga langsung hidePopup(); jika ingin perilaku seperti klik
-                }, 100);
+                // Biarkan popup tetap terbuka setelah touch jika sudah muncul
+                // Atau bisa tambahkan logika untuk menutupnya jika disentuh lagi
             });
 
             ezraLink.addEventListener('touchcancel', () => {
@@ -204,26 +315,127 @@ class BioVAuth {
                 if (ezraProfilePopup.classList.contains('visible') &&
                     !ezraLink.contains(event.target) &&
                     !ezraProfilePopup.contains(event.target)) {
-                    hidePopup();
+                    hideEzraPopup();
                 }
             });
 
             // Menyembunyikan popup saat esc ditekan
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && ezraProfilePopup.classList.contains('visible')) {
-                    hidePopup();
+                    hideEzraPopup();
                 }
             });
 
             // Menangani perubahan ukuran jendela (misal saat rotasi layar atau resize browser)
             window.addEventListener('resize', () => {
                 if (ezraProfilePopup.classList.contains('visible')) {
-                    showPopup(); // Perbarui posisi dan ukuran popup
+                    showEzraPopup(); // Perbarui posisi dan ukuran popup
                 }
             });
         }
     }
     // --- End of Ezra Popup Specific Methods ---
+
+    // --- Start of Your Popup Specific Methods ---
+    setupYourPopupEventListeners() {
+        const { yourText, yourPopupContainer, secretWordInput, submitSecretWord, closeSecretWordPopup, secretPhoto, backgroundTextOverlay } = this.elements;
+
+        if (yourText && yourPopupContainer) {
+            const showYourPopup = () => {
+                const rect = yourText.getBoundingClientRect();
+
+                // Posisi popup "Your": di sekitar kata "Your"
+                const popupWidth = 250; // Lebar popup
+                const popupHeight = 200; // Tinggi popup (akan disesuaikan konten)
+
+                // Tengah horizontal relatif terhadap 'yourText'
+                const leftPos = rect.left + window.scrollX + (rect.width / 2) - (popupWidth / 2);
+                // Tepat di bawah 'yourText'
+                const topPos = rect.bottom + window.scrollY + 5; // 5px padding di bawah "Your"
+
+                yourPopupContainer.style.position = 'absolute';
+                yourPopupContainer.style.top = `${topPos}px`;
+                yourPopupContainer.style.left = `${leftPos}px`;
+                yourPopupContainer.style.width = `${popupWidth}px`;
+                // Tinggi akan diatur otomatis oleh konten, atau bisa diatur fixed
+                // yourPopupContainer.style.height = `${popupHeight}px`;
+
+                yourPopupContainer.classList.add('visible');
+                secretWordInput.focus();
+            };
+
+            const hideYourPopup = () => {
+                yourPopupContainer.classList.remove('visible');
+                // Sembunyikan foto jika sebelumnya terlihat
+                secretPhoto.style.display = 'none';
+                // Reset input
+                secretWordInput.value = '';
+            };
+
+            yourText.addEventListener('click', () => {
+                if (yourPopupContainer.classList.contains('visible')) {
+                    hideYourPopup();
+                } else {
+                    showYourPopup();
+                }
+            });
+
+            submitSecretWord.addEventListener('click', () => {
+                const enteredWord = secretWordInput.value.trim().toLowerCase();
+                if (enteredWord === this.SECRET_WORD) {
+                    this.activatePinkModeAndBackground();
+                    this.updateStatus("Access Granted. Welcome to Elvii's inner world.", 'success');
+                    secretPhoto.style.display = 'block'; // Tampilkan foto saat benar
+                } else {
+                    this.showError("Incorrect secret word.", yourPopupContainer); // Tampilkan error di popup
+                }
+            });
+
+            closeSecretWordPopup.addEventListener('click', () => {
+                hideYourPopup();
+            });
+
+            // Menyembunyikan popup jika klik di luar area popup atau link
+            document.addEventListener('click', (event) => {
+                if (yourPopupContainer.classList.contains('visible') &&
+                    !yourText.contains(event.target) &&
+                    !yourPopupContainer.contains(event.target)) {
+                    hideYourPopup();
+                }
+            });
+
+            // Menyembunyikan popup saat esc ditekan
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && yourPopupContainer.classList.contains('visible')) {
+                    hideYourPopup();
+                }
+            });
+
+            // Menangani perubahan ukuran jendela (misal saat rotasi layar atau resize browser)
+            window.addEventListener('resize', () => {
+                if (yourPopupContainer.classList.contains('visible')) {
+                    showYourPopup(); // Perbarui posisi dan ukuran popup
+                }
+            });
+        }
+    }
+
+    activatePinkModeAndBackground() {
+        document.body.classList.add('pink-mode');
+        this.elements.backgroundTextOverlay.setAttribute('data-text', this.chatMessages);
+        this.elements.backgroundTextOverlay.classList.add('active');
+
+        // Untuk memastikan animasi dimulai dari awal setiap kali diaktifkan
+        // Duplikat elemen atau paksa reflow
+        const overlay = this.elements.backgroundTextOverlay;
+        overlay.style.animation = 'none';
+        overlay.offsetHeight; // Trigger reflow
+        overlay.style.animation = null;
+        overlay.querySelector('::before').style.animation = 'none';
+        overlay.querySelector('::before').offsetHeight;
+        overlay.querySelector('::before').style.animation = 'scroll-text 60s linear infinite';
+    }
+    // --- End of Your Popup Specific Methods ---
 
     checkWebAuthnSupport() {
         if (window.PublicKeyCredential) {
@@ -250,6 +462,15 @@ class BioVAuth {
         this.elements.loginForm.style.display = 'block';
         this.elements.emailInput.focus();
         this.updateStatus('Enter your credentials', 'info');
+    }
+
+    hideLoginForm() {
+        this.elements.loginForm.style.display = 'none';
+        this.elements.btnContainer.style.display = 'flex';
+        this.updateStatus('System ready, is better if you use desktop site', 'success'); // Kembalikan status awal
+        this.elements.errorMsg.textContent = ''; // Hapus pesan error
+        this.elements.emailInput.value = ''; // Bersihkan input
+        this.elements.passwordInput.value = '';
     }
 
     async handleLogin() {
@@ -342,12 +563,13 @@ class BioVAuth {
         }, 1000);
     }
 
-    showError(message) {
-        this.elements.errorMsg.textContent = message;
-        this.elements.errorMsg.style.display = 'block';
+    showError(message, targetElement = null) {
+        const errorElement = targetElement || this.elements.errorMsg;
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
         setTimeout(() => {
-            if (this.elements.errorMsg.textContent === message) {
-                this.elements.errorMsg.style.display = 'none';
+            if (errorElement.textContent === message) { // Hanya hapus jika pesan masih sama
+                errorElement.style.display = 'none';
             }
         }, 5000);
     }
@@ -367,7 +589,7 @@ class BioVAuth {
     togglePasswordVisibility() {
         const isPassword = this.elements.passwordInput.type === 'password';
         this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-        this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
+        this.elements.togglePassword.textContent = isPassword ? '😌' : '🙂';
         this.elements.togglePassword.setAttribute('aria-label',
             isPassword ? 'Hide password' : 'Show password');
     }
