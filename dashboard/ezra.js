@@ -332,3 +332,77 @@ class SecuritySystem {
 document.addEventListener('DOMContentLoaded', () => {
     new BioVAuth();
 });
+document.addEventListener('DOMContentLoaded', () => {
+    const ezraLink = document.getElementById('ezraLink');
+    const ezraProfilePopup = document.getElementById('ezraProfilePopup');
+
+    let pressTimer;
+    const PRESS_DURATION = 500; // Durasi tahan (milidetik) untuk menampilkan popup
+
+    if (ezraLink && ezraProfilePopup) {
+        // Fungsi untuk menampilkan popup
+        function showPopup() {
+            ezraProfilePopup.classList.add('visible');
+        }
+
+        // Fungsi untuk menyembunyikan popup
+        function hidePopup() {
+            ezraProfilePopup.classList.remove('visible');
+        }
+
+        // Event listener untuk klik
+        ezraLink.addEventListener('click', (event) => {
+            event.preventDefault(); // Mencegah perilaku default jika itu adalah link
+            if (ezraProfilePopup.classList.contains('visible')) {
+                hidePopup();
+            } else {
+                showPopup();
+            }
+        });
+
+        // Event listener untuk 'mousedown' (tahan mouse)
+        ezraLink.addEventListener('mousedown', () => {
+            pressTimer = setTimeout(showPopup, PRESS_DURATION);
+        });
+
+        // Event listener untuk 'mouseup' dan 'mouseleave' (melepas atau meninggalkan mouse)
+        ezraLink.addEventListener('mouseup', () => {
+            clearTimeout(pressTimer);
+        });
+
+        ezraLink.addEventListener('mouseleave', () => {
+            clearTimeout(pressTimer);
+        });
+
+        // Event listener untuk 'touchstart' (sentuh layar)
+        ezraLink.addEventListener('touchstart', (event) => {
+            event.preventDefault(); // Mencegah scroll atau zoom default
+            pressTimer = setTimeout(showPopup, PRESS_DURATION);
+        }, { passive: false }); // Gunakan { passive: false } untuk preventDefault
+
+        // Event listener untuk 'touchend' dan 'touchcancel' (mengangkat jari)
+        ezraLink.addEventListener('touchend', () => {
+            clearTimeout(pressTimer);
+            // Jika popup sudah terlihat saat touchend, biarkan terlihat.
+            // Bisa ditambahkan logika untuk menyembunyikan setelah beberapa detik atau klik di luar.
+        });
+
+        ezraLink.addEventListener('touchcancel', () => {
+            clearTimeout(pressTimer);
+        });
+
+        // Menyembunyikan popup jika klik di luar area popup atau link
+        document.addEventListener('click', (event) => {
+            if (!ezraLink.contains(event.target) && !ezraProfilePopup.contains(event.target)) {
+                hidePopup();
+            }
+        });
+
+        // Menyembunyikan popup saat esc ditekan
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                hidePopup();
+            }
+        });
+    }
+});
