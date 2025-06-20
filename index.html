@@ -38,9 +38,7 @@
       </div>
       <form id="loginForm" class="login-form" novalidate>
         <div class="form-group">
-          <label for="email">
-            <span class="your-text" id="yourText">Your</span> Email or Username
-          </label>
+          <label for="email">Email or Username</label>
           <input type="text" id="email" name="email" required aria-required="true" autocomplete="username" autocapitalize="off">
         </div>
         <div class="form-group">
@@ -50,15 +48,13 @@
             <button type="button" class="toggle-password" aria-label="Show password">🧑‍💻</button>
           </div>
         </div>
-        <div class="form-actions">
-          <button type="submit" class="auth-btn primary" id="submitLogin">
-            <span class="btn-text">Login</span>
-            <span class="loading-spinner" id="loadingSpinner" aria-hidden="true"></span>
-          </button>
-          <button type="button" class="auth-btn secondary" id="cancelLoginBtn">
-            <span class="btn-text">Cancel</span>
-          </button>
-        </div>
+        <button type="submit" class="auth-btn primary" id="submitLogin">
+          <span class="btn-text">Login</span>
+          <span class="loading-spinner" id="loadingSpinner" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="auth-btn cancel" id="cancelLoginBtn">
+          Cancel
+        </button>
         <div id="errorMsg" class="error-msg" aria-live="assertive"></div>
       </form>
       <div id="webauthnUnsupported" class="unsupported-warning" style="display: none;">
@@ -74,21 +70,26 @@
         <span class="secure-icon">🔐</span>
         <span>Secure Connection • TLS 1.3 • AES-256 <span class="ezra-link" id="ezraLink">🎖️Ezra</span> • 2025</span>
       </div>
-      <div class="ezra-profile-popup" id="ezraProfilePopup">
-          <img src="dashboard/ezra-profile.jpg" alt="Ezra Profile" class="profile-image">
-      </div>
-      <div class="your-popup-container" id="yourPopupContainer">
-          <div class="your-popup-content">
-              <h3>Secret Word</h3>
-              <input type="text" id="secretWordInput" placeholder="Enter secret word">
-              <button class="auth-btn primary" id="submitSecretWord">Submit</button>
-              <button class="auth-btn secondary" id="closeSecretWordPopup">Close</button>
-              <img src="dashboard/elvi-secret-photo.jpg" alt="Secret Photo" class="secret-photo" style="display:none;">
-          </div>
-      </div>
     </footer>
   </div>
-  <div class="background-text-overlay" id="backgroundTextOverlay"></div>
+
+  <div class="ezra-profile-popup" id="ezraProfilePopup">
+    <img src="dashboard/ezra-profile.jpg" alt="Ezra Profile" class="profile-image">
+  </div>
+
+  <div class="secret-word-popup" id="secretWordPopup">
+    <button class="close-popup-btn" id="closeSecretPopup">&times;</button>
+    <h3>What's the secret?</h3>
+    <input type="text" id="secretWordInput" placeholder="Enter secret word">
+    <button class="auth-btn primary" id="submitSecretWord">Submit</button>
+    <div id="secretErrorMsg" class="error-msg"></div>
+    <div class="secret-photo-display" id="secretPhotoDisplay">
+      <img src="dashboard/ezra-profile.jpg" alt="Secret Photo" class="secret-photo-image">
+    </div>
+  </div>
+
+  <div class="scrolling-text-background" id="scrollingTextBackground"></div>
+
   <script src="dashboard/ezra.js" defer></script>
 </body>
 </html>
