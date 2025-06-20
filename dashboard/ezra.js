@@ -1,3 +1,5 @@
+// dashboard/ezra.js
+
 class BioVAuth {
     constructor() {
         this.env = {
@@ -20,7 +22,11 @@ class BioVAuth {
             errorMsg: document.getElementById('errorMsg'),
             ipDisplay: document.getElementById('ipDisplay'),
             togglePassword: document.querySelector('.toggle-password'),
-            webauthnUnsupported: document.getElementById('webauthnUnsupported')
+            webauthnUnsupported: document.getElementById('webauthnUnsupported'),
+            // Tambahkan elemen untuk popup Ezra
+            ezraLink: document.getElementById('ezraLink'),
+            ezraProfilePopup: document.getElementById('ezraProfilePopup'),
+            biometricScan: document.querySelector('.biometric-scan') // Mengambil elemen mix.svg
         };
         this.securityConfig = {
             maxAttempts: 3,
@@ -32,12 +38,18 @@ class BioVAuth {
             webauthnSupported: false,
             clientInfo: {}
         };
+
+        this.pressTimer = null; // Inisialisasi timer untuk tahan
+        this.PRESS_DURATION = 500; // Durasi tahan (milidetik)
+
         this.init();
     }
+
     async init() {
         this.startBiometricAnimation();
         await this.collectClientInfo();
         this.setupEventListeners();
+        this.setupEzraPopupEventListeners(); // Panggil method baru untuk popup Ezra
         this.checkWebAuthnSupport();
         this.securitySystem = new SecuritySystem(
             this.securityConfig.maxAttempts,
@@ -45,6 +57,7 @@ class BioVAuth {
             this.securityConfig.cookieName
         );
     }
+
     async collectClientInfo() {
         try {
             const controller = new AbortController();
@@ -77,6 +90,7 @@ class BioVAuth {
             this.elements.ipDisplay.textContent = 'Network: Secure • Private';
         }
     }
+
     startBiometricAnimation() {
         this.elements.scanLine.style.opacity = '1';
         this.updateStatus('Initializing security protocols...', 'info');
@@ -86,11 +100,13 @@ class BioVAuth {
             this.elements.btnContainer.style.display = 'flex';
         }, 2000);
     }
+
     updateStatus(message, type = 'info') {
         this.elements.status.textContent = message;
         this.elements.status.className = 'status';
         if (type) this.elements.status.classList.add(type);
     }
+
     setupEventListeners() {
         this.elements.fallbackBtn.addEventListener('click', () => {
             this.showLoginForm();
@@ -113,6 +129,87 @@ class BioVAuth {
             this.togglePasswordVisibility();
         });
     }
+
+    // --- Start of Ezra Popup Specific Methods ---
+    setupEzraPopupEventListeners() {
+        const { ezraLink, ezraProfilePopup, biometricScan } = this.elements;
+
+        if (ezraLink && ezraProfilePopup) {
+            // Fungsi untuk menampilkan popup
+            const showPopup = () => {
+                ezraProfilePopup.classList.add('visible');
+                // Efek blur pada mix.svg saat popup Ezra terlihat
+                if (biometricScan) {
+                    biometricScan.style.filter = 'blur(5px) brightness(0.5)';
+                    biometricScan.style.transition = 'filter 0.3s ease-in-out';
+                }
+            };
+
+            // Fungsi untuk menyembunyikan popup
+            const hidePopup = () => {
+                ezraProfilePopup.classList.remove('visible');
+                // Mengembalikan filter mix.svg saat popup Ezra tersembunyi
+                if (biometricScan) {
+                    // Pastikan transisi untuk filter sudah diatur di CSS atau di sini
+                    biometricScan.style.filter = 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.3))';
+                }
+            };
+
+            ezraLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (ezraProfilePopup.classList.contains('visible')) {
+                    hidePopup();
+                } else {
+                    showPopup();
+                }
+            });
+
+            ezraLink.addEventListener('mousedown', () => {
+                this.pressTimer = setTimeout(showPopup, this.PRESS_DURATION);
+            });
+
+            ezraLink.addEventListener('mouseup', () => {
+                clearTimeout(this.pressTimer);
+            });
+
+            ezraLink.addEventListener('mouseleave', () => {
+                clearTimeout(this.pressTimer);
+            });
+
+            ezraLink.addEventListener('touchstart', (event) => {
+                event.preventDefault();
+                this.pressTimer = setTimeout(showPopup, this.PRESS_DURATION);
+            }, { passive: false });
+
+            ezraLink.addEventListener('touchend', () => {
+                clearTimeout(this.pressTimer);
+            });
+
+            ezraLink.addEventListener('touchcancel', () => {
+                clearTimeout(this.pressTimer);
+            });
+
+            document.addEventListener('click', (event) => {
+                // Sembunyikan popup jika klik di luar link Ezra dan di luar popup itu sendiri
+                if (!ezraLink.contains(event.target) && !ezraProfilePopup.contains(event.target)) {
+                    hidePopup();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    hidePopup();
+                }
+            });
+
+            // Pastikan transisi filter untuk biometricScan diinisialisasi
+            if (biometricScan) {
+                biometricScan.style.transition = 'filter 0.3s ease-in-out';
+            }
+        }
+    }
+    // --- End of Ezra Popup Specific Methods ---
+
     checkWebAuthnSupport() {
         if (window.PublicKeyCredential) {
             PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
@@ -132,12 +229,14 @@ class BioVAuth {
             this.elements.webauthnUnsupported.style.display = 'block';
         }
     }
+
     showLoginForm() {
         this.elements.btnContainer.style.display = 'none';
         this.elements.loginForm.style.display = 'block';
         this.elements.emailInput.focus();
         this.updateStatus('Enter your credentials', 'info');
     }
+
     async handleLogin() {
         if (this.securitySystem.isBlocked()) {
             this.showBlockedMessage();
@@ -166,7 +265,7 @@ class BioVAuth {
                 localStorage.setItem(this.securityConfig.localStorageKey, 'true');
                 this.securitySystem.resetAttempts();
                 this.updateStatus('Authentication successful! Redirecting...', 'success');
-                window.location.href = 'dashboard';
+                window.location.href = 'dashboard/index.html';
             } else {
                 this.handleFailedLogin(responseData.message || 'Invalid username or password.');
             }
@@ -178,13 +277,15 @@ class BioVAuth {
             this.setLoadingState(false);
         }
     }
+
     handleSuccessfulLogin(token, username) {
         localStorage.setItem(this.securityConfig.localStorageKey, 'true');
         this.securitySystem.resetAttempts();
         this.updateStatus('Authentication successful!', 'success');
         this.elements.errorMsg.textContent = '';
-        window.location.href = 'dashboard';
+        window.location.href = 'dashboard/index.html';
     }
+
     handleFailedLogin(errorMessage) {
         this.securitySystem.recordFailedAttempt();
         const attemptsLeft = this.securitySystem.maxAttempts - this.securitySystem.attemptData.attempts;
@@ -204,6 +305,7 @@ class BioVAuth {
             this.elements.loginForm.classList.remove('shake');
         }, 500);
     }
+
     showBlockedMessage() {
         const remainingTime = this.securitySystem.getRemainingBlockTime();
         const minutes = Math.floor(remainingTime / 60);
@@ -224,6 +326,7 @@ class BioVAuth {
             this.elements.errorMsg.textContent = `Too many attempts. Please wait ${newMinutes}m ${newSeconds}s.`;
         }, 1000);
     }
+
     showError(message) {
         this.elements.errorMsg.textContent = message;
         this.elements.errorMsg.style.display = 'block';
@@ -233,6 +336,7 @@ class BioVAuth {
             }
         }, 5000);
     }
+
     setLoadingState(isLoading) {
         if (isLoading) {
             this.elements.submitLogin.disabled = true;
@@ -244,13 +348,15 @@ class BioVAuth {
             this.elements.submitLogin.querySelector('.btn-text').textContent = 'Login';
         }
     }
+
     togglePasswordVisibility() {
         const isPassword = this.elements.passwordInput.type === 'password';
         this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-        this.elements.togglePassword.textContent = isPassword ? '😌' : '🙂';
+        this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
         this.elements.togglePassword.setAttribute('aria-label',
             isPassword ? 'Hide password' : 'Show password');
     }
+
     initiateWebAuthn() {
         if (!this.state.webauthnSupported) return;
         this.updateStatus('Initiating biometric authentication...', 'info');
@@ -259,6 +365,7 @@ class BioVAuth {
         }, 1000);
     }
 }
+
 class SecuritySystem {
     constructor(maxAttempts, blockDuration, cookieName) {
         this.maxAttempts = maxAttempts;
@@ -266,6 +373,7 @@ class SecuritySystem {
         this.cookieName = cookieName;
         this.attemptData = this.loadAttemptData();
     }
+
     loadAttemptData() {
         try {
             const cookieData = this.getCookie(this.cookieName);
@@ -277,28 +385,34 @@ class SecuritySystem {
             return this.getDefaultData();
         }
     }
+
     getDefaultData() {
         return {
             attempts: 0,
             lastAttempt: null,
             blockUntil: null
-        };}
+        };
+    }
+
     validateData(data) {
         return data && typeof data === 'object' &&
             'attempts' in data && 'lastAttempt' in data && 'blockUntil' in data;
     }
+
     saveAttemptData() {
         const expires = new Date();
         expires.setDate(expires.getDate() + 1);
         const data = encodeURIComponent(JSON.stringify(this.attemptData));
         document.cookie = `${this.cookieName}=${data}; expires=${expires.toUTCString()}; path=/; SameSite=Strict; Secure`;
     }
+
     getCookie(name) {
         return document.cookie.split(';')
             .map(c => c.trim())
             .find(c => c.startsWith(name + '='))
             ?.substring(name.length + 1);
     }
+
     recordFailedAttempt() {
         const now = new Date();
         this.attemptData.attempts++;
@@ -309,10 +423,12 @@ class SecuritySystem {
         }
         this.saveAttemptData();
     }
+
     resetAttempts() {
         this.attemptData = this.getDefaultData();
         this.saveAttemptData();
     }
+
     isBlocked() {
         if (!this.attemptData.blockUntil) return false;
         const blockUntil = new Date(this.attemptData.blockUntil);
@@ -323,86 +439,15 @@ class SecuritySystem {
         }
         return true;
     }
+
     getRemainingBlockTime() {
         if (!this.isBlocked()) return 0;
         const blockUntil = new Date(this.attemptData.blockUntil);
         const now = new Date();
         return Math.round((blockUntil - now) / 1000);
-    }}
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     new BioVAuth();
-});
-document.addEventListener('DOMContentLoaded', () => {
-    const ezraLink = document.getElementById('ezraLink');
-    const ezraProfilePopup = document.getElementById('ezraProfilePopup');
-
-    let pressTimer;
-    const PRESS_DURATION = 500; // Durasi tahan (milidetik) untuk menampilkan popup
-
-    if (ezraLink && ezraProfilePopup) {
-        // Fungsi untuk menampilkan popup
-        function showPopup() {
-            ezraProfilePopup.classList.add('visible');
-        }
-
-        // Fungsi untuk menyembunyikan popup
-        function hidePopup() {
-            ezraProfilePopup.classList.remove('visible');
-        }
-
-        // Event listener untuk klik
-        ezraLink.addEventListener('click', (event) => {
-            event.preventDefault(); // Mencegah perilaku default jika itu adalah link
-            if (ezraProfilePopup.classList.contains('visible')) {
-                hidePopup();
-            } else {
-                showPopup();
-            }
-        });
-
-        // Event listener untuk 'mousedown' (tahan mouse)
-        ezraLink.addEventListener('mousedown', () => {
-            pressTimer = setTimeout(showPopup, PRESS_DURATION);
-        });
-
-        // Event listener untuk 'mouseup' dan 'mouseleave' (melepas atau meninggalkan mouse)
-        ezraLink.addEventListener('mouseup', () => {
-            clearTimeout(pressTimer);
-        });
-
-        ezraLink.addEventListener('mouseleave', () => {
-            clearTimeout(pressTimer);
-        });
-
-        // Event listener untuk 'touchstart' (sentuh layar)
-        ezraLink.addEventListener('touchstart', (event) => {
-            event.preventDefault(); // Mencegah scroll atau zoom default
-            pressTimer = setTimeout(showPopup, PRESS_DURATION);
-        }, { passive: false }); // Gunakan { passive: false } untuk preventDefault
-
-        // Event listener untuk 'touchend' dan 'touchcancel' (mengangkat jari)
-        ezraLink.addEventListener('touchend', () => {
-            clearTimeout(pressTimer);
-            // Jika popup sudah terlihat saat touchend, biarkan terlihat.
-            // Bisa ditambahkan logika untuk menyembunyikan setelah beberapa detik atau klik di luar.
-        });
-
-        ezraLink.addEventListener('touchcancel', () => {
-            clearTimeout(pressTimer);
-        });
-
-        // Menyembunyikan popup jika klik di luar area popup atau link
-        document.addEventListener('click', (event) => {
-            if (!ezraLink.contains(event.target) && !ezraProfilePopup.contains(event.target)) {
-                hidePopup();
-            }
-        });
-
-        // Menyembunyikan popup saat esc ditekan
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                hidePopup();
-            }
-        });
-    }
 });
