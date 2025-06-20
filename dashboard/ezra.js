@@ -247,7 +247,7 @@ class BioVAuth {
     togglePasswordVisibility() {
         const isPassword = this.elements.passwordInput.type === 'password';
         this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-        this.elements.togglePassword.textContent = isPassword ? '😌' : '👁️';
+        this.elements.togglePassword.textContent = isPassword ? '😌' : '🙂';
         this.elements.togglePassword.setAttribute('aria-label',
             isPassword ? 'Hide password' : 'Show password');
     }
