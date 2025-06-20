@@ -846,18 +846,28 @@
                         uploadStatus.textContent = `Berhasil mengunggah ${result.uploadedCount} file ke galaksi!`;
                         uploadStatus.style.color = '#28a745'; // Green success
                         fileInput.value = ''; // Reset input file
-                        fetchWebsiteStats(); // Refresh media count
+                        fetchWebsiteStats(); // Refresh
                     } else {
                         const errorText = await response.text();
-                        throw new Error(`Gagal mengunggah: ${response.status}, ${errorText}`);
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                     }
                 } catch (error) {
-                    console.error('Error saat mengunggah:', error);
-                    uploadStatus.textContent = `Gagal mengunggah: ${error.message}`;
-                    uploadStatus.style.color = '#d9534f'; // Red error
+                    console.error('Error uploading files:', error);
+                    uploadStatus.textContent = `Gagal mengunggah file: ${error.message}`;
+                    uploadStatus.style.color = '#dc3545'; // Red error
                 }
             });
         });
+
+        // Global functions (not part of DOMContentLoaded, can be called from HTML)
+        function openTikTok() {
+            window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
+        }
+
+        function openInstagram() {
+            window.open("https://www.instagram.com/elvizill/", "_blank");
+        }
+
     </script>
 </body>
 </html>
