@@ -6,868 +6,1893 @@
     <title>Elvi Ezra - Cosmic Orb</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* General Body Styles */
-        body {
-            margin: 0;
-            font-family: 'Space Mono', monospace; /* Futuristic font */
-            color: #E0E0E0; /* Light gray for text on dark background */
-            background-color: #000005; /* Near black for deep space background */
-            overflow: auto; /* Allow scrolling for the large content area */
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"30\" viewBox=\"0 0 24 24\" fill=\"%2300FFFF\"><circle cx=\"12\" cy=\"12\" r=\"2\" opacity=\"0.8\"/><path d=\"M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12\" stroke=\"%2300FFFF\" stroke-width=\"1.5\"/></svg>') 15 15, auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* Particles animation - stays the same */
-        .particle {
-            position: absolute;
-            background: #00FFFF; /* Cyan */
-            border-radius: 50%;
-            animation: floatAndFade 15s infinite ease-in-out;
-            opacity: 0;
-        }
-
-        @keyframes floatAndFade {
-            0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
-            25% { opacity: 0.8; }
-            50% { transform: translate(calc(var(--rand-x) * 1px), calc(var(--rand-y) * 1px)) scale(var(--rand-scale)); opacity: 0.6; }
-            75% { opacity: 0.4; }
-            100% { transform: translate(calc(var(--rand-x) * 2px), calc(var(--rand-y) * 2px)) scale(0); opacity: 0; }
-        }
-
-        /* Main Content Wrapper */
-        .content-wrapper {
-            position: relative;
-            z-index: 10; /* Above particles */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-            max-width: 1200px;
-            width: 100%;
-        }
-
-        /* Hero Section - stays the same */
-        .hero-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .profile-orb {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #00FFFF, #8A2BE2); /* Cyan to Blue Violet */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(138, 43, 226, 0.5);
-            animation: pulse 3s infinite alternate;
-            position: relative; /* Needed for absolute positioning of inner elements */
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(138, 43, 226, 0.5); }
-            100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 255, 255, 0.9), 0 0 80px rgba(138, 43, 226, 0.7); }
-        }
-
-        .profile-orb img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid #E0E0E0;
-            object-fit: cover;
-        }
-
-        .elvi-name {
-            font-size: 3em;
-            color: #00FFFF;
-            text-shadow: 0 0 15px #00FFFF;
-            margin-bottom: 10px;
-        }
-
-        .cosmic-title {
-            font-size: 1.5em;
-            color: #8A2BE2;
-            text-shadow: 0 0 10px #8A2BE2;
-        }
-
-        /* Dynamic stat elements within the orb */
-        .orb-stat {
-            position: absolute;
-            color: #E0E0E0;
-            text-align: center;
-            font-size: 0.9em;
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
-        }
-
-        .orb-stat .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-            color: #00FFFF;
-        }
-
-        .orb-stat .stat-label {
-            font-size: 0.8em;
-            color: #999;
-        }
-
-        /* Positioning for new stats */
-        /* Kunjungan (replacing Orbiting) - Top Right */
-        .orb-stat.visits {
-            top: 20px;
-            right: 20px;
-            transform: translate(20px, -20px); /* Adjust to be outside the orb a bit */
-        }
-
-        /* Media Count (replacing Cosmic Being) - Bottom Right */
-        .orb-stat.media {
-            bottom: 20px;
-            right: 20px;
-            transform: translate(20px, 20px); /* Adjust to be outside the orb a bit */
-        }
-
-        /* Website Age (new) - Bottom Left */
-        .orb-stat.website-age {
-            bottom: 20px;
-            left: 20px;
-            transform: translate(-20px, 20px); /* Adjust to be outside the orb a bit */
-        }
-
-        /* Social Links - stays the same */
-        .social-links {
-            margin-top: 30px;
-            display: flex;
-            gap: 25px;
-        }
-
-        .social-links a {
-            color: #E0E0E0;
-            font-size: 2em;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-
-        .social-links a:hover {
-            color: #00FFFF;
-            transform: translateY(-5px);
-        }
-
-        /* Sections (About, Projects, Contact) - stays the same */
-        .section {
-            background-color: rgba(10, 10, 30, 0.8); /* Darker, slightly transparent */
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-        }
-
-        .section h2 {
-            color: #00FFFF;
-            font-size: 2em;
-            margin-bottom: 20px;
-            text-align: center;
-            border-bottom: 2px solid #8A2BE2;
-            padding-bottom: 10px;
-        }
-
-        .section p, .section ul {
-            font-size: 1.1em;
-            line-height: 1.6;
-            color: #C0C0C0;
-        }
-
-        .section ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .section ul li {
-            margin-bottom: 10px;
-            padding-left: 25px;
-            position: relative;
-        }
-
-        .section ul li::before {
-            content: "\f111"; /* FontAwesome circle icon */
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            color: #8A2BE2;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        /* Gallery Section - New */
-        .media-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .media-item {
-            background-color: rgba(20, 20, 40, 0.9);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .media-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .media-item img, .media-item video {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .media-item p {
-            font-size: 0.8em;
-            color: #B0B0B0;
-            padding: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* File Upload Section */
-        .upload-section {
-            background-color: rgba(10, 10, 30, 0.8);
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            text-align: center;
-        }
-
-        .upload-section h2 {
-            color: #00FFFF;
-            font-size: 2em;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #8A2BE2;
-            padding-bottom: 10px;
-        }
-
-        .upload-section input[type="file"] {
-            display: block;
-            margin: 0 auto 20px auto;
-            padding: 10px;
-            border: 1px solid #00FFFF;
-            border-radius: 5px;
-            background-color: #0a0a1e;
-            color: #E0E0E0;
-            width: fit-content;
-            cursor: pointer;
-        }
-        
-        .upload-section input[type="file"]::file-selector-button {
-            background-color: #8A2BE2;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .upload-section input[type="file"]::file-selector-button:hover {
-            background-color: #6a0ad2;
-        }
-
-        .upload-section button {
-            background-color: #00FFFF;
-            color: #000005;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-family: 'Space Mono', monospace;
-            font-weight: bold;
-        }
-
-        .upload-section button:hover {
-            background-color: #00E5E5;
-        }
-
-        #uploadStatus {
-            margin-top: 15px;
-            font-size: 0.95em;
-            color: #E0E0E0;
-        }
-
-        /* Editor Overlay (for Admin) - same as before */
-        .editor-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .editor-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .editor-content {
-            background-color: #1a1a2e;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-            width: 90%;
-            max-width: 600px;
-            color: #E0E0E0;
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .editor-content h2 {
-            color: #00FFFF;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .editor-content label {
-            display: block;
-            margin-bottom: 8px;
-            color: #B0B0B0;
-        }
-
-        .editor-content input[type="text"],
-        .editor-content textarea {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #8A2BE2;
-            border-radius: 5px;
-            background-color: #0d0d1a;
-            color: #E0E0E0;
-            font-family: 'Space Mono', monospace;
-            box-sizing: border-box;
-        }
-
-        .editor-content textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .editor-actions {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 30px;
-        }
-
-        .editor-actions button {
-            background-color: #00FFFF;
-            color: #000005;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Space Mono', monospace;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-
-        .editor-actions button:hover {
-            background-color: #00E5E5;
-        }
-
-        .editor-actions button.cancel {
-            background-color: #8A2BE2;
-        }
-
-        .editor-actions button.cancel:hover {
-            background-color: #6a0ad2;
-        }
-
-        .close-editor {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.5em;
-            color: #8A2BE2;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close-editor:hover {
-            color: #00FFFF;
-        }
-
-        /* Footer - stays the same */
-        footer {
-            margin-top: 50px;
-            padding: 20px;
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 0.9em;
-            width: 100%;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .profile-orb {
-                width: 150px;
-                height: 150px;
-            }
-
-            .profile-orb img {
-                width: 90px;
-                height: 90px;
-            }
-
-            .elvi-name {
-                font-size: 2.2em;
-            }
-
-            .cosmic-title {
-                font-size: 1.2em;
-            }
-
-            .orb-stat {
-                font-size: 0.7em;
-            }
-            .orb-stat .stat-value {
-                font-size: 1.2em;
-            }
-            .orb-stat.visits { top: 10px; right: 10px; transform: translate(10px, -10px); }
-            .orb-stat.media { bottom: 10px; right: 10px; transform: translate(10px, 10px); }
-            .orb-stat.website-age { bottom: 10px; left: 10px; transform: translate(-10px, 10px); }
-
-            .social-links {
-                gap: 15px;
-            }
-
-            .social-links a {
-                font-size: 1.5em;
-            }
-
-            .section, .upload-section {
-                padding: 20px;
-            }
-
-            .section h2, .upload-section h2 {
-                font-size: 1.8em;
-            }
-
-            .editor-content {
-                padding: 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-orb {
-                width: 120px;
-                height: 120px;
-            }
-
-            .profile-orb img {
-                width: 70px;
-                height: 70px;
-            }
-
-            .elvi-name {
-                font-size: 1.8em;
-            }
-
-            .cosmic-title {
-                font-size: 1em;
-            }
-
-            .orb-stat {
-                font-size: 0.6em;
-            }
-            .orb-stat .stat-value {
-                font-size: 1em;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="elvi.css">
 </head>
 <body>
-    <div id="particles"></div>
+<style>
+/* General Body Styles */
+body {
+    margin: 0;
+    font-family: 'Space Mono', monospace; /* Futuristic font */
+    color: #E0E0E0; /* Light gray for text on dark background */
+    background-color: #000005; /* Near black for deep space background */
+    overflow: hidden; /* Prevent body scroll, individual elements can scroll */
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="%2300FFFF"><circle cx="12" cy="12" r="2" opacity="0.8"/><path d="M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12" stroke="%2300FFFF" stroke-width="2" opacity="0.6"/></svg>') 15 15, auto; /* Custom pointer */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 2500px; /* Force a very wide content area */
+    min-height: 1800px; /* Force a very tall content area */
+    position: relative;
+}
 
-    <div class="content-wrapper">
-        <section class="hero-section">
-            <div class="profile-orb">
-                <img id="profile-picture" src="https://i.ibb.co/L5Q1dF6/me.jpg" alt="Elvi Ezra">
-                
-                <div class="orb-stat visits">
-                    <i class="fas fa-eye"></i>
-                    <span id="website-visits" class="stat-value">---</span>
-                    <span class="stat-label">Total Visits</span>
-                </div>
-                <div class="orb-stat media">
-                    <i class="fas fa-folder-open"></i>
-                    <span id="media-count" class="stat-value">---</span>
-                    <span class="stat-label">Media Count</span>
-                </div>
-                <div class="orb-stat website-age">
-                    <i class="fas fa-clock"></i>
-                    <span id="website-age" class="stat-value">---</span>
-                    <span class="stat-label">Website Age</span>
-                </div>
+/* Cosmic Background Stars */
+.cosmic-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><filter id="f1" x="0" y="0"><feGaussianBlur in="SourceGraphic" stdDeviation="1.5" /></filter></defs><circle cx="20%" cy="20%" r="1" fill="white" /><circle cx="80%" cy="40%" r="0.8" fill="white" /><circle cx="50%" cy="70%" r="1.2" fill="white" /><circle cx="30%" cy="90%" r="0.7" fill="white" /><circle cx="10%" cy="50%" r="1" fill="white" /><circle cx="70%" cy="10%" r="0.9" fill="white" /><circle cx="90%" cy="80%" r="1.1" fill="white" /><circle cx="40%" cy="30%" r="0.8" fill="white" /><circle cx="60%" cy="60%" r="1.3" fill="white" /><circle cx="25%" cy="75%" r="0.6" fill="white" /><circle cx="5%" cy="5%" r="1" fill="white" /><circle cx="95%" cy="95%" r="1" fill="white" /></svg>') repeat;
+    background-size: 200px 200px;
+    animation: moveStars 180s linear infinite;
+    opacity: 0.5;
+    z-index: -2;
+}
 
-            </div>
-            <h1 class="elvi-name" id="profile-name">Elvi Ezra</h1>
-            <p class="cosmic-title" id="profile-title">Cosmic Orb</p>
-            <div class="social-links">
-                <a href="#" onclick="openTikTok()" title="TikTok"><i class="fab fa-tiktok"></i></a>
-                <a href="#" onclick="openInstagram()" title="Instagram"><i class="fab fa-instagram"></i></a>
-            </div>
-        </section>
+@keyframes moveStars {
+    from { background-position: 0 0; }
+    to { background-position: 100% 100%; }
+}
 
-        <section class="section" id="about-me">
-            <h2>About Me</h2>
-            <p id="about-content">Greetings, cosmic travelers. I am Elvi Ezra, an entity of light and code, navigating the vast expanse of the digital cosmos. My journey is one of discovery, creation, and connection. I thrive on the ethereal glow of innovation and the vibrant pulse of human interaction.</p>
-        </section>
+/* Particle Animation */
+#particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
 
-        <section class="section" id="my-projects">
-            <h2>My Cosmic Projects</h2>
-            <ul id="projects-list">
-                <li><i class="fas fa-rocket"></i> Project Alpha: A decentralized neural network for interstellar communication.</li>
-                <li><i class="fas fa-gem"></i> Gemstone Protocol: An encrypted ledger for cosmic resource trading.</li>
-                <li><i class="fas fa-meteor"></i> Meteoroid Navigator: An AI-powered guide for asteroid field traversal.</li>
-            </ul>
-        </section>
+.particle {
+    position: absolute;
+    background: #00FFFF; /* Cyan */
+    border-radius: 50%;
+    animation: floatAndFade 15s infinite ease-in-out;
+}
 
-        <section class="upload-section">
-            <h2>Unggah Media Anda ke Cosmos</h2>
-            <form id="uploadForm">
-                <input type="file" id="mediaFile" name="mediaFiles" multiple>
-                <button type="submit">Unggah ke Orb</button>
-                <p id="uploadStatus"></p>
-            </form>
-        </section>
+@keyframes floatAndFade {
+    0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translate(var(--x), var(--y)) scale(1.2); opacity: 0; }
+}
 
-        <section class="section" id="contact">
-            <h2>Connect with the Cosmos</h2>
-            <p id="contact-content">If you wish to send a signal across the void, you can reach me through these channels or click the orb to edit.</p>
-            </section>
+/* Authentication Overlay */
+.auth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 10, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+    opacity: 0;
+    pointer-events: none;
+}
 
-        <footer>
-            <p>&copy; 2025 Elvi Ezra. All rights reserved. Powered by Stardust and Code.</p>
-        </footer>
+.auth-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.auth-container {
+    background: linear-gradient(135deg, #200540, #000005);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(138, 43, 226, 0.7);
+    border: 2px solid #8A2BE2;
+    transform: scale(0.9);
+    transition: transform 0.5s ease;
+}
+
+.auth-overlay.active .auth-container {
+    transform: scale(1);
+}
+
+.auth-container h2 {
+    color: #00FFFF;
+    margin-bottom: 20px;
+    font-size: 2.2em;
+    text-shadow: 0 0 10px #00FFFF;
+}
+
+.auth-container p {
+    color: #B0C4DE;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+.auth-input {
+    width: 80%;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 2px solid #6A0DAD;
+    border-radius: 10px;
+    background-color: rgba(10, 0, 20, 0.7);
+    color: #E0E0E0;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-input::placeholder {
+    color: #8A2BE2;
+}
+
+.auth-input:focus {
+    border-color: #00FFFF;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    outline: none;
+}
+
+.auth-button {
+    background: linear-gradient(90deg, #8A2BE2, #DA70D6);
+    color: white;
+    padding: 15px 35px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.3em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+}
+
+.auth-button:hover {
+    background: linear-gradient(90deg, #DA70D6, #8A2BE2);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+}
+
+/* Wormhole Overlay */
+#wormholeOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 10, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1s ease, visibility 1s ease;
+}
+
+#wormholeOverlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.wormhole-spinner {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 8px solid transparent;
+    border-top-color: #00FFFF;
+    border-bottom-color: #DA70D6;
+    animation: spin 1.5s linear infinite;
+    position: relative;
+    box-shadow: 0 0 30px #00FFFF, inset 0 0 20px #DA70D6;
+}
+
+.wormhole-spinner::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    border-radius: 50%;
+    border: 8px solid transparent;
+    border-top-color: #8A2BE2;
+    border-bottom-color: #00FFFF;
+    animation: spinReverse 1s linear infinite;
+    box-shadow: 0 0 20px #8A2BE2, inset 0 0 10px #00FFFF;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes spinReverse {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+}
+
+/* Cosmic Orb Container */
+#cosmicOrbContainer {
+    position: absolute;
+    width: 1500px; /* Adjust as needed */
+    height: 1500px; /* Adjust as needed */
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(10, 0, 20, 0.7) 0%, rgba(0, 0, 5, 0.9) 100%);
+    box-shadow: 0 0 100px rgba(138, 43, 226, 0.5), inset 0 0 50px rgba(0, 255, 255, 0.3);
+    border: 3px solid #8A2BE2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allows elements to wrap */
+    transform-origin: center center;
+    transition: transform 0.8s ease-in-out;
+}
+
+/* Individual Orb Elements */
+.orb-element {
+    position: absolute;
+    background-color: rgba(10, 0, 30, 0.8); /* Darker purple-blue */
+    border: 1px solid #8A2BE2;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.5), inset 0 0 8px rgba(0, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    cursor: pointer;
+    min-width: 100px; /* Ensure a minimum size for all orbs */
+    min-height: 100px;
+}
+
+.orb-element:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(138, 43, 226, 0.8), inset 0 0 15px rgba(0, 255, 255, 0.4);
+    background-color: rgba(20, 0, 50, 0.9);
+}
+
+/* Profile Orb */
+#profile-orb {
+    width: 280px;
+    height: 280px;
+    background: linear-gradient(135deg, #4B0082, #6A0DAD); /* Deeper purple */
+    border: 3px solid #DA70D6;
+    box-shadow: 0 0 30px rgba(218, 112, 214, 0.7), inset 0 0 20px rgba(0, 255, 255, 0.5);
+    z-index: 10; /* Ensure it's on top */
+}
+
+.profile-pic-container {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #00FFFF;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000005;
+}
+
+#profilePic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+#profileUsername {
+    color: #00FFFF;
+    font-size: 1.8em;
+    margin: 5px 0 0;
+    text-shadow: 0 0 8px #00FFFF;
+}
+
+#profileName {
+    color: #E0E0E0;
+    font-size: 1em;
+    margin-top: 0px;
+}
+
+/* Action Buttons */
+.action-button {
+    width: 150px;
+    height: 150px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #E0E0E0;
+    background: linear-gradient(135deg, #DA70D6, #FF69B4); /* Pinkish purple */
+    box-shadow: 0 0 20px rgba(218, 112, 214, 0.6);
+    border: 2px solid #FF69B4;
+}
+
+.action-button i {
+    font-size: 2em;
+    margin-bottom: 5px;
+    color: #00FFFF;
+    text-shadow: 0 0 5px #00FFFF;
+}
+
+#btn-create-galaxy {
+    background: linear-gradient(135deg, #FF6F61, #DE6262); /* Orange/Red for "Create New Galaxy" */
+    border-color: #DE6262;
+    box-shadow: 0 0 20px rgba(255, 111, 97, 0.6);
+}
+
+/* Stats Container */
+#stats-container {
+    position: absolute;
+    display: flex;
+    gap: 30px; /* Space between stat orbs */
+    z-index: 5;
+}
+
+.stat-orb {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #2A0A5C, #4B0082); /* Darker purple for stats */
+    border: 1px solid #6A0DAD;
+    box-shadow: 0 0 10px rgba(106, 13, 173, 0.5);
+}
+
+.stat-number {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #00FFFF;
+    text-shadow: 0 0 5px #00FFFF;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #B0C4DE;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Highlights Section */
+#highlights-section {
+    position: absolute;
+    display: flex;
+    gap: 15px; /* Spacing between highlight circles */
+    z-index: 5;
+    padding: 10px; /* Add some padding to see the dashed border */
+    border: 1px dashed #6A0DAD; /* Dashed border for the section */
+    border-radius: 50%; /* Make the section itself circular */
+    justify-content: center;
+    align-items: center;
+    width: 250px; /* Example size, will be adjusted by JS based on content */
+    height: 250px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    overflow: hidden; /* Hide overflow from content if it's too big */
+}
+
+.highlight-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(100, 0, 150, 0.7); /* Dark purple */
+    border: 2px solid #DA70D6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
+    color: #E0E0E0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 0 8px rgba(218, 112, 214, 0.5);
+    flex-shrink: 0; /* Prevent shrinking when space is limited */
+}
+
+.highlight-circle i {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+    color: #00FFFF;
+}
+
+.highlight-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(218, 112, 214, 0.8);
+}
+
+/* Content Display Orb */
+#content-display {
+    width: 600px;
+    height: 400px;
+    background: rgba(10, 0, 20, 0.85); /* Darker purple */
+    border-color: #6A0DAD;
+    box-shadow: 0 0 25px rgba(106, 13, 173, 0.6);
+    border-radius: 25px; /* Slightly rounded rectangle, not full circle */
+    overflow: hidden; /* Crucial for scrollable content */
+    display: flex;
+    flex-direction: column;
+    padding: 0; /* Remove default padding */
+}
+
+#content-display.orb-element:hover {
+    transform: none; /* No scaling for content display */
+    box-shadow: 0 0 25px rgba(106, 13, 173, 0.6); /* Keep consistent shadow */
+}
+
+.content-tabs {
+    display: flex;
+    justify-content: space-around;
+    background-color: rgba(20, 0, 40, 0.9);
+    padding: 10px 0;
+    border-bottom: 1px solid #6A0DAD;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    color: #B0C4DE;
+    font-family: 'Space Mono', monospace;
+    font-size: 1em;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.tab-button:hover {
+    color: #00FFFF;
+    text-shadow: 0 0 5px #00FFFF;
+}
+
+.tab-button.active {
+    color: #FFFFFF;
+    font-weight: bold;
+    text-shadow: 0 0 8px #FFFFFF;
+    border-bottom: 2px solid #DA70D6;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    flex-grow: 1; /* Allow it to take up available space */
+    background-color: rgba(10, 0, 20, 0.85);
+}
+
+.content-item {
+    background-color: rgba(30, 0, 50, 0.9);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    position: relative; /* For the "Private" label */
+}
+
+.content-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.7);
+}
+
+.content-item img, .content-item video, .content-item audio {
+    width: 100%;
+    height: 150px; /* Fixed height for consistency */
+    object-fit: cover;
+    display: block;
+}
+
+.content-item audio {
+    height: 50px; /* Shorter for audio controls */
+    margin-top: auto; /* Push to bottom */
+}
+
+.content-item p {
+    padding: 10px;
+    font-size: 0.9em;
+    color: #B0C4DE;
+    word-wrap: break-word;
+    white-space: pre-wrap; /* Preserve formatting for text content */
+    text-align: left;
+}
+
+.content-item .private-label {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 0.7em;
+    font-weight: bold;
+    z-index: 5;
+}
+
+/* Modal Overlays */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 15, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1A0530, #000005);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(138, 43, 226, 0.8);
+    border: 2px solid #8A2BE2;
+    position: relative;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2.5em;
+    color: #DA70D6;
+    cursor: pointer;
+    transition: transform 0.2s ease, text-shadow 0.2s ease;
+}
+
+.close-button:hover {
+    transform: rotate(90deg);
+    text-shadow: 0 0 10px #DA70D6;
+}
+
+/* Story Modal Specifics */
+.story-modal {
+    width: 90%;
+    max-width: 600px;
+    height: 90%;
+    max-height: 800px;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    border: 2px solid #00FFFF;
+    box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
+    overflow: hidden; /* Hide overflow of story content */
+}
+
+.story-carousel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Ensure only one story is visible at a time */
+    position: relative;
+}
+
+.story-item {
+    min-width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: black; /* Background for story */
+    position: relative;
+    box-sizing: border-box; /* Include padding in width/height */
+}
+
+.story-item img, .story-item video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Contain whole image within bounds */
+    display: block;
+}
+
+.story-text-content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1em;
+    max-height: 30%;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(138, 43, 226, 0.7);
+    border: none;
+    color: white;
+    font-size: 2em;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+}
+
+.nav-arrow:hover {
+    background: rgba(0, 255, 255, 0.7);
+}
+
+.prev-story {
+    left: 10px;
+}
+
+.next-story {
+    right: 10px;
+}
+
+/* Private Content Modal Specifics */
+.private-content-modal {
+    text-align: center;
+}
+
+.private-content-auth h2 {
+    color: #FF6F61;
+    text-shadow: 0 0 10px #FF6F61;
+}
+
+#privateContentDisplay {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: rgba(50, 0, 0, 0.5); /* Reddish tint for private content */
+    border-radius: 10px;
+    border: 1px dashed #FF6F61;
+    text-align: left;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+#privateContentDisplay img, #privateContentDisplay video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 10px;
+}
+
+#privateContentDisplay audio {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Editor Modal */
+.editor-modal h2 {
+    color: #00FFFF;
+    text-shadow: 0 0 8px #00FFFF;
+    margin-bottom: 25px;
+}
+
+.editor-section {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.editor-section label {
+    display: block;
+    margin-bottom: 8px;
+    color: #B0C4DE;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.editor-section input[type="text"],
+.editor-section textarea {
+    width: calc(100% - 20px);
+    padding: 12px;
+    border: 1px solid #6A0DAD;
+    border-radius: 8px;
+    background-color: rgba(10, 0, 30, 0.7);
+    color: #E0E0E0;
+    font-family: 'Space Mono', monospace;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.editor-section input[type="text"]:focus,
+.editor-section textarea:focus {
+    border-color: #00FFFF;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+    outline: none;
+}
+
+.editor-button {
+    background: linear-gradient(90deg, #8A2BE2, #DA70D6);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(138, 43, 226, 0.3);
+    margin-top: 15px;
+    margin-right: 10px;
+}
+
+.editor-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(138, 43, 226, 0.5);
+}
+
+/* New Content Upload Modal */
+.upload-modal {
+    text-align: center;
+}
+
+.upload-title {
+    color: #00FFFF;
+    text-shadow: 0 0 10px #00FFFF;
+    margin-bottom: 30px;
+}
+
+.upload-type-selector {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.upload-type-btn {
+    background: linear-gradient(90deg, #4B0082, #6A0DAD);
+    color: #B0C4DE;
+    padding: 12px 25px;
+    border: 2px solid #8A2BE2;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(138, 43, 226, 0.3);
+}
+
+.upload-type-btn.active, .upload-type-btn:hover {
+    background: linear-gradient(90deg, #DA70D6, #FF69B4);
+    border-color: #FF69B4;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(218, 112, 214, 0.5);
+}
+
+.upload-section {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.upload-section label {
+    display: block;
+    margin-bottom: 8px;
+    color: #B0C4DE;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.upload-section select,
+.upload-section textarea {
+    width: calc(100% - 20px);
+    padding: 12px;
+    border: 1px solid #6A0DAD;
+    border-radius: 8px;
+    background-color: rgba(10, 0, 30, 0.7);
+    color: #E0E0E0;
+    font-family: 'Space Mono', monospace;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.upload-section select:focus,
+.upload-section textarea:focus {
+    border-color: #00FFFF;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+    outline: none;
+}
+
+.custom-file-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(90deg, #4B0082, #6A0DAD);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(106, 13, 173, 0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+.custom-file-input-wrapper:hover {
+    background: linear-gradient(90deg, #DA70D6, #FF69B4);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(218, 112, 214, 0.5);
+}
+
+.custom-file-input-wrapper i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.custom-file-input-wrapper input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.file-name-display {
+    margin-left: 10px;
+    font-size: 0.9em;
+    color: #B0C4DE;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Limit width */
+}
+
+#uploadPreview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 50px;
+    border: 1px dashed #6A0DAD;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: rgba(10, 0, 30, 0.5);
+}
+
+#uploadPreview img, #uploadPreview video, #uploadPreview audio {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+#uploadPreview audio {
+    width: 100px; /* Ensure audio element is visible */
+    height: 30px;
+}
+
+.upload-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.upload-btn {
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    color: white;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+.upload-btn:hover {
+    background: linear-gradient(90deg, #8BC34A, #4CAF50);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.upload-cancel-btn {
+    background: linear-gradient(90deg, #FF6F61, #DE6262);
+    color: white;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
+}
+
+.upload-cancel-btn:hover {
+    background: linear-gradient(90deg, #DE6262, #FF6F61);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 111, 97, 0.6);
+}
+
+/* Hidden Utility Class */
+.hidden {
+    display: none !important;
+}
+</style>
+
+    <div class="cosmic-background"></div>
+
+    <div id="wormholeOverlay">
+        <div class="wormhole-spinner"></div>
     </div>
 
-    <div class="editor-overlay" id="editorOverlay">
-        <div class="editor-content">
-            <span class="close-editor" id="closeEditor">&times;</span>
-            <h2>Edit Cosmic Data</h2>
-            <label for="edit-name">Profile Name:</label>
-            <input type="text" id="edit-name">
-
-            <label for="edit-title">Cosmic Title:</label>
-            <input type="text" id="edit-title">
-
-            <label for="edit-about">About Me:</label>
-            <textarea id="edit-about"></textarea>
-
-            <label for="edit-projects">My Cosmic Projects (one per line):</label>
-            <textarea id="edit-projects"></textarea>
-
-            <div class="editor-actions">
-                <button id="publishChangesBtn">Publish to Galaxy</button>
-                <button class="cancel" id="cancelEditBtn">Cancel</button>
-            </div>
+    <div id="authOverlay" class="auth-overlay active">
+        <div class="auth-container">
+            <h2>Cosmic Access Initiated</h2>
+            <p>Enter the Stardust Key to proceed:</p>
+            <input type="password" id="secretAnswer" class="auth-input" placeholder="Stardust Key...">
+            <button id="authSubmit" class="auth-button">Unlock Galaxy</button>
         </div>
     </div>
 
+    <div id="cosmicOrbContainer">
+        <div id="profile-orb" class="orb-element">
+            <div class="profile-pic-container">
+                <img id="profilePic" src="" alt="Profile Picture">
+            </div>
+            <h1 id="profileUsername"></h1>
+            <p id="profileName" class="full-name"></p>
+        </div>
+
+        <button id="btn-follow" class="orb-element action-button"><i class="fas fa-satellite"></i> Launch Mission</button>
+        <button id="btn-tiktok" class="orb-element action-button" onclick="openTikTok()"><i class="fab fa-tiktok"></i> TikTok Warp</button>
+        <button id="btn-instagram" class="orb-element action-button" onclick="openInstagram()"><i class="fab fa-instagram"></i> Insta-Nexus</button>
+        <button id="btn-create-galaxy" class="orb-element action-button"><i class="fas fa-plus-circle"></i> Create New Galaxy</button>
+
+        <div id="stats-container">
+            <div id="follower-orb" class="orb-element stat-orb">
+                <span id="followerCount" class="stat-number">4.5K</span>
+                <span class="stat-label">Total Media</span>
+            </div>
+            <div id="following-orb" class="orb-element stat-orb">
+                <span id="visitorCount" class="stat-number">1.2M</span>
+                <span class="stat-label">Visitors</span>
+            </div>
+             <div id="website-age-orb" class="orb-element stat-orb">
+                <span id="websiteAge" class="stat-number"></span>
+                <span class="stat-label">Orbital Age</span>
+            </div>
+        </div>
+
+        <div id="highlights-section">
+            </div>
+
+        <div id="content-display" class="orb-element">
+            <div class="content-tabs">
+                <button class="tab-button active" data-tab="portfolios">Portfolios</button>
+                <button class="tab-button" data-tab="stellar-logs">Stellar Logs</button>
+                <button class="tab-button" data-tab="tagged-orbits">Tagged Orbits</button>
+            </div>
+            <div id="content-grid" class="content-grid">
+                </div>
+        </div>
+    </div>
+
+    <div id="storyModalOverlay" class="modal-overlay">
+        <div class="modal-content story-modal">
+            <button class="close-button">&times;</button>
+            <div class="story-carousel">
+                </div>
+            <button class="nav-arrow prev-story">&lt;</button>
+            <button class="nav-arrow next-story">&gt;</button>
+        </div>
+    </div>
+
+    <div id="privateContentModalOverlay" class="modal-overlay">
+        <div class="modal-content private-content-modal">
+            <button class="close-button">&times;</button>
+            <div class="private-content-auth">
+                <h2>Forbidden Zone Access</h2>
+                <p>A cosmic anomaly detected. Enter the Private Stardust Key:</p>
+                <input type="password" id="privateKeyInput" class="auth-input" placeholder="Private Key...">
+                <button id="privateKeySubmit" class="auth-button">Access Anomaly</button>
+            </div>
+            <div id="privateContentDisplay" class="hidden">
+                </div>
+        </div>
+    </div>
+
+    <div id="editorOverlay" class="modal-overlay">
+        <div class="modal-content editor-modal">
+            <button class="close-button">&times;</button>
+            <h2>Cosmic Editor</h2>
+            <div class="editor-section">
+                <label for="editorBio">Bio:</label>
+                <textarea id="editorBio" rows="4"></textarea>
+            </div>
+            <div class="editor-section">
+                <label for="editorProfilePicUrl">Profile Picture URL:</label>
+                <input type="text" id="editorProfilePicUrl" placeholder="Enter URL for profile picture">
+            </div>
+             <div class="editor-section">
+                <label for="editorUsername">Username:</label>
+                <input type="text" id="editorUsername" placeholder="Enter username">
+            </div>
+            <div class="editor-section">
+                <label for="editorFullName">Full Name:</label>
+                <input type="text" id="editorFullName" placeholder="Enter full name">
+            </div>
+            <button id="saveEditorChanges" class="editor-button"><i class="fas fa-save"></i> Save Changes</button>
+            <button id="publishEditorChanges" class="editor-button" style="background: linear-gradient(90deg, #6A0DAD, #8A2BE2);"><i class="fas fa-rocket"></i> Publish to Galaxy</button>
+        </div>
+    </div>
+
+    <div id="uploadContentModal" class="modal-overlay">
+        <div class="modal-content upload-modal">
+            <h2 class="upload-title">New Cosmic Upload</h2>
+            <div class="upload-type-selector">
+                <button class="upload-type-btn active" data-type="file"><i class="fas fa-image"></i> Media File</button>
+                <button class="upload-type-btn" data-type="text"><i class="fas fa-align-left"></i> Text Message</button>
+            </div>
+
+            <div class="upload-section">
+                <label for="uploadContentDestination">Destination:</label>
+                <select id="uploadContentDestination">
+                    <option value="posts">Portfolios (Public)</option>
+                    <option value="private">Forbidden Zone (Private)</option>
+                </select>
+            </div>
+
+            <div class="upload-section" id="uploadFileSection">
+                <label for="uploadFile">Upload File:</label>
+                <div class="custom-file-input-wrapper">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose File
+                    <span class="file-name-display" id="uploadFileName">No file chosen</span>
+                    <input type="file" id="uploadFile" accept="image/*,video/*,audio/*">
+                </div>
+                <div id="uploadPreview" style="margin-top: 15px;">
+                    </div>
+            </div>
+
+            <div class="upload-section hidden" id="uploadTextSection">
+                <label for="uploadTextContent">Text Content:</label>
+                <textarea id="uploadTextContent" rows="5" placeholder="Enter your private cosmic message here..."></textarea>
+            </div>
+            
+            <div class="upload-actions">
+                <button id="uploadSubmitBtn" class="upload-btn"><i class="fas fa-rocket"></i> Launch Content</button>
+                <button id="uploadCancelBtn" class="upload-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div id="particles"></div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Particle Background Initialization ---
-            const particlesContainer = document.getElementById('particles');
-            const numParticles = 80;
+    document.addEventListener('DOMContentLoaded', function() {
+    // --- Configuration ---
+    const VISITOR_COUNTER_WORKER_URL = 'https://your-visitor-counter-worker-url.workers.dev'; // GANTI INI DENGAN URL WORKER PENGUNJUNG ANDA
+    const MEDIA_COUNTER_WORKER_URL = 'https://your-media-counter-worker-url.workers.dev';     // GANTI INI DENGAN URL WORKER MEDIA ANDA
+    const websiteLaunchDate = new Date('2024-01-01T00:00:00Z'); // GANTI INI DENGAN TANGGAL PELUNCURAN WEBSITE ANDA (UTC)
 
-            for (let i = 0; i < numParticles; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                const size = Math.random() * 5 + 2; // Size between 2px and 7px
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.animationDelay = `${Math.random() * -15}s`; // Start at various points in animation
-                particle.style.setProperty('--rand-x', Math.random() * 400 - 200); // -200 to 200
-                particle.style.setProperty('--rand-y', Math.random() * 400 - 200); // -200 to 200
-                particle.style.setProperty('--rand-scale', Math.random() * 0.5 + 0.5); // 0.5 to 1.0
-                particlesContainer.appendChild(particle);
+    // --- Elements ---
+    const authOverlay = document.getElementById('authOverlay');
+    const wormholeOverlay = document.getElementById('wormholeOverlay');
+    const cosmicOrbContainer = document.getElementById('cosmicOrbContainer');
+    const secretAnswer = document.getElementById('secretAnswer');
+    const authSubmit = document.getElementById('authSubmit');
+    const particlesContainer = document.getElementById('particles');
+    const numParticles = 80;
+    
+    const profileOrb = document.getElementById('profile-orb');
+    const profilePic = document.getElementById('profilePic');
+    const profileUsername = document.getElementById('profileUsername');
+    const totalMediaCount = document.getElementById('followerCount'); // Renamed to totalMediaCount
+    const visitorCount = document.getElementById('visitorCount');     // New element for visitor count
+    const websiteAgeElement = document.getElementById('websiteAge'); // New element for website age
+    const profileName = document.getElementById('profileName');
+    const highlightsSection = document.getElementById('highlights-section');
+    const btnFollow = document.getElementById('btn-follow'); 
+    const btnTikTok = document.getElementById('btn-tiktok');
+    const btnInstagram = document.getElementById('btn-instagram');
+    const btnCreateGalaxy = document.getElementById('btn-create-galaxy');
+
+    const contentDisplay = document.getElementById('content-display');
+    const contentTabs = document.querySelectorAll('.tab-button');
+    const contentGrid = document.getElementById('content-grid');
+
+    const storyModalOverlay = document.getElementById('storyModalOverlay');
+    const storyModalCloseButton = storyModalOverlay.querySelector('.close-button');
+    const storyCarousel = storyModalOverlay.querySelector('.story-carousel');
+    const prevStoryButton = storyModalOverlay.querySelector('.prev-story');
+    const nextStoryButton = storyModalOverlay.querySelector('.next-story');
+    let currentStoryIndex = 0;
+    let currentHighlightStories = [];
+
+    const privateContentModalOverlay = document.getElementById('privateContentModalOverlay');
+    const privateContentModalCloseButton = privateContentModalOverlay.querySelector('.close-button');
+    const privateKeyInput = document.getElementById('privateKeyInput');
+    const privateKeySubmit = document.getElementById('privateKeySubmit');
+    const privateContentDisplay = document.getElementById('privateContentDisplay');
+
+    const editorOverlay = document.getElementById('editorOverlay');
+    const editorCloseButton = editorOverlay.querySelector('.close-button');
+    const editorBio = document.getElementById('editorBio');
+    const editorProfilePicUrl = document.getElementById('editorProfilePicUrl');
+    const editorUsername = document.getElementById('editorUsername');
+    const editorFullName = document.getElementById('editorFullName');
+    const saveEditorChangesBtn = document.getElementById('saveEditorChanges');
+    const publishEditorChangesBtn = document.getElementById('publishEditorChanges');
+
+    const uploadContentModal = document.getElementById('uploadContentModal');
+    const uploadModalCloseButton = uploadContentModal.querySelector('.upload-cancel-btn'); // Using cancel as close
+    const uploadTypeButtons = uploadContentModal.querySelectorAll('.upload-type-btn');
+    const uploadFileSection = document.getElementById('uploadFileSection');
+    const uploadTextSection = document.getElementById('uploadTextSection');
+    const uploadFileNameDisplay = document.getElementById('uploadFileName');
+    const uploadFile = document.getElementById('uploadFile');
+    const uploadTextContent = document.getElementById('uploadTextContent');
+    const uploadSubmitBtn = document.getElementById('uploadSubmitBtn');
+    const uploadContentDestination = document.getElementById('uploadContentDestination');
+    const uploadPreview = document.getElementById('uploadPreview');
+
+
+    // --- Data (Simulated, will be replaced by backend for counts) ---
+    let websiteData = {
+        profile: {
+            username: "elvi_ezra_",
+            name: "Elvi Ezra",
+            bio: "Cosmic explorer, digital artist, and quantum data alchemist. Orbiting the nexus of creativity and technology. Join my journey through the stellar archives.",
+            profilePicUrl: "https://i.ibb.co/L5r03cW/ezra-profile.jpg", // Ganti dengan URL gambar profil Anda
+            stats: {
+                totalMedia: 0, // Ini akan diambil dari Cloudflare Worker
+                visitors: 0,   // Ini akan diambil dari Cloudflare Worker
             }
-
-            // --- Admin Editor Logic (Unchanged from your original) ---
-            const profileOrb = document.querySelector('.profile-orb');
-            const editorOverlay = document.getElementById('editorOverlay');
-            const closeEditorBtn = document.getElementById('closeEditor');
-            const cancelEditBtn = document.getElementById('cancelEditBtn');
-            const publishChangesBtn = document.getElementById('publishChangesBtn');
-
-            const editName = document.getElementById('edit-name');
-            const editTitle = document.getElementById('edit-title');
-            const editAbout = document.getElementById('edit-about');
-            const editProjects = document.getElementById('edit-projects');
-
-            const profileName = document.getElementById('profile-name');
-            const profileTitle = document.getElementById('profile-title');
-            const aboutContent = document.getElementById('about-content');
-            const projectsList = document.getElementById('projects-list');
-
-            let currentProfileData = {
-                name: "Elvi Ezra",
-                title: "Cosmic Orb",
-                about: "Greetings, cosmic travelers. I am Elvi Ezra, an entity of light and code, navigating the vast expanse of the digital cosmos. My journey is one of discovery, creation, and connection. I thrive on the ethereal glow of innovation and the vibrant pulse of human interaction.",
-                projects: [
-                    "Project Alpha: A decentralized neural network for interstellar communication.",
-                    "Gemstone Protocol: An encrypted ledger for cosmic resource trading.",
-                    "Meteoroid Navigator: An AI-powered guide for asteroid field traversal."
-                ]
-            };
-
-            // Load content from localStorage or default
-            function loadProfileContent() {
-                const storedData = localStorage.getItem('elviProfileData');
-                if (storedData) {
-                    currentProfileData = JSON.parse(storedData);
-                }
-
-                profileName.textContent = currentProfileData.name;
-                profileTitle.textContent = currentProfileData.title;
-                aboutContent.textContent = currentProfileData.about;
-                
-                projectsList.innerHTML = '';
-                currentProfileData.projects.forEach(project => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<i class="fas fa-rocket"></i> ${project}`;
-                    projectsList.appendChild(li);
-                });
+        },
+        posts: [
+            { id: 'p1', type: 'image', src: 'https://i.ibb.co/3Wq5gX1/Cosmic-Orb-Post-1.jpg', alt: 'Cosmic Orb 1', private: false },
+            { id: 'p2', type: 'video', src: 'https://example.com/video2.mp4', alt: 'Cosmic video', private: false }, // Ganti dengan URL video Anda
+            { id: 'p3', type: 'image', src: 'https://i.ibb.co/F83Xf3p/Cosmic-Orb-Post-2.jpg', alt: 'Cosmic Orb 2', private: false },
+            { id: 'p4', type: 'image', src: 'https://i.ibb.co/Y2B76X1/Cosmic-Orb-Post-3.jpg', alt: 'Cosmic Orb 3', private: false },
+            { id: 'p5', type: 'image', src: 'https://i.ibb.co/VMy4P36/Cosmic-Orb-Post-4.jpg', alt: 'Cosmic Orb 4', private: false },
+        ],
+        reels: [
+            { id: 'r1', type: 'video', src: 'https://example.com/reel1.mp4', alt: 'Stellar Log 1', private: false },
+             { id: 'r2', type: 'video', src: 'https://example.com/reel2.mp4', alt: 'Stellar Log 2', private: false },
+        ],
+        tagged: [
+            { id: 't1', type: 'image', src: 'https://i.ibb.co/S7qM4fB/Cosmic-Orb-Tagged-1.jpg', alt: 'Tagged Orb 1', private: false },
+            { id: 't2', type: 'image', src: 'https://i.ibb.co/JnH0dF7/Cosmic-Orb-Tagged-2.jpg', alt: 'Tagged Orb 2', private: false },
+        ],
+        highlights: [
+            { id: 'h1', icon: 'fas fa-star-and-crescent', label: 'Galaxies',
+              stories: [
+                { type: 'image', src: 'https://i.ibb.co/xLw9J5F/Story-1.jpg', text: 'Exploring the Andromeda Galaxy.' },
+                { type: 'video', src: 'https://example.com/story-video.mp4', text: 'A brief encounter with a nebula.' }, // Ganti dengan URL video Anda
+              ]
+            },
+            { id: 'h2', icon: 'fas fa-flask', label: 'Experiments',
+              stories: [
+                { type: 'text', content: 'Our latest experiment in quantum entanglement yielded unexpected results. Further analysis required!', bg: '#300060' },
+                { type: 'image', src: 'https://i.ibb.co/zXp484W/Story-2.jpg', text: 'New data structures for cosmic mapping.' }
+              ]
+            },
+            { id: 'h3', icon: 'fas fa-compact-disc', label: 'Melodies',
+              stories: [
+                { type: 'audio', src: 'https://example.com/audio-story.mp3', text: 'Listen to the sounds of the void.', bg: '#000005' } // Ganti dengan URL audio Anda
+              ]
             }
+        ],
+        privateContent: [
+            { id: 'priv1', type: 'text', content: 'Secret plans for interstellar travel. Access strictly restricted.', bg: '#300000' },
+            { id: 'priv2', type: 'image', src: 'https://i.ibb.co/F83Xf3p/Cosmic-Orb-Post-2.jpg', alt: 'Encrypted blueprint', private: true, caption: 'This is a highly classified blueprint of a new propulsion system.' },
+            { id: 'priv3', type: 'video', src: 'https://example.com/private-video.mp4', alt: 'Confidential recording', private: true, caption: 'Footage from a restricted sector.' }, // Ganti dengan URL video Anda
+            { id: 'priv4', type: 'audio', src: 'https://example.com/private-audio.mp3', alt: 'Top secret communication', private: true, caption: 'Intercepted alien communication.' } // Ganti dengan URL audio Anda
+        ],
+        privateKey: 'COSMIC_STARKEY_2025' // Kunci rahasia untuk konten pribadi
+    };
 
-            profileOrb.addEventListener('click', () => {
-                editName.value = currentProfileData.name;
-                editTitle.value = currentProfileData.title;
-                editAbout.value = currentProfileData.about;
-                editProjects.value = currentProfileData.projects.join('\n');
-                editorOverlay.classList.add('active');
-            });
-
-            closeEditorBtn.addEventListener('click', () => {
-                editorOverlay.classList.remove('active');
-            });
-
-            cancelEditBtn.addEventListener('click', () => {
-                editorOverlay.classList.remove('active');
-            });
-
-            // --- IMPORTANT: Configure your Cloudflare Worker API URL here ---
-            // After deploying your Cloudflare Worker, Cloudflare will give you a URL.
-            // Replace 'https://your-worker-name.your-username.workers.dev' with that actual URL.
-            const API_BASE_URL = 'https://your-worker-name.your-username.workers.dev'; 
-
-            async function publishChangesToBackend() {
-                const updatedData = {
-                    name: editName.value,
-                    title: editTitle.value,
-                    about: editAbout.value,
-                    projects: editProjects.value.split('\n').filter(p => p.trim() !== '')
-                };
-
-                try {
-                    // This section assumes your backend can handle profile data updates.
-                    // The Cloudflare Worker example below focuses on stats and media.
-                    // You'd need to extend your Worker to store/retrieve this profile data,
-                    // perhaps in another KV namespace or D1 database.
-                    // For now, we'll just update localStorage.
-
-                    currentProfileData = updatedData;
-                    localStorage.setItem('elviProfileData', JSON.stringify(currentProfileData));
-                    alert('Changes successfully saved locally!');
-                    editorOverlay.classList.remove('active');
-                    loadProfileContent(); // Reload the website with the new data
-                } catch (error) {
-                    console.error('Error publishing changes:', error);
-                    alert(`Failed to publish changes: ${error.message}.`);
-                }
-            }
-
-            publishChangesBtn.addEventListener('click', publishChangesToBackend);
-
-            // Global functions (can be called from HTML)
-            function openTikTok() {
-                window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
-            }
-
-            function openInstagram() {
-                window.open("https://www.instagram.com/elvizill/", "_blank");
-            }
-
-            loadProfileContent(); // Load existing profile content on page load
-
-            // --- NEW: Website Age Feature ---
-            // Set your website's launch date here (Year, Month-1, Day, Hour, Minute, Second)
-            // Example: June 20, 2024 at 10:00:00 AM WIB -> new Date(2024, 5, 20, 10, 0, 0)
-            const WEBSITE_LAUNCH_DATE = new Date(2025, 5, 20, 8, 40, 0); // Assuming today (June 20, 2025, 08:40 AM WIB) as launch
-
-            function updateWebsiteAge() {
-                const now = new Date();
-                const diffMs = now - WEBSITE_LAUNCH_DATE;
-
-                // Handle cases where launch date is in the future
-                if (diffMs < 0) {
-                    document.getElementById('website-age').textContent = 'Launching Soon!';
-                    return;
-                }
-
-                const totalSeconds = Math.floor(diffMs / 1000);
-                
-                const years = Math.floor(totalSeconds / (365.25 * 24 * 60 * 60));
-                const remainingSecondsAfterYears = totalSeconds % (365.25 * 24 * 60 * 60);
-
-                const months = Math.floor(remainingSecondsAfterYears / (30.44 * 24 * 60 * 60));
-                const remainingSecondsAfterMonths = remainingSecondsAfterYears % (30.44 * 24 * 60 * 60);
-
-                const days = Math.floor(remainingSecondsAfterMonths / (24 * 60 * 60));
-                const remainingSecondsAfterDays = remainingSecondsAfterMonths % (24 * 60 * 60);
-
-                const hours = Math.floor(remainingSecondsAfterDays / (60 * 60));
-                const remainingSecondsAfterHours = remainingSecondsAfterDays % (60 * 60);
-
-                const minutes = Math.floor(remainingSecondsAfterHours / 60);
-                const seconds = remainingSecondsAfterHours % 60;
-
-                document.getElementById('website-age').textContent = 
-                    `${years}Y ${months}M ${days}D ${hours}h ${minutes}m ${seconds}s`;
-            }
-
-            // Update immediately and then every second
-            updateWebsiteAge();
-            setInterval(updateWebsiteAge, 1000);
-
-            // --- NEW: Fetch Website Stats (Visits & Media Count) ---
-            async function fetchWebsiteStats() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/stats`);
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                    }
-                    const data = await response.json();
-                    
-                    document.getElementById('website-visits').textContent = data.visits.toLocaleString();
-                    document.getElementById('media-count').textContent = data.mediaCount.toLocaleString();
-
-                } catch (error) {
-                    console.error('Gagal mengambil statistik website:', error);
-                    document.getElementById('website-visits').textContent = 'Error!';
-                    document.getElementById('media-count').textContent = 'Error!';
-                }
-            }
-
-            async function recordVisitAndFetchStats() {
-                try {
-                    // Send a POST request to record the visit
-                    await fetch(`${API_BASE_URL}/visit`, { method: 'POST' });
-                } catch (error) {
-                    console.warn('Gagal mencatat kunjungan (mungkin backend belum siap):', error);
-                } finally {
-                    // Always try to fetch stats, even if visit recording failed
-                    fetchWebsiteStats(); 
-                }
-            }
-
-            // Record a visit and fetch stats when the page loads
-            recordVisitAndFetchStats();
+    // Initialize total media count based on initial data
+    websiteData.profile.stats.totalMedia = websiteData.posts.length + websiteData.reels.length + websiteData.tagged.length + websiteData.privateContent.length;
 
 
-            // --- NEW: Media Upload Functionality ---
-            const uploadForm = document.getElementById('uploadForm');
-            const uploadStatus = document.getElementById('uploadStatus');
+    // --- Authentication ---
+    authSubmit.addEventListener('click', function() {
+        const key = secretAnswer.value.trim();
+        // Simple client-side check. For real app, this should be server-side.
+        if (key === 'COSMIC_KEY_2025') { // Ganti dengan kunci utama Anda
+            authOverlay.classList.remove('active');
+            wormholeOverlay.classList.add('active');
+            setTimeout(() => {
+                wormholeOverlay.classList.remove('active');
+                cosmicOrbContainer.style.transform = 'scale(1)'; // Scale up the orb
+            }, 1500); // Duration of wormhole animation
+        } else {
+            alert('Invalid Stardust Key. Access Denied.');
+            secretAnswer.value = '';
+        }
+    });
 
-            uploadForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
+    secretAnswer.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            authSubmit.click();
+        }
+    });
 
-                const fileInput = document.getElementById('mediaFile');
-                const files = fileInput.files;
+    // --- Particle Background ---
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particlesContainer.appendChild(particle);
 
-                if (files.length === 0) {
-                    uploadStatus.textContent = 'Pilih setidaknya satu file untuk diunggah.';
-                    uploadStatus.style.color = 'orange';
-                    return;
-                }
+        const size = Math.random() * 3 + 1; // 1 to 4px
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
 
-                uploadStatus.textContent = 'Mengunggah ke Cosmos...';
-                uploadStatus.style.color = '#00FFFF'; // Cosmic blue
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        particle.style.left = `${startX}px`;
+        particle.style.top = `${startY}px`;
 
-                const formData = new FormData();
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('mediaFiles', files[i]); // 'mediaFiles' must match backend field name
-                }
+        const endX = startX + (Math.random() - 0.5) * 500; // Move +/- 250px
+        const endY = startY + (Math.random() - 0.5) * 500; // Move +/- 250px
 
-                try {
-                    const response = await fetch(`${API_BASE_URL}/upload`, {
-                        method: 'POST',
-                        body: formData,
-                    });
+        particle.style.setProperty('--x', `${endX - startX}px`);
+        particle.style.setProperty('--y', `${endY - startY}px`);
 
-                    if (response.ok) {
-                        const result = await response.json();
-                        uploadStatus.textContent = `Berhasil mengunggah ${result.uploadedCount} file ke galaksi!`;
-                        uploadStatus.style.color = '#28a745'; // Green success
-                        fileInput.value = ''; // Reset input file
-                        fetchWebsiteStats(); // Refresh
-                    } else {
-                        const errorText = await response.text();
-                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                    }
-                } catch (error) {
-                    console.error('Error uploading files:', error);
-                    uploadStatus.textContent = `Gagal mengunggah file: ${error.message}`;
-                    uploadStatus.style.color = '#dc3545'; // Red error
-                }
-            });
+        // Remove particle after animation to prevent DOM bloat
+        particle.addEventListener('animationend', () => {
+            particle.remove();
+            // Re-add a new particle to maintain count
+            createParticle();
+        });
+    }
+
+    for (let i = 0; i < numParticles; i++) {
+        createParticle();
+    }
+
+    // --- Orb Element Positioning ---
+    const orbElements = document.querySelectorAll('.orb-element');
+    const actionButtons = document.querySelectorAll('.action-button');
+    const statOrbs = document.querySelectorAll('.stat-orb');
+
+    function positionElementsAroundOrb() {
+        const orbRadius = cosmicOrbContainer.offsetWidth / 2;
+        const profileOrbRadius = profileOrb.offsetWidth / 2;
+        
+        // Position Profile Orb in center
+        profileOrb.style.left = `calc(50% - ${profileOrbRadius}px)`;
+        profileOrb.style.top = `calc(50% - ${profileOrbRadius}px)`;
+
+        // Action Buttons (clockwise from top-right)
+        // Adjust these values to fine-tune positions
+        const buttonPositions = [
+            { angle: -20, radius: orbRadius * 0.45 }, // Launch Mission (top-right)
+            { angle: 60, radius: orbRadius * 0.4 },  // TikTok Warp (bottom-right)
+            { angle: 120, radius: orbRadius * 0.4 }, // Insta-Nexus (bottom-left)
+            { angle: -100, radius: orbRadius * 0.45 } // Create New Galaxy (top-left)
+        ];
+
+        actionButtons.forEach((button, index) => {
+            const angleRad = (buttonPositions[index].angle * Math.PI) / 180;
+            const btnRadius = button.offsetWidth / 2;
+            const x = orbRadius + buttonPositions[index].radius * Math.cos(angleRad) - btnRadius;
+            const y = orbRadius + buttonPositions[index].radius * Math.sin(angleRad) - btnRadius;
+            button.style.left = `${x}px`;
+            button.style.top = `${y}px`;
         });
 
-        // Global functions (not part of DOMContentLoaded, can be called from HTML)
-        function openTikTok() {
-            window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
+        // Stats Container (center-right)
+        const statsContainer = document.getElementById('stats-container');
+        const statsRadius = orbRadius * 0.28; // Smaller radius for stats
+        const statsAngle = 20; // Angle for stats (towards right)
+        const statsAngleRad = (statsAngle * Math.PI) / 180;
+        
+        const statsContainerWidth = statsContainer.offsetWidth; // Get current width
+        const statsContainerHeight = statsContainer.offsetHeight; // Get current height
+
+        // Center the stats container relative to its calculated position
+        statsContainer.style.left = `${orbRadius + statsRadius * Math.cos(statsAngleRad) - (statsContainerWidth / 2)}px`;
+        statsContainer.style.top = `${orbRadius + statsRadius * Math.sin(statsAngleRad) - (statsContainerHeight / 2)}px`;
+        
+        // Highlights Section (center-left)
+        const highlightsRadius = orbRadius * 0.28; // Smaller radius for highlights
+        const highlightsAngle = 160; // Angle for highlights (towards left)
+        const highlightsAngleRad = (highlightsAngle * Math.PI) / 180;
+        
+        const highlightsSectionWidth = highlightsSection.offsetWidth;
+        const highlightsSectionHeight = highlightsSection.offsetHeight;
+
+        highlightsSection.style.left = `${orbRadius + highlightsRadius * Math.cos(highlightsAngleRad) - (highlightsSectionWidth / 2)}px`;
+        highlightsSection.style.top = `${orbRadius + highlightsRadius * Math.sin(highlightsAngleRad) - (highlightsSectionHeight / 2)}px`;
+
+        // Content Display (bottom-center)
+        const contentRadius = orbRadius * 0.38; // Radius for content display
+        const contentAngle = 90; // Angle for content (straight down)
+        const contentAngleRad = (contentAngle * Math.PI) / 180;
+        
+        const contentDisplayWidth = contentDisplay.offsetWidth;
+        const contentDisplayHeight = contentDisplay.offsetHeight;
+
+        contentDisplay.style.left = `${orbRadius + contentRadius * Math.cos(contentAngleRad) - (contentDisplayWidth / 2)}px`;
+        contentDisplay.style.top = `${orbRadius + contentRadius * Math.sin(contentAngleRad) - (contentDisplayHeight / 2)}px`;
+    }
+
+    // Call on load and resize
+    positionElementsAroundOrb();
+    window.addEventListener('resize', positionElementsAroundOrb);
+
+    // --- Fetch Counts from Cloudflare Workers ---
+    async function fetchVisitorCount() {
+        try {
+            const response = await fetch(VISITOR_COUNTER_WORKER_URL, {
+                method: 'POST', // Send POST to increment count
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            websiteData.profile.stats.visitors = data.visits;
+            visitorCount.textContent = formatNumber(data.visits);
+        } catch (error) {
+            console.error('Error fetching visitor count:', error);
+            visitorCount.textContent = 'N/A'; // Fallback
+        }
+    }
+
+    async function fetchMediaCount() {
+         try {
+            const response = await fetch(MEDIA_COUNTER_WORKER_URL, {
+                method: 'GET', // Send GET to just retrieve count
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            websiteData.profile.stats.totalMedia = data.totalMedia;
+            totalMediaCount.textContent = formatNumber(data.totalMedia);
+        } catch (error) {
+            console.error('Error fetching media count:', error);
+            totalMediaCount.textContent = 'N/A'; // Fallback
+        }
+    }
+
+    async function incrementMediaCount() {
+        try {
+            const response = await fetch(MEDIA_COUNTER_WORKER_URL, {
+                method: 'POST', // Send POST to increment count
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            websiteData.profile.stats.totalMedia = data.totalMedia;
+            totalMediaCount.textContent = formatNumber(data.totalMedia);
+        } catch (error) {
+            console.error('Error incrementing media count:', error);
+        }
+    }
+
+
+    // --- Profile Content Loading ---
+    function loadProfileContent() {
+        profilePic.src = websiteData.profile.profilePicUrl;
+        profileUsername.textContent = websiteData.profile.username;
+        profileName.textContent = websiteData.profile.name;
+        // Counts will be updated by fetch functions
+        // totalMediaCount.textContent = formatNumber(websiteData.profile.stats.totalMedia);
+        // visitorCount.textContent = formatNumber(websiteData.profile.stats.visitors);
+        renderHighlights();
+        renderContentGrid('posts'); // Load initial content
+        updateWebsiteAge(); // Update website age on load
+    }
+
+    function formatNumber(num) {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        }
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toString();
+    }
+
+    // --- Website Age Calculator ---
+    function updateWebsiteAge() {
+        const now = new Date();
+        const diff = now.getTime() - websiteLaunchDate.getTime();
+
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        const months = Math.floor(days / 30.44); // Average days in a month
+        const years = Math.floor(days / 365.25); // Average days in a year
+
+        let ageText = '';
+
+        if (years > 0) {
+            ageText = `${years}y ${months % 12}m`;
+        } else if (months > 0) {
+            ageText = `${months}m ${days % 30}d`;
+        } else if (days > 0) {
+            ageText = `${days}d ${hours % 24}h`;
+        } else if (hours > 0) {
+            ageText = `${hours}h ${minutes % 60}m`;
+        } else if (minutes > 0) {
+            ageText = `${minutes}m ${seconds % 60}s`;
+        } else {
+            ageText = `${seconds}s`;
+        }
+        websiteAgeElement.textContent = ageText;
+    }
+    // Update website age every second
+    setInterval(updateWebsiteAge, 1000);
+
+    // --- Highlights Rendering ---
+    function renderHighlights() {
+        highlightsSection.innerHTML = ''; // Clear existing highlights
+        websiteData.highlights.forEach(highlight => {
+            const highlightDiv = document.createElement('div');
+            highlightDiv.classList.add('highlight-circle');
+            highlightDiv.innerHTML = `<i class="${highlight.icon}"></i><span>${highlight.label}</span>`;
+            highlightDiv.addEventListener('click', () => openStoryModal(highlight.stories));
+            highlightsSection.appendChild(highlightDiv);
+        });
+        positionElementsAroundOrb(); // Reposition after rendering highlights
+    }
+
+    // --- Content Grid Rendering ---
+    function renderContentGrid(type) {
+        contentGrid.innerHTML = ''; // Clear existing content
+        let contentArray = [];
+        let isPrivateSection = false;
+
+        if (type === 'portfolios') {
+            contentArray = websiteData.posts;
+        } else if (type === 'stellar-logs') {
+            contentArray = websiteData.reels;
+        } else if (type === 'tagged-orbits') {
+            contentArray = websiteData.tagged;
+        } else if (type === 'private') {
+            contentArray = websiteData.privateContent;
+            isPrivateSection = true;
         }
 
-        function openInstagram() {
-            window.open("https://www.instagram.com/elvizill/", "_blank");
+        contentArray.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('content-item');
+
+            let mediaElement;
+            if (item.type === 'image') {
+                mediaElement = document.createElement('img');
+                mediaElement.src = item.src;
+                mediaElement.alt = item.alt;
+            } else if (item.type === 'video') {
+                mediaElement = document.createElement('video');
+                mediaElement.src = item.src;
+                mediaElement.controls = true;
+                mediaElement.alt = item.alt;
+            } else if (item.type === 'audio') {
+                mediaElement = document.createElement('audio');
+                mediaElement.src = item.src;
+                mediaElement.controls = true;
+                mediaElement.alt = item.alt;
+            } else if (item.type === 'text') {
+                mediaElement = document.createElement('p');
+                mediaElement.textContent = item.content;
+                mediaElement.style.backgroundColor = item.bg || 'rgba(0,0,0,0.5)';
+                mediaElement.style.color = item.color || 'white';
+                mediaElement.style.padding = '15px';
+                mediaElement.style.minHeight = '150px';
+                mediaElement.style.display = 'flex';
+                mediaElement.style.alignItems = 'center';
+                mediaElement.style.justifyContent = 'center';
+                mediaElement.style.textAlign = 'center';
+            }
+
+            if (mediaElement) {
+                 itemDiv.appendChild(mediaElement);
+            }
+           
+            if (item.caption) {
+                const captionP = document.createElement('p');
+                captionP.textContent = item.caption;
+                itemDiv.appendChild(captionP);
+            }
+            
+            // Add private label if it's a private item (only for main content grid if needed)
+            if (item.private && !isPrivateSection) {
+                 const privateLabel = document.createElement('span');
+                 privateLabel.classList.add('private-label');
+                 privateLabel.textContent = 'PRIVATE';
+                 itemDiv.appendChild(privateLabel);
+            }
+
+
+            itemDiv.addEventListener('click', () => {
+                if (item.private && !isPrivateSection) {
+                    openPrivateContentModal(item);
+                } else if (!item.private) {
+                    // For public content, perhaps open a larger view or just do nothing for now
+                    console.log('Clicked public item:', item.id);
+                }
+            });
+            contentGrid.appendChild(itemDiv);
+        });
+    }
+
+    // --- Tab Switching ---
+    contentTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            contentTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            renderContentGrid(this.dataset.tab);
+        });
+    });
+
+    // --- Story Modal Functionality ---
+    function openStoryModal(stories) {
+        currentHighlightStories = stories;
+        currentStoryIndex = 0;
+        displayCurrentStory();
+        storyModalOverlay.classList.add('active');
+    }
+
+    function displayCurrentStory() {
+        storyCarousel.innerHTML = ''; // Clear previous story
+        if (currentHighlightStories.length === 0) return;
+
+        const story = currentHighlightStories[currentStoryIndex];
+        const storyItem = document.createElement('div');
+        storyItem.classList.add('story-item');
+
+        if (story.type === 'image') {
+            const img = document.createElement('img');
+            img.src = story.src;
+            storyItem.appendChild(img);
+        } else if (story.type === 'video') {
+            const video = document.createElement('video');
+            video.src = story.src;
+            video.controls = true;
+            video.autoplay = true;
+            video.loop = true;
+            storyItem.appendChild(video);
+        } else if (story.type === 'audio') {
+            const audio = document.createElement('audio');
+            audio.src = story.src;
+            audio.controls = true;
+            audio.autoplay = true;
+            storyItem.appendChild(audio);
+        } else if (story.type === 'text') {
+            const p = document.createElement('p');
+            p.textContent = story.content;
+            p.style.backgroundColor = story.bg || 'rgba(0,0,0,0.7)';
+            p.style.color = story.color || 'white';
+            p.style.padding = '20px';
+            p.style.textAlign = 'center';
+            p.style.borderRadius = '10px';
+            storyItem.appendChild(p);
         }
 
-    </script>
+        if (story.text) {
+            const storyTextDiv = document.createElement('div');
+            storyTextDiv.classList.add('story-text-content');
+            storyTextDiv.textContent = story.text;
+            storyItem.appendChild(storyTextDiv);
+        }
+
+        storyCarousel.appendChild(storyItem);
+
+        // Hide/show navigation arrows
+        prevStoryButton.style.display = currentHighlightStories.length > 1 ? 'block' : 'none';
+        nextStoryButton.style.display = currentHighlightStories.length > 1 ? 'block' : 'none';
+    }
+
+    function navigateStory(direction) {
+        currentStoryIndex += direction;
+        if (currentStoryIndex < 0) {
+            currentStoryIndex = currentHighlightStories.length - 1;
+        } else if (currentStoryIndex >= currentHighlightStories.length) {
+            currentStoryIndex = 0;
+        }
+        displayCurrentStory();
+    }
+
+    storyModalCloseButton.addEventListener('click', () => {
+        storyModalOverlay.classList.remove('active');
+        // Pause any playing media when closing
+        storyCarousel.querySelectorAll('video, audio').forEach(media => media.pause());
+    });
+    prevStoryButton.addEventListener('click', () => navigateStory(-1));
+    nextStoryButton.addEventListener('click', () => navigateStory(1));
+
+    // --- Private Content Modal ---
+    function openPrivateContentModal(item = null) {
+        privateContentDisplay.innerHTML = ''; // Clear previous content
+        privateContentDisplay.classList.add('hidden'); // Hide content initially
+        privateKeyInput.value = ''; // Clear input
+        privateContentModalOverlay.classList.add('active');
+    }
+
+    privateKeySubmit.addEventListener('click', function() {
+        const key = privateKeyInput.value.trim();
+        if (key === websiteData.privateKey) {
+            renderPrivateContent(websiteData.privateContent); // Render all private content
+            privateContentDisplay.classList.remove('hidden');
+            // Hide auth section (optional, you might want to keep it if they can change key)
+            privateContentModalOverlay.querySelector('.private-content-auth').classList.add('hidden');
+        } else {
+            alert('Incorrect Private Stardust Key. Access to Forbidden Zone denied.');
+            privateKeyInput.value = '';
+        }
+    });
+
+    privateKeyInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            privateKeySubmit.click();
+        }
+    });
+
+    privateContentModalCloseButton.addEventListener('click', () => {
+        privateContentModalOverlay.classList.remove('active');
+        // Reset modal state
+        privateContentModalOverlay.querySelector('.private-content-auth').classList.remove('hidden');
+        privateContentDisplay.classList.add('hidden');
+        privateContentDisplay.innerHTML = '';
+        privateKeyInput.value = '';
+        // Pause any playing media when closing
+        privateContentDisplay.querySelectorAll('video, audio').forEach(media => media.pause());
+    });
+
+    function renderPrivateContent(contentArray) {
+        privateContentDisplay.innerHTML = '';
+        contentArray.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('private-content-item'); // Use a specific class for styling private items
+
+            let mediaElement;
+            if (item.type === 'image') {
+                mediaElement = document.createElement('img');
+                mediaElement.src = item.src;
+                mediaElement.alt = item.alt;
+            } else if (item.type === 'video') {
+                mediaElement = document.createElement('video');
+                mediaElement.src = item.src;
+                mediaElement.controls = true;
+                mediaElement.alt = item.alt;
+            } else if (item.type === 'audio') {
+                mediaElement = document.createElement('audio');
+                mediaElement.src = item.src;
+                mediaElement.controls = true;
+                mediaElement.alt = item.alt;
+            } else if (item.type === 'text') {
+                mediaElement = document.createElement('p');
+                mediaElement.textContent = item.content;
+                mediaElement.style.backgroundColor = item.bg || 'rgba(50,0,0,0.7)';
+                mediaElement.style.color = item.color || 'white';
+                mediaElement.style.padding = '15px';
+                mediaElement.style.minHeight = '80px'; // Ensure text is visible
+            }
+
+            if (mediaElement) {
+                itemDiv.appendChild(mediaElement);
+            }
+            if (item.caption) {
+                const captionP = document.createElement('p');
+                captionP.textContent = item.caption;
+                captionP.style.fontSize = '0.9em';
+                captionP.style.color = '#FFD0D0';
+                captionP.style.marginTop = '5px';
+                itemDiv.appendChild(captionP);
+            }
+            privateContentDisplay.appendChild(itemDiv);
+        });
+    }
+
+    // --- Editor Modal (Simulated Save/Publish) ---
+    btnFollow.addEventListener('click', () => { // Re-purpose Follow button as editor trigger for demo
+        editorOverlay.classList.add('active');
+        editorBio.value = websiteData.profile.bio;
+        editorProfilePicUrl.value = websiteData.profile.profilePicUrl;
+        editorUsername.value = websiteData.profile.username;
+        editorFullName.value = websiteData.profile.name;
+    });
+
+    editorCloseButton.addEventListener('click', () => {
+        editorOverlay.classList.remove('active');
+    });
+
+    saveEditorChangesBtn.addEventListener('click', () => {
+        websiteData.profile.bio = editorBio.value;
+        websiteData.profile.profilePicUrl = editorProfilePicUrl.value;
+        websiteData.profile.username = editorUsername.value;
+        websiteData.profile.name = editorFullName.value;
+        alert('Changes saved locally! (Will reset on refresh without backend)');
+        loadProfileContent(); // Reload to reflect changes
+        editorOverlay.classList.remove('active');
+    });
+
+    publishEditorChangesBtn.addEventListener('click', async () => {
+        // This is a placeholder. Real publishing would involve sending data to a backend.
+        // For example, if you set up a Cloudflare Worker to update a GitHub Gist or a database:
+        // You would send websiteData object or parts of it to your worker.
+
+        alert('Publishing changes to galaxy... (This is a simulated publish without a full backend for data storage)');
+        console.log('Simulating publish with data:', websiteData.profile);
+        
+        // Example: If you had a dedicated worker for profile updates:
+        // try {
+        //     const response = await fetch('YOUR_PROFILE_UPDATE_WORKER_URL', {
+        //         method: 'POST',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify(websiteData.profile)
+        //     });
+        //     if (!response.ok) throw new Error('Failed to publish profile.');
+        //     alert('Profile published successfully!');
+        // } catch (error) {
+        //     console.error('Publish error:', error);
+        //     alert('Failed to publish profile: ' + error.message);
+        // }
+
+        editorOverlay.classList.remove('active');
+        loadProfileContent(); // Reload content after simulated publish
+    });
+
+    // --- New Content Upload Modal ---
+    btnCreateGalaxy.addEventListener('click', () => {
+        uploadContentModal.classList.add('active');
+        uploadFileSection.classList.remove('hidden'); // Default to file upload
+        uploadTextSection.classList.add('hidden');
+        uploadFileNameDisplay.textContent = 'No file chosen';
+        uploadFile.value = '';
+        uploadTextContent.value = '';
+        uploadPreview.innerHTML = '';
+        uploadTypeButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector('.upload-type-btn[data-type="file"]').classList.add('active');
+    });
+
+    uploadModalCloseButton.addEventListener('click', () => {
+        uploadContentModal.classList.remove('active');
+    });
+
+    uploadTypeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            uploadTypeButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            if (this.dataset.type === 'file') {
+                uploadFileSection.classList.remove('hidden');
+                uploadTextSection.classList.add('hidden');
+            } else {
+                uploadFileSection.classList.add('hidden');
+                uploadTextSection.classList.remove('hidden');
+            }
+        });
+    });
+
+    uploadFile.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            uploadFileNameDisplay.textContent = this.files[0].name;
+            uploadPreview.innerHTML = '';
+            const file = this.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let mediaElement;
+                if (file.type.startsWith('image/')) {
+                    mediaElement = document.createElement('img');
+                    mediaElement.src = e.target.result;
+                } else if (file.type.startsWith('video/')) {
+                    mediaElement = document.createElement('video');
+                    mediaElement.src = e.target.result;
+                    mediaElement.controls = true;
+                } else if (file.type.startsWith('audio/')) {
+                    mediaElement = document.createElement('audio');
+                    mediaElement.src = e.target.result;
+                    mediaElement.controls = true;
+                }
+                if (mediaElement) {
+                    uploadPreview.appendChild(mediaElement);
+                }
+            };
+            reader.readAsDataURL(file);
+        } else {
+            uploadFileNameDisplay.textContent = 'No file chosen';
+            uploadPreview.innerHTML = '';
+        }
+    });
+
+    uploadSubmitBtn.addEventListener('click', async function() {
+        const destination = uploadContentDestination.value;
+        const uploadType = document.querySelector('.upload-type-btn.active').dataset.type;
+        let newItem = {};
+
+        if (uploadType === 'file') {
+            const file = uploadFile.files[0];
+            if (!file) {
+                alert('Please select a file to upload.');
+                return;
+            }
+            const fileUrl = URL.createObjectURL(file); // For local preview
+            const fileType = file.type;
+
+            newItem = {
+                id: 'new' + Date.now(),
+                type: fileType.startsWith('image/') ? 'image' : (fileType.startsWith('video/') ? 'video' : (fileType.startsWith('audio/') ? 'audio' : 'file')),
+                src: fileUrl, // In a real app, this would be a URL from a storage service
+                alt: file.name,
+                private: destination === 'private'
+            };
+        } else { // text upload
+            const textContent = uploadTextContent.value.trim();
+            if (!textContent) {
+                alert('Please enter some text content.');
+                return;
+            }
+            newItem = {
+                id: 'new' + Date.now(),
+                type: 'text',
+                content: textContent,
+                private: destination === 'private'
+            };
+        }
+
+        // Add to appropriate data array (locally for demo)
+        if (newItem.private) {
+            websiteData.privateContent.push(newItem);
+            alert('Content added to Forbidden Zone (Private)!');
+        } else {
+            // For public, assuming it goes to 'posts' by default for new public uploads
+            websiteData.posts.push(newItem);
+            alert('Content launched to Portfolios (Public)!');
+        }
+
+        // Increment media count via Worker
+        await incrementMediaCount();
+
+        uploadContentModal.classList.remove('active');
+        loadProfileContent(); // Reload content to show new item
+    });
+
+    // --- Global functions (not part of DOMContentLoaded, can be called from HTML) ---
+    window.openTikTok = function() {
+        window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
+    }
+
+    window.openInstagram = function() {
+        window.open("https://www.instagram.com/elvizill/", "_blank");
+    }
+
+    // --- Initial Load ---
+    fetchVisitorCount(); // Increment and fetch visitor count on initial load
+    fetchMediaCount();   // Fetch initial media count
+    loadProfileContent(); // Load local profile data
+});
+</script>
 </body>
 </html>
