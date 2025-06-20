@@ -1,3 +1,5 @@
+/* dashboard/elvi.css */
+
 :root {
   --primary: #00ff88;
   --primary-dark: #00cc6a;
@@ -272,59 +274,106 @@ body {
 .shake {
   animation: shake 0.4s ease;
 }
-/* Styling untuk link Ezra */
+
+/* Styling untuk link Ezra (teks di footer) */
 .ezra-link {
-    cursor: pointer; /* Menandakan bahwa elemen ini bisa diklik */
-    position: relative; /* Penting untuk penempatan popup */
-    display: inline-block; /* Agar bisa mengatur posisi popup relatif terhadapnya */
-    color: inherit; /* Menggunakan warna teks parent */
-    text-decoration: none; /* Menghilangkan garis bawah default link */
+    cursor: pointer;
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+    /* Efek hover untuk teks Ezra */
+    transition: color 0.2s ease-in-out, text-shadow 0.2s ease-in-out;
 }
 
-/* Styling untuk popup gambar profil */
+.ezra-link:hover {
+    color: var(--primary);
+    text-shadow: 0 0 5px var(--primary);
+}
+
+/* Styling untuk popup gambar profil Ezra */
 .ezra-profile-popup {
     display: none; /* Awalnya sembunyikan popup */
-    position: absolute;
-    bottom: 120%; /* Posisikan di atas link Ezra */
+    position: fixed; /* Posisi fixed agar relatif terhadap viewport */
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%); /* Pusatkan popup secara horizontal */
-    background-color: var(--auth-bg-color, #1a1a2e); /* Warna background popup, sesuaikan dengan tema */
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 100; /* Pastikan popup muncul di atas elemen lain */
-    opacity: 0; /* Awalnya transparan */
-    transition: opacity 0.3s ease-in-out; /* Animasi fade in/out */
-    min-width: 100px; /* Lebar minimum popup */
-    text-align: center;
+    transform: translate(-50%, -50%) scale(0.8); /* Mulai dari sedikit lebih kecil */
+    width: 200px; /* Ukuran sesuai mix.svg */
+    height: 200px; /* Ukuran sesuai mix.svg */
+    padding: 0;
+    background-color: transparent; /* Pastikan transparan untuk gambar */
+    border-radius: 50%; /* Bulat sempurna */
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.9), 0 0 40px rgba(0, 255, 136, 0.4); /* Efek glow yang lebih kuat */
+    overflow: hidden; /* Penting untuk menjaga gambar tetap bulat */
+    z-index: 1000; /* Pastikan muncul di atas semua elemen lain */
+    opacity: 0;
+    pointer-events: none; /* Memungkinkan interaksi dengan elemen di bawahnya saat tidak terlihat */
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; /* Transisi untuk opacity dan scale */
+
+    /* Menambahkan elemen pseudo untuk efek cincin berputar */
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 3px solid transparent;
+        border-top-color: var(--primary);
+        border-right-color: var(--primary);
+        border-radius: 50%;
+        animation: spin-ring 2s linear infinite;
+        opacity: 0; /* Awalnya sembunyikan */
+        transition: opacity 0.3s ease-out;
+    }
 }
 
 .ezra-profile-popup.visible {
-    display: block; /* Tampilkan popup saat kelas 'visible' ditambahkan */
-    opacity: 1; /* Fade in */
+    display: flex; /* Gunakan flex saat visible untuk centering */
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1); /* Kembali ke ukuran normal */
+    pointer-events: auto; /* Memungkinkan interaksi saat terlihat */
+
+    &::before {
+        opacity: 1; /* Tampilkan cincin berputar saat popup terlihat */
+    }
 }
 
 /* Styling untuk gambar di dalam popup */
 .ezra-profile-popup .profile-image {
-    width: 80px; /* Ukuran gambar, sesuaikan */
-    height: 80px; /* Ukuran gambar, sesuaikan */
-    border-radius: 50%; /* Membuat gambar menjadi bulat */
+    width: 100%; /* Gambar mengisi seluruh lebar popup */
+    height: 100%; /* Gambar mengisi seluruh tinggi popup */
+    border-radius: 50%; /* Membuat gambar tetap bulat */
     object-fit: cover; /* Pastikan gambar mengisi area tanpa terdistorsi */
-    border: 2px solid var(--primary-color, #4CAF50); /* Border di sekitar gambar, sesuaikan warna */
+    border: 3px solid var(--darker); /* Border di sekitar gambar */
+    filter: brightness(0.9) grayscale(0.2); /* Sedikit efek agar menyatu */
+    transition: filter 0.3s ease-out; /* Transisi untuk filter gambar */
 }
 
-/* Optional: Animasi jika ingin ada sedikit "pop" saat muncul */
-.ezra-profile-popup.visible {
-    animation: fadeInScale 0.3s ease-out forwards;
+/* Animasi cincin berputar */
+@keyframes spin-ring {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-@keyframes fadeInScale {
-    from {
+/* Animasi untuk memudar dan skala */
+@keyframes popup-appear {
+    0% {
         opacity: 0;
-        transform: translateX(-50%) scale(0.8);
+        transform: translate(-50%, -50%) scale(0.8);
     }
-    to {
+    70% {
         opacity: 1;
-        transform: translateX(-50%) scale(1);
+        transform: translate(-50%, -50%) scale(1.05); /* Sedikit membesar sebelum normal */
     }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Terapkan animasi saat kelas 'visible' ditambahkan */
+.ezra-profile-popup.visible {
+    animation: popup-appear 0.4s ease-out forwards;
 }
