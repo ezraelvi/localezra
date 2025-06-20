@@ -34,7 +34,6 @@ class BioVAuth {
         };
         this.init();
     }
-
     async init() {
         this.startBiometricAnimation();
         await this.collectClientInfo();
@@ -46,15 +45,12 @@ class BioVAuth {
             this.securityConfig.cookieName
         );
     }
-
     async collectClientInfo() {
         try {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), 3000);
-
             const ipResponse = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
             clearTimeout(id);
-
             if (!ipResponse.ok) {
                 throw new Error(`HTTP error! status: ${ipResponse.status}`);
             }
@@ -81,7 +77,6 @@ class BioVAuth {
             this.elements.ipDisplay.textContent = 'Network: Secure • Private';
         }
     }
-
     startBiometricAnimation() {
         this.elements.scanLine.style.opacity = '1';
         this.updateStatus('Initializing security protocols...', 'info');
@@ -91,13 +86,11 @@ class BioVAuth {
             this.elements.btnContainer.style.display = 'flex';
         }, 2000);
     }
-
     updateStatus(message, type = 'info') {
         this.elements.status.textContent = message;
         this.elements.status.className = 'status';
         if (type) this.elements.status.classList.add(type);
     }
-
     setupEventListeners() {
         this.elements.fallbackBtn.addEventListener('click', () => {
             this.showLoginForm();
@@ -120,7 +113,6 @@ class BioVAuth {
             this.togglePasswordVisibility();
         });
     }
-
     checkWebAuthnSupport() {
         if (window.PublicKeyCredential) {
             PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
@@ -140,20 +132,17 @@ class BioVAuth {
             this.elements.webauthnUnsupported.style.display = 'block';
         }
     }
-
     showLoginForm() {
         this.elements.btnContainer.style.display = 'none';
         this.elements.loginForm.style.display = 'block';
         this.elements.emailInput.focus();
         this.updateStatus('Enter your credentials', 'info');
     }
-
     async handleLogin() {
         if (this.securitySystem.isBlocked()) {
             this.showBlockedMessage();
             return;
         }
-
         const username = this.elements.emailInput.value.trim().toLowerCase();
         const password = this.elements.passwordInput.value;
 
@@ -161,7 +150,6 @@ class BioVAuth {
             this.showError('Please fill in all fields (username and password).');
             return;
         }
-
         this.setLoadingState(true);
         try {
             const response = await fetch(this.env.WORKER_URL, {
@@ -173,9 +161,7 @@ class BioVAuth {
                 },
                 body: JSON.stringify({ username: username, password: password })
             });
-
             const responseData = await response.json();
-
             if (responseData.authenticated) {
                 localStorage.setItem(this.securityConfig.localStorageKey, 'true');
                 this.securitySystem.resetAttempts();
@@ -184,7 +170,6 @@ class BioVAuth {
             } else {
                 this.handleFailedLogin(responseData.message || 'Invalid username or password.');
             }
-
         } catch (error) {
             console.error('Login error (network or worker response parsing issue):', error);
             this.showError('Login failed: network issue or server error. Please try again.');
@@ -193,7 +178,6 @@ class BioVAuth {
             this.setLoadingState(false);
         }
     }
-
     handleSuccessfulLogin(token, username) {
         localStorage.setItem(this.securityConfig.localStorageKey, 'true');
         this.securitySystem.resetAttempts();
@@ -201,7 +185,6 @@ class BioVAuth {
         this.elements.errorMsg.textContent = '';
         window.location.href = 'dashboard/index.html';
     }
-
     handleFailedLogin(errorMessage) {
         this.securitySystem.recordFailedAttempt();
         const attemptsLeft = this.securitySystem.maxAttempts - this.securitySystem.attemptData.attempts;
@@ -210,9 +193,7 @@ class BioVAuth {
         if (attemptsLeft > 0) {
             displayMessage += ` (${attemptsLeft} ${attemptsLeft === 1 ? 'attempt' : 'attempts'} left)`;
         }
-
         this.showError(displayMessage);
-
         if (this.securitySystem.isBlocked()) {
             this.showBlockedMessage();
         }
@@ -223,7 +204,6 @@ class BioVAuth {
             this.elements.loginForm.classList.remove('shake');
         }, 500);
     }
-
     showBlockedMessage() {
         const remainingTime = this.securitySystem.getRemainingBlockTime();
         const minutes = Math.floor(remainingTime / 60);
@@ -244,7 +224,6 @@ class BioVAuth {
             this.elements.errorMsg.textContent = `Too many attempts. Please wait ${newMinutes}m ${newSeconds}s.`;
         }, 1000);
     }
-
     showError(message) {
         this.elements.errorMsg.textContent = message;
         this.elements.errorMsg.style.display = 'block';
@@ -254,7 +233,6 @@ class BioVAuth {
             }
         }, 5000);
     }
-
     setLoadingState(isLoading) {
         if (isLoading) {
             this.elements.submitLogin.disabled = true;
@@ -266,7 +244,6 @@ class BioVAuth {
             this.elements.submitLogin.querySelector('.btn-text').textContent = 'Login';
         }
     }
-
     togglePasswordVisibility() {
         const isPassword = this.elements.passwordInput.type === 'password';
         this.elements.passwordInput.type = isPassword ? 'text' : 'password';
@@ -274,7 +251,6 @@ class BioVAuth {
         this.elements.togglePassword.setAttribute('aria-label',
             isPassword ? 'Hide password' : 'Show password');
     }
-
     initiateWebAuthn() {
         if (!this.state.webauthnSupported) return;
         this.updateStatus('Initiating biometric authentication...', 'info');
@@ -283,7 +259,6 @@ class BioVAuth {
         }, 1000);
     }
 }
-
 class SecuritySystem {
     constructor(maxAttempts, blockDuration, cookieName) {
         this.maxAttempts = maxAttempts;
@@ -354,8 +329,7 @@ class SecuritySystem {
         const blockUntil = new Date(this.attemptData.blockUntil);
         const now = new Date();
         return Math.round((blockUntil - now) / 1000);
-    }
-}
+    }}
 document.addEventListener('DOMContentLoaded', () => {
     new BioVAuth();
 });
