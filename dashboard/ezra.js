@@ -134,25 +134,29 @@ class BioVAuth {
     setupEzraPopupEventListeners() {
         const { ezraLink, ezraProfilePopup, biometricScan } = this.elements;
 
-        if (ezraLink && ezraProfilePopup) {
-            // Fungsi untuk menampilkan popup
+        if (ezraLink && ezraProfilePopup && biometricScan) {
+            // Fungsi untuk menampilkan popup dan memposisikannya
             const showPopup = () => {
+                const rect = biometricScan.getBoundingClientRect(); // Dapatkan posisi dan ukuran mix.svg
+
+                // Atur posisi dan ukuran popup sesuai mix.svg
+                ezraProfilePopup.style.position = 'absolute'; // Pastikan absolute
+                ezraProfilePopup.style.top = `${rect.top + window.scrollY}px`; // Top relatif terhadap document
+                ezraProfilePopup.style.left = `${rect.left + window.scrollX}px`; // Left relatif terhadap document
+                ezraProfilePopup.style.width = `${rect.width}px`;
+                ezraProfilePopup.style.height = `${rect.height}px`;
+
                 ezraProfilePopup.classList.add('visible');
+
                 // Efek blur pada mix.svg saat popup Ezra terlihat
-                if (biometricScan) {
-                    biometricScan.style.filter = 'blur(5px) brightness(0.5)';
-                    biometricScan.style.transition = 'filter 0.3s ease-in-out';
-                }
+                biometricScan.style.filter = 'blur(5px) brightness(0.5)';
             };
 
             // Fungsi untuk menyembunyikan popup
             const hidePopup = () => {
                 ezraProfilePopup.classList.remove('visible');
                 // Mengembalikan filter mix.svg saat popup Ezra tersembunyi
-                if (biometricScan) {
-                    // Pastikan transisi untuk filter sudah diatur di CSS atau di sini
-                    biometricScan.style.filter = 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.3))';
-                }
+                biometricScan.style.filter = 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.3))';
             };
 
             ezraLink.addEventListener('click', (event) => {
@@ -183,29 +187,40 @@ class BioVAuth {
 
             ezraLink.addEventListener('touchend', () => {
                 clearTimeout(this.pressTimer);
+                // Menambahkan sedikit delay untuk touch agar tidak langsung hilang jika hanya tap
+                setTimeout(() => {
+                    if (!ezraProfilePopup.classList.contains('visible')) return; // Jika sudah hilang oleh clickOutside
+                    // Ini bisa diatur agar popup tetap ada sampai disentuh lagi atau klik di luar
+                    // Atau bisa juga langsung hidePopup(); jika ingin perilaku seperti klik
+                }, 100);
             });
 
             ezraLink.addEventListener('touchcancel', () => {
                 clearTimeout(this.pressTimer);
             });
 
+            // Menyembunyikan popup jika klik di luar area popup atau link
             document.addEventListener('click', (event) => {
-                // Sembunyikan popup jika klik di luar link Ezra dan di luar popup itu sendiri
-                if (!ezraLink.contains(event.target) && !ezraProfilePopup.contains(event.target)) {
+                if (ezraProfilePopup.classList.contains('visible') &&
+                    !ezraLink.contains(event.target) &&
+                    !ezraProfilePopup.contains(event.target)) {
                     hidePopup();
                 }
             });
 
+            // Menyembunyikan popup saat esc ditekan
             document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') {
+                if (event.key === 'Escape' && ezraProfilePopup.classList.contains('visible')) {
                     hidePopup();
                 }
             });
 
-            // Pastikan transisi filter untuk biometricScan diinisialisasi
-            if (biometricScan) {
-                biometricScan.style.transition = 'filter 0.3s ease-in-out';
-            }
+            // Menangani perubahan ukuran jendela (misal saat rotasi layar atau resize browser)
+            window.addEventListener('resize', () => {
+                if (ezraProfilePopup.classList.contains('visible')) {
+                    showPopup(); // Perbarui posisi dan ukuran popup
+                }
+            });
         }
     }
     // --- End of Ezra Popup Specific Methods ---
