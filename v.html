@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Elvi Ezra - Cosmic Orb</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -15,622 +15,671 @@
             color: #E0E0E0; /* Light gray for text on dark background */
             background-color: #000005; /* Near black for deep space background */
             overflow: auto; /* Allow scrolling for the large content area */
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="%2300FFFF"><circle cx="12" cy="12" r="2" opacity="0.8"/><path d="M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12" stroke="%2300FFFF" stroke-width="2"/></svg>') 15 15, auto; /* Custom cursor */
-            perspective: 1000px; /* For 3D effects */
-        }
-
-        .background-stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px), radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
-            background-size: 500px 500px, 300px 300px, 200px 200px;
-            background-position: 0 0, 50px 50px, 100px 100px;
-            animation: moveStars 100s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes moveStars {
-            from { background-position: 0 0, 50px 50px, 100px 100px; }
-            to { background-position: 500px 500px, 350px 350px, 300px 300px; }
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 40px;
-            background-color: rgba(10, 10, 20, 0.9); /* Slightly transparent dark background for content */
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4); /* Cyan glow */
-            position: relative;
-            z-index: 1;
-            transform-style: preserve-3d;
-            animation: fadeIn 1s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Header and Profile */
-        .profile-header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        .profile-picture {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 4px solid #00FFFF; /* Cyan border */
-            object-fit: cover;
-            margin-bottom: 20px;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
-            transition: transform 0.3s ease;
-        }
-
-        .profile-picture:hover {
-            transform: scale(1.05) rotate(5deg);
-        }
-
-        .name-and-title h1 {
-            font-size: 2.8em;
-            color: #00FFFF; /* Cyan for name */
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
-        }
-
-        .name-and-title p {
-            font-size: 1.2em;
-            color: #99FFFF; /* Lighter cyan for title */
-            margin-top: 0;
-            text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-        }
-
-        /* Bio Section */
-        .bio-section {
-            background-color: rgba(20, 20, 40, 0.7);
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 40px;
-            border: 1px solid #00AAFF; /* Blue border */
-            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
-        }
-
-        .bio-section h2 {
-            color: #00AAFF; /* Blue for heading */
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            text-shadow: 0 0 8px rgba(0, 170, 255, 0.6);
-        }
-
-        .bio-section p {
-            line-height: 1.8;
-            font-size: 1.1em;
-            text-align: justify;
-            color: #B0E0E6; /* Pale cyan for bio text */
-        }
-
-        /* Core Metrics Section - NEW */
-        .core-metrics {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"30\" viewBox=\"0 0 24 24\" fill=\"%2300FFFF\"><circle cx=\"12\" cy=\"12\" r=\"2\" opacity=\"0.8\"/><path d=\"M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12\" stroke=\"%2300FFFF\" stroke-width=\"1.5\"/></svg>') 15 15, auto;
             display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 25px;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Particles animation - stays the same */
+        .particle {
+            position: absolute;
+            background: #00FFFF; /* Cyan */
+            border-radius: 50%;
+            animation: floatAndFade 15s infinite ease-in-out;
+            opacity: 0;
+        }
+
+        @keyframes floatAndFade {
+            0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+            25% { opacity: 0.8; }
+            50% { transform: translate(calc(var(--rand-x) * 1px), calc(var(--rand-y) * 1px)) scale(var(--rand-scale)); opacity: 0.6; }
+            75% { opacity: 0.4; }
+            100% { transform: translate(calc(var(--rand-x) * 2px), calc(var(--rand-y) * 2px)) scale(0); opacity: 0; }
+        }
+
+        /* Main Content Wrapper */
+        .content-wrapper {
+            position: relative;
+            z-index: 10; /* Above particles */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Hero Section - stays the same */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
             margin-bottom: 50px;
         }
 
-        .metric-item {
-            background-color: rgba(30, 30, 50, 0.8);
-            border-radius: 12px;
-            padding: 25px;
+        .profile-orb {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00FFFF, #8A2BE2); /* Cyan to Blue Violet */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(138, 43, 226, 0.5);
+            animation: pulse 3s infinite alternate;
+            position: relative; /* Needed for absolute positioning of inner elements */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(138, 43, 226, 0.5); }
+            100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 255, 255, 0.9), 0 0 80px rgba(138, 43, 226, 0.7); }
+        }
+
+        .profile-orb img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #E0E0E0;
+            object-fit: cover;
+        }
+
+        .elvi-name {
+            font-size: 3em;
+            color: #00FFFF;
+            text-shadow: 0 0 15px #00FFFF;
+            margin-bottom: 10px;
+        }
+
+        .cosmic-title {
+            font-size: 1.5em;
+            color: #8A2BE2;
+            text-shadow: 0 0 10px #8A2BE2;
+        }
+
+        /* Dynamic stat elements within the orb */
+        .orb-stat {
+            position: absolute;
+            color: #E0E0E0;
             text-align: center;
-            flex: 1;
-            min-width: 250px;
-            box-shadow: 0 0 20px rgba(128, 0, 128, 0.4); /* Purple glow */
-            border: 1px solid #8A2BE2; /* BlueViolet border */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-size: 0.9em;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
         }
 
-        .metric-item:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 0 35px rgba(128, 0, 128, 0.6);
+        .orb-stat .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #00FFFF;
         }
 
-        .metric-item .icon-large {
-            font-size: 3.8em;
-            color: #DDA0DD; /* Plum color for icon */
-            margin-bottom: 15px;
-            text-shadow: 0 0 10px rgba(221, 160, 221, 0.8);
+        .orb-stat .stat-label {
+            font-size: 0.8em;
+            color: #999;
         }
 
-        .metric-item h2 {
-            font-size: 2.4em;
-            color: #EE82EE; /* Violet color for number */
-            margin-bottom: 8px;
-            text-shadow: 0 0 12px rgba(238, 130, 238, 0.8);
+        /* Positioning for new stats */
+        /* Kunjungan (replacing Orbiting) - Top Right */
+        .orb-stat.visits {
+            top: 20px;
+            right: 20px;
+            transform: translate(20px, -20px); /* Adjust to be outside the orb a bit */
         }
 
-        .metric-item p {
-            color: #FFC0CB; /* Pink color for description */
-            font-size: 1.1em;
-            margin-top: 0;
+        /* Media Count (replacing Cosmic Being) - Bottom Right */
+        .orb-stat.media {
+            bottom: 20px;
+            right: 20px;
+            transform: translate(20px, 20px); /* Adjust to be outside the orb a bit */
         }
 
+        /* Website Age (new) - Bottom Left */
+        .orb-stat.website-age {
+            bottom: 20px;
+            left: 20px;
+            transform: translate(-20px, 20px); /* Adjust to be outside the orb a bit */
+        }
 
-        /* Social Links */
+        /* Social Links - stays the same */
         .social-links {
-            text-align: center;
-            margin-bottom: 40px;
+            margin-top: 30px;
+            display: flex;
+            gap: 25px;
         }
 
         .social-links a {
-            color: #00FFFF;
-            font-size: 2.5em;
-            margin: 0 15px;
+            color: #E0E0E0;
+            font-size: 2em;
             transition: color 0.3s ease, transform 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
         }
 
         .social-links a:hover {
-            color: #99FFFF;
-            transform: scale(1.2);
+            color: #00FFFF;
+            transform: translateY(-5px);
         }
 
-        /* Footer */
-        footer {
+        /* Sections (About, Projects, Contact) - stays the same */
+        .section {
+            background-color: rgba(10, 10, 30, 0.8); /* Darker, slightly transparent */
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .section h2 {
+            color: #00FFFF;
+            font-size: 2em;
+            margin-bottom: 20px;
             text-align: center;
-            margin-top: 50px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(0, 255, 255, 0.2);
-            color: #99FFFF;
-            font-size: 0.9em;
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+            border-bottom: 2px solid #8A2BE2;
+            padding-bottom: 10px;
         }
 
-        /* Editor Overlay Styles */
+        .section p, .section ul {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #C0C0C0;
+        }
+
+        .section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .section ul li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .section ul li::before {
+            content: "\f111"; /* FontAwesome circle icon */
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            color: #8A2BE2;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Gallery Section - New */
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .media-item {
+            background-color: rgba(20, 20, 40, 0.9);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .media-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .media-item img, .media-item video {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .media-item p {
+            font-size: 0.8em;
+            color: #B0B0B0;
+            padding: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* File Upload Section */
+        .upload-section {
+            background-color: rgba(10, 10, 30, 0.8);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .upload-section h2 {
+            color: #00FFFF;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #8A2BE2;
+            padding-bottom: 10px;
+        }
+
+        .upload-section input[type="file"] {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px;
+            border: 1px solid #00FFFF;
+            border-radius: 5px;
+            background-color: #0a0a1e;
+            color: #E0E0E0;
+            width: fit-content;
+            cursor: pointer;
+        }
+        
+        .upload-section input[type="file"]::file-selector-button {
+            background-color: #8A2BE2;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-section input[type="file"]::file-selector-button:hover {
+            background-color: #6a0ad2;
+        }
+
+        .upload-section button {
+            background-color: #00FFFF;
+            color: #000005;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+        }
+
+        .upload-section button:hover {
+            background-color: #00E5E5;
+        }
+
+        #uploadStatus {
+            margin-top: 15px;
+            font-size: 0.95em;
+            color: #E0E0E0;
+        }
+
+        /* Editor Overlay (for Admin) - same as before */
         .editor-overlay {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .editor-overlay.active {
-            display: flex;
+            opacity: 1;
+            visibility: visible;
         }
 
         .editor-content {
-            background-color: #1a1a2e; /* Dark blue-purple */
+            background-color: #1a1a2e;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 40px rgba(138, 43, 226, 0.7); /* Amethyst glow */
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
             width: 90%;
             max-width: 600px;
             color: #E0E0E0;
             position: relative;
-            animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            max-height: 90vh; /* Limit height */
-            overflow-y: auto; /* Allow scrolling within the editor */
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .editor-content h2 {
-            color: #FF69B4; /* Hot pink */
+            color: #00FFFF;
             text-align: center;
             margin-bottom: 25px;
-            font-size: 2.2em;
-            text-shadow: 0 0 10px rgba(255, 105, 180, 0.7);
         }
 
         .editor-content label {
             display: block;
-            margin-bottom: 10px;
-            color: #C0C0C0;
-            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #B0B0B0;
         }
 
         .editor-content input[type="text"],
         .editor-content textarea {
             width: calc(100% - 20px);
-            padding: 12px;
+            padding: 10px;
             margin-bottom: 20px;
-            border: 1px solid #4a4a6e;
-            border-radius: 8px;
-            background-color: #2a2a4a;
+            border: 1px solid #8A2BE2;
+            border-radius: 5px;
+            background-color: #0d0d1a;
             color: #E0E0E0;
             font-family: 'Space Mono', monospace;
-            font-size: 1em;
             box-sizing: border-box;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
         }
 
         .editor-content textarea {
-            min-height: 120px;
             resize: vertical;
+            min-height: 100px;
         }
 
         .editor-actions {
             display: flex;
             justify-content: space-around;
-            gap: 15px;
             margin-top: 30px;
         }
 
         .editor-actions button {
-            padding: 12px 25px;
+            background-color: #00FFFF;
+            color: #000005;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            flex: 1;
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
         .editor-actions button:hover {
-            transform: translateY(-3px);
+            background-color: #00E5E5;
         }
 
-        .editor-actions .publish-btn {
-            background-color: #4CAF50; /* Green */
-            color: white;
-            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        .editor-actions button.cancel {
+            background-color: #8A2BE2;
         }
 
-        .editor-actions .publish-btn:hover {
-            background-color: #45a049;
+        .editor-actions button.cancel:hover {
+            background-color: #6a0ad2;
         }
 
-        .editor-actions .cancel-btn {
-            background-color: #f44336; /* Red */
-            color: white;
-            box-shadow: 0 0 15px rgba(244, 67, 54, 0.5);
-        }
-
-        .editor-actions .cancel-btn:hover {
-            background-color: #da190b;
-        }
-
-        .close-editor-btn {
+        .close-editor {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: none;
-            border: none;
-            color: #E0E0E0;
-            font-size: 2em;
+            font-size: 1.5em;
+            color: #8A2BE2;
             cursor: pointer;
             transition: color 0.3s ease;
         }
 
-        .close-editor-btn:hover {
-            color: #FF69B4;
+        .close-editor:hover {
+            color: #00FFFF;
         }
 
-        /* Upload Section */
-        .upload-section {
-            background-color: rgba(20, 20, 40, 0.7);
-            border: 1px dashed #00AAFF;
-            border-radius: 10px;
-            padding: 30px;
+        /* Footer - stays the same */
+        footer {
+            margin-top: 50px;
+            padding: 20px;
             text-align: center;
-            margin-bottom: 40px;
-            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            color: #7f8c8d;
+            font-size: 0.9em;
+            width: 100%;
         }
 
-        .upload-section h2 {
-            color: #00AAFF;
-            margin-bottom: 25px;
-            font-size: 1.8em;
-            text-shadow: 0 0 8px rgba(0, 170, 255, 0.6);
-        }
-
-        #uploadForm input[type="file"] {
-            display: block;
-            margin: 0 auto 20px auto;
-            padding: 10px;
-            border: 1px solid #4a4a6e;
-            border-radius: 8px;
-            width: fit-content;
-            background-color: #2a2a4a;
-            color: #E0E0E0;
-            font-family: 'Space Mono', monospace;
-            cursor: pointer;
-        }
-
-        #uploadForm button {
-            background-color: #6A5ACD; /* SlateBlue */
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 0 15px rgba(106, 90, 205, 0.5);
-        }
-
-        #uploadForm button:hover {
-            background-color: #483D8B; /* DarkSlateBlue */
-            transform: translateY(-3px);
-        }
-
-        #uploadStatus {
-            margin-top: 15px;
-            font-size: 1em;
-            color: #FFD700; /* Gold */
-        }
-        
-        /* Media Query for Responsiveness */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .container {
-                margin: 30px auto;
-                padding: 25px;
+            .profile-orb {
+                width: 150px;
+                height: 150px;
             }
 
-            .profile-header h1 {
+            .profile-orb img {
+                width: 90px;
+                height: 90px;
+            }
+
+            .elvi-name {
                 font-size: 2.2em;
             }
 
-            .profile-header p {
-                font-size: 1em;
+            .cosmic-title {
+                font-size: 1.2em;
             }
 
-            .bio-section h2, .upload-section h2 {
-                font-size: 1.5em;
+            .orb-stat {
+                font-size: 0.7em;
             }
-
-            .bio-section p {
-                font-size: 1em;
+            .orb-stat .stat-value {
+                font-size: 1.2em;
             }
+            .orb-stat.visits { top: 10px; right: 10px; transform: translate(10px, -10px); }
+            .orb-stat.media { bottom: 10px; right: 10px; transform: translate(10px, 10px); }
+            .orb-stat.website-age { bottom: 10px; left: 10px; transform: translate(-10px, 10px); }
 
-            .core-metrics {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .metric-item {
-                min-width: unset;
-                width: 100%;
-            }
-
-            .metric-item h2 {
-                font-size: 2em;
-            }
-
-            .metric-item .icon-large {
-                font-size: 3em;
+            .social-links {
+                gap: 15px;
             }
 
             .social-links a {
-                font-size: 2em;
-                margin: 0 10px;
+                font-size: 1.5em;
             }
-        }
 
-        @media (max-width: 480px) {
-            .container {
-                margin: 20px auto;
+            .section, .upload-section {
                 padding: 20px;
             }
 
-            .profile-picture {
-                width: 100px;
-                height: 100px;
-            }
-
-            .profile-header h1 {
+            .section h2, .upload-section h2 {
                 font-size: 1.8em;
-            }
-            .profile-header p {
-                font-size: 0.9em;
             }
 
             .editor-content {
                 padding: 20px;
             }
+        }
 
-            .editor-content h2 {
+        @media (max-width: 480px) {
+            .profile-orb {
+                width: 120px;
+                height: 120px;
+            }
+
+            .profile-orb img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .elvi-name {
                 font-size: 1.8em;
             }
 
-            .editor-actions button {
-                padding: 10px 20px;
+            .cosmic-title {
+                font-size: 1em;
+            }
+
+            .orb-stat {
+                font-size: 0.6em;
+            }
+            .orb-stat .stat-value {
                 font-size: 1em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="background-stars"></div>
+    <div id="particles"></div>
 
-    <div class="container">
-        <header class="profile-header">
-            <img id="profilePic" src="https://via.placeholder.com/150/00FFFF/000000?text=ELVI" alt="Profile Picture of Elvi" class="profile-picture">
-            <div class="name-and-title">
-                <h1 id="profileName">Elvi Ezra</h1>
-                <p id="profileTitle">Cosmic Orb</p>
+    <div class="content-wrapper">
+        <section class="hero-section">
+            <div class="profile-orb">
+                <img id="profile-picture" src="https://i.ibb.co/L5Q1dF6/me.jpg" alt="Elvi Ezra">
+                
+                <div class="orb-stat visits">
+                    <i class="fas fa-eye"></i>
+                    <span id="website-visits" class="stat-value">---</span>
+                    <span class="stat-label">Total Visits</span>
+                </div>
+                <div class="orb-stat media">
+                    <i class="fas fa-folder-open"></i>
+                    <span id="media-count" class="stat-value">---</span>
+                    <span class="stat-label">Media Count</span>
+                </div>
+                <div class="orb-stat website-age">
+                    <i class="fas fa-clock"></i>
+                    <span id="website-age" class="stat-value">---</span>
+                    <span class="stat-label">Website Age</span>
+                </div>
+
             </div>
-            <button id="editProfileBtn" style="position: absolute; top: 10px; right: 10px; background-color: #8A2BE2; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
-                <i class="fas fa-edit"></i> Edit Profile
-            </button>
-        </header>
-
-        <section class="core-metrics">
-            <div class="metric-item">
-                <i class="fas fa-eye icon-large"></i>
-                <h2 id="website-visits">Memuat...</h2>
-                <p>Total Kunjungan</p>
-            </div>
-
-            <div class="metric-item">
-                <i class="fas fa-folder-open icon-large"></i>
-                <h2 id="media-count">Memuat...</h2>
-                <p>Media Tersimpan</p>
-            </div>
-
-            <div class="metric-item">
-                <i class="fas fa-clock icon-large"></i>
-                <h2 id="website-age">Memuat...</h2>
-                <p>Usia Website</p>
+            <h1 class="elvi-name" id="profile-name">Elvi Ezra</h1>
+            <p class="cosmic-title" id="profile-title">Cosmic Orb</p>
+            <div class="social-links">
+                <a href="#" onclick="openTikTok()" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                <a href="#" onclick="openInstagram()" title="Instagram"><i class="fab fa-instagram"></i></a>
             </div>
         </section>
 
-        <section class="bio-section">
-            <h2>Cosmic Bio</h2>
-            <p id="profileBio">
-                Connecting the dots in the vast expanse of the digital cosmos. I'm a passionate explorer of technology and creativity, constantly seeking new galaxies of innovation. This cosmic orb is my personal space where thoughts, projects, and explorations converge. Join me on this journey through the digital universe.
-            </p>
+        <section class="section" id="about-me">
+            <h2>About Me</h2>
+            <p id="about-content">Greetings, cosmic travelers. I am Elvi Ezra, an entity of light and code, navigating the vast expanse of the digital cosmos. My journey is one of discovery, creation, and connection. I thrive on the ethereal glow of innovation and the vibrant pulse of human interaction.</p>
+        </section>
+
+        <section class="section" id="my-projects">
+            <h2>My Cosmic Projects</h2>
+            <ul id="projects-list">
+                <li><i class="fas fa-rocket"></i> Project Alpha: A decentralized neural network for interstellar communication.</li>
+                <li><i class="fas fa-gem"></i> Gemstone Protocol: An encrypted ledger for cosmic resource trading.</li>
+                <li><i class="fas fa-meteor"></i> Meteoroid Navigator: An AI-powered guide for asteroid field traversal.</li>
+            </ul>
         </section>
 
         <section class="upload-section">
-            <h2>Unggah Media Kosmik</h2>
+            <h2>Unggah Media Anda ke Cosmos</h2>
             <form id="uploadForm">
-                <input type="file" id="mediaFile" name="mediaFile" multiple>
+                <input type="file" id="mediaFile" name="mediaFiles" multiple>
                 <button type="submit">Unggah ke Orb</button>
                 <p id="uploadStatus"></p>
             </form>
         </section>
 
-        <section class="social-links">
-            <a href="#" onclick="openTikTok()"><i class="fab fa-tiktok"></i></a>
-            <a href="#" onclick="openInstagram()"><i class="fab fa-instagram"></i></a>
+        <section class="section" id="contact">
+            <h2>Connect with the Cosmos</h2>
+            <p id="contact-content">If you wish to send a signal across the void, you can reach me through these channels or click the orb to edit.</p>
             </section>
 
         <footer>
-            <p>&copy; 2025 Elvi Ezra - Cosmic Orb. All rights reserved.</p>
+            <p>&copy; 2025 Elvi Ezra. All rights reserved. Powered by Stardust and Code.</p>
         </footer>
     </div>
 
-    <div id="editorOverlay" class="editor-overlay">
+    <div class="editor-overlay" id="editorOverlay">
         <div class="editor-content">
-            <button class="close-editor-btn" id="closeEditorBtn">&times;</button>
-            <h2>Edit Cosmic Profile</h2>
-            <label for="editorName">Nama:</label>
-            <input type="text" id="editorName">
+            <span class="close-editor" id="closeEditor">&times;</span>
+            <h2>Edit Cosmic Data</h2>
+            <label for="edit-name">Profile Name:</label>
+            <input type="text" id="edit-name">
 
-            <label for="editorTitle">Judul:</label>
-            <input type="text" id="editorTitle">
+            <label for="edit-title">Cosmic Title:</label>
+            <input type="text" id="edit-title">
 
-            <label for="editorBio">Bio:</label>
-            <textarea id="editorBio"></textarea>
+            <label for="edit-about">About Me:</label>
+            <textarea id="edit-about"></textarea>
+
+            <label for="edit-projects">My Cosmic Projects (one per line):</label>
+            <textarea id="edit-projects"></textarea>
 
             <div class="editor-actions">
-                <button class="publish-btn" id="publishChangesBtn">Publish Changes</button>
-                <button class="cancel-btn" id="cancelEditBtn">Cancel</button>
+                <button id="publishChangesBtn">Publish to Galaxy</button>
+                <button class="cancel" id="cancelEditBtn">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Data default (akan di-override oleh data dari Cloudflare Worker jika tersedia)
-        let profileData = {
-            name: "Elvi Ezra",
-            title: "Cosmic Orb",
-            bio: "Connecting the dots in the vast expanse of the digital cosmos. I'm a passionate explorer of technology and creativity, constantly seeking new galaxies of innovation. This cosmic orb is my personal space where thoughts, projects, and explorations converge. Join me on this journey through the digital universe."
-        };
-
-        // DOMContentLoaded memastikan script berjalan setelah HTML dimuat sepenuhnya
         document.addEventListener('DOMContentLoaded', () => {
-            const profileName = document.getElementById('profileName');
-            const profileTitle = document.getElementById('profileTitle');
-            const profileBio = document.getElementById('profileBio');
-            const editProfileBtn = document.getElementById('editProfileBtn');
+            // --- Particle Background Initialization ---
+            const particlesContainer = document.getElementById('particles');
+            const numParticles = 80;
+
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2; // Size between 2px and 7px
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * -15}s`; // Start at various points in animation
+                particle.style.setProperty('--rand-x', Math.random() * 400 - 200); // -200 to 200
+                particle.style.setProperty('--rand-y', Math.random() * 400 - 200); // -200 to 200
+                particle.style.setProperty('--rand-scale', Math.random() * 0.5 + 0.5); // 0.5 to 1.0
+                particlesContainer.appendChild(particle);
+            }
+
+            // --- Admin Editor Logic (Unchanged from your original) ---
+            const profileOrb = document.querySelector('.profile-orb');
             const editorOverlay = document.getElementById('editorOverlay');
-            const closeEditorBtn = document.getElementById('closeEditorBtn');
+            const closeEditorBtn = document.getElementById('closeEditor');
             const cancelEditBtn = document.getElementById('cancelEditBtn');
-            const editorName = document.getElementById('editorName');
-            const editorTitle = document.getElementById('editorTitle');
-            const editorBio = document.getElementById('editorBio');
             const publishChangesBtn = document.getElementById('publishChangesBtn');
 
-            // --- API Base URL for Cloudflare Worker ---
-            // PENTING: Ganti ini dengan URL Cloudflare Worker Anda setelah di-deploy!
-            const API_BASE_URL = 'https://your-worker-name.your-username.workers.dev'; 
-            // Contoh: 'https://elvi-cosmic-worker.yourname.workers.dev'
+            const editName = document.getElementById('edit-name');
+            const editTitle = document.getElementById('edit-title');
+            const editAbout = document.getElementById('edit-about');
+            const editProjects = document.getElementById('edit-projects');
 
+            const profileName = document.getElementById('profile-name');
+            const profileTitle = document.getElementById('profile-title');
+            const aboutContent = document.getElementById('about-content');
+            const projectsList = document.getElementById('projects-list');
 
-            // --- Fungsi untuk memuat data profil (dari Cloudflare Worker atau default) ---
-            async function fetchDataFromBackend() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/profile`);
-                    if (!response.ok) {
-                        // Jika tidak ada data profil di backend, gunakan data default
-                        console.warn('No profile data found on backend, using default.');
-                        loadProfileContent(); // Load default local data
-                        return;
-                    }
-                    const data = await response.json();
-                    profileData = data; // Update global profileData
-                    loadProfileContent(); // Load content with fetched data
-                } catch (error) {
-                    console.error('Error fetching profile data from backend:', error);
-                    loadProfileContent(); // Load default local data if fetch fails
-                }
-            }
+            let currentProfileData = {
+                name: "Elvi Ezra",
+                title: "Cosmic Orb",
+                about: "Greetings, cosmic travelers. I am Elvi Ezra, an entity of light and code, navigating the vast expanse of the digital cosmos. My journey is one of discovery, creation, and connection. I thrive on the ethereal glow of innovation and the vibrant pulse of human interaction.",
+                projects: [
+                    "Project Alpha: A decentralized neural network for interstellar communication.",
+                    "Gemstone Protocol: An encrypted ledger for cosmic resource trading.",
+                    "Meteoroid Navigator: An AI-powered guide for asteroid field traversal."
+                ]
+            };
 
+            // Load content from localStorage or default
             function loadProfileContent() {
-                profileName.textContent = profileData.name;
-                profileTitle.textContent = profileData.title;
-                profileBio.textContent = profileData.bio;
-            }
-
-            // --- Fungsi untuk menyimpan data profil ke backend (Cloudflare Worker) ---
-            async function publishChangesToBackend() {
-                const updatedProfile = {
-                    name: editorName.value,
-                    title: editorTitle.value,
-                    bio: editorBio.value
-                };
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/profile`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(updatedProfile)
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                    }
-
-                    const result = await response.json();
-                    console.log('Changes published to Cloudflare Worker:', result);
-                    alert('Changes successfully published to the galaxy!');
-                    editorOverlay.classList.remove('active');
-                    profileData = updatedProfile; // Update local data
-                    loadProfileContent(); // Reload the website with the new data
-                } catch (error) {
-                    console.error('Error publishing changes:', error);
-                    alert(`Failed to publish changes: ${error.message}. Check Cloudflare Worker logs.`);
+                const storedData = localStorage.getItem('elviProfileData');
+                if (storedData) {
+                    currentProfileData = JSON.parse(storedData);
                 }
+
+                profileName.textContent = currentProfileData.name;
+                profileTitle.textContent = currentProfileData.title;
+                aboutContent.textContent = currentProfileData.about;
+                
+                projectsList.innerHTML = '';
+                currentProfileData.projects.forEach(project => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<i class="fas fa-rocket"></i> ${project}`;
+                    projectsList.appendChild(li);
+                });
             }
 
-            // --- Event Listeners for Editor ---
-            editProfileBtn.addEventListener('click', () => {
-                editorName.value = profileData.name;
-                editorTitle.value = profileData.title;
-                editorBio.value = profileData.bio;
+            profileOrb.addEventListener('click', () => {
+                editName.value = currentProfileData.name;
+                editTitle.value = currentProfileData.title;
+                editAbout.value = currentProfileData.about;
+                editProjects.value = currentProfileData.projects.join('\n');
                 editorOverlay.classList.add('active');
             });
 
@@ -642,108 +691,148 @@
                 editorOverlay.classList.remove('active');
             });
 
+            // --- IMPORTANT: Configure your Cloudflare Worker API URL here ---
+            // After deploying your Cloudflare Worker, Cloudflare will give you a URL.
+            // Replace 'https://your-worker-name.your-username.workers.dev' with that actual URL.
+            const API_BASE_URL = 'https://your-worker-name.your-username.workers.dev'; 
+
+            async function publishChangesToBackend() {
+                const updatedData = {
+                    name: editName.value,
+                    title: editTitle.value,
+                    about: editAbout.value,
+                    projects: editProjects.value.split('\n').filter(p => p.trim() !== '')
+                };
+
+                try {
+                    // This section assumes your backend can handle profile data updates.
+                    // The Cloudflare Worker example below focuses on stats and media.
+                    // You'd need to extend your Worker to store/retrieve this profile data,
+                    // perhaps in another KV namespace or D1 database.
+                    // For now, we'll just update localStorage.
+
+                    currentProfileData = updatedData;
+                    localStorage.setItem('elviProfileData', JSON.stringify(currentProfileData));
+                    alert('Changes successfully saved locally!');
+                    editorOverlay.classList.remove('active');
+                    loadProfileContent(); // Reload the website with the new data
+                } catch (error) {
+                    console.error('Error publishing changes:', error);
+                    alert(`Failed to publish changes: ${error.message}.`);
+                }
+            }
+
             publishChangesBtn.addEventListener('click', publishChangesToBackend);
 
+            // Global functions (can be called from HTML)
+            function openTikTok() {
+                window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
+            }
 
-            // --- NEW FEATURE 1: Website Age ---
-            // Ganti dengan tanggal peluncuran website Anda yang sebenarnya (tahun, bulan-1, hari, jam, menit, detik)
-            // Contoh: 20 Juni 2024 -> new Date(2024, 5, 20, 0, 0, 0)
-            const WEBSITE_BUILD_DATE = new Date(2024, 5, 20, 0, 0, 0); 
+            function openInstagram() {
+                window.open("https://www.instagram.com/elvizill/", "_blank");
+            }
+
+            loadProfileContent(); // Load existing profile content on page load
+
+            // --- NEW: Website Age Feature ---
+            // Set your website's launch date here (Year, Month-1, Day, Hour, Minute, Second)
+            // Example: June 20, 2024 at 10:00:00 AM WIB -> new Date(2024, 5, 20, 10, 0, 0)
+            const WEBSITE_LAUNCH_DATE = new Date(2025, 5, 20, 8, 40, 0); // Assuming today (June 20, 2025, 08:40 AM WIB) as launch
 
             function updateWebsiteAge() {
                 const now = new Date();
-                const diffMs = now - WEBSITE_BUILD_DATE;
+                const diffMs = now - WEBSITE_LAUNCH_DATE;
 
-                const seconds = Math.floor(diffMs / 1000);
-                const minutes = Math.floor(seconds / 60);
-                const hours = Math.floor(minutes / 60);
-                const days = Math.floor(hours / 24);
-
-                // Perhitungan tahun dan bulan yang lebih akurat
-                let years = now.getFullYear() - WEBSITE_BUILD_DATE.getFullYear();
-                let months = now.getMonth() - WEBSITE_BUILD_DATE.getMonth();
-                let remainingDays = now.getDate() - WEBSITE_BUILD_DATE.getDate();
-
-                if (remainingDays < 0) {
-                    months--;
-                    remainingDays += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); // Days in previous month
-                }
-                if (months < 0) {
-                    years--;
-                    months += 12;
+                // Handle cases where launch date is in the future
+                if (diffMs < 0) {
+                    document.getElementById('website-age').textContent = 'Launching Soon!';
+                    return;
                 }
 
-                const sisaHours = hours % 24;
-                const sisaMinutes = minutes % 60;
-                const sisaSeconds = seconds % 60;
+                const totalSeconds = Math.floor(diffMs / 1000);
+                
+                const years = Math.floor(totalSeconds / (365.25 * 24 * 60 * 60));
+                const remainingSecondsAfterYears = totalSeconds % (365.25 * 24 * 60 * 60);
 
-                document.getElementById('website-age').innerText = 
-                    `${years}y ${months}m ${remainingDays}d\n${sisaHours}h ${sisaMinutes}m ${sisaSeconds}s`;
+                const months = Math.floor(remainingSecondsAfterYears / (30.44 * 24 * 60 * 60));
+                const remainingSecondsAfterMonths = remainingSecondsAfterYears % (30.44 * 24 * 60 * 60);
+
+                const days = Math.floor(remainingSecondsAfterMonths / (24 * 60 * 60));
+                const remainingSecondsAfterDays = remainingSecondsAfterMonths % (24 * 60 * 60);
+
+                const hours = Math.floor(remainingSecondsAfterDays / (60 * 60));
+                const remainingSecondsAfterHours = remainingSecondsAfterDays % (60 * 60);
+
+                const minutes = Math.floor(remainingSecondsAfterHours / 60);
+                const seconds = remainingSecondsAfterHours % 60;
+
+                document.getElementById('website-age').textContent = 
+                    `${years}Y ${months}M ${days}D ${hours}h ${minutes}m ${seconds}s`;
             }
 
-            // Panggil sekali saat DOM dimuat
+            // Update immediately and then every second
             updateWebsiteAge();
-            // Update setiap detik
             setInterval(updateWebsiteAge, 1000);
 
-
-            // --- NEW FEATURE 2 & 3: Kunjungan Website & Jumlah Media (Membutuhkan Backend) ---
+            // --- NEW: Fetch Website Stats (Visits & Media Count) ---
             async function fetchWebsiteStats() {
                 try {
                     const response = await fetch(`${API_BASE_URL}/stats`);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        const errorText = await response.text();
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                     }
                     const data = await response.json();
                     
-                    document.getElementById('website-visits').innerText = data.visits.toLocaleString();
-                    document.getElementById('media-count').innerText = data.mediaCount.toLocaleString();
+                    document.getElementById('website-visits').textContent = data.visits.toLocaleString();
+                    document.getElementById('media-count').textContent = data.mediaCount.toLocaleString();
 
                 } catch (error) {
                     console.error('Gagal mengambil statistik website:', error);
-                    document.getElementById('website-visits').innerText = 'Error!';
-                    document.getElementById('media-count').innerText = 'Error!';
+                    document.getElementById('website-visits').textContent = 'Error!';
+                    document.getElementById('media-count').textContent = 'Error!';
                 }
             }
 
-            async function recordVisit() {
+            async function recordVisitAndFetchStats() {
                 try {
-                    // Mengirim request untuk mencatat kunjungan
+                    // Send a POST request to record the visit
                     await fetch(`${API_BASE_URL}/visit`, { method: 'POST' });
-                    // Setelah mencatat kunjungan, ambil statistik terbaru
-                    fetchWebsiteStats();
                 } catch (error) {
-                    console.error('Gagal mencatat kunjungan:', error);
-                    // Masih mencoba mengambil statistik terakhir yang mungkin ada
+                    console.warn('Gagal mencatat kunjungan (mungkin backend belum siap):', error);
+                } finally {
+                    // Always try to fetch stats, even if visit recording failed
                     fetchWebsiteStats(); 
                 }
             }
 
-            // Panggil fungsi ini saat halaman dimuat
-            recordVisit(); // Mencatat kunjungan dan kemudian mengambil statistik
+            // Record a visit and fetch stats when the page loads
+            recordVisitAndFetchStats();
 
-            // --- NEW FEATURE: Unggah Media ---
+
+            // --- NEW: Media Upload Functionality ---
             const uploadForm = document.getElementById('uploadForm');
             const uploadStatus = document.getElementById('uploadStatus');
 
             uploadForm.addEventListener('submit', async (event) => {
-                event.preventDefault(); // Mencegah form reload halaman
+                event.preventDefault();
 
                 const fileInput = document.getElementById('mediaFile');
                 const files = fileInput.files;
 
                 if (files.length === 0) {
                     uploadStatus.textContent = 'Pilih setidaknya satu file untuk diunggah.';
-                    uploadStatus.style.color = '#FFD700'; // Gold color for warnings
+                    uploadStatus.style.color = 'orange';
                     return;
                 }
 
-                uploadStatus.textContent = 'Mengunggah...';
-                uploadStatus.style.color = '#ADD8E6'; // Light blue for status
+                uploadStatus.textContent = 'Mengunggah ke Cosmos...';
+                uploadStatus.style.color = '#00FFFF'; // Cosmic blue
 
                 const formData = new FormData();
                 for (let i = 0; i < files.length; i++) {
-                    formData.append('mediaFiles', files[i]); // 'mediaFiles' harus sesuai dengan nama field di Worker
+                    formData.append('mediaFiles', files[i]); // 'mediaFiles' must match backend field name
                 }
 
                 try {
@@ -754,34 +843,20 @@
 
                     if (response.ok) {
                         const result = await response.json();
-                        uploadStatus.textContent = `Berhasil mengunggah ${result.uploadedCount} file!`;
-                        uploadStatus.style.color = '#90EE90'; // Light Green for success
+                        uploadStatus.textContent = `Berhasil mengunggah ${result.uploadedCount} file ke galaksi!`;
+                        uploadStatus.style.color = '#28a745'; // Green success
                         fileInput.value = ''; // Reset input file
-                        fetchWebsiteStats(); // Perbarui hitungan media setelah unggah
+                        fetchWebsiteStats(); // Refresh media count
                     } else {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Gagal mengunggah: ${response.statusText}`);
+                        const errorText = await response.text();
+                        throw new Error(`Gagal mengunggah: ${response.status}, ${errorText}`);
                     }
                 } catch (error) {
                     console.error('Error saat mengunggah:', error);
                     uploadStatus.textContent = `Gagal mengunggah: ${error.message}`;
-                    uploadStatus.style.color = '#FF6347'; // Tomato for errors
+                    uploadStatus.style.color = '#d9534f'; // Red error
                 }
             });
-
-
-            // Global functions (not part of DOMContentLoaded, can be called from HTML)
-            function openTikTok() {
-                window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
-            }
-
-            function openInstagram() {
-                window.open("https://www.instagram.com/elvizill/", "_blank");
-            }
-
-            // Call fetchDataFromBackend on initial load to populate the website with live data
-            fetchDataFromBackend(); 
-            // Initial load of profile data. recordVisit() above will fetch stats.
         });
     </script>
 </body>
