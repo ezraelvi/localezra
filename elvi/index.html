@@ -23,6 +23,21 @@
             min-height: 1800px; /* Force a very tall content area */
             position: relative;
         }
+        .particle {
+    position: absolute;
+    background: #00FFFF; /* Cyan */
+    border-radius: 50%;
+    animation: floatAndFade 15s infinite ease-in-out;
+    opacity: 0;
+}
+
+@keyframes floatAndFade {
+    0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+    25% { opacity: 0.8; }
+    50% { transform: translate(calc(var(--rand-x) * 1px), calc(var(--rand-y) * 1px)) scale(var(--rand-scale)); opacity: 0.6; }
+    75% { opacity: 0.4; }
+    100% { transform: translate(calc(var(--rand-x) * 2px), calc(var(--rand-y) * 2px)) scale(0); opacity: 0; }
+}
 
         /* --- Cosmic Background (Fixed Stars) --- */
         .cosmic-background {
