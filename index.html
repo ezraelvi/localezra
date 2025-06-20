@@ -22,12 +22,12 @@
         <img src="dashboard/mix.svg" alt="Mix uai" class="biometric-scan" width="200" height="200">
         <div class="scan-line" id="scanLine" aria-hidden="true"></div>
       </div>
-      <div class="status" id="status" aria-live="polite">Initializing authentication system...</div>
+      <div class="status" id="status" aria-live="polite">Initializing authentication system</div>
     </header>
     <main class="auth-main">
       <div class="btn-container" id="btnContainer">
         <button class="auth-btn" id="fallbackBtn">
-          <span class="icon">✉️</span> Email Login
+          <span class="icon">✉️</span> Username Login
         </button>
         <button class="auth-btn" id="visitBtn">
           <span class="icon">🚀</span> Visit Dashboard
@@ -55,7 +55,7 @@
         <div id="errorMsg" class="error-msg" aria-live="assertive"></div>
       </form>
       <div id="webauthnUnsupported" class="unsupported-warning" style="display: none;">
-        <p>Your browser doesn't support WebAuthn. You can still login with email.</p>
+        <p>Your browser doesn't support WebAuthn. You can still login with username</p>
         <a href="https://webauthn.me/browser-support" target="_blank" rel="noopener noreferrer" class="auth-btn">
           Check Browser Compatibility
         </a>
