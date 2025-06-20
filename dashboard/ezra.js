@@ -1,10 +1,6 @@
 class BioVAuth {
     constructor() {
-        this.env = {
-            WORKER_URL: 'https://auth-logs.ezvvel.workers.dev/',
-            RATE_LIMIT_WINDOW: 5 * 60 * 1000,
-            RATE_LIMIT_MAX_ATTEMPTS: 5
-        };
+        this.env = { WORKER_URL: 'https://auth-logs.ezvvel.workers.dev/', RATE_LIMIT_WINDOW: 300000, RATE_LIMIT_MAX_ATTEMPTS: 5 };
         this.elements = {
             scanLine: document.getElementById('scanLine'), status: document.getElementById('status'),
             btnContainer: document.getElementById('btnContainer'), loginForm: document.getElementById('loginForm'),
@@ -15,37 +11,28 @@ class BioVAuth {
             ipDisplay: document.getElementById('ipDisplay'), togglePassword: document.querySelector('.toggle-password'),
             webauthnUnsupported: document.getElementById('webauthnUnsupported')
         };
-        this.securityConfig = {
-            maxAttempts: 3, blockDuration: 5 * 60 * 1000,
-            cookieName: 'bioVAuthSecurity', localStorageKey: 'isEzraLoggedIn'
-        };
+        this.securityConfig = { maxAttempts: 3, blockDuration: 300000, cookieName: 'bioVAuthSecurity', localStorageKey: 'isEzraLoggedIn' };
         this.state = { webauthnSupported: false, clientInfo: {} };
         this.init();
     }
-
     async init() {
         this.startBiometricAnimation();
         await this.collectClientInfo();
         this.setupEventListeners();
         this.checkWebAuthnSupport();
-        this.securitySystem = new SecuritySystem(
-            this.securityConfig.maxAttempts, this.securityConfig.blockDuration, this.securityConfig.cookieName
-        );
+        this.securitySystem = new SecuritySystem(this.securityConfig.maxAttempts, this.securityConfig.blockDuration, this.securityConfig.cookieName);
     }
-
     async collectClientInfo() {
         try {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), 3000);
             const ipResponse = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
             clearTimeout(id);
-
             if (!ipResponse.ok) throw new Error(`HTTP error! status: ${ipResponse.status}`);
             const ipData = await ipResponse.json();
             this.state.clientInfo = {
                 ip: ipData.ip, userAgent: navigator.userAgent, platform: navigator.platform,
-                timestamp: new Date().toISOString(),
-                screenResolution: `${window.screen.width}x${window.screen.height}`,
+                timestamp: new Date().toISOString(), screenResolution: `${window.screen.width}x${window.screen.height}`,
                 language: navigator.language
             };
             this.elements.ipDisplay.textContent = `IP: ${ipData.ip} • ${navigator.platform}`;
@@ -60,7 +47,6 @@ class BioVAuth {
             this.elements.ipDisplay.textContent = 'Network: Secure • Private';
         }
     }
-
     startBiometricAnimation() {
         this.elements.scanLine.style.opacity = '1';
         this.updateStatus('Initializing security protocols...', 'info');
@@ -70,114 +56,81 @@ class BioVAuth {
             this.elements.btnContainer.style.display = 'flex';
         }, 2000);
     }
-
     updateStatus(message, type = 'info') {
         this.elements.status.textContent = message;
         this.elements.status.className = 'status';
         if (type) this.elements.status.classList.add(type);
     }
-
     setupEventListeners() {
         this.elements.fallbackBtn.addEventListener('click', () => this.showLoginForm());
-        this.elements.visitBtn.addEventListener('click', () => window.location.href = 'dashboard/index.html');
+        this.elements.visitBtn.addEventListener('click', () => window.location.href = 'dashboard');
         this.elements.webauthnBtn.addEventListener('click', () => {
             if (this.state.webauthnSupported) this.initiateWebAuthn();
             else this.elements.webauthnUnsupported.style.display = 'block';
         });
-        this.elements.loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleLogin();
-        });
+        this.elements.loginForm.addEventListener('submit', async (e) => { e.preventDefault(); await this.handleLogin(); });
         this.elements.togglePassword.addEventListener('click', () => this.togglePasswordVisibility());
     }
-
     checkWebAuthnSupport() {
         if (!window.PublicKeyCredential) {
-            this.state.webauthnSupported = false;
-            this.elements.webauthnBtn.disabled = true;
-            this.elements.webauthnUnsupported.style.display = 'block';
-            return;
+            this.state.webauthnSupported = false; this.elements.webauthnBtn.disabled = true;
+            this.elements.webauthnUnsupported.style.display = 'block'; return;
         }
         PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-            .then((available) => {
+            .then(available => {
                 this.state.webauthnSupported = available;
                 if (!available) this.elements.webauthnUnsupported.style.display = 'block';
             })
             .catch(() => {
-                this.state.webauthnSupported = false;
-                this.elements.webauthnUnsupported.style.display = 'block';
+                this.state.webauthnSupported = false; this.elements.webauthnUnsupported.style.display = 'block';
             });
     }
-
     showLoginForm() {
-        this.elements.btnContainer.style.display = 'none';
-        this.elements.loginForm.style.display = 'block';
-        this.elements.emailInput.focus();
-        this.updateStatus('Enter your credentials', 'info');
+        this.elements.btnContainer.style.display = 'none'; this.elements.loginForm.style.display = 'block';
+        this.elements.emailInput.focus(); this.updateStatus('Enter your credentials', 'info');
     }
-
     async handleLogin() {
-        if (this.securitySystem.isBlocked()) {
-            this.showBlockedMessage();
-            return;
-        }
+        if (this.securitySystem.isBlocked()) { this.showBlockedMessage(); return; }
         const username = this.elements.emailInput.value.trim().toLowerCase();
         const password = this.elements.passwordInput.value;
-
-        if (!username || !password) {
-            this.showError('Please fill in all fields (username and password).');
-            return;
-        }
+        if (!username || !password) { this.showError('Please fill in all fields (username and password).'); return; }
         this.setLoadingState(true);
         try {
             const response = await fetch(this.env.WORKER_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Client-IP': this.state.clientInfo.ip,
-                    'X-Client-UA': this.state.clientInfo.userAgent
-                },
+                headers: { 'Content-Type': 'application/json', 'X-Client-IP': this.state.clientInfo.ip, 'X-Client-UA': this.state.clientInfo.userAgent },
                 body: JSON.stringify({ username, password })
             });
             const responseData = await response.json();
-
             if (responseData.authenticated) {
                 localStorage.setItem(this.securityConfig.localStorageKey, 'true');
                 this.securitySystem.resetAttempts();
                 this.updateStatus('Authentication successful! Redirecting...', 'success');
-                window.location.href = 'dashboard/index.html';
-            } else {
-                this.handleFailedLogin(responseData.message || 'Invalid username or password.');
-            }
+                window.location.href = 'dashboard';
+            } else { this.handleFailedLogin(responseData.message || 'Invalid username or password.'); }
         } catch (error) {
             console.error('Login error (network or worker response parsing issue):', error);
             this.showError('Login failed: network issue or server error. Please try again.');
             this.securitySystem.recordFailedAttempt();
-        } finally {
-            this.setLoadingState(false);
-        }
+        } finally { this.setLoadingState(false); }
     }
-
-    handleSuccessfulLogin() { // token, username params removed as they're not used
+    handleSuccessfulLogin() {
         localStorage.setItem(this.securityConfig.localStorageKey, 'true');
         this.securitySystem.resetAttempts();
         this.updateStatus('Authentication successful!', 'success');
         this.elements.errorMsg.textContent = '';
-        window.location.href = 'dashboard/index.html';
+        window.location.href = 'dashboard';
     }
-
     handleFailedLogin(errorMessage) {
         this.securitySystem.recordFailedAttempt();
         const attemptsLeft = this.securitySystem.maxAttempts - this.securitySystem.attemptData.attempts;
         let displayMessage = errorMessage + (attemptsLeft > 0 ? ` (${attemptsLeft} ${attemptsLeft === 1 ? 'attempt' : 'attempts'} left)` : '');
         this.showError(displayMessage);
         if (this.securitySystem.isBlocked()) this.showBlockedMessage();
-        this.elements.passwordInput.value = '';
-        this.elements.passwordInput.focus();
+        this.elements.passwordInput.value = ''; this.elements.passwordInput.focus();
         this.elements.loginForm.classList.add('shake');
         setTimeout(() => this.elements.loginForm.classList.remove('shake'), 500);
     }
-
     showBlockedMessage() {
         let remainingTime = this.securitySystem.getRemainingBlockTime();
         const updateCountdown = () => {
@@ -185,47 +138,37 @@ class BioVAuth {
             const seconds = remainingTime % 60;
             this.showError(`Too many attempts. Please wait ${minutes}m ${seconds}s.`);
         };
-        this.setLoadingState(false);
-        this.elements.submitLogin.disabled = true;
-        updateCountdown();
+        this.setLoadingState(false); this.elements.submitLogin.disabled = true; updateCountdown();
         const countdownInterval = setInterval(() => {
             remainingTime = this.securitySystem.getRemainingBlockTime();
             if (remainingTime <= 0) {
-                clearInterval(countdownInterval);
-                this.elements.errorMsg.textContent = '';
-                this.elements.submitLogin.disabled = false;
-                return;
+                clearInterval(countdownInterval); this.elements.errorMsg.textContent = '';
+                this.elements.submitLogin.disabled = false; return;
             }
             updateCountdown();
         }, 1000);
     }
-
     showError(message) {
-        this.elements.errorMsg.textContent = message;
-        this.elements.errorMsg.style.display = 'block';
+        this.elements.errorMsg.textContent = message; this.elements.errorMsg.style.display = 'block';
         setTimeout(() => { if (this.elements.errorMsg.textContent === message) this.elements.errorMsg.style.display = 'none'; }, 5000);
     }
-
     setLoadingState(isLoading) {
         this.elements.submitLogin.disabled = isLoading;
         this.elements.loadingSpinner.style.display = isLoading ? 'inline-block' : 'none';
         this.elements.submitLogin.querySelector('.btn-text').textContent = isLoading ? 'Authenticating...' : 'Login';
     }
-
     togglePasswordVisibility() {
         const isPassword = this.elements.passwordInput.type === 'password';
         this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-        this.elements.togglePassword.textContent = isPassword ? '🐵' : '👁️'; // Changed icons for brevity
+        this.elements.togglePassword.textContent = isPassword ? '😌' : '🙂';
         this.elements.togglePassword.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
     }
-
     initiateWebAuthn() {
         if (!this.state.webauthnSupported) return;
         this.updateStatus('Initiating biometric authentication...', 'info');
         setTimeout(() => this.updateStatus('Please use your device biometric authenticator', 'info'), 1000);
     }
 }
-
 class SecuritySystem {
     constructor(maxAttempts, blockDuration, cookieName) {
         this.maxAttempts = maxAttempts; this.blockDuration = blockDuration; this.cookieName = cookieName;
@@ -236,9 +179,7 @@ class SecuritySystem {
             const cookieData = this.getCookie(this.cookieName);
             const data = cookieData ? JSON.parse(decodeURIComponent(cookieData)) : this.getDefaultData();
             return this.validateData(data) ? data : this.getDefaultData();
-        } catch (e) {
-            console.error('Failed to parse cookie data:', e); return this.getDefaultData();
-        }
+        } catch (e) { console.error('Failed to parse cookie data:', e); return this.getDefaultData(); }
     }
     getDefaultData() { return { attempts: 0, lastAttempt: null, blockUntil: null }; }
     validateData(data) {
@@ -271,5 +212,4 @@ class SecuritySystem {
         return Math.round((new Date(this.attemptData.blockUntil) - new Date()) / 1000);
     }
 }
-
 document.addEventListener('DOMContentLoaded', () => new BioVAuth());
