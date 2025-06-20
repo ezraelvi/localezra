@@ -13,6 +13,7 @@
   --border-radius: 8px;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
+  --pink-color: #ff69b4; /* Warna pink baru */
 }
 * {
   box-sizing: border-box;
@@ -34,10 +35,47 @@ body {
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  overflow-x: hidden;
-  /* Tambahkan ini jika kamu ingin body menjadi acuan untuk fixed/absolute positioning */
-  position: relative;
+  overflow: hidden; /* Penting untuk mengelola background teks berjalan */
+  position: relative; /* Menjadi acuan untuk positioning absolute */
 }
+/* Style untuk overlay background teks berjalan */
+.background-text-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Pastikan teks tidak keluar dari overlay */
+    z-index: 0; /* Pastikan di belakang semua konten utama */
+    pointer-events: none; /* Biarkan klik melewati overlay */
+    opacity: 0; /* Awalnya tersembunyi */
+    transition: opacity 1s ease-in-out;
+}
+
+.background-text-overlay.active {
+    opacity: 1;
+}
+
+.background-text-overlay::before {
+    content: attr(data-text); /* Konten teks dari JS */
+    position: absolute;
+    white-space: nowrap; /* Penting agar teks tidak wrap */
+    font-size: 3rem; /* Ukuran teks */
+    color: rgba(255, 105, 180, 0.1); /* Warna pink transparan */
+    animation: scroll-text 60s linear infinite; /* Animasi scroll */
+    min-width: 100%; /* Agar teks bisa lebih panjang dari viewport */
+    top: 0;
+    left: 0;
+    padding-left: 100%; /* Memastikan teks masuk dari kanan */
+    will-change: transform; /* Hint untuk optimasi browser */
+}
+
+@keyframes scroll-text {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); } /* Menggulir dari kanan ke kiri */
+}
+
+
 .container {
   width: 100%;
   max-width: 480px;
@@ -150,6 +188,15 @@ body {
   background: var(--primary-dark);
   box-shadow: 0 0 15px var(--primary);
 }
+.auth-btn.secondary { /* Style untuk tombol cancel/close */
+    background: rgba(255, 0, 51, 0.3); /* Merah gelap transparan */
+    border-color: var(--error);
+    color: var(--error);
+}
+.auth-btn.secondary:hover:not(:disabled) {
+    background: rgba(255, 0, 51, 0.1);
+    box-shadow: 0 0 10px var(--error);
+}
 .icon {
   font-size: 1.1rem;
 }
@@ -250,6 +297,8 @@ body {
   text-align: center;
   font-size: 0.8rem;
   color: var(--text-secondary);
+  position: relative; /* Menjadi acuan untuk popup Ezra */
+  padding-bottom: 50px; /* Memberi ruang untuk popup Ezra */
 }
 .ip-display {
   margin-bottom: 0.5rem;
@@ -260,6 +309,8 @@ body {
   justify-content: center;
   gap: 0.5rem;
   margin-top: 0.5rem;
+  position: relative; /* Ini penting agar `ezra-profile-popup` bisa diposisikan relatif terhadap `security-info` */
+  z-index: 10; /* Pastikan di atas overlay jika aktif */
 }
 .secure-icon {
   font-size: 1rem;
@@ -301,50 +352,27 @@ body {
 /* Styling untuk popup gambar profil Ezra */
 .ezra-profile-popup {
     display: none; /* Awalnya sembunyikan popup */
-    position: absolute; /* Ganti dari fixed ke absolute, relatif terhadap <body> */
+    position: absolute; /* Sekarang absolute, relatif terhadap .auth-footer atau .security-info */
     /* top, left, width, height akan diatur oleh JavaScript secara dinamis */
-    padding: 0;
     background-color: transparent;
     border-radius: 50%; /* Bulat sempurna */
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.9), 0 0 40px rgba(0, 255, 136, 0.4); /* Efek glow yang lebih kuat */
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.7), 0 0 30px rgba(0, 255, 136, 0.3); /* Efek glow yang lebih lembut */
     overflow: hidden; /* Penting untuk menjaga gambar tetap bulat */
     z-index: 1000; /* Pastikan muncul di atas semua elemen lain */
     opacity: 0;
     pointer-events: none; /* Memungkinkan interaksi dengan elemen di bawahnya saat tidak terlihat */
     transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, top 0.4s ease-out, left 0.4s ease-out, width 0.4s ease-out, height 0.4s ease-out; /* Transisi untuk posisi dan ukuran */
-
-    /* Menambahkan elemen pseudo untuk efek cincin berputar */
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: 3px solid transparent;
-        border-top-color: var(--primary);
-        border-right-color: var(--primary);
-        border-radius: 50%;
-        animation: spin-ring 2s linear infinite;
-        opacity: 0; /* Awalnya sembunyikan */
-        transition: opacity 0.3s ease-out;
-    }
 }
 
 .ezra-profile-popup.visible {
-    display: flex; /* Gunakan flex saat visible untuk centering */
-    justify-content: center;
-    align-items: center;
+    display: block; /* Menggunakan block agar bisa diatur width/height */
     opacity: 1;
-    /* Transform akan diatur oleh JS */
     pointer-events: auto; /* Memungkinkan interaksi saat terlihat */
-
-    &::before {
-        opacity: 1; /* Tampilkan cincin berputar saat popup terlihat */
-    }
+    /* Animasi skala akan diterapkan melalui keyframes */
+    animation: popup-appear 0.4s ease-out forwards;
 }
 
-/* Styling untuk gambar di dalam popup */
+/* Styling untuk gambar di dalam popup Ezra */
 .ezra-profile-popup .profile-image {
     width: 100%; /* Gambar mengisi seluruh lebar popup */
     height: 100%; /* Gambar mengisi seluruh tinggi popup */
@@ -355,22 +383,11 @@ body {
     transition: filter 0.3s ease-out; /* Transisi untuk filter gambar */
 }
 
-/* Animasi cincin berputar */
-@keyframes spin-ring {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Animasi untuk memudar dan skala */
-/* Keyframes ini akan menjadi 'awal' dan 'akhir' saat JS mengontrol posisi */
+/* Animasi untuk skala popup Ezra */
 @keyframes popup-appear {
     from {
         opacity: 0;
         transform: scale(0.8);
-    }
-    70% {
-        opacity: 1;
-        transform: scale(1.05); /* Sedikit membesar sebelum normal */
     }
     to {
         opacity: 1;
@@ -378,7 +395,161 @@ body {
     }
 }
 
-/* Terapkan animasi saat kelas 'visible' ditambahkan */
-.ezra-profile-popup.visible {
-    animation: popup-appear 0.4s ease-out forwards;
+/* Form Actions untuk tombol submit dan cancel */
+.form-actions {
+    display: flex;
+    justify-content: space-between; /* Untuk menempatkan tombol di kiri dan kanan */
+    gap: 1rem; /* Jarak antar tombol */
+    margin-top: 1.5rem;
+}
+.form-actions .auth-btn {
+    flex-grow: 1; /* Biarkan tombol mengisi ruang yang tersedia */
+}
+
+/* Styling untuk "Your" popup */
+.your-text {
+    display: inline-block; /* Agar bisa mendapatkan posisi yang tepat */
+    position: relative; /* Untuk menjadi acuan bagi popup secret word */
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s ease-in-out;
+}
+.your-text:hover {
+    color: var(--primary);
+}
+
+.your-popup-container {
+    display: none; /* Sembunyikan secara default */
+    position: absolute; /* Akan diposisikan relatif terhadap body/viewport */
+    background: rgba(10, 10, 18, 0.9);
+    border: 1px solid var(--warning);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+    z-index: 1001; /* Di atas popup Ezra */
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    flex-direction: column; /* Untuk menata konten di dalamnya */
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.your-popup-container.visible {
+    display: flex; /* Menggunakan flex saat visible */
+    opacity: 1;
+    transform: scale(1);
+}
+
+.your-popup-container h3 {
+    color: var(--warning);
+    margin-bottom: 0.5rem;
+}
+
+.your-popup-container input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 204, 0, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text);
+    font-family: inherit;
+    text-align: center;
+}
+
+.your-popup-container .auth-btn {
+    width: 100%; /* Tombol mengisi lebar popup */
+}
+
+.your-popup-container .secret-photo {
+    width: 100px; /* Ukuran foto di dalam popup "Your" */
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-top: 1rem;
+    border: 3px solid var(--warning);
+}
+
+/* Class untuk mengaktifkan tema pink dan teks berjalan */
+body.pink-mode {
+    color: var(--pink-color) !important;
+}
+
+body.pink-mode * { /* Terapkan ke semua elemen */
+    color: var(--pink-color) !important;
+}
+
+body.pink-mode .auth-btn {
+    border-color: var(--pink-color) !important;
+    color: var(--pink-color) !important;
+}
+
+body.pink-mode .auth-btn:hover:not(:disabled) {
+    background: rgba(255, 105, 180, 0.1) !important;
+    box-shadow: 0 0 10px var(--pink-color) !important;
+}
+
+body.pink-mode .auth-btn.primary {
+    background: var(--pink-color) !important;
+    color: var(--dark) !important;
+}
+body.pink-mode .auth-btn.primary:hover:not(:disabled) {
+    background: var(--pink-color) !important;
+    box-shadow: 0 0 15px var(--pink-color) !important;
+}
+
+body.pink-mode .auth-btn.secondary {
+    border-color: var(--pink-color) !important;
+    color: var(--pink-color) !important;
+    background: rgba(255, 105, 180, 0.1) !important;
+}
+body.pink-mode .auth-btn.secondary:hover:not(:disabled) {
+    background: rgba(255, 105, 180, 0.05) !important;
+    box-shadow: 0 0 10px var(--pink-color) !important;
+}
+
+
+body.pink-mode .status,
+body.pink-mode .ip-display,
+body.pink-mode .ezra-link,
+body.pink-mode label,
+body.pink-mode .toggle-password {
+    color: var(--pink-color) !important;
+    text-shadow: 0 0 5px var(--pink-color) !important;
+}
+
+body.pink-mode .biometric-scan {
+    filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.5)) hue-rotate(-50deg) !important; /* Agar warnanya jadi pinkish */
+    animation: pulse-pink 3s infinite alternate !important;
+}
+
+@keyframes pulse-pink {
+  0% { filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.5)); }
+  100% { filter: drop-shadow(0 0 16px rgba(255, 105, 180, 0.8)); }
+}
+
+body.pink-mode .scan-line {
+    background: linear-gradient(to bottom, transparent, var(--pink-color), transparent) !important;
+}
+
+body.pink-mode .form-group input {
+    border-color: rgba(255, 105, 180, 0.3) !important;
+}
+body.pink-mode .form-group input:focus {
+    border-color: var(--pink-color) !important;
+    box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2) !important;
+}
+
+body.pink-mode .your-popup-container {
+    border-color: var(--pink-color) !important;
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.4) !important;
+}
+body.pink-mode .your-popup-container h3 {
+    color: var(--pink-color) !important;
+}
+body.pink-mode .your-popup-container input {
+    border-color: rgba(255, 105, 180, 0.3) !important;
+}
+body.pink-mode .your-popup-container .secret-photo {
+    border-color: var(--pink-color) !important;
 }
