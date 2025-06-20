@@ -296,7 +296,7 @@ body {
     position: fixed; /* Posisi fixed agar relatif terhadap viewport */
     top: 50%;
     left: 50%;
-    transform: translate(-50%, calc(-50% - 5px)); /* Contoh: geser 5px ke atas */
+    transform: translate(-50%, calc(-50% - 50px)); /* Contoh: geser 5px ke atas */
     width: 200px; /* Ukuran sesuai mix.svg */
     height: 200px; /* Ukuran sesuai mix.svg */
     padding: 0;
@@ -361,7 +361,7 @@ body {
 @keyframes popup-appear {
     0% {
         opacity: 0;
-        transform: translate(-50%, calc(-50% - 5px)); /* Contoh: geser 5px ke atas */
+        transform: translate(-50%, calc(-50% - 50px)); /* Contoh: geser 5px ke atas */
     }
     70% {
         opacity: 1;
