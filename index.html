@@ -22,12 +22,12 @@
         <img src="dashboard/mix.svg" alt="Mix uai" class="biometric-scan" width="200" height="200">
         <div class="scan-line" id="scanLine" aria-hidden="true"></div>
       </div>
-      <div class="status" id="status" aria-live="polite">Initializing authentication system</div>
+      <div class="status" id="status" aria-live="polite">Initializing authentication system...</div>
     </header>
     <main class="auth-main">
       <div class="btn-container" id="btnContainer">
         <button class="auth-btn" id="fallbackBtn">
-          <span class="icon">✉️</span> Username Login
+          <span class="icon">✉️</span> Email Login
         </button>
         <button class="auth-btn" id="visitBtn">
           <span class="icon">🚀</span> Visit Dashboard
@@ -38,14 +38,14 @@
       </div>
       <form id="loginForm" class="login-form" novalidate>
         <div class="form-group">
-          <label for="email">Username</label>
+          <label for="email">Email or Username</label>
           <input type="text" id="email" name="email" required aria-required="true" autocomplete="username" autocapitalize="off">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
           <div class="password-wrapper">
             <input type="password" id="password" name="password" required aria-required="true" autocomplete="current-password">
-            <button type="button" class="toggle-password" aria-label="Show password">🧑‍💻</button>
+            <button type="button" class="toggle-password" aria-label="Show password">👁️</button>
           </div>
         </div>
         <button type="submit" class="auth-btn primary" id="submitLogin">
@@ -55,7 +55,7 @@
         <div id="errorMsg" class="error-msg" aria-live="assertive"></div>
       </form>
       <div id="webauthnUnsupported" class="unsupported-warning" style="display: none;">
-        <p>Your browser doesn't support WebAuthn. You can still login with username</p>
+        <p>Your browser doesn't support WebAuthn. You can still login with email.</p>
         <a href="https://webauthn.me/browser-support" target="_blank" rel="noopener noreferrer" class="auth-btn">
           Check Browser Compatibility
         </a>
@@ -65,7 +65,10 @@
       <div class="ip-display" id="ipDisplay">Detecting network</div>
       <div class="security-info">
         <span class="secure-icon">🔐</span>
-        <span>Secure Connection • TLS 1.3 • AES-256 🥇Ezra • 2025</span>
+        <span>Secure Connection • TLS 1.3 • AES-256 <span class="ezra-link" id="ezraLink">🎖️Ezra</span> • 2025</span>
+        <div class="ezra-profile-popup" id="ezraProfilePopup">
+            <img src="dashboard/ezra-profile.jpg" alt="Ezra Profile" class="profile-image">
+        </div>
       </div>
     </footer>
   </div>
