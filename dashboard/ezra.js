@@ -247,7 +247,7 @@ class BioVAuth {
     togglePasswordVisibility() {
         const isPassword = this.elements.passwordInput.type === 'password';
         this.elements.passwordInput.type = isPassword ? 'text' : 'password';
-        this.elements.togglePassword.textContent = isPassword ? '🙈' : '👁️';
+        this.elements.togglePassword.textContent = isPassword ? '😌' : '👁️';
         this.elements.togglePassword.setAttribute('aria-label',
             isPassword ? 'Hide password' : 'Show password');
     }
@@ -282,8 +282,7 @@ class SecuritySystem {
             attempts: 0,
             lastAttempt: null,
             blockUntil: null
-        };
-    }
+        };}
     validateData(data) {
         return data && typeof data === 'object' &&
             'attempts' in data && 'lastAttempt' in data && 'blockUntil' in data;
