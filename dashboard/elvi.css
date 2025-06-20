@@ -35,6 +35,8 @@ body {
   align-items: center;
   padding: 1rem;
   overflow-x: hidden;
+  /* Tambahkan ini jika kamu ingin body menjadi acuan untuk fixed/absolute positioning */
+  position: relative;
 }
 .container {
   width: 100%;
@@ -61,6 +63,10 @@ body {
   margin: 0 auto 1.5rem;
   width: 200px;
   height: 200px;
+  /* Pastikan flexbox untuk centering konten di dalamnya */
+  display: flex;
+  justify-content: center; /* Pusatkan horizontal */
+  align-items: center;   /* Pusatkan vertikal */
 }
 .biometric-scan {
   width: 100%;
@@ -68,6 +74,9 @@ body {
   opacity: 0.8;
   filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.3));
   animation: pulse 3s infinite alternate;
+  display: block; /* Pastikan gambar berperilaku seperti blok untuk centering */
+  /* Tambahkan transisi filter agar blur/brightness dari JS mulus */
+  transition: filter 0.3s ease-in-out;
 }
 .scan-line {
   position: absolute;
@@ -281,7 +290,6 @@ body {
     display: inline-block;
     color: inherit;
     text-decoration: none;
-    /* Efek hover untuk teks Ezra */
     transition: color 0.2s ease-in-out, text-shadow 0.2s ease-in-out;
 }
 
@@ -293,21 +301,17 @@ body {
 /* Styling untuk popup gambar profil Ezra */
 .ezra-profile-popup {
     display: none; /* Awalnya sembunyikan popup */
-    position: fixed; /* Posisi fixed agar relatif terhadap viewport */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, calc(-50% - 50px)); /* Contoh: geser 5px ke atas */
-    width: 200px; /* Ukuran sesuai mix.svg */
-    height: 200px; /* Ukuran sesuai mix.svg */
+    position: absolute; /* Ganti dari fixed ke absolute, relatif terhadap <body> */
+    /* top, left, width, height akan diatur oleh JavaScript secara dinamis */
     padding: 0;
-    background-color: transparent; /* Pastikan transparan untuk gambar */
+    background-color: transparent;
     border-radius: 50%; /* Bulat sempurna */
     box-shadow: 0 0 20px rgba(0, 255, 136, 0.9), 0 0 40px rgba(0, 255, 136, 0.4); /* Efek glow yang lebih kuat */
     overflow: hidden; /* Penting untuk menjaga gambar tetap bulat */
     z-index: 1000; /* Pastikan muncul di atas semua elemen lain */
     opacity: 0;
     pointer-events: none; /* Memungkinkan interaksi dengan elemen di bawahnya saat tidak terlihat */
-    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; /* Transisi untuk opacity dan scale */
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, top 0.4s ease-out, left 0.4s ease-out, width 0.4s ease-out, height 0.4s ease-out; /* Transisi untuk posisi dan ukuran */
 
     /* Menambahkan elemen pseudo untuk efek cincin berputar */
     &::before {
@@ -332,7 +336,7 @@ body {
     justify-content: center;
     align-items: center;
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1); /* Kembali ke ukuran normal */
+    /* Transform akan diatur oleh JS */
     pointer-events: auto; /* Memungkinkan interaksi saat terlihat */
 
     &::before {
@@ -358,18 +362,19 @@ body {
 }
 
 /* Animasi untuk memudar dan skala */
+/* Keyframes ini akan menjadi 'awal' dan 'akhir' saat JS mengontrol posisi */
 @keyframes popup-appear {
-    0% {
+    from {
         opacity: 0;
-        transform: translate(-50%, calc(-50% - 50px)); /* Contoh: geser 5px ke atas */
+        transform: scale(0.8);
     }
     70% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.05); /* Sedikit membesar sebelum normal */
+        transform: scale(1.05); /* Sedikit membesar sebelum normal */
     }
-    100% {
+    to {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: scale(1);
     }
 }
 
