@@ -1480,25 +1480,6 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Particle Background Initialization ---
-            const particlesContainer = document.getElementById('particles');
-            const numParticles = 80;
-
-            for (let i = 0; i < numParticles; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                const size = Math.random() * 5 + 2; // Size between 2px and 7px
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.animationDelay = `${Math.random() * -15}s`; // Start at various points in animation
-                particle.style.setProperty('--rand-x', Math.random() * 400 - 200); // -200 to 200
-                particle.style.setProperty('--rand-y', Math.random() * 400 - 200); // -200 to 200
-                particle.style.setProperty('--rand-scale', Math.random() * 0.5 + 0.5); // 0.5 to 1.0
-                particlesContainer.appendChild(particle);
-            }
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
             const authOverlay = document.getElementById('authOverlay');
@@ -1506,7 +1487,9 @@
             const cosmicOrbContainer = document.getElementById('cosmicOrbContainer'); // Renamed
             const secretAnswer = document.getElementById('secretAnswer');
             const authSubmit = document.getElementById('authSubmit');
-
+            const particlesContainer = document.getElementById('particles');
+            const numParticles = 80;
+            
             const profileOrb = document.getElementById('profile-orb');
             const profilePic = document.getElementById('profilePic');
             const profileUsername = document.getElementById('profileUsername');
@@ -1603,7 +1586,20 @@
             const uploadSubmitBtn = document.getElementById('uploadSubmitBtn');
             const uploadCancelBtn = document.getElementById('uploadCancelBtn');
 
-
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2; // Size between 2px and 7px
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * -15}s`; // Start at various points in animation
+                particle.style.setProperty('--rand-x', Math.random() * 400 - 200); // -200 to 200
+                particle.style.setProperty('--rand-y', Math.random() * 400 - 200); // -200 to 200
+                particle.style.setProperty('--rand-scale', Math.random() * 0.5 + 0.5); // 0.5 to 1.0
+                particlesContainer.appendChild(particle);
+            }
             // --- Data Storage (initially from local data, will be synced with backend) ---
             let profileData = {
                 username: "elvi_ezra_",
