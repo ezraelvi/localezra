@@ -166,7 +166,7 @@ class BioVAuth {
                 localStorage.setItem(this.securityConfig.localStorageKey, 'true');
                 this.securitySystem.resetAttempts();
                 this.updateStatus('Authentication successful! Redirecting...', 'success');
-                window.location.href = 'dashboard/index.html';
+                window.location.href = 'dashboard';
             } else {
                 this.handleFailedLogin(responseData.message || 'Invalid username or password.');
             }
@@ -183,7 +183,7 @@ class BioVAuth {
         this.securitySystem.resetAttempts();
         this.updateStatus('Authentication successful!', 'success');
         this.elements.errorMsg.textContent = '';
-        window.location.href = 'dashboard/index.html';
+        window.location.href = 'dashboard';
     }
     handleFailedLogin(errorMessage) {
         this.securitySystem.recordFailedAttempt();
