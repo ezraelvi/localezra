@@ -3,123 +3,2007 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editable Content Site</title>
+    <title>Elvi's Cosmic Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Aldrich&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { font-family: sans-serif; margin: 20px; }
-        #content { border: 1px solid #ccc; padding: 15px; min-height: 200px; }
-        button { margin-top: 10px; padding: 8px 15px; cursor: pointer; }
-        #imageUploadContainer { margin-top: 20px; border-top: 1px dashed #eee; padding-top: 20px; }
-        img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
+        /* Base Styles */
+        body {
+            margin: 0;
+            overflow: hidden; /* Hide scrollbar for cosmic effect */
+            font-family: 'Aldrich', sans-serif;
+            color: #E0E0E0;
+            background-color: #0A0A1A;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1; /* Ensure body content is above particles */
+        }
+
+        /* Particle Background */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: #000; /* Dark background for particles */
+            z-index: 0; /* Behind other content */
+            top: 0;
+            left: 0;
+        }
+
+        /* Loading Screen (Wormhole) */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00FFC0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            text-align: center;
+            z-index: 1000;
+            transition: opacity 1s ease-out;
+            opacity: 1;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .wormhole-effect {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 5px solid transparent;
+            border-top-color: #00FFC0;
+            animation: spin 1.5s linear infinite;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .wormhole-effect::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 5px solid transparent;
+            border-top-color: #00E0A0;
+            border-radius: 50%;
+            animation: spin 2s linear infinite reverse;
+        }
+
+        .wormhole-effect::after {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            bottom: 30px;
+            border: 5px solid transparent;
+            border-top-color: #00C080;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .secret-input {
+            background: rgba(0, 255, 192, 0.1);
+            border: 1px solid #00FFC0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: #00FFC0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1em;
+            outline: none;
+            text-align: center;
+        }
+        .secret-input::placeholder {
+            color: rgba(0, 255, 192, 0.5);
+        }
+
+        /* Main Profile Container */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 10, 26, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 192, 0.5);
+            max-width: 900px;
+            width: 90%;
+            box-sizing: border-box;
+            position: relative; /* For orb positioning */
+            z-index: 10;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+            position: relative;
+        }
+
+        .profile-pic-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #00FFC0;
+            box-shadow: 0 0 15px rgba(0, 255, 192, 0.7);
+            margin-right: 30px;
+            flex-shrink: 0;
+            z-index: 2; /* Bring above orb */
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .profile-info {
+            flex-grow: 1;
+            z-index: 2;
+        }
+
+        .username {
+            font-size: 1.8em;
+            font-family: 'Orbitron', sans-serif;
+            color: #00FFC0;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 192, 0.5);
+        }
+
+        .full-name {
+            font-size: 1.2em;
+            color: #A0A0A0;
+            margin-bottom: 15px;
+        }
+
+        .bio {
+            font-size: 0.9em;
+            color: #B0B0B0;
+            line-height: 1.5;
+            max-width: 400px; /* Limit bio width */
+        }
+
+        /* Cosmic Orb and Orbiting Stats */
+        .cosmic-orb-container {
+            position: absolute;
+            top: 50%;
+            left: 60%; /* Adjust as needed */
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            z-index: 1; /* Below profile pic */
+        }
+
+        .cosmic-orb {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, #00C0FF, #004080);
+            box-shadow: 0 0 50px rgba(0, 192, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #FFF;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px #FFF;
+            animation: pulse 3s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 50px rgba(0, 192, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.3); }
+            100% { transform: scale(1.05); box-shadow: 0 0 60px rgba(0, 192, 255, 1), inset 0 0 25px rgba(255, 255, 255, 0.5); }
+        }
+
+        .orbiting-stat {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00FFC0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.8em;
+            box-shadow: 0 0 15px rgba(0, 255, 192, 0.6);
+            transition: transform 0.3s ease, background 0.3s ease;
+            cursor: pointer;
+            width: 100px; /* Fixed width */
+            height: 60px; /* Fixed height */
+            justify-content: center;
+        }
+
+        .orbiting-stat:hover {
+            transform: scale(1.1);
+            background: rgba(0, 255, 192, 0.2);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1em;
+            color: #00FFC0;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            color: #C0C0C0;
+            font-size: 0.75em;
+        }
+
+        /* Profile Tabs */
+        .profile-tabs {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            margin-top: 30px;
+            border-bottom: 1px solid rgba(0, 255, 192, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: #A0A0A0;
+            font-size: 1.1em;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: color 0.3s, border-bottom 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .tab-button.active {
+            color: #00FFC0;
+            border-bottom: 2px solid #00FFC0;
+        }
+
+        .tab-button:hover {
+            color: #00FFC0;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-top: 20px;
+            max-height: 400px; /* Limit height for scroll */
+            overflow-y: auto; /* Enable scroll */
+            padding-right: 10px; /* Space for scrollbar */
+        }
+
+        .content-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-grid::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .content-grid::-webkit-scrollbar-thumb {
+            background: #00FFC0;
+            border-radius: 10px;
+        }
+
+        .content-item {
+            background: #1A1A30;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 255, 192, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .content-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 255, 192, 0.5);
+        }
+
+        .content-item img,
+        .content-item video {
+            width: 100%;
+            height: 180px; /* Fixed height for consistency */
+            object-fit: cover;
+            display: block;
+        }
+
+        .content-item audio {
+            width: 100%;
+            display: block;
+            margin-top: 10px;
+            background-color: #0A0A1A;
+            border-radius: 0 0 10px 10px;
+        }
+        .content-item.text-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            height: 180px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #C0C0C0;
+            background-color: #2a2a40; /* Slightly different background for text */
+            word-wrap: break-word; /* Ensure long words wrap */
+            overflow: hidden; /* Hide overflow */
+            line-height: 1.4;
+        }
+
+        /* Highlights */
+        .highlights-section {
+            width: 100%;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 255, 192, 0.3);
+        }
+
+        .highlights-title {
+            font-size: 1.4em;
+            font-family: 'Orbitron', sans-serif;
+            color: #00FFC0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .highlights-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto; /* Enable horizontal scroll */
+            padding-bottom: 10px;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #00FFC0 rgba(0, 0, 0, 0.3); /* Firefox */
+        }
+
+        .highlights-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .highlights-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .highlights-container::-webkit-scrollbar-thumb {
+            background: #00FFC0;
+            border-radius: 10px;
+        }
+
+        .highlight-item {
+            flex: 0 0 auto; /* Prevent shrinking */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            width: 80px; /* Fixed width */
+        }
+
+        .highlight-item-pic {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #00FFC0;
+            box-shadow: 0 0 10px rgba(0, 255, 192, 0.5);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1A1A30;
+        }
+
+        .highlight-item-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .highlight-item-label {
+            font-size: 0.8em;
+            color: #C0C0C0;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #1A1A30;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(0, 255, 192, 0.7);
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            color: #E0E0E0;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #00FFC0;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            color: #00FFC0;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Story Modal */
+        .story-modal-media {
+            max-width: 80vw;
+            max-height: 70vh;
+            display: block;
+            margin: 0 auto 20px auto;
+            border-radius: 10px;
+        }
+
+        .story-modal-media.audio-preview {
+            max-height: 80px;
+        }
+        .story-modal-text {
+            white-space: pre-wrap; /* Preserve formatting for text content */
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Private Content Modal */
+        .private-content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            padding-top: 10px;
+        }
+
+        .private-item {
+            background: #2a2a40;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 8px rgba(0, 255, 192, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .private-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0, 255, 192, 0.4);
+        }
+
+        .private-item img,
+        .private-item video {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .private-item audio {
+            width: 100%;
+            display: block;
+            margin-top: 5px;
+            background-color: #1A1A30;
+        }
+        .private-item.text-item {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #C0C0C0;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+        .private-item-placeholder {
+            width: 100%;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #3a3a50;
+            color: #808080;
+            font-size: 0.9em;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        /* Editor Modal */
+        .editor-modal-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed rgba(0, 255, 192, 0.2);
+        }
+
+        .editor-modal-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .editor-label {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            color: #00FFC0;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .editor-input, .editor-textarea, .editor-select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #0A0A1A;
+            border: 1px solid #00FFC0;
+            border-radius: 5px;
+            color: #E0E0E0;
+            font-family: 'Aldrich', sans-serif;
+            font-size: 0.9em;
+            outline: none;
+        }
+        .editor-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .editor-button {
+            background: #00FFC0;
+            color: #0A0A1A;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1em;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .editor-button:hover {
+            background: #00E0A0;
+            transform: translateY(-2px);
+        }
+
+        .editor-item-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 255, 192, 0.3);
+            border-radius: 5px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .editor-item-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .editor-item-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .editor-item-list::-webkit-scrollbar-thumb {
+            background: #00FFC0;
+            border-radius: 10px;
+        }
+
+
+        .editor-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #2a2a40;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            color: #E0E0E0;
+            font-size: 0.9em;
+        }
+
+        .editor-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .editor-item-media-preview {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        .editor-item-text-preview {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .editor-item-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .delete-item-btn {
+            background: #FF4040;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.2s;
+        }
+
+        .delete-item-btn:hover {
+            background: #FF0000;
+        }
+
+        /* Upload Modal */
+        .upload-options {
+            margin-bottom: 20px;
+        }
+        .upload-options label {
+            margin-right: 15px;
+        }
+        .upload-options select {
+            padding: 8px;
+            background: #0A0A1A;
+            border: 1px solid #00FFC0;
+            border-radius: 5px;
+            color: #E0E0E0;
+        }
+
+        .file-upload-container, .text-upload-container {
+            margin-top: 20px;
+        }
+
+        .file-upload-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+            border: 2px dashed #00FFC0;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+            transition: background 0.2s;
+        }
+
+        .file-upload-input:hover {
+            background: rgba(0, 255, 192, 0.1);
+        }
+
+        .file-upload-input input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            color: #00FFC0;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-upload-label i {
+            margin-right: 10px;
+        }
+
+        .file-name-display {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #C0C0C0;
+            text-align: center;
+        }
+
+        .upload-preview {
+            margin-top: 20px;
+            border: 1px solid rgba(0, 255, 192, 0.3);
+            border-radius: 8px;
+            min-height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .upload-preview-media {
+            max-width: 100%;
+            max-height: 150px;
+            display: block;
+            object-fit: contain; /* Use contain to fit whole image/video */
+            border-radius: 5px;
+        }
+        .upload-preview-media.audio-preview {
+            max-height: 80px;
+        }
+
+        /* Admin Button */
+        .admin-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #5050FF;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 80, 255, 0.5);
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            z-index: 100;
+            border: none;
+        }
+
+        .admin-button:hover {
+            background: #4040E0;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 80, 255, 0.7);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 20px;
+                max-width: 95%;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .profile-pic-wrapper {
+                margin-right: 0;
+                margin-bottom: 20px;
+                width: 100px;
+                height: 100px;
+            }
+
+            .cosmic-orb-container {
+                position: static;
+                transform: none;
+                margin-bottom: 30px;
+                width: 200px;
+                height: 200px;
+            }
+
+            .orbiting-stat {
+                width: 80px;
+                height: 50px;
+                padding: 5px 8px;
+                font-size: 0.7em;
+            }
+
+            .stat-value {
+                font-size: 1em;
+            }
+
+            .content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            .content-item img, .content-item video, .content-item.text-item {
+                height: 150px;
+            }
+
+            .private-content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            .private-item img, .private-item video, .private-item.text-item {
+                height: 120px;
+            }
+
+            .highlights-container {
+                gap: 15px;
+            }
+            .highlight-item {
+                width: 70px;
+            }
+            .highlight-item-pic {
+                width: 60px;
+                height: 60px;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            .modal-title {
+                font-size: 1.5em;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>My Editable Site</h1>
+    <div id="particles-js"></div>
 
-    <div id="content" contenteditable="true">
-        </div>
-
-    <button id="saveContent">Save Content</button>
-
-    <div id="imageUploadContainer">
-        <h2>Upload Image</h2>
-        <input type="file" id="imageInput" accept="image/*">
-        <button id="uploadImage">Upload Image</button>
-        <p>Image URL: <span id="imageUrlDisplay"></span></p>
-        <img id="uploadedImagePreview" style="display:none;" alt="Uploaded Image Preview">
+    <div class="loading-screen" id="loadingScreen">
+        <div class="wormhole-effect"></div>
+        <p>Entering the Elvi's Cosmic Galaxy...</p>
+        <input type="password" id="secretInput" class="secret-input" placeholder="Enter key">
     </div>
 
+    <div class="profile-container" id="profileContainer" style="display: none;">
+        <div class="profile-header">
+            <div class="profile-pic-wrapper">
+                <img src="https://via.placeholder.com/120/00FFC0/000000?text=Elvi" alt="Profile Picture" class="profile-pic" id="profilePic">
+            </div>
+            <div class="profile-info">
+                <h1 class="username" id="username">@elvizill</h1>
+                <p class="full-name" id="fullName">Elvi Ezra</p>
+                <p class="bio" id="bio">Explorer of cosmic melodies, seeker of untold stories, and weaver of digital dreams. Welcome to my galaxy.</p>
+            </div>
+            <div class="cosmic-orb-container">
+                <div class="cosmic-orb">Elvi Ezra</div>
+                <div class="orbiting-stat" id="totalVisitsStat">
+                    <span class="stat-value" id="totalVisitsValue">0</span>
+                    <span class="stat-label">Cosmic Visits</span>
+                </div>
+                <div class="orbiting-stat" id="totalMediaStat">
+                    <span class="stat-value" id="totalMediaValue">0</span>
+                    <span class="stat-label">Media Uploaded</span>
+                </div>
+                 <div class="orbiting-stat" id="websiteAgeStat">
+                    <span class="stat-value" id="websiteAgeValue">0d 0h 0m 0s</span>
+                    <span class="stat-label">Galaxy Age</span>
+                </div>
+                <div class="orbiting-stat" id="followersStat">
+                    <span class="stat-value" id="followersValue">0</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+                <div class="orbiting-stat" id="followingStat">
+                    <span class="stat-value" id="followingValue">0</span>
+                    <span class="stat-label">Following</span>
+                </div>
+                <div class="orbiting-stat" id="postsStat">
+                    <span class="stat-value" id="postsValue">0</span>
+                    <span class="stat-label">Posts</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <button class="tab-button active" data-tab="posts">Posts</button>
+            <button class="tab-button" data-tab="reels">Reels</button>
+            <button class="tab-button" data-tab="tagged">Tagged</button>
+        </div>
+
+        <div class="content-grid" id="contentGrid">
+            </div>
+
+        <div class="highlights-section">
+            <h2 class="highlights-title">Highlights</h2>
+            <div class="highlights-container" id="highlightsContainer">
+                </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="storyModalOverlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="storyModalCloseBtn">&times;</button>
+            <h3 class="modal-title" id="storyModalTitle">Story Title</h3>
+            <div id="storyModalContent">
+                </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="privateContentModalOverlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="privateContentModalCloseBtn">&times;</button>
+            <h3 class="modal-title">Forbidden Zone</h3>
+            <div class="private-content-grid" id="privateContentGrid">
+                </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editorOverlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="editorCloseBtn">&times;</button>
+            <h3 class="modal-title">Admin Console</h3>
+
+            <div class="editor-modal-section">
+                <h4 class="editor-label">Profile Settings</h4>
+                <label for="editorProfilePicUrl" class="editor-label">Profile Picture URL:</label>
+                <input type="text" id="editorProfilePicUrl" class="editor-input">
+                <label for="editorUsername" class="editor-label">Username:</label>
+                <input type="text" id="editorUsername" class="editor-input">
+                <label for="editorFullName" class="editor-label">Full Name:</label>
+                <input type="text" id="editorFullName" class="editor-input">
+                <label for="editorBio" class="editor-label">Bio:</label>
+                <textarea id="editorBio" class="editor-textarea"></textarea>
+                <label for="editorFollowers" class="editor-label">Followers:</label>
+                <input type="number" id="editorFollowers" class="editor-input">
+                <label for="editorFollowing" class="editor-label">Following:</label>
+                <input type="number" id="editorFollowing" class="editor-input">
+                <button class="editor-button" id="updateProfileBtn">Update Profile</button>
+            </div>
+
+            <div class="editor-modal-section">
+                <h4 class="editor-label">Manage Content</h4>
+                <label for="editorContentTypeSelect" class="editor-label">Select Content Type to Manage:</label>
+                <select id="editorContentTypeSelect" class="editor-select">
+                    <option value="posts">Posts</option>
+                    <option value="reels">Reels</option>
+                    <option value="tagged">Tagged</option>
+                    <option value="highlights">Highlights</option>
+                    <option value="private">Private Content</option>
+                </select>
+                <div class="editor-item-list" id="editorItemList">
+                    </div>
+            </div>
+
+            <button class="editor-button" id="publishChangesBtn">Publish All Changes</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="uploadModalOverlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="uploadModalCloseBtn">&times;</button>
+            <h3 class="modal-title">Create Galaxy</h3>
+
+            <div class="upload-options">
+                <label for="uploadContentType">Content Type:</label>
+                <select id="uploadContentType" class="editor-select">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                    <option value="audio">Audio</option>
+                    <option value="text">Text</option>
+                </select>
+
+                <label for="uploadContentDestination">Destination:</label>
+                <select id="uploadContentDestination" class="editor-select">
+                    <option value="posts">Public Posts</option>
+                    <option value="private">Private Content</option>
+                </select>
+            </div>
+
+            <div class="file-upload-container" id="uploadFileSection">
+                <label class="editor-label">Upload Media File:</label>
+                <div class="file-upload-input">
+                    <input type="file" id="uploadFile" accept="image/*,video/*,audio/*">
+                    <span class="file-upload-label"><i class="fas fa-cloud-upload-alt"></i> Choose File</span>
+                </div>
+                <p class="file-name-display" id="uploadFileName">No file chosen</p>
+                <div class="upload-preview" id="uploadPreview"></div>
+            </div>
+
+            <div class="text-upload-container" id="uploadTextSection" style="display: none;">
+                <label for="uploadTextContent" class="editor-label">Enter Text Content:</label>
+                <textarea id="uploadTextContent" class="editor-textarea" placeholder="Type your cosmic message here..."></textarea>
+            </div>
+
+            <button class="editor-button" id="uploadSubmitBtn">Add to Galaxy</button>
+        </div>
+    </div>
+
+    <button class="admin-button" id="adminButton">Admin Console</button>
+    <button class="admin-button" id="uploadContentButton" style="right: 170px;">Create Galaxy</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        const contentDiv = document.getElementById('content');
-        const saveButton = document.getElementById('saveContent');
-        const imageInput = document.getElementById('imageInput');
-        const uploadImageButton = document.getElementById('uploadImage');
-        const imageUrlDisplay = document.getElementById('imageUrlDisplay');
-        const uploadedImagePreview = document.getElementById('uploadedImagePreview');
-
-        // Ganti dengan URL Worker Anda jika frontend dihosting terpisah
-        const API_BASE_URL = 'https://my-editable-site-worker.ezvvel.workers.dev/'; 
-
-        // Fungsi untuk memuat konten
-        async function loadContent() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/content/homepage`); // 'homepage' sebagai key default
-                if (response.ok) {
-                    const content = await response.text();
-                    contentDiv.innerHTML = content;
-                } else if (response.status === 404) {
-                    contentDiv.innerHTML = '<p>No content found. Start typing!</p>';
-                } else {
-                    console.error('Failed to load content:', response.statusText);
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#00FFC0"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#00FFC0",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 6,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
                 }
-            } catch (error) {
-                console.error('Error loading content:', error);
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 400,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+
+        // --- DOM Elements ---
+        const loadingScreen = document.getElementById('loadingScreen');
+        const secretInput = document.getElementById('secretInput');
+        const profileContainer = document.getElementById('profileContainer');
+
+        const profilePic = document.getElementById('profilePic');
+        const usernameDisplay = document.getElementById('username');
+        const fullNameDisplay = document.getElementById('fullName');
+        const bioDisplay = document.getElementById('bio');
+
+        const cosmicOrbContainer = document.querySelector('.cosmic-orb-container');
+        const totalVisitsStat = document.getElementById('totalVisitsStat');
+        const totalVisitsValue = document.getElementById('totalVisitsValue');
+        const totalMediaStat = document.getElementById('totalMediaStat');
+        const totalMediaValue = document.getElementById('totalMediaValue');
+        const websiteAgeStat = document.getElementById('websiteAgeStat');
+        const websiteAgeValue = document.getElementById('websiteAgeValue');
+        const followersStat = document.getElementById('followersStat');
+        const followersValue = document.getElementById('followersValue');
+        const followingStat = document.getElementById('followingStat');
+        const followingValue = document.getElementById('followingValue');
+        const postsStat = document.getElementById('postsStat');
+        const postsValue = document.getElementById('postsValue');
+
+
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const contentGrid = document.getElementById('contentGrid');
+        const highlightsContainer = document.getElementById('highlightsContainer');
+
+        const storyModalOverlay = document.getElementById('storyModalOverlay');
+        const storyModalCloseBtn = document.getElementById('storyModalCloseBtn');
+        const storyModalTitle = document.getElementById('storyModalTitle');
+        const storyModalContent = document.getElementById('storyModalContent');
+
+        const privateContentModalOverlay = document.getElementById('privateContentModalOverlay');
+        const privateContentModalCloseBtn = document.getElementById('privateContentModalCloseBtn');
+        const privateContentGrid = document.getElementById('privateContentGrid');
+
+        const adminButton = document.getElementById('adminButton');
+        const editorOverlay = document.getElementById('editorOverlay');
+        const editorCloseBtn = document.getElementById('editorCloseBtn');
+        const editorProfilePicUrl = document.getElementById('editorProfilePicUrl');
+        const editorUsername = document.getElementById('editorUsername');
+        const editorFullName = document.getElementById('editorFullName');
+        const editorBio = document.getElementById('editorBio');
+        const editorFollowers = document.getElementById('editorFollowers');
+        const editorFollowing = document.getElementById('editorFollowing');
+        const updateProfileBtn = document.getElementById('updateProfileBtn');
+        const editorContentTypeSelect = document.getElementById('editorContentTypeSelect');
+        const editorItemList = document.getElementById('editorItemList');
+        const publishChangesBtn = document.getElementById('publishChangesBtn');
+
+        const uploadContentButton = document.getElementById('uploadContentButton');
+        const uploadModalOverlay = document.getElementById('uploadModalOverlay');
+        const uploadModalCloseBtn = document.getElementById('uploadModalCloseBtn');
+        const uploadContentType = document.getElementById('uploadContentType');
+        const uploadContentDestination = document.getElementById('uploadContentDestination');
+        const uploadFileSection = document.getElementById('uploadFileSection');
+        const uploadTextSection = document.getElementById('uploadTextSection');
+        const uploadFile = document.getElementById('uploadFile');
+        const uploadFileName = document.getElementById('uploadFileName');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const uploadTextContent = document.getElementById('uploadTextContent');
+        const uploadSubmitBtn = document.getElementById('uploadSubmitBtn');
+
+
+        // --- Data Storage (Local for initial load, will be synced with backend) ---
+        let profileData = {
+            profilePic: "https://elvizill-cdn.pages.dev/elvi-pfp.jpg",
+            username: "@elvizill",
+            fullName: "Elvi Ezra",
+            bio: "Explorer of cosmic melodies, seeker of untold stories, and weaver of digital dreams. Welcome to my galaxy.",
+            stats: {
+                // These will be dynamic, but initial values for display
+                totalVisits: 0,
+                totalMedia: 0,
+                websiteLaunchDate: "2024-01-01T00:00:00", // Tanggal peluncuran website (YYYY-MM-DDTHH:MM:SS)
+                followers: 4500,
+                following: 320,
+                posts: 0 // Will be calculated from postsData.length
+            }
+        };
+
+        // Dummy Data (replace with actual data from data.json)
+        let postsData = [
+            { id: 'img1', type: 'image', src: 'https://elvizill-cdn.pages.dev/posts/post1.jpg' },
+            { id: 'vid1', type: 'video', src: 'https://elvizill-cdn.pages.dev/posts/post2.mp4' },
+            { id: 'img2', type: 'image', src: 'https://elvizill-cdn.pages.dev/posts/post3.jpg' },
+            { id: 'aud1', type: 'audio', src: 'https://elvizill-cdn.pages.dev/posts/post4.mp3' },
+            { id: 'img3', type: 'image', src: 'https://elvizill-cdn.pages.dev/posts/post5.jpg' },
+            { id: 'txt1', type: 'text', content: 'In the vastness of the digital cosmos, every thought is a star, every connection a new constellation.'}
+        ];
+
+        let reelsData = [
+            { id: 'reel1', type: 'video', src: 'https://elvizill-cdn.pages.dev/reels/reel1.mp4' },
+            { id: 'reel2', type: 'video', src: 'https://elvizill-cdn.pages.dev/reels/reel2.mp4' },
+        ];
+
+        let taggedData = [
+            { id: 'tag1', type: 'image', src: 'https://elvizill-cdn.pages.dev/tagged/tagged1.jpg' },
+            { id: 'tag2', type: 'video', src: 'https://elvizill-cdn.pages.dev/tagged/tagged2.mp4' },
+        ];
+
+        let highlightsData = [
+            { id: 'h1', label: 'Space Journeys', cover: 'https://elvizill-cdn.pages.dev/highlights/highlight1.jpg', content: [
+                { type: 'image', src: 'https://elvizill-cdn.pages.dev/highlights/story1-1.jpg' },
+                { type: 'video', src: 'https://elvizill-cdn.pages.dev/highlights/story1-2.mp4' },
+                { type: 'text', content: 'Exploring the depths of the universe, one byte at a time.'}
+            ]},
+            { id: 'h2', label: 'Stellar Sounds', cover: 'https://elvizill-cdn.pages.dev/highlights/highlight2.jpg', content: [
+                { type: 'audio', src: 'https://elvizill-cdn.pages.dev/highlights/story2-1.mp3' },
+                { type: 'image', src: 'https://elvizill-cdn.pages.dev/highlights/story2-2.jpg' },
+            ]}
+        ];
+
+        let privateContentData = [
+            { id: 'pvt1', type: 'image', src: 'https://elvizill-cdn.pages.dev/private/secret1.jpg' },
+            { id: 'pvt2', type: 'video', src: 'https://elvizill-cdn.pages.dev/private/secret2.mp4' },
+            { id: 'pvt3', type: 'text', content: 'A message from a distant star, just for your eyes. Seek the truth beyond the visible light.'},
+            { id: 'pvt4', type: 'audio', src: 'https://elvizill-cdn.pages.dev/private/secret3.mp3' },
+        ];
+
+        let currentActiveTab = 'posts';
+
+        // --- Backend Configuration (Cloudflare Worker) ---
+        const GITHUB_REPO_OWNER = 'your-github-username'; // GANTI DENGAN USERNAME GITHUB ANDA
+        const GITHUB_REPO_NAME = 'your-repo-name';        // GANTI DENGAN NAMA REPO GITHUB ANDA (e.g., elvi-cosmic-profile)
+        const GITHUB_BRANCH = 'main';                     // Atau 'master'
+        const CLOUDFLARE_WORKER_API_ENDPOINT = 'https://your-worker-name.your-username.workers.dev'; // GANTI DENGAN URL CLOUDFLARE WORKER ANDA
+        const DATA_FILE_PATH = 'data.json';               // Path ke file data di repo Anda
+
+        // --- Functions ---
+
+        // Authentication & Loading Screen
+        secretInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (secretInput.value === 'love') {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        profileContainer.style.display = 'flex';
+                        // Fetch data from backend on successful auth
+                        fetchAndLoadData();
+                        // Start website age counter
+                        startWebsiteAgeCounter();
+                    }, 1000); // Give time for fade out
+                } else {
+                    alert('Access Denied. Wormhole integrity compromised.');
+                    secretInput.value = '';
+                }
+            }
+        });
+
+        // Function to position elements around the cosmic orb
+        function positionElementsCircularly() {
+            const elements = [totalVisitsStat, totalMediaStat, websiteAgeStat, followersStat, followingStat, postsStat];
+            const radius = 150; // Radius from the center of the orb
+            const centerX = cosmicOrbContainer.offsetWidth / 2;
+            const centerY = cosmicOrbContainer.offsetHeight / 2;
+            const angleStep = (2 * Math.PI) / elements.length;
+
+            elements.forEach((el, index) => {
+                const angle = index * angleStep;
+                const x = centerX + radius * Math.cos(angle) - el.offsetWidth / 2;
+                const y = centerY + radius * Math.sin(angle) - el.offsetHeight / 2;
+
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+            });
+        }
+
+        // Function to load profile content (main display)
+        function loadProfileContent() {
+            // Update profile info
+            profilePic.src = profileData.profilePic;
+            usernameDisplay.textContent = profileData.username;
+            fullNameDisplay.textContent = profileData.fullName;
+            bioDisplay.textContent = profileData.bio;
+
+            // Update stats
+            // totalVisitsValue.textContent will be updated by fetchTotalVisits()
+            // totalMediaValue will be updated below
+            followersValue.textContent = formatNumber(profileData.stats.followers);
+            followingValue.textContent = formatNumber(profileData.stats.following);
+            postsValue.textContent = formatNumber(postsData.length); // Posts count only for posts tab
+
+            // Calculate total media
+            const totalMediaCount = postsData.length + reelsData.length + taggedData.length + privateContentData.length + highlightsData.flatMap(h => h.content).length;
+            totalMediaValue.textContent = formatNumber(totalMediaCount);
+
+            // Position orbiting elements
+            positionElementsCircularly();
+
+            // Render current active tab content
+            renderContent(currentActiveTab);
+
+            // Render highlights
+            renderHighlights();
+        }
+
+        // Function to format large numbers (e.g., 4500 to 4.5k)
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'm';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num;
+        }
+
+        // Render content for selected tab
+        function renderContent(tabName) {
+            contentGrid.innerHTML = ''; // Clear current content
+            let dataToRender = [];
+
+            switch (tabName) {
+                case 'posts':
+                    dataToRender = postsData;
+                    break;
+                case 'reels':
+                    dataToRender = reelsData;
+                    break;
+                case 'tagged':
+                    dataToRender = taggedData;
+                    break;
+                default:
+                    dataToRender = postsData;
+            }
+
+            dataToRender.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('content-item');
+
+                if (item.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    itemDiv.appendChild(img);
+                } else if (item.type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = item.src;
+                    video.muted = true;
+                    video.loop = true;
+                    video.playsInline = true; // For iOS autoplay
+                    video.onmouseover = () => video.play();
+                    video.onmouseout = () => video.pause();
+                    itemDiv.appendChild(video);
+                } else if (item.type === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.src = item.src;
+                    audio.controls = true;
+                    itemDiv.appendChild(audio);
+                } else if (item.type === 'text') {
+                    itemDiv.classList.add('text-item');
+                    itemDiv.textContent = item.content;
+                }
+
+                contentGrid.appendChild(itemDiv);
+            });
+        }
+
+        // Render highlights
+        function renderHighlights() {
+            highlightsContainer.innerHTML = '';
+            highlightsData.forEach(highlight => {
+                const highlightDiv = document.createElement('div');
+                highlightDiv.classList.add('highlight-item');
+                highlightDiv.dataset.id = highlight.id; // Store ID for easy lookup
+
+                const picDiv = document.createElement('div');
+                picDiv.classList.add('highlight-item-pic');
+                const img = document.createElement('img');
+                img.src = highlight.cover;
+                picDiv.appendChild(img);
+                highlightDiv.appendChild(picDiv);
+
+                const labelSpan = document.createElement('span');
+                labelSpan.classList.add('highlight-item-label');
+                labelSpan.textContent = highlight.label;
+                highlightDiv.appendChild(labelSpan);
+
+                highlightDiv.addEventListener('click', () => openStoryModal(highlight));
+                highlightsContainer.appendChild(highlightDiv);
+            });
+        }
+
+        // Open Story Modal
+        function openStoryModal(highlight) {
+            storyModalTitle.textContent = highlight.label;
+            storyModalContent.innerHTML = ''; // Clear previous content
+
+            highlight.content.forEach(storyItem => {
+                if (storyItem.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = storyItem.src;
+                    img.classList.add('story-modal-media');
+                    storyModalContent.appendChild(img);
+                } else if (storyItem.type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = storyItem.src;
+                    video.controls = true;
+                    video.muted = false; // Allow sound for stories
+                    video.autoplay = true; // Autoplay story videos
+                    video.classList.add('story-modal-media');
+                    storyModalContent.appendChild(video);
+                } else if (storyItem.type === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.src = storyItem.src;
+                    audio.controls = true;
+                    audio.autoplay = true; // Autoplay story audio
+                    audio.classList.add('story-modal-media', 'audio-preview');
+                    storyModalContent.appendChild(audio);
+                } else if (storyItem.type === 'text') {
+                    const p = document.createElement('p');
+                    p.classList.add('story-modal-text');
+                    p.textContent = storyItem.content;
+                    storyModalContent.appendChild(p);
+                }
+            });
+            storyModalOverlay.classList.add('active');
+        }
+
+        // Open Private Content Modal
+        function openPrivateContentModal() {
+            // A prompt for a secret answer
+            const answer = prompt('This is a forbidden zone. Enter the secret answer:');
+            if (answer && answer.toLowerCase() === 'aku sayang kita') { // Case-insensitive check
+                privateContentGrid.innerHTML = '';
+                if (privateContentData.length === 0) {
+                    const placeholder = document.createElement('div');
+                    placeholder.classList.add('private-item-placeholder');
+                    placeholder.textContent = 'No secret treasures here... yet.';
+                    privateContentGrid.appendChild(placeholder);
+                } else {
+                    privateContentData.forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add('private-item');
+
+                        if (item.type === 'image') {
+                            const img = document.createElement('img');
+                            img.src = item.src;
+                            itemDiv.appendChild(img);
+                        } else if (item.type === 'video') {
+                            const video = document.createElement('video');
+                            video.src = item.src;
+                            video.controls = true;
+                            video.muted = true;
+                            video.playsInline = true;
+                            itemDiv.appendChild(video);
+                        } else if (item.type === 'audio') {
+                            const audio = document.createElement('audio');
+                            audio.src = item.src;
+                            audio.controls = true;
+                            itemDiv.appendChild(audio);
+                        } else if (item.type === 'text') {
+                            itemDiv.classList.add('text-item');
+                            itemDiv.textContent = item.content;
+                        }
+                        privateContentGrid.appendChild(itemDiv);
+                    });
+                }
+                privateContentModalOverlay.classList.add('active');
+            } else if (answer !== null) { // If user didn't cancel
+                alert('Intruder detected. Access denied.');
             }
         }
 
-        // Fungsi untuk menyimpan konten
-        saveButton.addEventListener('click', async () => {
-            const newContent = contentDiv.innerHTML;
-            try {
-                const response = await fetch(`${API_BASE_URL}/content/homepage`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'text/html',
-                    },
-                    body: newContent,
-                });
-                if (response.ok) {
-                    alert('Content saved successfully!');
-                } else {
-                    alert('Failed to save content.');
-                    console.error('Failed to save content:', response.statusText);
-                }
-            } catch (error) {
-                console.error('Error saving content:', error);
-                alert('Error saving content.');
-            }
-        });
+        // Populate Editor Fields with current data
+        function populateEditorFields() {
+            editorProfilePicUrl.value = profileData.profilePic;
+            editorUsername.value = profileData.username;
+            editorFullName.value = profileData.fullName;
+            editorBio.value = profileData.bio;
+            editorFollowers.value = profileData.stats.followers;
+            editorFollowing.value = profileData.stats.following;
 
-        // Fungsi untuk mengunggah gambar
-        uploadImageButton.addEventListener('click', async () => {
-            const file = imageInput.files[0];
-            if (!file) {
-                alert('Please select an image to upload.');
+            populateEditorItemList(); // Populate list based on current selection
+        }
+
+        // Populate Editor Item List based on selected content type
+        function populateEditorItemList() {
+            const selectedType = editorContentTypeSelect.value;
+            editorItemList.innerHTML = '';
+            let dataToEdit = [];
+
+            switch (selectedType) {
+                case 'posts': dataToEdit = postsData; break;
+                case 'reels': dataToEdit = reelsData; break;
+                case 'tagged': dataToEdit = taggedData; break;
+                case 'highlights': dataToEdit = highlightsData; break;
+                case 'private': dataToEdit = privateContentData; break;
+            }
+
+            if (dataToEdit.length === 0) {
+                editorItemList.innerHTML = '<div style="text-align: center; color: #808080; padding: 20px;">No items to display.</div>';
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('image', file);
+            dataToEdit.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('editor-item');
 
+                const contentSpan = document.createElement('span');
+                contentSpan.classList.add('editor-item-content');
+
+                if (item.type === 'image' || item.type === 'video' || item.type === 'audio') {
+                    const mediaPreview = document.createElement(item.type === 'audio' ? 'audio' : (item.type === 'video' ? 'video' : 'img'));
+                    if (item.type !== 'audio') { // Image/Video preview
+                        mediaPreview.src = item.src;
+                        mediaPreview.classList.add('editor-item-media-preview');
+                    } else { // Audio preview
+                        mediaPreview.src = item.src;
+                        mediaPreview.controls = true;
+                        mediaPreview.style.width = '100px';
+                        mediaPreview.style.height = '30px';
+                        mediaPreview.style.marginRight = '10px';
+                    }
+                    contentSpan.appendChild(mediaPreview);
+                    contentSpan.innerHTML += `<span>${item.src.split('/').pop()}</span>`; // Show file name
+                } else if (item.type === 'text') {
+                    contentSpan.innerHTML += `<span class="editor-item-text-preview">${item.content}</span>`;
+                } else if (selectedType === 'highlights') { // Special handling for highlights (show cover & label)
+                    const img = document.createElement('img');
+                    img.src = item.cover;
+                    img.classList.add('editor-item-media-preview');
+                    contentSpan.appendChild(img);
+                    contentSpan.innerHTML += `<span>${item.label}</span>`;
+                }
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('delete-item-btn');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => deleteContentItem(item.id, selectedType));
+
+                itemDiv.appendChild(contentSpan);
+                itemDiv.appendChild(deleteBtn);
+                editorItemList.appendChild(itemDiv);
+            });
+        }
+
+        // Delete Content Item
+        function deleteContentItem(id, type) {
+            if (!confirm(`Are you sure you want to delete this ${type} item? This action cannot be undone.`)) {
+                return;
+            }
+
+            let dataArray;
+            switch (type) {
+                case 'posts': dataArray = postsData; break;
+                case 'reels': dataArray = reelsData; break;
+                case 'tagged': dataArray = taggedData; break;
+                case 'highlights': dataArray = highlightsData; break;
+                case 'private': dataArray = privateContentData; break;
+                default: return;
+            }
+
+            const initialLength = dataArray.length;
+            const updatedArray = dataArray.filter(item => item.id !== id);
+
+            if (updatedArray.length < initialLength) {
+                // Update the original array reference
+                if (type === 'posts') postsData = updatedArray;
+                else if (type === 'reels') reelsData = updatedArray;
+                else if (type === 'tagged') taggedData = updatedArray;
+                else if (type === 'highlights') highlightsData = updatedArray;
+                else if (type === 'private') privateContentData = updatedArray;
+
+                alert(`Item deleted from local ${type} data. Click "Publish All Changes" to sync.`);
+                populateEditorItemList(); // Refresh the list
+                loadProfileContent(); // Refresh main website content (e.g., post count)
+            } else {
+                alert('Item not found.');
+            }
+        }
+
+
+        // Toggle Upload Modal Visibility
+        function updateUploadModalVisibility() {
+            const contentType = uploadContentType.value;
+            const destination = uploadContentDestination.value;
+
+            // Toggle file and text sections
+            if (contentType === 'text') {
+                uploadFileSection.style.display = 'none';
+                uploadTextSection.style.display = 'block';
+                // Force destination to private if text is selected
+                if (destination !== 'private') {
+                    uploadContentDestination.value = 'private';
+                }
+                uploadContentDestination.querySelector('option[value="posts"]').disabled = true; // Disable public option
+            } else {
+                uploadFileSection.style.display = 'block';
+                uploadTextSection.style.display = 'none';
+                uploadContentDestination.querySelector('option[value="posts"]').disabled = false; // Enable public option
+            }
+
+            // Clear preview if content type changes
+            uploadPreview.innerHTML = '';
+            uploadFileName.textContent = 'No file chosen';
+            uploadTextContent.value = ''; // Clear text content
+            uploadFile.value = ''; // Clear selected file
+        }
+
+        // Update file display and preview for upload modal
+        function updateUploadFileDisplayAndPreview() {
+            const file = uploadFile.files[0];
+            if (file) {
+                uploadFileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadPreview.innerHTML = ''; // Clear previous preview
+                    const contentType = uploadContentType.value;
+                    if (contentType === 'image') {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('upload-preview-media');
+                        uploadPreview.appendChild(img);
+                    } else if (contentType === 'video') {
+                        const video = document.createElement('video');
+                        video.src = e.target.result;
+                        video.controls = true;
+                        video.muted = true;
+                        video.playsInline = true;
+                        video.classList.add('upload-preview-media');
+                        uploadPreview.appendChild(video);
+                    } else if (contentType === 'audio') {
+                        const audio = document.createElement('audio');
+                        audio.src = e.target.result;
+                        audio.controls = true;
+                        audio.classList.add('upload-preview-media', 'audio-preview');
+                        uploadPreview.appendChild(audio);
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadFileName.textContent = 'No file chosen';
+                uploadPreview.innerHTML = '';
+            }
+        }
+
+        // --- Backend Integration (Cloudflare Worker & GitHub API) ---
+
+        /**
+         * Fetches current data from GitHub via Cloudflare Worker.
+         * This function assumes your Cloudflare Worker is set up to proxy GitHub API requests
+         * and handle authentication securely.
+         */
+        async function fetchDataFromBackend() {
             try {
-                const response = await fetch(`${API_BASE_URL}/upload-image`, {
+                // Fetch data.json
+                const dataResponse = await fetch(`${CLOUDFLARE_WORKER_API_ENDPOINT}?action=fetchData&path=${DATA_FILE_PATH}`);
+                if (!dataResponse.ok) {
+                    throw new Error(`HTTP error fetching data.json! status: ${dataResponse.status}`);
+                }
+                const data = await dataResponse.json();
+
+                // Fetch total visits from KV
+                const visitsResponse = await fetch(`${CLOUDFLARE_WORKER_API_ENDPOINT}?action=getTotalVisits`);
+                if (!visitsResponse.ok) {
+                     // Log error but don't stop execution, use local default for visits
+                    console.error(`HTTP error fetching total visits! status: ${visitsResponse.status}`);
+                }
+                const visitsData = await visitsResponse.json();
+                
+                // Update local data with fetched data
+                profileData = data.profileData;
+                postsData = data.postsData;
+                reelsData = data.reelsData;
+                taggedData = data.taggedData;
+                highlightsData = data.highlightsData;
+                privateContentData = data.privateContentData || []; // Ensure it's an array
+
+                // Update total visits from KV if successful, otherwise keep default
+                if (visitsResponse.ok && visitsData && typeof visitsData.totalVisits === 'number') {
+                    profileData.stats.totalVisits = visitsData.totalVisits;
+                } else {
+                    console.warn("Could not fetch total visits from backend. Using local default.");
+                }
+
+                console.log('Data fetched from backend:', {profileData, postsData, reelsData, taggedData, highlightsData, privateContentData, totalVisits: profileData.stats.totalVisits});
+                loadProfileContent(); // Re-render website with fetched data
+            } catch (error) {
+                console.error('Error fetching data from backend:', error);
+                alert('Failed to load data from backend. Using local default data. Please ensure Cloudflare Worker is configured.');
+                // Fallback to local default data if fetch fails
+                loadProfileContent(); // Load local defaults
+            }
+        }
+
+        /**
+         * Increments total visits on the backend via Cloudflare Worker.
+         */
+        async function incrementTotalVisits() {
+            try {
+                const response = await fetch(`${CLOUDFLARE_WORKER_API_ENDPOINT}?action=incrementVisits`, {
                     method: 'POST',
-                    body: formData,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}) // Empty body for a simple increment action
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    const imageUrl = data.link;
-                    imageUrlDisplay.textContent = imageUrl;
-                    uploadedImagePreview.src = imageUrl;
-                    uploadedImagePreview.style.display = 'block';
-
-                    // Opsional: Langsung masukkan gambar ke dalam konten yang diedit
-                    const imgTag = `<img src="${imageUrl}" alt="Uploaded Image" style="max-width:100%;">`;
-                    contentDiv.innerHTML += imgTag; // Menambahkan ke akhir konten
-                    alert('Image uploaded and added to content!');
-                } else {
-                    const errorText = await response.text();
-                    alert(`Image upload failed: ${errorText}`);
-                    console.error('Image upload failed:', response.statusText, errorText);
+                if (!response.ok) {
+                    throw new Error(`HTTP error incrementing visits! status: ${response.status}`);
+                }
+                const result = await response.json();
+                if (typeof result.totalVisits === 'number') {
+                    profileData.stats.totalVisits = result.totalVisits;
+                    totalVisitsValue.textContent = formatNumber(profileData.stats.totalVisits); // Update display
                 }
             } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('Error uploading image.');
+                console.error('Error incrementing total visits:', error);
+            }
+        }
+
+        /**
+         * Publishes (saves) changes to GitHub via Cloudflare Worker.
+         * This function assumes your Cloudflare Worker is set up to handle
+         * file updates on GitHub and manage authentication securely.
+         */
+        async function publishChangesToBackend() {
+            // Update posts count before publishing
+            profileData.stats.posts = postsData.length;
+            
+            // Calculate total media count for publishing
+            profileData.stats.totalMedia = postsData.length + reelsData.length + taggedData.length + privateContentData.length + highlightsData.flatMap(h => h.content).length;
+
+            const allData = {
+                profileData,
+                postsData,
+                reelsData,
+                taggedData,
+                highlightsData,
+                privateContentData
+            };
+
+            try {
+                alert('Publishing changes... Please wait.');
+                const response = await fetch(CLOUDFLARE_WORKER_API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'updateData', // Action for the worker
+                        path: DATA_FILE_PATH,
+                        content: JSON.stringify(allData, null, 2), // Pretty print JSON
+                        message: `Update data: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })}`,
+                        branch: GITHUB_BRANCH
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('Changes published to GitHub:', result);
+                alert('Changes successfully published to the galaxy!');
+                editorOverlay.classList.remove('active');
+                loadProfileContent(); // Reload the website with the new data
+            } catch (error) {
+                console.error('Error publishing changes:', error);
+                alert(`Failed to publish changes: ${error.message}. Check Cloudflare Worker logs.`);
+            }
+        }
+
+
+        // --- Event Listeners ---
+        // Tab switching
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentActiveTab = button.dataset.tab;
+                renderContent(currentActiveTab);
+            });
+        });
+
+        // Story Modal close
+        storyModalCloseBtn.addEventListener('click', () => {
+            storyModalOverlay.classList.remove('active');
+            // Pause any playing media when closing modal
+            const mediaElements = storyModalContent.querySelectorAll('video, audio');
+            mediaElements.forEach(media => media.pause());
+        });
+
+        // Private Content Modal close
+        privateContentModalCloseBtn.addEventListener('click', () => {
+            privateContentModalOverlay.classList.remove('active');
+            const mediaElements = privateContentGrid.querySelectorAll('video, audio');
+            mediaElements.forEach(media => media.pause());
+        });
+
+        // Admin Button click
+        adminButton.addEventListener('click', () => {
+            editorOverlay.classList.add('active');
+            populateEditorFields();
+        });
+
+        // Admin Editor Close Button click
+        editorCloseBtn.addEventListener('click', () => {
+            editorOverlay.classList.remove('active');
+        });
+
+        // Update Profile in Editor
+        updateProfileBtn.addEventListener('click', () => {
+            profileData.profilePic = editorProfilePicUrl.value.trim();
+            profileData.username = editorUsername.value.trim();
+            profileData.fullName = editorFullName.value.trim();
+            profileData.bio = editorBio.value.trim();
+            profileData.stats.followers = parseInt(editorFollowers.value) || 0;
+            profileData.stats.following = parseInt(editorFollowing.value) || 0;
+
+            alert('Profile data updated locally! Click "Publish All Changes" to sync.');
+            loadProfileContent(); // Refresh main website display
+        });
+
+        // Editor Content Type Select Change
+        editorContentTypeSelect.addEventListener('change', populateEditorItemList);
+
+        // Upload Content Button click
+        uploadContentButton.addEventListener('click', () => {
+            uploadModalOverlay.classList.add('active');
+            updateUploadModalVisibility(); // Initialize visibility based on default selection
+        });
+
+        // Upload Modal Close Button
+        uploadModalCloseBtn.addEventListener('click', () => {
+            uploadModalOverlay.classList.remove('active');
+        });
+
+        // Upload Content Type change (toggle file/text input)
+        uploadContentType.addEventListener('change', updateUploadModalVisibility);
+
+        // File input change (update display and preview)
+        uploadFile.addEventListener('change', updateUploadFileDisplayAndPreview);
+
+
+        // Upload Submit Button Logic
+        uploadSubmitBtn.addEventListener('click', async () => {
+            const contentType = uploadContentType.value;
+            const destination = uploadContentDestination.value;
+            let newContent = null;
+
+            if (contentType === 'text') {
+                const text = uploadTextContent.value.trim();
+                if (!text) {
+                    alert('Please enter text content.');
+                    return;
+                }
+                newContent = { id: `text${Date.now()}`, type: 'text', content: text };
+            } else {
+                const file = uploadFile.files[0];
+                if (!file) {
+                    alert('Please select a file to upload.');
+                    return;
+                }
+
+                // IMPORTANT: For a real app, you MUST upload the file to a CDN/storage service
+                // (e.g., Cloudflare R2, imgur, etc.) and get its public URL here.
+                // This is a SIMULATION using a dummy base URL.
+                const dummyFileBaseUrl = "https://elvizill-cdn.pages.dev/uploads/"; // GANTI DENGAN URL CDN ANDA
+                const simulatedUrl = `${dummyFileBaseUrl}${file.name.replace(/ /g, '_').toLowerCase()}`; // Simple URL generation
+
+                newContent = { id: `${contentType}${Date.now()}`, type: contentType, src: simulatedUrl };
+                alert(`Simulating file upload for: ${file.name}\n\nIn a real app, this file would be uploaded to storage (e.g., Cloudflare R2) and its public URL saved.`);
+            }
+
+            if (newContent) {
+                if (destination === 'posts') {
+                    postsData.unshift(newContent); // Add to the beginning
+                    alert('New public post added locally! Click "Publish All Changes" to sync.');
+                } else if (destination === 'private') {
+                    privateContentData.unshift(newContent); // Add to the beginning
+                    alert('New private content added locally! Click "Publish All Changes" to sync.');
+                }
+                uploadModalOverlay.classList.remove('active');
+                populateEditorFields(); // Re-render editor lists
+                loadProfileContent(); // Re-render main site (e.g., post count)
             }
         });
 
-        // Muat konten saat halaman dimuat
-        loadContent();
+
+        publishChangesBtn.addEventListener('click', publishChangesToBackend);
+
+        // --- Website Age Counter ---
+        const websiteLaunchDate = new Date(profileData.stats.websiteLaunchDate);
+        let websiteAgeInterval;
+
+        function startWebsiteAgeCounter() {
+            if (websiteAgeInterval) clearInterval(websiteAgeInterval); // Clear existing interval if any
+
+            websiteAgeInterval = setInterval(() => {
+                const now = new Date();
+                const diff = now.getTime() - websiteLaunchDate.getTime(); // Difference in milliseconds
+
+                const seconds = Math.floor(diff / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+                const years = Math.floor(days / 365.25); // Account for leap years
+                
+                const remainingDays = days % 365;
+                const remainingHours = hours % 24;
+                const remainingMinutes = minutes % 60;
+                const remainingSeconds = seconds % 60;
+
+                let ageString = '';
+                if (years > 0) ageString += `${years}y `;
+                if (remainingDays > 0 || years > 0) ageString += `${remainingDays}d `;
+                if (remainingHours > 0 || remainingDays > 0 || years > 0) ageString += `${remainingHours}h `;
+                if (remainingMinutes > 0 || remainingHours > 0 || remainingDays > 0 || years > 0) ageString += `${remainingMinutes}m `;
+                ageString += `${remainingSeconds}s`;
+
+                websiteAgeValue.textContent = ageString.trim();
+
+            }, 1000); // Update every second
+        }
+
+        // --- Global functions (can be called from HTML, though not used directly in this version) ---
+        function openTikTok() {
+            window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
+        }
+
+        function openInstagram() {
+            window.open("https://www.instagram.com/elvizill/", "_blank");
+        }
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // No initial load of profile content here, wait for auth or fetch data
+            // The loading screen will handle this.
+            secretInput.focus(); // Focus input for immediate typing
+
+            // For development, uncomment to bypass auth
+            // loadingScreen.classList.add('hidden');
+            // setTimeout(() => {
+            //     loadingScreen.style.display = 'none';
+            //     profileContainer.style.display = 'flex';
+            //     fetchAndLoadData(); // Load data from backend on start
+            //     startWebsiteAgeCounter();
+            // }, 100);
+        });
+
+        // Function to fetch data and increment visits
+        async function fetchAndLoadData() {
+            await fetchDataFromBackend(); // This fetches profile data and initial totalVisits
+            incrementTotalVisits(); // This increments the visit counter on the backend
+        }
     </script>
 </body>
 </html>
