@@ -1,1898 +1,1251 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Elvi Ezra - Cosmic Orb</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="elvi.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.10/marked.min.js"></script>
+    <style>
+        :root {
+            --primary: #8e44ad; --accent: #00a8ff; --success: #2ecc71;
+            --danger: #e74c3c; --light: #ecf0f1; --dark: #1a1a2e;
+            --bg-main: #000000; /* Changed to black */
+            --bg-panel: rgba(0, 0, 0, 0.9); /* Changed to black with opacity */
+            --text-primary: #e0fbfc; --text-secondary: #98ded9;
+            --border-color: rgba(0, 168, 255, 0.3);
+        }
+        html[data-theme='light'] {
+            --primary: #3498db; --accent: #e67e22;
+            --bg-main: #000000; /* Changed to black */
+            --bg-panel: rgba(0, 0, 0, 0.9); /* Changed to black with opacity */
+            --text-primary: #2c3e50; --text-secondary: #7f8c8d;
+            --border-color: rgba(52, 152, 219, 0.4);
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%; margin: 0; padding: 0;
+            overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-main); color: var(--text-primary);
+        }
+        .main-container {
+            position: relative; z-index: 1; width: 100%; height: 100%;
+            transition: all 0.5s ease-in-out;
+        }
+        .lock-screen {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; gap: 15px; height: 100%;
+        }
+        .hidden { display: none !important; }
+        .panel {
+            position: fixed; background: var(--bg-panel); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); z-index: 1010;
+            box-shadow: 0 0 50px rgba(0,0,0,0.6);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            display: flex; flex-direction: column;
+        }
+        #editor-panel {
+            top: 0; left: 0; width: 100%; height: 100%;
+            transform: translateX(-100%);
+        }
+        #editor-panel.active { transform: translateX(0); }
+        #music-panel {
+            bottom: 0; left: 0; width: 100%; height: auto;
+            max-height: 50vh; border-top: 1px solid var(--border-color);
+            transform: translateY(100%); padding: 15px;
+        }
+        #music-panel.active { transform: translateY(0); }
+        #contribution-panel {
+            top: 0; right: 0; width: 400px; max-width: 90vw; height: 100%;
+            transform: translateX(100%); padding: 20px;
+        }
+        #contribution-panel.active { transform: translateX(0); }
+        .panel-close-btn {
+            position: absolute; top: 15px; right: 15px; background: none; border: none;
+            color: var(--text-primary); font-size: 1.5rem; cursor: pointer; z-index: 5;
+        }
+        .fab-container { position: fixed; z-index: 1000; }
+        .fab {
+            background: var(--primary); color: white; width: 55px; height: 55px;
+            border-radius: 50%; border: none; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.4rem; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .fab:hover { background: var(--accent); transform: scale(1.1); }
+        #fab-editor { top: 20px; left: 20px; }
+        #fab-music { bottom: 20px; left: 50%; transform: translateX(-50%); }
+        #fab-contribution { top: 20px; right: 20px; }
+        #fab-layout, #fab-theme { bottom: 20px; }
+        #fab-layout { left: 20px; }
+        #fab-theme { right: 20px; }
+        #editor-panel { padding: 0; }
+        .editor-toolbar { display: flex; gap: 5px; padding: 10px; background: rgba(0,0,0,0.2); flex-wrap: wrap; }
+        .editor-toolbar button, .editor-toolbar select { background: var(--primary); color: white; border:none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        .editor-main { display: flex; flex-grow: 1; height: calc(100% - 58px); }
+        .editor-code-area, .editor-preview-area { flex: 1; display: flex; flex-direction: column; }
+        .editor-panes { display: flex; flex-direction: column; flex-grow: 1; }
+        .editor-pane { display: flex; flex-direction: column; flex-grow: 1; }
+        .editor-pane label { background: #333; color: var(--accent); padding: 5px 10px; font-size: 0.8em; font-weight: bold;}
+        .editor-pane textarea { flex-grow: 1; background: #1e1e1e; color: #f8f8f2; border: none; resize: none; padding: 10px; font-family: 'Courier New', monospace; font-size: 14px; outline: none; }
+        #editor-preview { width: 100%; height: 100%; border: none; background: white; }
+        #video-player-widget {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            border: 2px solid var(--border-color);
+        }
+        #video-player-widget video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .video-controls {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .video-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .social-links {
+            position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 999;
+        }
+        .social-links a { color: var(--text-primary); font-size: 1.5rem; transition: color 0.3s, transform 0.3s; }
+        .social-links a:hover { color: var(--accent); transform: scale(1.2); }
+        body.desktop-layout .main-container {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            grid-template-rows: 1fr;
+            gap: 20px; padding: 20px; height: 100vh;
+        }
+        body.desktop-layout .panel {
+            position: static; transform: none !important;
+            height: auto; width: auto; max-height: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+            border-radius: 15px;
+        }
+        body.desktop-layout .panel-close-btn,
+        body.desktop-layout .fab,
+        body.desktop-layout .social-links { display: none; }
+        body.desktop-layout .desktop-fab-bar {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; gap: 10px;
+            background: var(--bg-panel); padding: 10px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Styling for the new private user button */
+        #fab-private-user {
+            left: 20px; /* Position it on the left */
+            top: 50%;
+            transform: translateY(-50%); /* Center vertically */
+        }
+
+        /* Styling for the private user panel */
+        #private-user-panel {
+            top: 50%;
+            left: 50%;
+            width: 300px; /* Adjust width as needed */
+            max-width: 90vw;
+            height: auto; /* Adjust height based on content */
+            transform: translate(-50%, -50%) scale(0.8); /* Initially smaller and off-center */
+            opacity: 0;
+            pointer-events: none; /* Make it unclickable when not active */
+            border-radius: 15px;
+            padding: 10px; /* Add some padding to the panel */
+        }
+
+        #private-user-panel.active {
+            transform: translate(-50%, -50%) scale(1); /* Full size and centered when active */
+            opacity: 1;
+            pointer-events: all; /* Make it clickable when active */
+        }
+
+        /* Adjust desktop layout to hide the new FAB */
+        body.desktop-layout #fab-private-user {
+            display: none;
+        }
+
+        /* Ensure desktop panel style for consistency */
+        body.desktop-layout #private-user-panel {
+            position: static;
+            transform: none !important;
+            height: auto;
+            width: auto;
+            max-height: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            opacity: 1; /* Always visible in desktop layout if implemented as a static panel */
+            pointer-events: all;
+        }
+        /* Styling for the new Live Visitors FAB */
+        #fab-live-visitors {
+            bottom: 20px; /* Atur posisi sesuai keinginan, contoh di kanan bawah */
+            right: 90px; /* Agar tidak tumpang tindih dengan fab-theme */
+        }
+
+        /* Styling for the Live Visitors panel */
+        #live-visitors-panel {
+            top: 50%;
+            left: 50%;
+            width: 350px; /* Sesuaikan lebar */
+            max-width: 90vw;
+            height: 60vh; /* Sesuaikan tinggi */
+            transform: translate(-50%, -50%) scale(0.8); /* Awalnya lebih kecil dan tidak di tengah */
+            opacity: 0;
+            pointer-events: none; /* Tidak bisa diklik saat tidak aktif */
+            border-radius: 15px;
+            padding: 0; /* Padding sudah diatur di inner div */
+            display: flex; /* Untuk flexbox layout di dalamnya */
+            flex-direction: column;
+        }
+
+        #live-visitors-panel.active {
+            transform: translate(-50%, -50%) scale(1); /* Penuh dan di tengah saat aktif */
+            opacity: 1;
+            pointer-events: all; /* Bisa diklik saat aktif */
+        }
+
+        /* Adjust desktop layout to hide the new FAB */
+        body.desktop-layout #fab-live-visitors {
+            display: none;
+        }
+
+        /* Ensure desktop panel style for consistency */
+        body.desktop-layout #live-visitors-panel {
+            position: static;
+            transform: none !important;
+            height: auto;
+            width: auto;
+            max-height: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            opacity: 1; /* Selalu terlihat dalam tata letak desktop jika diimplementasikan sebagai panel statis */
+            pointer-events: all;
+        }
+
+        /* Styling for individual visitor list items */
+        #visitor-list li {
+            background: rgba(0, 168, 255, 0.1); /* Warna latar belakang item */
+            border: 1px solid rgba(0, 168, 255, 0.2);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.9em;
+            color: var(--text-primary);
+        }
+
+        #visitor-list li strong {
+            color: var(--accent); /* Warna untuk label */
+        }
+
+        #visitor-list li span {
+            word-break: break-all; /* Agar teks panjang tidak keluar dari container */
+        }
+
+        /* --- START: CSS dari index (8).html, disesuaikan untuk panel Ezra --- */
+        #ezra-content-panel {
+            top: 0; left: 0; width: 100%; height: 100%;
+            transform: translateY(-100%); /* Start hidden from top */
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Allow scrolling for content */
+            padding: 20px; /* Add padding to the panel itself */
+        }
+
+        #ezra-content-panel.active {
+            transform: translateY(0); /* Slide in from top */
+        }
+
+        /* Styles for the inner content of the Ezra panel, scoped to #ezra-inner-content */
+        #ezra-inner-content {
+            flex-grow: 1; /* Allow content to expand */
+            overflow-y: auto; /* Allow internal scrolling if content is long */
+            font-family: 'Space Mono', monospace; /* Futuristic font */
+            color: #E0E0E0; /* Light gray for text on dark background */
+            background-color: #000005; /* Near black for deep space background, applied to inner content */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="%2300FFFF"><circle cx="12" cy="12" r="2" opacity="0.8"/><path d="M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12" stroke="%2300FFFF" stroke-width="2"/></svg>') 12 12, auto; /* Custom futuristic cursor */
+        }
+
+        #ezra-inner-content .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(180deg, rgba(0,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
+            border-bottom: 1px solid rgba(0,255,255,0.2);
+            margin-bottom: 30px;
+        }
+        #ezra-inner-content .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        #ezra-inner-content .header .tagline {
+            font-size: 1.2em;
+            color: #00FFFF; /* Cyan for emphasis */
+        }
+
+        #ezra-inner-content .glow-text {
+            text-shadow: 0 0 8px rgba(0,255,255,0.7), 0 0 20px rgba(0,255,255,0.5);
+            color: #E0E0E0;
+            transition: text-shadow 0.3s ease;
+        }
+        #ezra-inner-content .glow-text:hover {
+            text-shadow: 0 0 10px rgba(0,255,255,0.9), 0 0 30px rgba(0,255,255,0.7);
+        }
+
+        #ezra-inner-content .orb-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+        #ezra-inner-content .orb-container {
+            width: 200px;
+            height: 200px;
+            perspective: 800px;
+            margin-bottom: 30px;
+        }
+        #ezra-inner-content .orb {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateOrb 20s infinite linear;
+        }
+        #ezra-inner-content .orb-inner {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #00FFFF, #00BFFF, #0000AA); /* Gradient for the orb */
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(0,255,255,0.8), inset 0 0 20px rgba(255,255,255,0.5);
+            position: absolute;
+            transform: rotateX(20deg) rotateY(30deg); /* Initial tilt */
+            animation: pulseGlow 3s infinite alternate;
+        }
+        @keyframes rotateOrb {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 50px rgba(0,255,255,0.8), inset 0 0 20px rgba(255,255,255,0.5); }
+            to { box-shadow: 0 0 70px rgba(0,255,255,1), inset 0 0 30px rgba(255,255,255,0.7); }
+        }
+
+        #ezra-inner-content .action-btn {
+            background-color: #00FFFF; /* Cyan */
+            color: #000005; /* Near black */
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-family: 'Space Mono', monospace;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,255,255,0.3);
+            margin: 10px;
+        }
+        #ezra-inner-content .action-btn:hover {
+            background-color: #00BFFF; /* Lighter cyan */
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,255,255,0.5);
+        }
+        #ezra-inner-content .action-btn.edit-btn i {
+            margin-right: 8px;
+        }
+
+        #ezra-inner-content .profile-section {
+            max-width: 800px;
+            margin: 0 auto 50px auto;
+            padding: 0 20px;
+        }
+        #ezra-inner-content .content-box {
+            background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent black */
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 25px rgba(0,255,255,0.2);
+            line-height: 1.8;
+            white-space: pre-wrap; /* Preserve formatting for loaded content */
+        }
+
+        #ezra-inner-content .contact-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        #ezra-inner-content .social-icons {
+            margin-top: 20px;
+        }
+        #ezra-inner-content .social-icon {
+            color: #00FFFF; /* Cyan */
+            font-size: 2.5em;
+            margin: 0 15px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        #ezra-inner-content .social-icon:hover {
+            color: #00BFFF; /* Lighter cyan */
+            transform: scale(1.2);
+        }
+
+        #ezra-inner-content .footer {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(0deg, rgba(0,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
+            border-top: 1px solid rgba(0,255,255,0.2);
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        /* Editor Overlay Styles */
+        #ezra-inner-content .editor-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #ezra-inner-content .editor-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #ezra-inner-content .editor-modal {
+            background-color: #1a1a2e; /* Darker background for modal */
+            border: 1px solid #00FFFF;
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 0 30px rgba(0,255,255,0.5);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        #ezra-inner-content .editor-overlay.active .editor-modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        #ezra-inner-content .editor-modal h2 {
+            text-align: center;
+            color: #00FFFF;
+            margin-bottom: 25px;
+        }
+        #ezra-inner-content .editor-modal textarea {
+            width: calc(100% - 20px); /* Adjust for padding */
+            height: 300px;
+            background-color: #0a0a1a; /* Even darker for textarea */
+            border: 1px solid rgba(0,255,255,0.4);
+            color: #E0E0E0;
+            padding: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 1em;
+            resize: vertical;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            outline: none;
+        }
+        #ezra-inner-content .editor-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        #ezra-inner-content .editor-actions .action-btn {
+            margin: 0; /* Override margin from general .action-btn */
+        }
+
+        /* Responsive Adjustments for Ezra Panel */
+        @media (max-width: 768px) {
+            #ezra-inner-content .header h1 {
+                font-size: 2.5em;
+            }
+            #ezra-inner-content .header .tagline {
+                font-size: 1em;
+            }
+            #ezra-inner-content .orb-container {
+                width: 150px;
+                height: 150px;
+            }
+            #ezra-inner-content .action-btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+            #ezra-inner-content .content-box {
+                padding: 20px;
+            }
+            #ezra-inner-content .social-icon {
+                font-size: 2em;
+                margin: 0 10px;
+            }
+            #ezra-inner-content .editor-modal {
+                padding: 20px;
+            }
+            #ezra-inner-content .editor-modal textarea {
+                height: 250px;
+            }
+            #ezra-inner-content .editor-actions {
+                justify-content: center;
+            }
+        }
+        @media (max-width: 480px) {
+            #ezra-inner-content .header h1 {
+                font-size: 2em;
+            }
+            #ezra-inner-content .header .tagline {
+                font-size: 0.9em;
+            }
+            #ezra-inner-content .orb-container {
+                width: 120px;
+                height: 120px;
+            }
+            #ezra-inner-content .action-btn {
+                padding: 8px 15px;
+                font-size: 0.8em;
+            }
+            #ezra-inner-content .content-box {
+                padding: 15px;
+            }
+            #ezra-inner-content .social-icon {
+                font-size: 1.8em;
+                margin: 0 8px;
+            }
+            #ezra-inner-content .editor-modal textarea {
+                height: 200px;
+            }
+        }
+        /* --- END: CSS dari index (8).html, disesuaikan untuk panel Ezra --- */
+
+        /* FAB for Ezra Panel */
+        #fab-ezra-panel {
+            bottom: 20px; /* Adjust position as needed, e.g., next to live visitors or a new spot */
+            right: 160px; /* Example position */
+        }
+    </style>
 </head>
-<body>
-<style>
-/* General Body Styles */
-body {
-    margin: 0;
-    font-family: 'Space Mono', monospace; /* Futuristic font */
-    color: #E0E0E0; /* Light gray for text on dark background */
-    background-color: #000005; /* Near black for deep space background */
-    overflow: hidden; /* Prevent body scroll, individual elements can scroll */
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="%2300FFFF"><circle cx="12" cy="12" r="2" opacity="0.8"/><path d="M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12" stroke="%2300FFFF" stroke-width="2" opacity="0.6"/></svg>') 15 15, auto; /* Custom pointer */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 2500px; /* Force a very wide content area */
-    min-height: 1800px; /* Force a very tall content area */
-    position: relative;
-}
-
-/* Cosmic Background Stars */
-.cosmic-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><filter id="f1" x="0" y="0"><feGaussianBlur in="SourceGraphic" stdDeviation="1.5" /></filter></defs><circle cx="20%" cy="20%" r="1" fill="white" /><circle cx="80%" cy="40%" r="0.8" fill="white" /><circle cx="50%" cy="70%" r="1.2" fill="white" /><circle cx="30%" cy="90%" r="0.7" fill="white" /><circle cx="10%" cy="50%" r="1" fill="white" /><circle cx="70%" cy="10%" r="0.9" fill="white" /><circle cx="90%" cy="80%" r="1.1" fill="white" /><circle cx="40%" cy="30%" r="0.8" fill="white" /><circle cx="60%" cy="60%" r="1.3" fill="white" /><circle cx="25%" cy="75%" r="0.6" fill="white" /><circle cx="5%" cy="5%" r="1" fill="white" /><circle cx="95%" cy="95%" r="1" fill="white" /></svg>') repeat;
-    background-size: 200px 200px;
-    animation: moveStars 180s linear infinite;
-    opacity: 0.5;
-    z-index: -2;
-}
-
-@keyframes moveStars {
-    from { background-position: 0 0; }
-    to { background-position: 100% 100%; }
-}
-
-/* Particle Animation */
-#particles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: -1;
-}
-
-.particle {
-    position: absolute;
-    background: #00FFFF; /* Cyan */
-    border-radius: 50%;
-    animation: floatAndFade 15s infinite ease-in-out;
-}
-
-@keyframes floatAndFade {
-    0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
-    50% { opacity: 1; }
-    100% { transform: translate(var(--x), var(--y)) scale(1.2); opacity: 0; }
-}
-
-/* Authentication Overlay */
-.auth-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 10, 0.95);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    transition: opacity 0.5s ease;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.auth-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.auth-container {
-    background: linear-gradient(135deg, #200540, #000005);
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 0 30px rgba(138, 43, 226, 0.7);
-    border: 2px solid #8A2BE2;
-    transform: scale(0.9);
-    transition: transform 0.5s ease;
-}
-
-.auth-overlay.active .auth-container {
-    transform: scale(1);
-}
-
-.auth-container h2 {
-    color: #00FFFF;
-    margin-bottom: 20px;
-    font-size: 2.2em;
-    text-shadow: 0 0 10px #00FFFF;
-}
-
-.auth-container p {
-    color: #B0C4DE;
-    margin-bottom: 30px;
-    font-size: 1.1em;
-}
-
-.auth-input {
-    width: 80%;
-    padding: 15px;
-    margin-bottom: 25px;
-    border: 2px solid #6A0DAD;
-    border-radius: 10px;
-    background-color: rgba(10, 0, 20, 0.7);
-    color: #E0E0E0;
-    font-size: 1em;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.auth-input::placeholder {
-    color: #8A2BE2;
-}
-
-.auth-input:focus {
-    border-color: #00FFFF;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-    outline: none;
-}
-
-.auth-button {
-    background: linear-gradient(90deg, #8A2BE2, #DA70D6);
-    color: white;
-    padding: 15px 35px;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 1.3em;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
-}
-
-.auth-button:hover {
-    background: linear-gradient(90deg, #DA70D6, #8A2BE2);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
-}
-
-/* Wormhole Overlay */
-#wormholeOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 10, 0.95);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1001;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 1s ease, visibility 1s ease;
-}
-
-#wormholeOverlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.wormhole-spinner {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 8px solid transparent;
-    border-top-color: #00FFFF;
-    border-bottom-color: #DA70D6;
-    animation: spin 1.5s linear infinite;
-    position: relative;
-    box-shadow: 0 0 30px #00FFFF, inset 0 0 20px #DA70D6;
-}
-
-.wormhole-spinner::before {
-    content: '';
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    right: 15px;
-    bottom: 15px;
-    border-radius: 50%;
-    border: 8px solid transparent;
-    border-top-color: #8A2BE2;
-    border-bottom-color: #00FFFF;
-    animation: spinReverse 1s linear infinite;
-    box-shadow: 0 0 20px #8A2BE2, inset 0 0 10px #00FFFF;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes spinReverse {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(-360deg); }
-}
-
-/* Cosmic Orb Container */
-#cosmicOrbContainer {
-    position: absolute;
-    width: 1500px; /* Adjust as needed */
-    height: 1500px; /* Adjust as needed */
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(10, 0, 20, 0.7) 0%, rgba(0, 0, 5, 0.9) 100%);
-    box-shadow: 0 0 100px rgba(138, 43, 226, 0.5), inset 0 0 50px rgba(0, 255, 255, 0.3);
-    border: 3px solid #8A2BE2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap; /* Allows elements to wrap */
-    transform-origin: center center;
-    transition: transform 0.8s ease-in-out;
-}
-
-/* Individual Orb Elements */
-.orb-element {
-    position: absolute;
-    background-color: rgba(10, 0, 30, 0.8); /* Darker purple-blue */
-    border: 1px solid #8A2BE2;
-    border-radius: 50%;
-    box-shadow: 0 0 15px rgba(138, 43, 226, 0.5), inset 0 0 8px rgba(0, 255, 255, 0.2);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    cursor: pointer;
-    min-width: 100px; /* Ensure a minimum size for all orbs */
-    min-height: 100px;
-}
-
-.orb-element:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(138, 43, 226, 0.8), inset 0 0 15px rgba(0, 255, 255, 0.4);
-    background-color: rgba(20, 0, 50, 0.9);
-}
-
-/* Profile Orb */
-#profile-orb {
-    width: 280px;
-    height: 280px;
-    background: linear-gradient(135deg, #4B0082, #6A0DAD); /* Deeper purple */
-    border: 3px solid #DA70D6;
-    box-shadow: 0 0 30px rgba(218, 112, 214, 0.7), inset 0 0 20px rgba(0, 255, 255, 0.5);
-    z-index: 10; /* Ensure it's on top */
-}
-
-.profile-pic-container {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #00FFFF;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #000005;
-}
-
-#profilePic {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-}
-
-#profileUsername {
-    color: #00FFFF;
-    font-size: 1.8em;
-    margin: 5px 0 0;
-    text-shadow: 0 0 8px #00FFFF;
-}
-
-#profileName {
-    color: #E0E0E0;
-    font-size: 1em;
-    margin-top: 0px;
-}
-
-/* Action Buttons */
-.action-button {
-    width: 150px;
-    height: 150px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #E0E0E0;
-    background: linear-gradient(135deg, #DA70D6, #FF69B4); /* Pinkish purple */
-    box-shadow: 0 0 20px rgba(218, 112, 214, 0.6);
-    border: 2px solid #FF69B4;
-}
-
-.action-button i {
-    font-size: 2em;
-    margin-bottom: 5px;
-    color: #00FFFF;
-    text-shadow: 0 0 5px #00FFFF;
-}
-
-#btn-create-galaxy {
-    background: linear-gradient(135deg, #FF6F61, #DE6262); /* Orange/Red for "Create New Galaxy" */
-    border-color: #DE6262;
-    box-shadow: 0 0 20px rgba(255, 111, 97, 0.6);
-}
-
-/* Stats Container */
-#stats-container {
-    position: absolute;
-    display: flex;
-    gap: 30px; /* Space between stat orbs */
-    z-index: 5;
-}
-
-.stat-orb {
-    width: 120px;
-    height: 120px;
-    background: linear-gradient(135deg, #2A0A5C, #4B0082); /* Darker purple for stats */
-    border: 1px solid #6A0DAD;
-    box-shadow: 0 0 10px rgba(106, 13, 173, 0.5);
-}
-
-.stat-number {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #00FFFF;
-    text-shadow: 0 0 5px #00FFFF;
-    margin-bottom: 5px;
-}
-
-.stat-label {
-    font-size: 0.9em;
-    color: #B0C4DE;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Highlights Section */
-#highlights-section {
-    position: absolute;
-    display: flex;
-    gap: 15px; /* Spacing between highlight circles */
-    z-index: 5;
-    padding: 10px; /* Add some padding to see the dashed border */
-    border: 1px dashed #6A0DAD; /* Dashed border for the section */
-    border-radius: 50%; /* Make the section itself circular */
-    justify-content: center;
-    align-items: center;
-    width: 250px; /* Example size, will be adjusted by JS based on content */
-    height: 250px;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    overflow: hidden; /* Hide overflow from content if it's too big */
-}
-
-.highlight-circle {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: rgba(100, 0, 150, 0.7); /* Dark purple */
-    border: 2px solid #DA70D6;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.8em;
-    color: #E0E0E0;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 0 8px rgba(218, 112, 214, 0.5);
-    flex-shrink: 0; /* Prevent shrinking when space is limited */
-}
-
-.highlight-circle i {
-    font-size: 1.5em;
-    margin-bottom: 5px;
-    color: #00FFFF;
-}
-
-.highlight-circle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(218, 112, 214, 0.8);
-}
-
-/* Content Display Orb */
-#content-display {
-    width: 600px;
-    height: 400px;
-    background: rgba(10, 0, 20, 0.85); /* Darker purple */
-    border-color: #6A0DAD;
-    box-shadow: 0 0 25px rgba(106, 13, 173, 0.6);
-    border-radius: 25px; /* Slightly rounded rectangle, not full circle */
-    overflow: hidden; /* Crucial for scrollable content */
-    display: flex;
-    flex-direction: column;
-    padding: 0; /* Remove default padding */
-}
-
-#content-display.orb-element:hover {
-    transform: none; /* No scaling for content display */
-    box-shadow: 0 0 25px rgba(106, 13, 173, 0.6); /* Keep consistent shadow */
-}
-
-.content-tabs {
-    display: flex;
-    justify-content: space-around;
-    background-color: rgba(20, 0, 40, 0.9);
-    padding: 10px 0;
-    border-bottom: 1px solid #6A0DAD;
-}
-
-.tab-button {
-    background: none;
-    border: none;
-    color: #B0C4DE;
-    font-family: 'Space Mono', monospace;
-    font-size: 1em;
-    padding: 10px 15px;
-    cursor: pointer;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-
-.tab-button:hover {
-    color: #00FFFF;
-    text-shadow: 0 0 5px #00FFFF;
-}
-
-.tab-button.active {
-    color: #FFFFFF;
-    font-weight: bold;
-    text-shadow: 0 0 8px #FFFFFF;
-    border-bottom: 2px solid #DA70D6;
-}
-
-.content-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    overflow-y: auto; /* Enable vertical scrolling */
-    flex-grow: 1; /* Allow it to take up available space */
-    background-color: rgba(10, 0, 20, 0.85);
-}
-
-.content-item {
-    background-color: rgba(30, 0, 50, 0.9);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-    position: relative; /* For the "Private" label */
-}
-
-.content-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0 20px rgba(138, 43, 226, 0.7);
-}
-
-.content-item img, .content-item video, .content-item audio {
-    width: 100%;
-    height: 150px; /* Fixed height for consistency */
-    object-fit: cover;
-    display: block;
-}
-
-.content-item audio {
-    height: 50px; /* Shorter for audio controls */
-    margin-top: auto; /* Push to bottom */
-}
-
-.content-item p {
-    padding: 10px;
-    font-size: 0.9em;
-    color: #B0C4DE;
-    word-wrap: break-word;
-    white-space: pre-wrap; /* Preserve formatting for text content */
-    text-align: left;
-}
-
-.content-item .private-label {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: rgba(255, 0, 0, 0.7);
-    color: white;
-    padding: 3px 8px;
-    border-radius: 5px;
-    font-size: 0.7em;
-    font-weight: bold;
-    z-index: 5;
-}
-
-/* Modal Overlays */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 15, 0.95);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.modal-content {
-    background: linear-gradient(135deg, #1A0530, #000005);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 0 40px rgba(138, 43, 226, 0.8);
-    border: 2px solid #8A2BE2;
-    position: relative;
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
-
-.modal-overlay.active .modal-content {
-    transform: scale(1);
-}
-
-.close-button {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 2.5em;
-    color: #DA70D6;
-    cursor: pointer;
-    transition: transform 0.2s ease, text-shadow 0.2s ease;
-}
-
-.close-button:hover {
-    transform: rotate(90deg);
-    text-shadow: 0 0 10px #DA70D6;
-}
-
-/* Story Modal Specifics */
-.story-modal {
-    width: 90%;
-    max-width: 600px;
-    height: 90%;
-    max-height: 800px;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    border: 2px solid #00FFFF;
-    box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
-    overflow: hidden; /* Hide overflow of story content */
-}
-
-.story-carousel {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* Ensure only one story is visible at a time */
-    position: relative;
-}
-
-.story-item {
-    min-width: 100%;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: black; /* Background for story */
-    position: relative;
-    box-sizing: border-box; /* Include padding in width/height */
-}
-
-.story-item img, .story-item video {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain; /* Contain whole image within bounds */
-    display: block;
-}
-
-.story-text-content {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1em;
-    max-height: 30%;
-    overflow-y: auto;
-    text-align: left;
-}
-
-.nav-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(138, 43, 226, 0.7);
-    border: none;
-    color: white;
-    font-size: 2em;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: background-color 0.3s ease;
-    z-index: 10;
-}
-
-.nav-arrow:hover {
-    background: rgba(0, 255, 255, 0.7);
-}
-
-.prev-story {
-    left: 10px;
-}
-
-.next-story {
-    right: 10px;
-}
-
-/* Private Content Modal Specifics */
-.private-content-modal {
-    text-align: center;
-}
-
-.private-content-auth h2 {
-    color: #FF6F61;
-    text-shadow: 0 0 10px #FF6F61;
-}
-
-#privateContentDisplay {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: rgba(50, 0, 0, 0.5); /* Reddish tint for private content */
-    border-radius: 10px;
-    border: 1px dashed #FF6F61;
-    text-align: left;
-    max-height: 60vh;
-    overflow-y: auto;
-}
-
-#privateContentDisplay img, #privateContentDisplay video {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin-bottom: 10px;
-}
-
-#privateContentDisplay audio {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-/* Editor Modal */
-.editor-modal h2 {
-    color: #00FFFF;
-    text-shadow: 0 0 8px #00FFFF;
-    margin-bottom: 25px;
-}
-
-.editor-section {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.editor-section label {
-    display: block;
-    margin-bottom: 8px;
-    color: #B0C4DE;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.editor-section input[type="text"],
-.editor-section textarea {
-    width: calc(100% - 20px);
-    padding: 12px;
-    border: 1px solid #6A0DAD;
-    border-radius: 8px;
-    background-color: rgba(10, 0, 30, 0.7);
-    color: #E0E0E0;
-    font-family: 'Space Mono', monospace;
-    font-size: 1em;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.editor-section input[type="text"]:focus,
-.editor-section textarea:focus {
-    border-color: #00FFFF;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
-    outline: none;
-}
-
-.editor-button {
-    background: linear-gradient(90deg, #8A2BE2, #DA70D6);
-    color: white;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(138, 43, 226, 0.3);
-    margin-top: 15px;
-    margin-right: 10px;
-}
-
-.editor-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(138, 43, 226, 0.5);
-}
-
-/* New Content Upload Modal */
-.upload-modal {
-    text-align: center;
-}
-
-.upload-title {
-    color: #00FFFF;
-    text-shadow: 0 0 10px #00FFFF;
-    margin-bottom: 30px;
-}
-
-.upload-type-selector {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.upload-type-btn {
-    background: linear-gradient(90deg, #4B0082, #6A0DAD);
-    color: #B0C4DE;
-    padding: 12px 25px;
-    border: 2px solid #8A2BE2;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(138, 43, 226, 0.3);
-}
-
-.upload-type-btn.active, .upload-type-btn:hover {
-    background: linear-gradient(90deg, #DA70D6, #FF69B4);
-    border-color: #FF69B4;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(218, 112, 214, 0.5);
-}
-
-.upload-section {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.upload-section label {
-    display: block;
-    margin-bottom: 8px;
-    color: #B0C4DE;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.upload-section select,
-.upload-section textarea {
-    width: calc(100% - 20px);
-    padding: 12px;
-    border: 1px solid #6A0DAD;
-    border-radius: 8px;
-    background-color: rgba(10, 0, 30, 0.7);
-    color: #E0E0E0;
-    font-family: 'Space Mono', monospace;
-    font-size: 1em;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.upload-section select:focus,
-.upload-section textarea:focus {
-    border-color: #00FFFF;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
-    outline: none;
-}
-
-.custom-file-input-wrapper {
-    display: inline-flex;
-    align-items: center;
-    background: linear-gradient(90deg, #4B0082, #6A0DAD);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(106, 13, 173, 0.3);
-    overflow: hidden;
-    position: relative;
-}
-
-.custom-file-input-wrapper:hover {
-    background: linear-gradient(90deg, #DA70D6, #FF69B4);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(218, 112, 214, 0.5);
-}
-
-.custom-file-input-wrapper i {
-    margin-right: 10px;
-    font-size: 1.2em;
-}
-
-.custom-file-input-wrapper input[type="file"] {
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-}
-
-.file-name-display {
-    margin-left: 10px;
-    font-size: 0.9em;
-    color: #B0C4DE;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px; /* Limit width */
-}
-
-#uploadPreview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    min-height: 50px;
-    border: 1px dashed #6A0DAD;
-    border-radius: 8px;
-    padding: 10px;
-    background-color: rgba(10, 0, 30, 0.5);
-}
-
-#uploadPreview img, #uploadPreview video, #uploadPreview audio {
-    max-width: 100px;
-    max-height: 100px;
-    border-radius: 5px;
-    object-fit: cover;
-}
-
-#uploadPreview audio {
-    width: 100px; /* Ensure audio element is visible */
-    height: 30px;
-}
-
-.upload-actions {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 25px;
-}
-
-.upload-btn {
-    background: linear-gradient(90deg, #4CAF50, #8BC34A);
-    color: white;
-    padding: 14px 30px;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 1.2em;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
-}
-.upload-btn:hover {
-    background: linear-gradient(90deg, #8BC34A, #4CAF50);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
-}
-
-.upload-cancel-btn {
-    background: linear-gradient(90deg, #FF6F61, #DE6262);
-    color: white;
-    padding: 14px 30px;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 1.2em;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
-}
-
-.upload-cancel-btn:hover {
-    background: linear-gradient(90deg, #DE6262, #FF6F61);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(255, 111, 97, 0.6);
-}
-
-/* Hidden Utility Class */
-.hidden {
-    display: none !important;
-}
-</style>
-
-    <div class="cosmic-background"></div>
-
-    <div id="wormholeOverlay">
-        <div class="wormhole-spinner"></div>
+<body class="">
+    <div class="main-container">
+        <div class="panel" id="contribution-panel-desktop" style="display: none;">
+             </div>
     </div>
-
-    <div id="authOverlay" class="auth-overlay active">
-        <div class="auth-container">
-            <h2>Cosmic Access Initiated</h2>
-            <p>Enter the Stardust Key to proceed:</p>
-            <input type="password" id="secretAnswer" class="auth-input" placeholder="Stardust Key...">
-            <button id="authSubmit" class="auth-button">Unlock Galaxy</button>
+    <div class="panel" id="editor-panel">
+        <button class="panel-close-btn" data-panel="editor-panel"><i class="fas fa-times"></i></button>
+        <div class="editor-toolbar">
+            <button id="editor-run"><i class="fas fa-play"></i> Run</button>
+            <button id="editor-save"><i class="fas fa-save"></i> Save</button>
+            <button id="editor-load"><i class="fas fa-folder-open"></i> Load</button>
+            <button id="editor-new"><i class="fas fa-file"></i> New</button>
+            <button id="editor-add-media"><i class="fas fa-photo-video"></i> Add Media</button>
         </div>
-    </div>
-
-    <div id="cosmicOrbContainer">
-        <div id="profile-orb" class="orb-element">
-            <div class="profile-pic-container">
-                <img id="profilePic" src="" alt="Profile Picture">
-            </div>
-            <h1 id="profileUsername"></h1>
-            <p id="profileName" class="full-name"></p>
-        </div>
-
-        <button id="btn-follow" class="orb-element action-button"><i class="fas fa-satellite"></i> Launch Mission</button>
-        <button id="btn-tiktok" class="orb-element action-button" onclick="openTikTok()"><i class="fab fa-tiktok"></i> TikTok Warp</button>
-        <button id="btn-instagram" class="orb-element action-button" onclick="openInstagram()"><i class="fab fa-instagram"></i> Insta-Nexus</button>
-        <button id="btn-create-galaxy" class="orb-element action-button"><i class="fas fa-plus-circle"></i> Create New Galaxy</button>
-
-        <div id="stats-container">
-            <div id="follower-orb" class="orb-element stat-orb">
-                <span id="followerCount" class="stat-number">4.5K</span>
-                <span class="stat-label">Total Media</span>
-            </div>
-            <div id="following-orb" class="orb-element stat-orb">
-                <span id="visitorCount" class="stat-number">1.2M</span>
-                <span class="stat-label">Visitors</span>
-            </div>
-             <div id="website-age-orb" class="orb-element stat-orb">
-                <span id="websiteAge" class="stat-number"></span>
-                <span class="stat-label">Orbital Age</span>
-            </div>
-        </div>
-
-        <div id="highlights-section">
-            </div>
-
-        <div id="content-display" class="orb-element">
-            <div class="content-tabs">
-                <button class="tab-button active" data-tab="portfolios">Portfolios</button>
-                <button class="tab-button" data-tab="stellar-logs">Stellar Logs</button>
-                <button class="tab-button" data-tab="tagged-orbits">Tagged Orbits</button>
-            </div>
-            <div id="content-grid" class="content-grid">
-                </div>
-        </div>
-    </div>
-
-    <div id="storyModalOverlay" class="modal-overlay">
-        <div class="modal-content story-modal">
-            <button class="close-button">&times;</button>
-            <div class="story-carousel">
-                </div>
-            <button class="nav-arrow prev-story">&lt;</button>
-            <button class="nav-arrow next-story">&gt;</button>
-        </div>
-    </div>
-
-    <div id="privateContentModalOverlay" class="modal-overlay">
-        <div class="modal-content private-content-modal">
-            <button class="close-button">&times;</button>
-            <div class="private-content-auth">
-                <h2>Forbidden Zone Access</h2>
-                <p>A cosmic anomaly detected. Enter the Private Stardust Key:</p>
-                <input type="password" id="privateKeyInput" class="auth-input" placeholder="Private Key...">
-                <button id="privateKeySubmit" class="auth-button">Access Anomaly</button>
-            </div>
-            <div id="privateContentDisplay" class="hidden">
-                </div>
-        </div>
-    </div>
-
-    <div id="editorOverlay" class="modal-overlay">
-        <div class="modal-content editor-modal">
-            <button class="close-button">&times;</button>
-            <h2>Cosmic Editor</h2>
-            <div class="editor-section">
-                <label for="editorBio">Bio:</label>
-                <textarea id="editorBio" rows="4"></textarea>
-            </div>
-            <div class="editor-section">
-                <label for="editorProfilePicUrl">Profile Picture URL:</label>
-                <input type="text" id="editorProfilePicUrl" placeholder="Enter URL for profile picture">
-            </div>
-             <div class="editor-section">
-                <label for="editorUsername">Username:</label>
-                <input type="text" id="editorUsername" placeholder="Enter username">
-            </div>
-            <div class="editor-section">
-                <label for="editorFullName">Full Name:</label>
-                <input type="text" id="editorFullName" placeholder="Enter full name">
-            </div>
-            <button id="saveEditorChanges" class="editor-button"><i class="fas fa-save"></i> Save Changes</button>
-            <button id="publishEditorChanges" class="editor-button" style="background: linear-gradient(90deg, #6A0DAD, #8A2BE2);"><i class="fas fa-rocket"></i> Publish to Galaxy</button>
-        </div>
-    </div>
-
-    <div id="uploadContentModal" class="modal-overlay">
-        <div class="modal-content upload-modal">
-            <h2 class="upload-title">New Cosmic Upload</h2>
-            <div class="upload-type-selector">
-                <button class="upload-type-btn active" data-type="file"><i class="fas fa-image"></i> Media File</button>
-                <button class="upload-type-btn" data-type="text"><i class="fas fa-align-left"></i> Text Message</button>
-            </div>
-
-            <div class="upload-section">
-                <label for="uploadContentDestination">Destination:</label>
-                <select id="uploadContentDestination">
-                    <option value="posts">Portfolios (Public)</option>
-                    <option value="private">Forbidden Zone (Private)</option>
-                </select>
-            </div>
-
-            <div class="upload-section" id="uploadFileSection">
-                <label for="uploadFile">Upload File:</label>
-                <div class="custom-file-input-wrapper">
-                    <i class="fas fa-cloud-upload-alt"></i> Choose File
-                    <span class="file-name-display" id="uploadFileName">No file chosen</span>
-                    <input type="file" id="uploadFile" accept="image/*,video/*,audio/*">
-                </div>
-                <div id="uploadPreview" style="margin-top: 15px;">
+        <div class="editor-main">
+            <div class="editor-code-area">
+                <div class="editor-panes">
+                    <div class="editor-pane">
+                        <label for="html-editor">HTML</label>
+                        <textarea id="html-editor" spellcheck="false"></textarea>
                     </div>
+                    <div class="editor-pane">
+                        <label for="css-editor">CSS</label>
+                        <textarea id="css-editor" spellcheck="false"></textarea>
+                    </div>
+                    <div class="editor-pane">
+                        <label for="js-editor">JAVASCRIPT</label>
+                        <textarea id="js-editor" spellcheck="false"></textarea>
+                    </div>
+                </div>
             </div>
-
-            <div class="upload-section hidden" id="uploadTextSection">
-                <label for="uploadTextContent">Text Content:</label>
-                <textarea id="uploadTextContent" rows="5" placeholder="Enter your private cosmic message here..."></textarea>
-            </div>
-            
-            <div class="upload-actions">
-                <button id="uploadSubmitBtn" class="upload-btn"><i class="fas fa-rocket"></i> Launch Content</button>
-                <button id="uploadCancelBtn" class="upload-cancel-btn">Cancel</button>
+            <div class="editor-preview-area">
+                 <iframe id="editor-preview"></iframe>
             </div>
         </div>
     </div>
-    <div id="particles"></div>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    // --- Configuration ---
-    const VISITOR_COUNTER_WORKER_URL = 'https://your-visitor-counter-worker-url.workers.dev'; // GANTI INI DENGAN URL WORKER PENGUNJUNG ANDA
-    const MEDIA_COUNTER_WORKER_URL = 'https://your-media-counter-worker-url.workers.dev';     // GANTI INI DENGAN URL WORKER MEDIA ANDA
-    const websiteLaunchDate = new Date('2024-01-01T00:00:00Z'); // GANTI INI DENGAN TANGGAL PELUNCURAN WEBSITE ANDA (UTC)
+    <div class="panel" id="music-panel">
+        <button class="panel-close-btn" data-panel="music-panel"><i class="fas fa-times"></i></button>
+        <h4>Now Playing</h4>
+        <div id="music-player-content">
+            <h5 id="song-title">Select a song</h5>
+            <audio id="audio-player" controls loop style="width: 100%;"></audio>
+            <div id="playlist" style="max-height: 20vh; overflow-y: auto; margin-top: 10px;"></div>
+        </div>
+    </div>
+    <div class="panel" id="contribution-panel">
+        <button class="panel-close-btn" data-panel="contribution-panel"><i class="fas fa-times"></i></button>
+        <div id="contribution-content" style="display: flex; flex-direction: column; height: 100%;">
+            <h3 style="margin-top:20px;">Leave a Message</h3>
+            <div id="contribution-display" style="flex-grow: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 15px;">
+                <p>Loading messages...</p>
+            </div>
+            <form id="contribution-form">
+                <textarea id="contribution-text" placeholder="Your message..." required style="width:100%; min-height: 80px; background:rgba(0,0,0,0.2); color:var(--text-primary); border:1px solid var(--border-color); border-radius:5px; padding:10px;"></textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <input type="file" id="contribution-file" accept="image/*,video/*" style="color:var(--text-secondary);">
+                    <button type="submit" class="fab" style="position:static; width:45px; height:45px; font-size:1.1rem;"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <p id="contribution-status" style="font-size:0.9em; text-align:center; margin-top:10px;"></p>
+            </form>
+        </div>
+    </div>
+    <div class="fab-container" id="fab-private-user">
+        <button class="fab" title="Private User"><i class="fas fa-user-secret"></i></button>
+    </div>
+    <div class="panel" id="private-user-panel">
+        <button class="panel-close-btn" data-panel="private-user-panel"><i class="fas fa-times"></i></button>
+        <div style="padding: 20px; text-align: center;">
+            <h3 style="margin-bottom: 15px; color: var(--accent);">Private User</h3>
+            <p style="margin-bottom: 20px;">Masuk sebagai siapa?</p>
+            <input type="text" id="private-user-input" placeholder="Masukkan nama Anda..." style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--text-primary); margin-bottom: 15px;">
+            <button id="private-user-submit" class="fab" style="position:static; width:auto; padding: 10px 20px; font-size:1rem;">Masuk</button>
+            <p id="private-user-message" style="margin-top: 15px; font-size: 0.9em;"></p>
+        </div>
+    </div>
+    <div class="fab-container" id="fab-live-visitors" style="display: none;">
+        <button class="fab" data-panel="live-visitors-panel" title="Live Visitors"><i class="fas fa-eye"></i></button>
+    </div>
+    <div class="panel" id="live-visitors-panel">
+        <button class="panel-close-btn" data-panel="live-visitors-panel"><i class="fas fa-times"></i></button>
+        <div style="padding: 20px; height: 100%; display: flex; flex-direction: column;">
+            <h3 style="margin-bottom: 15px; color: var(--accent); text-align: center;">Live Visitors</h3>
+            <div id="visitor-list-container" style="flex-grow: 1; overflow-y: auto; padding-right: 10px;">
+                <p style="text-align: center; color: var(--text-secondary);">Loading visitors...</p>
+                <ul id="visitor-list" style="list-style: none; padding: 0; margin: 0;">
+                </ul>
+            </div>
+            <div style="margin-top: 15px; text-align: center; font-size: 0.85em; color: var(--text-secondary);">
+                Last updated: <span id="last-updated-time">N/A</span>
+            </div>
+        </div>
+    </div>
 
-    // --- Elements ---
-    const authOverlay = document.getElementById('authOverlay');
-    const wormholeOverlay = document.getElementById('wormholeOverlay');
-    const cosmicOrbContainer = document.getElementById('cosmicOrbContainer');
-    const secretAnswer = document.getElementById('secretAnswer');
-    const authSubmit = document.getElementById('authSubmit');
-    const particlesContainer = document.getElementById('particles');
-    const numParticles = 80;
+    <div class="fab-container" id="fab-ezra-panel" style="display: none;">
+        <button class="fab" data-panel="ezra-content-panel" title="Ezra's Portal"><i class="fas fa-dragon"></i></button>
+    </div>
+    <div class="panel" id="ezra-content-panel">
+        <button class="panel-close-btn" data-panel="ezra-content-panel"><i class="fas fa-times"></i></button>
+        <div id="ezra-inner-content">
+            <div id="editor-overlay" class="editor-overlay">
+                <div class="editor-modal">
+                    <h2>Edit Profile Content</h2>
+                    <textarea id="profile-content-editor"></textarea>
+                    <div class="editor-actions">
+                        <button id="save-content-btn" class="action-btn save-btn">Save Content</button>
+                        <button id="publish-changes-btn" class="action-btn publish-btn">Publish to Galaxy</button>
+                        <button id="close-editor-btn" class="action-btn close-btn">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container" id="elvi-ezra-main-content">
+                <header class="header">
+                    <h1 class="glow-text">Elvi Ezra</h1>
+                    <p class="tagline">Cosmic Orb Master</p>
+                </header>
+
+                <section class="orb-section">
+                    <div class="orb-container">
+                        <div class="orb">
+                            <div class="orb-inner"></div>
+                        </div>
+                    </div>
+                    <div class="orb-actions">
+                        <button id="edit-profile-btn" class="action-btn edit-btn"><i class="fas fa-edit"></i> Edit Profile</button>
+                    </div>
+                </section>
+
+                <section class="profile-section">
+                    <div id="profile-content" class="content-box">
+                        <p>Loading cosmic data...</p>
+                    </div>
+                </section>
+
+                <section class="contact-section">
+                    <h2 class="glow-text">Connect with the Cosmos</h2>
+                    <div class="social-icons">
+                        <a href="#" onclick="openTikTok()" class="social-icon"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" onclick="openInstagram()" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </section>
+
+                <footer class="footer">
+                    <p>&copy; 2024 Elvi Ezra. All rights reserved.</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+    <div class="fab-container" id="fab-editor">
+        <button class="fab" data-panel="editor-panel" title="Code Editor"><i class="fas fa-code"></i></button>
+    </div>
+    <div class="fab-container" id="fab-music">
+        <button class="fab" data-panel="music-panel" title="Music Player"><i class="fas fa-music"></i></button>
+    </div>
+    <div class="fab-container" id="fab-contribution">
+        <button class="fab" data-panel="contribution-panel" title="Leave a Message"><i class="fas fa-feather-alt"></i></button>
+    </div>
+    <div class="fab-container" id="fab-layout">
+        <button class="fab" title="Toggle Layout"><i class="fas fa-layer-group"></i></button>
+    </div>
+    <div class="fab-container" id="fab-theme">
+        <button class="fab" title="Toggle Theme"><i class="fas fa-sun"></i></button>
+    </div>
+    <div class="desktop-fab-bar" style="display:none;">
+         <button class="fab" id="desktop-layout-toggle" title="Toggle Layout" style="position:static;"><i class="fas fa-mobile-alt"></i></button>
+         <button class="fab" id="desktop-theme-toggle" title="Toggle Theme" style="position:static;"><i class="fas fa-sun"></i></button>
+    </div>
+    <div id="video-player-widget">
+        <video id="widget-video" loop src="video.mp4"></video>
+        <div class="video-controls">
+            <button id="video-play-pause"><i class="fas fa-play"></i></button>
+            <button id="video-mute"><i class="fas fa-volume-up"></i></button>
+        </div>
+    </div>
+    <div class="social-links">
+        <a href="https://wa.me/6283844959380" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://instagram.com/I_dont_care_now" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://alkitab.me/in-tb/Matius/5/13" target="_blank" title="Alkitab"><i class="fab fa-github"></i></a>
+    </div>
+<script>
+const CONTRIBUTIONS_WORKER_URL = 'https://contributions-workerjs.ezvvel.workers.dev/';
+const VISITOR_TRACKER_WORKER_URL = 'https://visitor-tracker-workerjs.ezvvel.workers.dev/';
+const LIVE_VISITORS_WORKER_URL = 'https://live-visitors.ezvvel.workers.dev/';
+const GITHUB_PROFILE_WORKER_URL = 'https://ezra-gh-profile-worker.ezvvel.workers.dev/'; // URL Cloudflare Worker untuk profil Ezra
+
+const REFRESH_INTERVAL_MS = 5000;
+let visitorRefreshInterval;
+
+document.addEventListener('DOMContentLoaded', () => {
+    initPanelControls();
+    initLayoutAndThemeToggles();
+    initVideoPlayer();
+    initEditor();
+    initMusicPlayer();
     
-    const profileOrb = document.getElementById('profile-orb');
-    const profilePic = document.getElementById('profilePic');
-    const profileUsername = document.getElementById('profileUsername');
-    const totalMediaCount = document.getElementById('followerCount'); // Renamed to totalMediaCount
-    const visitorCount = document.getElementById('visitorCount');     // New element for visitor count
-    const websiteAgeElement = document.getElementById('websiteAge'); // New element for website age
-    const profileName = document.getElementById('profileName');
-    const highlightsSection = document.getElementById('highlights-section');
-    const btnFollow = document.getElementById('btn-follow'); 
-    const btnTikTok = document.getElementById('btn-tiktok');
-    const btnInstagram = document.getElementById('btn-instagram');
-    const btnCreateGalaxy = document.getElementById('btn-create-galaxy');
-
-    const contentDisplay = document.getElementById('content-display');
-    const contentTabs = document.querySelectorAll('.tab-button');
-    const contentGrid = document.getElementById('content-grid');
-
-    const storyModalOverlay = document.getElementById('storyModalOverlay');
-    const storyModalCloseButton = storyModalOverlay.querySelector('.close-button');
-    const storyCarousel = storyModalOverlay.querySelector('.story-carousel');
-    const prevStoryButton = storyModalOverlay.querySelector('.prev-story');
-    const nextStoryButton = storyModalOverlay.querySelector('.next-story');
-    let currentStoryIndex = 0;
-    let currentHighlightStories = [];
-
-    const privateContentModalOverlay = document.getElementById('privateContentModalOverlay');
-    const privateContentModalCloseButton = privateContentModalOverlay.querySelector('.close-button');
-    const privateKeyInput = document.getElementById('privateKeyInput');
-    const privateKeySubmit = document.getElementById('privateKeySubmit');
-    const privateContentDisplay = document.getElementById('privateContentDisplay');
-
-    const editorOverlay = document.getElementById('editorOverlay');
-    const editorCloseButton = editorOverlay.querySelector('.close-button');
-    const editorBio = document.getElementById('editorBio');
-    const editorProfilePicUrl = document.getElementById('editorProfilePicUrl');
-    const editorUsername = document.getElementById('editorUsername');
-    const editorFullName = document.getElementById('editorFullName');
-    const saveEditorChangesBtn = document.getElementById('saveEditorChanges');
-    const publishEditorChangesBtn = document.getElementById('publishEditorChanges');
-
-    const uploadContentModal = document.getElementById('uploadContentModal');
-    const uploadModalCloseButton = uploadContentModal.querySelector('.upload-cancel-btn'); // Using cancel as close
-    const uploadTypeButtons = uploadContentModal.querySelectorAll('.upload-type-btn');
-    const uploadFileSection = document.getElementById('uploadFileSection');
-    const uploadTextSection = document.getElementById('uploadTextSection');
-    const uploadFileNameDisplay = document.getElementById('uploadFileName');
-    const uploadFile = document.getElementById('uploadFile');
-    const uploadTextContent = document.getElementById('uploadTextContent');
-    const uploadSubmitBtn = document.getElementById('uploadSubmitBtn');
-    const uploadContentDestination = document.getElementById('uploadContentDestination');
-    const uploadPreview = document.getElementById('uploadPreview');
-
-
-    // --- Data (Simulated, will be replaced by backend for counts) ---
-    let websiteData = {
-        profile: {
-            username: "elvi_ezra_",
-            name: "Elvi Ezra",
-            bio: "Cosmic explorer, digital artist, and quantum data alchemist. Orbiting the nexus of creativity and technology. Join my journey through the stellar archives.",
-            profilePicUrl: "https://i.ibb.co/L5r03cW/ezra-profile.jpg", // Ganti dengan URL gambar profil Anda
-            stats: {
-                totalMedia: 0, // Ini akan diambil dari Cloudflare Worker
-                visitors: 0,   // Ini akan diambil dari Cloudflare Worker
-            }
-        },
-        posts: [
-            { id: 'p1', type: 'image', src: 'https://i.ibb.co/3Wq5gX1/Cosmic-Orb-Post-1.jpg', alt: 'Cosmic Orb 1', private: false },
-            { id: 'p2', type: 'video', src: 'https://example.com/video2.mp4', alt: 'Cosmic video', private: false }, // Ganti dengan URL video Anda
-            { id: 'p3', type: 'image', src: 'https://i.ibb.co/F83Xf3p/Cosmic-Orb-Post-2.jpg', alt: 'Cosmic Orb 2', private: false },
-            { id: 'p4', type: 'image', src: 'https://i.ibb.co/Y2B76X1/Cosmic-Orb-Post-3.jpg', alt: 'Cosmic Orb 3', private: false },
-            { id: 'p5', type: 'image', src: 'https://i.ibb.co/VMy4P36/Cosmic-Orb-Post-4.jpg', alt: 'Cosmic Orb 4', private: false },
-        ],
-        reels: [
-            { id: 'r1', type: 'video', src: 'https://example.com/reel1.mp4', alt: 'Stellar Log 1', private: false },
-             { id: 'r2', type: 'video', src: 'https://example.com/reel2.mp4', alt: 'Stellar Log 2', private: false },
-        ],
-        tagged: [
-            { id: 't1', type: 'image', src: 'https://i.ibb.co/S7qM4fB/Cosmic-Orb-Tagged-1.jpg', alt: 'Tagged Orb 1', private: false },
-            { id: 't2', type: 'image', src: 'https://i.ibb.co/JnH0dF7/Cosmic-Orb-Tagged-2.jpg', alt: 'Tagged Orb 2', private: false },
-        ],
-        highlights: [
-            { id: 'h1', icon: 'fas fa-star-and-crescent', label: 'Galaxies',
-              stories: [
-                { type: 'image', src: 'https://i.ibb.co/xLw9J5F/Story-1.jpg', text: 'Exploring the Andromeda Galaxy.' },
-                { type: 'video', src: 'https://example.com/story-video.mp4', text: 'A brief encounter with a nebula.' }, // Ganti dengan URL video Anda
-              ]
-            },
-            { id: 'h2', icon: 'fas fa-flask', label: 'Experiments',
-              stories: [
-                { type: 'text', content: 'Our latest experiment in quantum entanglement yielded unexpected results. Further analysis required!', bg: '#300060' },
-                { type: 'image', src: 'https://i.ibb.co/zXp484W/Story-2.jpg', text: 'New data structures for cosmic mapping.' }
-              ]
-            },
-            { id: 'h3', icon: 'fas fa-compact-disc', label: 'Melodies',
-              stories: [
-                { type: 'audio', src: 'https://example.com/audio-story.mp3', text: 'Listen to the sounds of the void.', bg: '#000005' } // Ganti dengan URL audio Anda
-              ]
-            }
-        ],
-        privateContent: [
-            { id: 'priv1', type: 'text', content: 'Secret plans for interstellar travel. Access strictly restricted.', bg: '#300000' },
-            { id: 'priv2', type: 'image', src: 'https://i.ibb.co/F83Xf3p/Cosmic-Orb-Post-2.jpg', alt: 'Encrypted blueprint', private: true, caption: 'This is a highly classified blueprint of a new propulsion system.' },
-            { id: 'priv3', type: 'video', src: 'https://example.com/private-video.mp4', alt: 'Confidential recording', private: true, caption: 'Footage from a restricted sector.' }, // Ganti dengan URL video Anda
-            { id: 'priv4', type: 'audio', src: 'https://example.com/private-audio.mp3', alt: 'Top secret communication', private: true, caption: 'Intercepted alien communication.' } // Ganti dengan URL audio Anda
-        ],
-        privateKey: 'COSMIC_STARKEY_2025' // Kunci rahasia untuk konten pribadi
-    };
-
-    // Initialize total media count based on initial data
-    websiteData.profile.stats.totalMedia = websiteData.posts.length + websiteData.reels.length + websiteData.tagged.length + websiteData.privateContent.length;
-
-
-    // --- Authentication ---
-    authSubmit.addEventListener('click', function() {
-        const key = secretAnswer.value.trim();
-        // Simple client-side check. For real app, this should be server-side.
-        if (key === 'COSMIC_KEY_2025') { // Ganti dengan kunci utama Anda
-            authOverlay.classList.remove('active');
-            wormholeOverlay.classList.add('active');
-            setTimeout(() => {
-                wormholeOverlay.classList.remove('active');
-                cosmicOrbContainer.style.transform = 'scale(1)'; // Scale up the orb
-            }, 1500); // Duration of wormhole animation
-        } else {
-            alert('Invalid Stardust Key. Access Denied.');
-            secretAnswer.value = '';
-        }
-    });
-
-    secretAnswer.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            authSubmit.click();
-        }
-    });
-
-    // --- Particle Background ---
-    function createParticle() {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        particlesContainer.appendChild(particle);
-
-        const size = Math.random() * 3 + 1; // 1 to 4px
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-
-        const startX = Math.random() * window.innerWidth;
-        const startY = Math.random() * window.innerHeight;
-        particle.style.left = `${startX}px`;
-        particle.style.top = `${startY}px`;
-
-        const endX = startX + (Math.random() - 0.5) * 500; // Move +/- 250px
-        const endY = startY + (Math.random() - 0.5) * 500; // Move +/- 250px
-
-        particle.style.setProperty('--x', `${endX - startX}px`);
-        particle.style.setProperty('--y', `${endY - startY}px`);
-
-        // Remove particle after animation to prevent DOM bloat
-        particle.addEventListener('animationend', () => {
-            particle.remove();
-            // Re-add a new particle to maintain count
-            createParticle();
-        });
-    }
-
-    for (let i = 0; i < numParticles; i++) {
-        createParticle();
-    }
-
-    // --- Orb Element Positioning ---
-    const orbElements = document.querySelectorAll('.orb-element');
-    const actionButtons = document.querySelectorAll('.action-button');
-    const statOrbs = document.querySelectorAll('.stat-orb');
-
-    function positionElementsAroundOrb() {
-        const orbRadius = cosmicOrbContainer.offsetWidth / 2;
-        const profileOrbRadius = profileOrb.offsetWidth / 2;
-        
-        // Position Profile Orb in center
-        profileOrb.style.left = `calc(50% - ${profileOrbRadius}px)`;
-        profileOrb.style.top = `calc(50% - ${profileOrbRadius}px)`;
-
-        // Action Buttons (clockwise from top-right)
-        // Adjust these values to fine-tune positions
-        const buttonPositions = [
-            { angle: -20, radius: orbRadius * 0.45 }, // Launch Mission (top-right)
-            { angle: 60, radius: orbRadius * 0.4 },  // TikTok Warp (bottom-right)
-            { angle: 120, radius: orbRadius * 0.4 }, // Insta-Nexus (bottom-left)
-            { angle: -100, radius: orbRadius * 0.45 } // Create New Galaxy (top-left)
-        ];
-
-        actionButtons.forEach((button, index) => {
-            const angleRad = (buttonPositions[index].angle * Math.PI) / 180;
-            const btnRadius = button.offsetWidth / 2;
-            const x = orbRadius + buttonPositions[index].radius * Math.cos(angleRad) - btnRadius;
-            const y = orbRadius + buttonPositions[index].radius * Math.sin(angleRad) - btnRadius;
-            button.style.left = `${x}px`;
-            button.style.top = `${y}px`;
-        });
-
-        // Stats Container (center-right)
-        const statsContainer = document.getElementById('stats-container');
-        const statsRadius = orbRadius * 0.28; // Smaller radius for stats
-        const statsAngle = 20; // Angle for stats (towards right)
-        const statsAngleRad = (statsAngle * Math.PI) / 180;
-        
-        const statsContainerWidth = statsContainer.offsetWidth; // Get current width
-        const statsContainerHeight = statsContainer.offsetHeight; // Get current height
-
-        // Center the stats container relative to its calculated position
-        statsContainer.style.left = `${orbRadius + statsRadius * Math.cos(statsAngleRad) - (statsContainerWidth / 2)}px`;
-        statsContainer.style.top = `${orbRadius + statsRadius * Math.sin(statsAngleRad) - (statsContainerHeight / 2)}px`;
-        
-        // Highlights Section (center-left)
-        const highlightsRadius = orbRadius * 0.28; // Smaller radius for highlights
-        const highlightsAngle = 160; // Angle for highlights (towards left)
-        const highlightsAngleRad = (highlightsAngle * Math.PI) / 180;
-        
-        const highlightsSectionWidth = highlightsSection.offsetWidth;
-        const highlightsSectionHeight = highlightsSection.offsetHeight;
-
-        highlightsSection.style.left = `${orbRadius + highlightsRadius * Math.cos(highlightsAngleRad) - (highlightsSectionWidth / 2)}px`;
-        highlightsSection.style.top = `${orbRadius + highlightsRadius * Math.sin(highlightsAngleRad) - (highlightsSectionHeight / 2)}px`;
-
-        // Content Display (bottom-center)
-        const contentRadius = orbRadius * 0.38; // Radius for content display
-        const contentAngle = 90; // Angle for content (straight down)
-        const contentAngleRad = (contentAngle * Math.PI) / 180;
-        
-        const contentDisplayWidth = contentDisplay.offsetWidth;
-        const contentDisplayHeight = contentDisplay.offsetHeight;
-
-        contentDisplay.style.left = `${orbRadius + contentRadius * Math.cos(contentAngleRad) - (contentDisplayWidth / 2)}px`;
-        contentDisplay.style.top = `${orbRadius + contentRadius * Math.sin(contentAngleRad) - (contentDisplayHeight / 2)}px`;
-    }
-
-    // Call on load and resize
-    positionElementsAroundOrb();
-    window.addEventListener('resize', positionElementsAroundOrb);
-
-    // --- Fetch Counts from Cloudflare Workers ---
-    async function fetchVisitorCount() {
-        try {
-            const response = await fetch(VISITOR_COUNTER_WORKER_URL, {
-                method: 'POST', // Send POST to increment count
-                headers: { 'Content-Type': 'application/json' }
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            websiteData.profile.stats.visitors = data.visits;
-            visitorCount.textContent = formatNumber(data.visits);
-        } catch (error) {
-            console.error('Error fetching visitor count:', error);
-            visitorCount.textContent = 'N/A'; // Fallback
-        }
-    }
-
-    async function fetchMediaCount() {
-         try {
-            const response = await fetch(MEDIA_COUNTER_WORKER_URL, {
-                method: 'GET', // Send GET to just retrieve count
-                headers: { 'Content-Type': 'application/json' }
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            websiteData.profile.stats.totalMedia = data.totalMedia;
-            totalMediaCount.textContent = formatNumber(data.totalMedia);
-        } catch (error) {
-            console.error('Error fetching media count:', error);
-            totalMediaCount.textContent = 'N/A'; // Fallback
-        }
-    }
-
-    async function incrementMediaCount() {
-        try {
-            const response = await fetch(MEDIA_COUNTER_WORKER_URL, {
-                method: 'POST', // Send POST to increment count
-                headers: { 'Content-Type': 'application/json' }
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            websiteData.profile.stats.totalMedia = data.totalMedia;
-            totalMediaCount.textContent = formatNumber(data.totalMedia);
-        } catch (error) {
-            console.error('Error incrementing media count:', error);
-        }
-    }
-
-
-    // --- Profile Content Loading ---
-    function loadProfileContent() {
-        profilePic.src = websiteData.profile.profilePicUrl;
-        profileUsername.textContent = websiteData.profile.username;
-        profileName.textContent = websiteData.profile.name;
-        // Counts will be updated by fetch functions
-        // totalMediaCount.textContent = formatNumber(websiteData.profile.stats.totalMedia);
-        // visitorCount.textContent = formatNumber(websiteData.profile.stats.visitors);
-        renderHighlights();
-        renderContentGrid('posts'); // Load initial content
-        updateWebsiteAge(); // Update website age on load
-    }
-
-    function formatNumber(num) {
-        if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + 'M';
-        }
-        if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'K';
-        }
-        return num.toString();
-    }
-
-    // --- Website Age Calculator ---
-    function updateWebsiteAge() {
-        const now = new Date();
-        const diff = now.getTime() - websiteLaunchDate.getTime();
-
-        const seconds = Math.floor(diff / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-        const months = Math.floor(days / 30.44); // Average days in a month
-        const years = Math.floor(days / 365.25); // Average days in a year
-
-        let ageText = '';
-
-        if (years > 0) {
-            ageText = `${years}y ${months % 12}m`;
-        } else if (months > 0) {
-            ageText = `${months}m ${days % 30}d`;
-        } else if (days > 0) {
-            ageText = `${days}d ${hours % 24}h`;
-        } else if (hours > 0) {
-            ageText = `${hours}h ${minutes % 60}m`;
-        } else if (minutes > 0) {
-            ageText = `${minutes}m ${seconds % 60}s`;
-        } else {
-            ageText = `${seconds}s`;
-        }
-        websiteAgeElement.textContent = ageText;
-    }
-    // Update website age every second
-    setInterval(updateWebsiteAge, 1000);
-
-    // --- Highlights Rendering ---
-    function renderHighlights() {
-        highlightsSection.innerHTML = ''; // Clear existing highlights
-        websiteData.highlights.forEach(highlight => {
-            const highlightDiv = document.createElement('div');
-            highlightDiv.classList.add('highlight-circle');
-            highlightDiv.innerHTML = `<i class="${highlight.icon}"></i><span>${highlight.label}</span>`;
-            highlightDiv.addEventListener('click', () => openStoryModal(highlight.stories));
-            highlightsSection.appendChild(highlightDiv);
-        });
-        positionElementsAroundOrb(); // Reposition after rendering highlights
-    }
-
-    // --- Content Grid Rendering ---
-    function renderContentGrid(type) {
-        contentGrid.innerHTML = ''; // Clear existing content
-        let contentArray = [];
-        let isPrivateSection = false;
-
-        if (type === 'portfolios') {
-            contentArray = websiteData.posts;
-        } else if (type === 'stellar-logs') {
-            contentArray = websiteData.reels;
-        } else if (type === 'tagged-orbits') {
-            contentArray = websiteData.tagged;
-        } else if (type === 'private') {
-            contentArray = websiteData.privateContent;
-            isPrivateSection = true;
-        }
-
-        contentArray.forEach(item => {
-            const itemDiv = document.createElement('div');
-            itemDiv.classList.add('content-item');
-
-            let mediaElement;
-            if (item.type === 'image') {
-                mediaElement = document.createElement('img');
-                mediaElement.src = item.src;
-                mediaElement.alt = item.alt;
-            } else if (item.type === 'video') {
-                mediaElement = document.createElement('video');
-                mediaElement.src = item.src;
-                mediaElement.controls = true;
-                mediaElement.alt = item.alt;
-            } else if (item.type === 'audio') {
-                mediaElement = document.createElement('audio');
-                mediaElement.src = item.src;
-                mediaElement.controls = true;
-                mediaElement.alt = item.alt;
-            } else if (item.type === 'text') {
-                mediaElement = document.createElement('p');
-                mediaElement.textContent = item.content;
-                mediaElement.style.backgroundColor = item.bg || 'rgba(0,0,0,0.5)';
-                mediaElement.style.color = item.color || 'white';
-                mediaElement.style.padding = '15px';
-                mediaElement.style.minHeight = '150px';
-                mediaElement.style.display = 'flex';
-                mediaElement.style.alignItems = 'center';
-                mediaElement.style.justifyContent = 'center';
-                mediaElement.style.textAlign = 'center';
-            }
-
-            if (mediaElement) {
-                 itemDiv.appendChild(mediaElement);
-            }
-           
-            if (item.caption) {
-                const captionP = document.createElement('p');
-                captionP.textContent = item.caption;
-                itemDiv.appendChild(captionP);
-            }
-            
-            // Add private label if it's a private item (only for main content grid if needed)
-            if (item.private && !isPrivateSection) {
-                 const privateLabel = document.createElement('span');
-                 privateLabel.classList.add('private-label');
-                 privateLabel.textContent = 'PRIVATE';
-                 itemDiv.appendChild(privateLabel);
-            }
-
-
-            itemDiv.addEventListener('click', () => {
-                if (item.private && !isPrivateSection) {
-                    openPrivateContentModal(item);
-                } else if (!item.private) {
-                    // For public content, perhaps open a larger view or just do nothing for now
-                    console.log('Clicked public item:', item.id);
-                }
-            });
-            contentGrid.appendChild(itemDiv);
-        });
-    }
-
-    // --- Tab Switching ---
-    contentTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            contentTabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            renderContentGrid(this.dataset.tab);
-        });
-    });
-
-    // --- Story Modal Functionality ---
-    function openStoryModal(stories) {
-        currentHighlightStories = stories;
-        currentStoryIndex = 0;
-        displayCurrentStory();
-        storyModalOverlay.classList.add('active');
-    }
-
-    function displayCurrentStory() {
-        storyCarousel.innerHTML = ''; // Clear previous story
-        if (currentHighlightStories.length === 0) return;
-
-        const story = currentHighlightStories[currentStoryIndex];
-        const storyItem = document.createElement('div');
-        storyItem.classList.add('story-item');
-
-        if (story.type === 'image') {
-            const img = document.createElement('img');
-            img.src = story.src;
-            storyItem.appendChild(img);
-        } else if (story.type === 'video') {
-            const video = document.createElement('video');
-            video.src = story.src;
-            video.controls = true;
-            video.autoplay = true;
-            video.loop = true;
-            storyItem.appendChild(video);
-        } else if (story.type === 'audio') {
-            const audio = document.createElement('audio');
-            audio.src = story.src;
-            audio.controls = true;
-            audio.autoplay = true;
-            storyItem.appendChild(audio);
-        } else if (story.type === 'text') {
-            const p = document.createElement('p');
-            p.textContent = story.content;
-            p.style.backgroundColor = story.bg || 'rgba(0,0,0,0.7)';
-            p.style.color = story.color || 'white';
-            p.style.padding = '20px';
-            p.style.textAlign = 'center';
-            p.style.borderRadius = '10px';
-            storyItem.appendChild(p);
-        }
-
-        if (story.text) {
-            const storyTextDiv = document.createElement('div');
-            storyTextDiv.classList.add('story-text-content');
-            storyTextDiv.textContent = story.text;
-            storyItem.appendChild(storyTextDiv);
-        }
-
-        storyCarousel.appendChild(storyItem);
-
-        // Hide/show navigation arrows
-        prevStoryButton.style.display = currentHighlightStories.length > 1 ? 'block' : 'none';
-        nextStoryButton.style.display = currentHighlightStories.length > 1 ? 'block' : 'none';
-    }
-
-    function navigateStory(direction) {
-        currentStoryIndex += direction;
-        if (currentStoryIndex < 0) {
-            currentStoryIndex = currentHighlightStories.length - 1;
-        } else if (currentStoryIndex >= currentHighlightStories.length) {
-            currentStoryIndex = 0;
-        }
-        displayCurrentStory();
-    }
-
-    storyModalCloseButton.addEventListener('click', () => {
-        storyModalOverlay.classList.remove('active');
-        // Pause any playing media when closing
-        storyCarousel.querySelectorAll('video, audio').forEach(media => media.pause());
-    });
-    prevStoryButton.addEventListener('click', () => navigateStory(-1));
-    nextStoryButton.addEventListener('click', () => navigateStory(1));
-
-    // --- Private Content Modal ---
-    function openPrivateContentModal(item = null) {
-        privateContentDisplay.innerHTML = ''; // Clear previous content
-        privateContentDisplay.classList.add('hidden'); // Hide content initially
-        privateKeyInput.value = ''; // Clear input
-        privateContentModalOverlay.classList.add('active');
-    }
-
-    privateKeySubmit.addEventListener('click', function() {
-        const key = privateKeyInput.value.trim();
-        if (key === websiteData.privateKey) {
-            renderPrivateContent(websiteData.privateContent); // Render all private content
-            privateContentDisplay.classList.remove('hidden');
-            // Hide auth section (optional, you might want to keep it if they can change key)
-            privateContentModalOverlay.querySelector('.private-content-auth').classList.add('hidden');
-        } else {
-            alert('Incorrect Private Stardust Key. Access to Forbidden Zone denied.');
-            privateKeyInput.value = '';
-        }
-    });
-
-    privateKeyInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            privateKeySubmit.click();
-        }
-    });
-
-    privateContentModalCloseButton.addEventListener('click', () => {
-        privateContentModalOverlay.classList.remove('active');
-        // Reset modal state
-        privateContentModalOverlay.querySelector('.private-content-auth').classList.remove('hidden');
-        privateContentDisplay.classList.add('hidden');
-        privateContentDisplay.innerHTML = '';
-        privateKeyInput.value = '';
-        // Pause any playing media when closing
-        privateContentDisplay.querySelectorAll('video, audio').forEach(media => media.pause());
-    });
-
-    function renderPrivateContent(contentArray) {
-        privateContentDisplay.innerHTML = '';
-        contentArray.forEach(item => {
-            const itemDiv = document.createElement('div');
-            itemDiv.classList.add('private-content-item'); // Use a specific class for styling private items
-
-            let mediaElement;
-            if (item.type === 'image') {
-                mediaElement = document.createElement('img');
-                mediaElement.src = item.src;
-                mediaElement.alt = item.alt;
-            } else if (item.type === 'video') {
-                mediaElement = document.createElement('video');
-                mediaElement.src = item.src;
-                mediaElement.controls = true;
-                mediaElement.alt = item.alt;
-            } else if (item.type === 'audio') {
-                mediaElement = document.createElement('audio');
-                mediaElement.src = item.src;
-                mediaElement.controls = true;
-                mediaElement.alt = item.alt;
-            } else if (item.type === 'text') {
-                mediaElement = document.createElement('p');
-                mediaElement.textContent = item.content;
-                mediaElement.style.backgroundColor = item.bg || 'rgba(50,0,0,0.7)';
-                mediaElement.style.color = item.color || 'white';
-                mediaElement.style.padding = '15px';
-                mediaElement.style.minHeight = '80px'; // Ensure text is visible
-            }
-
-            if (mediaElement) {
-                itemDiv.appendChild(mediaElement);
-            }
-            if (item.caption) {
-                const captionP = document.createElement('p');
-                captionP.textContent = item.caption;
-                captionP.style.fontSize = '0.9em';
-                captionP.style.color = '#FFD0D0';
-                captionP.style.marginTop = '5px';
-                itemDiv.appendChild(captionP);
-            }
-            privateContentDisplay.appendChild(itemDiv);
-        });
-    }
-
-    // --- Editor Modal (Simulated Save/Publish) ---
-    btnFollow.addEventListener('click', () => { // Re-purpose Follow button as editor trigger for demo
-        editorOverlay.classList.add('active');
-        editorBio.value = websiteData.profile.bio;
-        editorProfilePicUrl.value = websiteData.profile.profilePicUrl;
-        editorUsername.value = websiteData.profile.username;
-        editorFullName.value = websiteData.profile.name;
-    });
-
-    editorCloseButton.addEventListener('click', () => {
-        editorOverlay.classList.remove('active');
-    });
-
-    saveEditorChangesBtn.addEventListener('click', () => {
-        websiteData.profile.bio = editorBio.value;
-        websiteData.profile.profilePicUrl = editorProfilePicUrl.value;
-        websiteData.profile.username = editorUsername.value;
-        websiteData.profile.name = editorFullName.value;
-        alert('Changes saved locally! (Will reset on refresh without backend)');
-        loadProfileContent(); // Reload to reflect changes
-        editorOverlay.classList.remove('active');
-    });
-
-    publishEditorChangesBtn.addEventListener('click', async () => {
-        // This is a placeholder. Real publishing would involve sending data to a backend.
-        // For example, if you set up a Cloudflare Worker to update a GitHub Gist or a database:
-        // You would send websiteData object or parts of it to your worker.
-
-        alert('Publishing changes to galaxy... (This is a simulated publish without a full backend for data storage)');
-        console.log('Simulating publish with data:', websiteData.profile);
-        
-        // Example: If you had a dedicated worker for profile updates:
-        // try {
-        //     const response = await fetch('YOUR_PROFILE_UPDATE_WORKER_URL', {
-        //         method: 'POST',
-        //         headers: { 'Content-Type': 'application/json' },
-        //         body: JSON.stringify(websiteData.profile)
-        //     });
-        //     if (!response.ok) throw new Error('Failed to publish profile.');
-        //     alert('Profile published successfully!');
-        // } catch (error) {
-        //     console.error('Publish error:', error);
-        //     alert('Failed to publish profile: ' + error.message);
-        // }
-
-        editorOverlay.classList.remove('active');
-        loadProfileContent(); // Reload content after simulated publish
-    });
-
-    // --- New Content Upload Modal ---
-    btnCreateGalaxy.addEventListener('click', () => {
-        uploadContentModal.classList.add('active');
-        uploadFileSection.classList.remove('hidden'); // Default to file upload
-        uploadTextSection.classList.add('hidden');
-        uploadFileNameDisplay.textContent = 'No file chosen';
-        uploadFile.value = '';
-        uploadTextContent.value = '';
-        uploadPreview.innerHTML = '';
-        uploadTypeButtons.forEach(btn => btn.classList.remove('active'));
-        document.querySelector('.upload-type-btn[data-type="file"]').classList.add('active');
-    });
-
-    uploadModalCloseButton.addEventListener('click', () => {
-        uploadContentModal.classList.remove('active');
-    });
-
-    uploadTypeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            uploadTypeButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            if (this.dataset.type === 'file') {
-                uploadFileSection.classList.remove('hidden');
-                uploadTextSection.classList.add('hidden');
-            } else {
-                uploadFileSection.classList.add('hidden');
-                uploadTextSection.classList.remove('hidden');
-            }
-        });
-    });
-
-    uploadFile.addEventListener('change', function() {
-        if (this.files.length > 0) {
-            uploadFileNameDisplay.textContent = this.files[0].name;
-            uploadPreview.innerHTML = '';
-            const file = this.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                let mediaElement;
-                if (file.type.startsWith('image/')) {
-                    mediaElement = document.createElement('img');
-                    mediaElement.src = e.target.result;
-                } else if (file.type.startsWith('video/')) {
-                    mediaElement = document.createElement('video');
-                    mediaElement.src = e.target.result;
-                    mediaElement.controls = true;
-                } else if (file.type.startsWith('audio/')) {
-                    mediaElement = document.createElement('audio');
-                    mediaElement.src = e.target.result;
-                    mediaElement.controls = true;
-                }
-                if (mediaElement) {
-                    uploadPreview.appendChild(mediaElement);
-                }
-            };
-            reader.readAsDataURL(file);
-        } else {
-            uploadFileNameDisplay.textContent = 'No file chosen';
-            uploadPreview.innerHTML = '';
-        }
-    });
-
-    uploadSubmitBtn.addEventListener('click', async function() {
-        const destination = uploadContentDestination.value;
-        const uploadType = document.querySelector('.upload-type-btn.active').dataset.type;
-        let newItem = {};
-
-        if (uploadType === 'file') {
-            const file = uploadFile.files[0];
-            if (!file) {
-                alert('Please select a file to upload.');
-                return;
-            }
-            const fileUrl = URL.createObjectURL(file); // For local preview
-            const fileType = file.type;
-
-            newItem = {
-                id: 'new' + Date.now(),
-                type: fileType.startsWith('image/') ? 'image' : (fileType.startsWith('video/') ? 'video' : (fileType.startsWith('audio/') ? 'audio' : 'file')),
-                src: fileUrl, // In a real app, this would be a URL from a storage service
-                alt: file.name,
-                private: destination === 'private'
-            };
-        } else { // text upload
-            const textContent = uploadTextContent.value.trim();
-            if (!textContent) {
-                alert('Please enter some text content.');
-                return;
-            }
-            newItem = {
-                id: 'new' + Date.now(),
-                type: 'text',
-                content: textContent,
-                private: destination === 'private'
-            };
-        }
-
-        // Add to appropriate data array (locally for demo)
-        if (newItem.private) {
-            websiteData.privateContent.push(newItem);
-            alert('Content added to Forbidden Zone (Private)!');
-        } else {
-            // For public, assuming it goes to 'posts' by default for new public uploads
-            websiteData.posts.push(newItem);
-            alert('Content launched to Portfolios (Public)!');
-        }
-
-        // Increment media count via Worker
-        await incrementMediaCount();
-
-        uploadContentModal.classList.remove('active');
-        loadProfileContent(); // Reload content to show new item
-    });
-
-    // --- Global functions (not part of DOMContentLoaded, can be called from HTML) ---
-    window.openTikTok = function() {
-        window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
-    }
-
-    window.openInstagram = function() {
-        window.open("https://www.instagram.com/elvizill/", "_blank");
-    }
-
-    // --- Initial Load ---
-    fetchVisitorCount(); // Increment and fetch visitor count on initial load
-    fetchMediaCount();   // Fetch initial media count
-    loadProfileContent(); // Load local profile data
+    trackVisitor();
+    initPrivateUserAuth();
+    checkEzraLoginAndShowSpecialPanels(); // Memeriksa dan menampilkan panel khusus (Ezra & Live Visitors)
 });
+
+function initPanelControls() {
+    document.querySelectorAll('[data-panel]').forEach(button => {
+        button.addEventListener('click', () => {
+            const panelId = button.getAttribute('data-panel');
+            const panel = document.getElementById(panelId);
+
+            panel.classList.toggle('active');
+
+            if (panelId === 'live-visitors-panel') {
+                if (panel.classList.contains('active')) {
+                    fetchLiveVisitors();
+                    visitorRefreshInterval = setInterval(fetchLiveVisitors, REFRESH_INTERVAL_MS);
+                } else {
+                    clearInterval(visitorRefreshInterval);
+                    const visitorList = document.getElementById('visitor-list');
+                    visitorList.innerHTML = '';
+                }
+            } else if (panelId === 'ezra-content-panel') {
+                if (panel.classList.contains('active')) {
+                    initEzraPanelContent(); // Panggil inisialisasi konten Ezra saat panel dibuka
+                }
+            }
+
+            document.querySelectorAll('.panel').forEach(otherPanel => {
+                if (otherPanel.id !== panelId) {
+                    otherPanel.classList.remove('active');
+                    if (otherPanel.id === 'live-visitors-panel') {
+                        clearInterval(visitorRefreshInterval);
+                        document.getElementById('visitor-list').innerHTML = '';
+                    }
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.panel-close-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const panelId = button.getAttribute('data-panel');
+            const panel = document.getElementById(panelId);
+            panel.classList.remove('active');
+
+            if (panelId === 'live-visitors-panel') {
+                clearInterval(visitorRefreshInterval);
+                const visitorList = document.getElementById('visitor-list');
+                visitorList.innerHTML = '';
+            }
+        });
+    });
+}
+
+function initPrivateUserAuth() {
+    const privateUserFab = document.querySelector('#fab-private-user .fab');
+    const privateUserPanel = document.getElementById('private-user-panel');
+    const privateUserInput = document.getElementById('private-user-input');
+    const privateUserSubmit = document.getElementById('private-user-submit');
+    const privateUserMessage = document.getElementById('private-user-message');
+
+    privateUserFab.addEventListener('click', () => {
+        privateUserPanel.classList.toggle('active');
+        document.querySelectorAll('.panel').forEach(otherPanel => {
+            if (otherPanel.id !== 'private-user-panel') {
+                otherPanel.classList.remove('active');
+            }
+        });
+        privateUserInput.value = '';
+        privateUserMessage.textContent = '';
+    });
+
+    privateUserSubmit.addEventListener('click', async () => {
+        const username = privateUserInput.value.trim().toLowerCase();
+        if (username === '') {
+            privateUserMessage.style.color = 'var(--danger)';
+            privateUserMessage.textContent = 'Nama tidak boleh kosong!';
+            return;
+        }
+
+        privateUserMessage.style.color = 'var(--text-secondary)';
+        privateUserMessage.textContent = 'Memeriksa user...';
+
+        try {
+            const response = await fetch('https://private-user-auth.ezvvel.workers.dev/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            });
+
+            const data = await response.json();
+
+            if (data.authenticated) {
+                privateUserMessage.style.color = 'var(--success)';
+                privateUserMessage.textContent = 'User terautentikasi! Mengarahkan...';
+                localStorage.setItem('isEzraLoggedIn', 'true');
+                checkEzraLoginAndShowSpecialPanels(); // Perbarui visibilitas setelah login
+                setTimeout(() => {
+                    privateUserPanel.classList.remove('active');
+                }, 1000);
+            } else {
+                privateUserMessage.style.color = 'var(--danger)';
+                privateUserMessage.textContent = 'User tidak ada';
+                localStorage.setItem('isEzraLoggedIn', 'false');
+                checkEzraLoginAndShowSpecialPanels(); // Perbarui visibilitas setelah gagal login
+            }
+        } catch (error) {
+            console.error('Error during authentication:', error);
+            privateUserMessage.style.color = 'var(--danger)';
+            privateUserMessage.textContent = 'Terjadi kesalahan saat otentikasi.';
+            localStorage.setItem('isEzraLoggedIn', 'false');
+            checkEzraLoginAndShowSpecialPanels();
+        }
+    });
+}
+
+function initLayoutAndThemeToggles() {
+    const layoutBtn = document.querySelector('#fab-layout .fab');
+    const themeBtn = document.querySelector('#fab-theme .fab');
+    const desktopLayoutBtn = document.getElementById('desktop-layout-toggle');
+    const desktopThemeBtn = document.getElementById('desktop-theme-toggle');
+    const toggleLayout = () => document.body.classList.toggle('desktop-layout');
+    const toggleTheme = () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        document.querySelectorAll('#fab-theme i, #desktop-theme-toggle i').forEach(i => {
+            i.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+    };
+    layoutBtn.addEventListener('click', toggleLayout);
+    desktopLayoutBtn.addEventListener('click', toggleLayout);
+    themeBtn.addEventListener('click', toggleTheme);
+    desktopThemeBtn.addEventListener('click', toggleTheme);
+}
+
+function initVideoPlayer() {
+    const video = document.getElementById('widget-video');
+    const playBtn = document.getElementById('video-play-pause');
+    const muteBtn = document.getElementById('video-mute');
+
+    playBtn.addEventListener('click', () => {
+        if (video.paused) {
+            video.play();
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+            video.pause();
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    });
+    muteBtn.addEventListener('click', () => {
+        video.muted = !video.muted;
+        muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+    });
+}
+
+function initMusicPlayer() {
+    const player = document.getElementById('audio-player');
+    const playlistEl = document.getElementById('playlist');
+    const songTitleEl = document.getElementById('song-title');
+    const songs = [
+        { name: "Where We Are", url: "where-we-are.mp3" },
+        { name: "Wish You Were Here", url: "wish-you-were-here.mp3" },
+        { name: "ghost to you", url: "ghost-to-you.mp3" },
+    ];
+    songs.forEach((song, index) => {
+        const item = document.createElement('div');
+        item.textContent = song.name;
+        item.style.cursor = 'pointer';
+        item.style.padding = '8px';
+        item.onclick = () => {
+            player.src = song.url;
+            songTitleEl.textContent = song.name;
+            player.play();
+        };
+        playlistEl.appendChild(item);
+    });
+}
+
+function initEditor() {
+    const htmlEditor = document.getElementById('html-editor');
+    const cssEditor = document.getElementById('css-editor');
+    const jsEditor = document.getElementById('js-editor');
+    const previewFrame = document.getElementById('editor-preview');
+    const runCode = () => {
+        const source = `
+            <html>
+                <head><style>${cssEditor.value}</style></head>
+                <body>${htmlEditor.value}<script>${jsEditor.value}<\/script></body>
+            </html>
+        `;
+        previewFrame.srcdoc = source;
+    };
+    const saveCode = () => {
+        localStorage.setItem('editor_html', htmlEditor.value);
+        localStorage.setItem('editor_css', cssEditor.value);
+        localStorage.setItem('editor_js', jsEditor.value);
+        alert('Code saved!');
+    };
+    const loadCode = () => {
+        htmlEditor.value = localStorage.getItem('editor_html') || '';
+        cssEditor.value = localStorage.getItem('editor_css') || '';
+        jsEditor.value = localStorage.getItem('editor_js') || '';
+        runCode();
+    };
+    const newDoc = () => {
+        htmlEditor.value = '<h1>Hello World</h1>';
+        cssEditor.value = 'h1 { color: blue; }';
+        jsEditor.value = 'console.log("Hello from JS!");';
+        runCode();
+    };
+    document.getElementById('editor-run').addEventListener('click', runCode);
+    document.getElementById('editor-save').addEventListener('click', saveCode);
+    document.getElementById('editor-load').addEventListener('click', loadCode);
+    document.getElementById('editor-new').addEventListener('click', newDoc);
+    document.getElementById('editor-add-media').addEventListener('click', () => {
+        htmlEditor.value += '\n<img src="path/to/image.jpg" alt="image" width="100">';
+    });
+    loadCode();
+}
+
+async function fetchContributions() {
+    const display = document.getElementById('contribution-display');
+    display.innerHTML = `<p>Loading...</p>`;
+    try {
+        const response = await fetch(CONTRIBUTIONS_WORKER_URL);
+        const contributions = await response.json();
+        if (contributions && contributions.length > 0) {
+            display.innerHTML = contributions.reverse().map(c => {
+                let mediaHTML = '';
+                if(c.fileUrl) {
+                    if(c.fileType.startsWith('image/')) {
+                        mediaHTML = `<img src="${c.fileUrl}" style="max-width:100%; border-radius:5px; margin-top:10px;">`;
+                    } else if(c.fileType.startsWith('video/')) {
+                           mediaHTML = `<video src="${c.fileUrl}" controls style="max-width:100%; border-radius:5px; margin-top:10px;"></video>`;
+                    }
+                }
+                return `<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;">
+                    <p style="margin:0;">${c.text}</p>${mediaHTML}
+                    <small style="color:var(--text-secondary);">${new Date(c.timestamp).toLocaleString()}</small>
+                </div>`;
+            }).join('');
+        } else {
+            display.innerHTML = `<p>Be the first to leave a message!</p>`;
+        }
+    } catch (e) {
+        display.innerHTML = `<p style="color:var(--danger);">Could not load contributions.</p>`;
+    }
+}
+
+document.getElementById('contribution-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById('contribution-status');
+    statusEl.textContent = 'Uploading...';
+    const formData = new FormData();
+    formData.append('text', document.getElementById('contribution-text').value);
+    const fileInput = document.getElementById('contribution-file');
+    if (fileInput.files.length > 0) {
+        formData.append('file', fileInput.files[0]);
+    }
+    try {
+        const response = await fetch(CONTRIBUTIONS_WORKER_URL, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Upload failed');
+        statusEl.textContent = 'Message sent! Thank you.';
+        e.target.reset();
+        fetchContributions();
+    } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
+    }
+});
+
+function getBrowserId() {
+    let browserId = localStorage.getItem('unique_browser_id');
+    if (!browserId) {
+        browserId = 'browser_' + Math.random().toString(36).substr(2, 9) + Date.now();
+        localStorage.setItem('unique_browser_id', browserId);
+    }
+    return browserId;
+}
+
+async function trackVisitor() {
+    try {
+        const browserId = getBrowserId();
+        let ipAddress = 'unknown';
+
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            ipAddress = ipData.ip;
+        } catch (ipError) {
+            console.warn('Could not fetch IP address:', ipError);
+        }
+
+        const data = {
+            browserId: browserId,
+            ip: ipAddress,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+        };
+
+        fetch(VISITOR_TRACKER_WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            mode: 'no-cors'
+        }).catch(e => console.error("Error sending to general visitor tracker:", e));
+
+        fetch(LIVE_VISITORS_WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        }).catch(e => console.error("Error sending to live visitors worker:", e));
+
+    } catch(e) {
+        console.error('Error in trackVisitor:', e);
+    }
+}
+
+// Fungsi untuk mengecek login Ezra dan menampilkan/menyembunyikan FAB serta Panel khusus
+function checkEzraLoginAndShowSpecialPanels() {
+    const isEzra = localStorage.getItem('isEzraLoggedIn');
+    const fabLiveVisitors = document.getElementById('fab-live-visitors');
+    const fabEzraPanel = document.getElementById('fab-ezra-panel');
+    
+    // Tampilkan/sembunyikan FAB Live Visitors
+    if (fabLiveVisitors) {
+        fabLiveVisitors.style.display = (isEzra === 'true') ? 'block' : 'none';
+    }
+    // Tampilkan/sembunyikan FAB Ezra Panel
+    if (fabEzraPanel) {
+        fabEzraPanel.style.display = (isEzra === 'true') ? 'block' : 'none';
+    }
+
+    // Pastikan panel Live Visitors dan Ezra tertutup jika bukan Ezra
+    if (isEzra !== 'true') {
+        const liveVisitorsPanel = document.getElementById('live-visitors-panel');
+        if (liveVisitorsPanel && liveVisitorsPanel.classList.contains('active')) {
+            liveVisitorsPanel.classList.remove('active');
+            clearInterval(visitorRefreshInterval);
+            document.getElementById('visitor-list').innerHTML = '';
+        }
+        const ezraContentPanel = document.getElementById('ezra-content-panel');
+        if (ezraContentPanel && ezraContentPanel.classList.contains('active')) {
+            ezraContentPanel.classList.remove('active');
+        }
+    }
+}
+
+async function fetchLiveVisitors() {
+    const visitorList = document.getElementById('visitor-list');
+    const lastUpdatedTime = document.getElementById('last-updated-time');
+    
+    if (!visitorList.innerHTML.trim() || visitorList.innerHTML.includes('Loading visitors...')) {
+        visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">Loading visitors...</li>';
+    }
+    
+    try {
+        const response = await fetch(LIVE_VISITORS_WORKER_URL + '?get_visitors=true');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const visitors = await response.json();
+
+        if (visitors && visitors.length > 0) {
+            visitorList.innerHTML = visitors.map(visitor => {
+                const timestamp = new Date(visitor.timestamp).toLocaleString('id-ID', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+                return `
+                    <li>
+                        <strong>ID:</strong> <span>${visitor.browserId.substring(0, 10)}...</span><br>
+                        <strong>IP:</strong> <span>${visitor.ip || 'N/A'}</span><br>
+                        <strong>Waktu:</strong> <span>${timestamp}</span>
+                    </li>
+                `;
+            }).join('');
+        } else {
+            visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">No visitors online.</li>';
+        }
+        lastUpdatedTime.textContent = new Date().toLocaleTimeString('id-ID');
+
+    } catch (error) {
+        console.error('Error fetching live visitors:', error);
+        visitorList.innerHTML = '<li style="text-align: center; color: var(--danger);">Failed to load visitors.</li>';
+        lastUpdatedTime.textContent = 'Error';
+    }
+}
+
+// --- START: Fungsi untuk Inisialisasi Konten Panel Ezra (dari script index (8).html) ---
+function initEzraPanelContent() {
+    const profileContent = document.getElementById('ezra-inner-content').querySelector('#profile-content');
+    const editProfileBtn = document.getElementById('ezra-inner-content').querySelector('#edit-profile-btn');
+    const editorOverlay = document.getElementById('ezra-inner-content').querySelector('#editor-overlay');
+    const closeEditorBtn = document.getElementById('ezra-inner-content').querySelector('#close-editor-btn');
+    const profileContentEditor = document.getElementById('ezra-inner-content').querySelector('#profile-content-editor');
+    const saveContentBtn = document.getElementById('ezra-inner-content').querySelector('#save-content-btn');
+    const publishChangesBtn = document.getElementById('ezra-inner-content').querySelector('#publish-changes-btn');
+
+    // Pastikan elemen ditemukan sebelum menambahkan event listener
+    if (!profileContent || !editProfileBtn || !editorOverlay || !closeEditorBtn || !profileContentEditor || !saveContentBtn || !publishChangesBtn) {
+        console.error("Ezra panel elements not found. Skipping initialization.");
+        return;
+    }
+
+    async function fetchDataFromBackend() {
+        try {
+            const response = await fetch(GITHUB_PROFILE_WORKER_URL);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+            const data = await response.text();
+            console.log('Fetched data:', data);
+            profileContent.innerHTML = marked.parse(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            profileContent.innerHTML = `<p style="color:red;">Failed to load profile content: ${error.message}. Please try again later or check worker URL.</p>`;
+        }
+    }
+
+    function loadProfileContent() {
+        const storedContent = localStorage.getItem('elvi_ezra_profile_content');
+        if (storedContent) {
+            profileContent.innerHTML = marked.parse(storedContent);
+            profileContentEditor.value = storedContent;
+        } else {
+            fetchDataFromBackend();
+        }
+    }
+
+    editProfileBtn.addEventListener('click', () => {
+        profileContentEditor.value = profileContent.innerText;
+        editorOverlay.classList.add('active');
+    });
+
+    closeEditorBtn.addEventListener('click', () => {
+        editorOverlay.classList.remove('active');
+    });
+
+    function saveContentLocally() {
+        const newContent = profileContentEditor.value;
+        localStorage.setItem('elvi_ezra_profile_content', newContent);
+        profileContent.innerHTML = marked.parse(newContent);
+        alert('Content saved locally!');
+    }
+    saveContentBtn.addEventListener('click', saveContentLocally);
+
+    async function publishChangesToBackend() {
+        const newContent = profileContentEditor.value;
+        try {
+            const response = await fetch(GITHUB_PROFILE_WORKER_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: newContent
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log('Changes published to GitHub:', result);
+            alert('Changes successfully published to the galaxy!');
+            editorOverlay.classList.remove('active');
+            loadProfileContent();
+        } catch (error) {
+            console.error('Error publishing changes:', error);
+            alert(`Failed to publish changes: ${error.message}. Check Cloudflare Worker logs.`);
+        }
+    }
+
+    publishChangesBtn.addEventListener('click', publishChangesToBackend);
+
+    // Initial load for Ezra panel content
+    loadProfileContent();
+}
+
+// Global functions (dari index (8).html)
+function openTikTok() {
+    window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
+}
+
+function openInstagram() {
+    window.open("https://www.instagram.com/elvizill/", "_blank");
+}
+// --- END: Fungsi untuk Inisialisasi Konten Panel Ezra ---
 </script>
 </body>
 </html>
