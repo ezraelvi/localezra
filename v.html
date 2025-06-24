@@ -271,6 +271,7 @@
         /* Live Visitors Panel */
         #live-visitors-panel {
             min-height: 300px;
+            display: none; /* Default to hidden, shown only for Ezra */
         }
         #live-visitors-panel ul {
             list-style: none;
@@ -535,7 +536,7 @@
             <button id="show-code-editor">Code Editor</button>
             <button id="show-music-player">Music Player</button>
             <button id="show-contribute">Contribute</button>
-            <button id="show-live-visitors">Live Visitors</button> <button id="show-private-user"><i class="fas fa-user-secret"></i></button>
+            <button id="show-live-visitors" class="hidden">Live Visitors</button> <button id="show-private-user"><i class="fas fa-user-secret"></i></button>
         </div>
     </header>
 
@@ -583,7 +584,7 @@
                 <p id="contribute-message"></p>
             </div>
 
-            <div id="live-visitors-panel" class="panel">
+            <div id="live-visitors-panel" class="panel hidden">
                 <div class="panel-header">
                     <h3>Live Visitors</h3>
                     <button class="close-btn"><i class="fas fa-times"></i></button>
@@ -596,7 +597,7 @@
                     <button id="refresh-visitors-btn">Refresh</button>
                 </div>
                 <p style="text-align: center; font-size: 0.8em; color: var(--text-secondary); margin-top: 10px;">
-                    *Fitur ini hanya terlihat oleh Ezra jika diaktifkan di Cloudflare Worker.
+                    *Fitur ini hanya terlihat ketika Anda login sebagai Ezra.
                 </p>
             </div>
         </div>
@@ -607,7 +608,7 @@
         <button class="fab" id="fab-code-editor" aria-label="Open Code Editor"><i class="fas fa-code"></i></button>
         <button class="fab" id="fab-music-player" aria-label="Open Music Player"><i class="fas fa-music"></i></button>
         <button class="fab" id="fab-contribute" aria-label="Contribute Message"><i class="fas fa-comment-dots"></i></button>
-        <button class="fab" id="fab-live-visitors" aria-label="Live Visitors"><i class="fas fa-eye"></i></button> <button class="fab" id="fab-private-user" aria-label="Private User Access"><i class="fas fa-user-secret"></i></button>
+        <button class="fab hidden" id="fab-live-visitors" aria-label="Live Visitors"><i class="fas fa-eye"></i></button> <button class="fab" id="fab-private-user" aria-label="Private User Access"><i class="fas fa-user-secret"></i></button>
     </div>
 
     <div class="social-links">
@@ -719,6 +720,7 @@
         showContributeBtn.addEventListener('click', () => showPanel(contributePanel));
         fabContributeBtn.addEventListener('click', () => showPanel(contributePanel));
 
+        // Logic for Live Visitors panel visibility based on Ezra login
         showLiveVisitorsBtn.addEventListener('click', () => {
             showPanel(liveVisitorsPanel);
             fetchLiveVisitors(); // Refresh visitors when panel is shown
@@ -891,7 +893,7 @@
             }
         });
 
-        // --- LIVE VISITORS LOGIC - REINTEGRATED ---
+        // --- LIVE VISITORS LOGIC - REINTEGRATED & EZRA-SPECIFIC ---
         const visitorList = document.getElementById('visitor-list');
         const refreshVisitorsBtn = document.getElementById('refresh-visitors-btn');
         const lastUpdatedTime = document.getElementById('last-updated-time');
@@ -957,6 +959,8 @@
             if (username === 'ezra') {
                 privateUserPanel.classList.add('hidden');
                 ezraPanel.classList.add('active'); // Show Ezra Panel
+                showLiveVisitorsBtn.classList.remove('hidden'); // Show Live Visitors button in header
+                fabLiveVisitorsBtn.classList.remove('hidden'); // Show Live Visitors FAB
                 loadEzraContent(); // Load content when Ezra logs in
                 privateUserMessage.textContent = ''; // Clear previous messages
             } else {
@@ -966,6 +970,9 @@
 
         ezraLogoutBtn.addEventListener('click', () => {
             ezraPanel.classList.remove('active'); // Hide Ezra Panel
+            liveVisitorsPanel.classList.add('hidden'); // Hide Live Visitors Panel if open
+            showLiveVisitorsBtn.classList.add('hidden'); // Hide Live Visitors button in header
+            fabLiveVisitorsBtn.classList.add('hidden'); // Hide Live Visitors FAB
             privateUserInput.value = ''; // Clear input
             resetEzraForm(); // Reset form
             ezraGalleryContainer.innerHTML = '<p id="ezra-gallery-status" style="color: var(--text-secondary); text-align: center;">Loading content...</p>'; // Clear gallery
@@ -1121,11 +1128,7 @@
                 formData.append('media', mediaFile);
                 formData.append('type', mediaFile.type.startsWith('image/') ? 'image' : 'video');
             } else if (isEditing) {
-                 // If editing and no new media, send a flag or existing media URL
-                 // This depends on how your Worker handles media updates (e.g., send 'no_change' flag)
-                 // For now, if no new media, the worker should assume current media is kept.
-                 // You might need to adjust your Worker's logic based on this.
-                 formData.append('noMediaChange', 'true'); // Example flag
+                 formData.append('noMediaChange', 'true'); // Flag to worker: keep existing media
             }
 
             try {
