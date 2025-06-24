@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=1200"> 
     <title>Ezra's Personal Site</title>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -138,15 +138,17 @@
             align-items: flex-start; /* Align content to top vertically */
             padding: 20px;
             overflow-y: auto; /* Allow scrolling for main content if it overflows */
-            max-width: 1200px; /* Max width for content for readability */
+            /* Removed max-width to let it expand */
             margin: 0 auto; /* Center main content block */
         }
 
         .main-content-wrapper {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid for panels */
+            /* Force more columns for horizontal feel */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
             gap: 20px;
             width: 100%; /* Take full width of main-content */
+            min-width: 1160px; /* Ensure a minimum width to force desktop-like scroll */
         }
 
         /* --- Panel Styles (Re-used for general panels) --- */
@@ -266,7 +268,37 @@
             text-align: center;
         }
 
-        /* --- Floating Action Buttons (FABs) - If still needed --- */
+        /* Live Visitors Panel */
+        #live-visitors-panel {
+            min-height: 300px;
+        }
+        #live-visitors-panel ul {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        #live-visitors-panel ul li {
+            padding: 8px 10px;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 0.9em;
+        }
+        #live-visitors-panel ul li:last-child {
+            border-bottom: none;
+        }
+        #live-visitors-panel .refresh-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        /* --- Floating Action Buttons (FABs) - Kept for mobile convenience if desired --- */
         .fab-container {
             position: fixed;
             bottom: 20px;
@@ -491,52 +523,6 @@
             text-align: center;
             margin-top: 10px;
         }
-
-        /* --- Responsive Design (for smaller screens) --- */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                height: auto;
-                padding: 10px;
-                gap: 10px;
-            }
-            header .logo {
-                margin-bottom: 5px;
-            }
-            .main-content {
-                padding: 10px;
-            }
-            .main-content-wrapper {
-                grid-template-columns: 1fr; /* Single column on mobile */
-            }
-            .fab-container, .social-links {
-                flex-direction: row;
-                bottom: 10px;
-                left: 10px;
-                right: 10px;
-                justify-content: center;
-                gap: 10px;
-            }
-            .fab {
-                width: 45px;
-                height: 45px;
-                font-size: 1.3em;
-            }
-            .social-links a {
-                font-size: 1.5em;
-            }
-            #ezra-panel {
-                padding: 10px;
-            }
-            #ezra-gallery-container {
-                grid-template-columns: 1fr;
-                padding: 10px;
-            }
-            #ezra-content-form .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-        }
     </style>
 </head>
 <body>
@@ -549,7 +535,7 @@
             <button id="show-code-editor">Code Editor</button>
             <button id="show-music-player">Music Player</button>
             <button id="show-contribute">Contribute</button>
-            <button id="show-private-user"><i class="fas fa-user-secret"></i></button>
+            <button id="show-live-visitors">Live Visitors</button> <button id="show-private-user"><i class="fas fa-user-secret"></i></button>
         </div>
     </header>
 
@@ -596,6 +582,23 @@
                 </form>
                 <p id="contribute-message"></p>
             </div>
+
+            <div id="live-visitors-panel" class="panel">
+                <div class="panel-header">
+                    <h3>Live Visitors</h3>
+                    <button class="close-btn"><i class="fas fa-times"></i></button>
+                </div>
+                <ul id="visitor-list">
+                    <li>Loading visitors...</li>
+                </ul>
+                <div class="refresh-info">
+                    <small>Last updated: <span id="last-updated-time">N/A</span></small>
+                    <button id="refresh-visitors-btn">Refresh</button>
+                </div>
+                <p style="text-align: center; font-size: 0.8em; color: var(--text-secondary); margin-top: 10px;">
+                    *Fitur ini hanya terlihat oleh Ezra jika diaktifkan di Cloudflare Worker.
+                </p>
+            </div>
         </div>
     </main>
 
@@ -604,7 +607,7 @@
         <button class="fab" id="fab-code-editor" aria-label="Open Code Editor"><i class="fas fa-code"></i></button>
         <button class="fab" id="fab-music-player" aria-label="Open Music Player"><i class="fas fa-music"></i></button>
         <button class="fab" id="fab-contribute" aria-label="Contribute Message"><i class="fas fa-comment-dots"></i></button>
-        <button class="fab" id="fab-private-user" aria-label="Private User Access"><i class="fas fa-user-secret"></i></button>
+        <button class="fab" id="fab-live-visitors" aria-label="Live Visitors"><i class="fas fa-eye"></i></button> <button class="fab" id="fab-private-user" aria-label="Private User Access"><i class="fas fa-user-secret"></i></button>
     </div>
 
     <div class="social-links">
@@ -659,18 +662,21 @@
         const showCodeEditorBtn = document.getElementById('show-code-editor');
         const showMusicPlayerBtn = document.getElementById('show-music-player');
         const showContributeBtn = document.getElementById('show-contribute');
+        const showLiveVisitorsBtn = document.getElementById('show-live-visitors'); // Live Visitors button
         const showPrivateUserBtn = document.getElementById('show-private-user');
 
         // Panel toggles (FABs)
         const fabCodeEditorBtn = document.getElementById('fab-code-editor');
         const fabMusicPlayerBtn = document.getElementById('fab-music-player');
         const fabContributeBtn = document.getElementById('fab-contribute');
+        const fabLiveVisitorsBtn = document.getElementById('fab-live-visitors'); // FAB for Live Visitors
         const fabPrivateUserBtn = document.getElementById('fab-private-user');
 
         // Panels
         const codeEditorPanel = document.getElementById('code-editor-panel');
         const musicPlayerPanel = document.getElementById('music-player-panel');
         const contributePanel = document.getElementById('contribute-panel');
+        const liveVisitorsPanel = document.getElementById('live-visitors-panel'); // Live Visitors panel
         const privateUserPanel = document.getElementById('private-user-panel');
         const ezraPanel = document.getElementById('ezra-panel');
 
@@ -696,7 +702,7 @@
         // --- PANEL MANAGEMENT (General) ---
         function showPanel(panel) {
             // Hide all other main panels if they are not Ezra panel
-            [codeEditorPanel, musicPlayerPanel, contributePanel, privateUserPanel].forEach(p => {
+            [codeEditorPanel, musicPlayerPanel, contributePanel, liveVisitorsPanel, privateUserPanel].forEach(p => {
                 if (p !== panel && p !== ezraPanel) {
                     p.classList.add('hidden');
                 }
@@ -712,6 +718,15 @@
 
         showContributeBtn.addEventListener('click', () => showPanel(contributePanel));
         fabContributeBtn.addEventListener('click', () => showPanel(contributePanel));
+
+        showLiveVisitorsBtn.addEventListener('click', () => {
+            showPanel(liveVisitorsPanel);
+            fetchLiveVisitors(); // Refresh visitors when panel is shown
+        });
+        fabLiveVisitorsBtn.addEventListener('click', () => {
+            showPanel(liveVisitorsPanel);
+            fetchLiveVisitors(); // Refresh visitors when panel is shown
+        });
 
         showPrivateUserBtn.addEventListener('click', () => showPanel(privateUserPanel));
         fabPrivateUserBtn.addEventListener('click', () => showPanel(privateUserPanel));
@@ -875,6 +890,51 @@
                 contributeMessage.style.color = 'var(--danger)';
             }
         });
+
+        // --- LIVE VISITORS LOGIC - REINTEGRATED ---
+        const visitorList = document.getElementById('visitor-list');
+        const refreshVisitorsBtn = document.getElementById('refresh-visitors-btn');
+        const lastUpdatedTime = document.getElementById('last-updated-time');
+
+        async function fetchLiveVisitors() {
+            visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">Memuat pengunjung...</li>';
+            lastUpdatedTime.textContent = 'Memuat...';
+
+            try {
+                // Assuming your Cloudflare Worker has a /get_visitors endpoint
+                const response = await fetch(`${CLOUDFLARE_WORKER_URL}/get_visitors`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const visitors = await response.json();
+
+                if (visitors && visitors.length > 0) {
+                    visitorList.innerHTML = visitors.map(visitor => {
+                        const timestamp = new Date(visitor.timestamp).toLocaleString('id-ID', {
+                            hour: '2-digit', minute: '2-digit', second: '2-digit',
+                            day: '2-digit', month: '2-digit', year: 'numeric'
+                        });
+                        return `
+                            <li>
+                                <strong>ID:</strong> <span>${visitor.browserId.substring(0, 10)}...</span><br>
+                                <strong>IP:</strong> <span>${visitor.ip || 'N/A'}</span><br>
+                                <strong>Waktu:</strong> <span>${timestamp}</span>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">Tidak ada pengunjung online.</li>';
+                }
+                lastUpdatedTime.textContent = new Date().toLocaleTimeString('id-ID');
+
+            } catch (error) {
+                console.error('Error fetching live visitors:', error);
+                visitorList.innerHTML = '<li style="text-align: center; color: var(--danger);">Gagal memuat pengunjung.</li>';
+                lastUpdatedTime.textContent = 'Error';
+            }
+        }
+
+        refreshVisitorsBtn.addEventListener('click', fetchLiveVisitors);
 
         // --- PRIVATE USER / EZRA PANEL LOGIC ---
         const privateUserInput = document.getElementById('private-user-input');
@@ -1045,6 +1105,13 @@
                 return;
             }
 
+            // Only require media file for new additions, not for edits without new media
+            if (!mediaFile && !isEditing) {
+                 ezraFormStatus.textContent = 'Pilih file media untuk konten baru!';
+                 ezraFormStatus.style.color = 'var(--danger)';
+                 return;
+            }
+
             const formData = new FormData();
             formData.append('id', id);
             formData.append('title', title);
@@ -1053,19 +1120,20 @@
             if (mediaFile) {
                 formData.append('media', mediaFile);
                 formData.append('type', mediaFile.type.startsWith('image/') ? 'image' : 'video');
-            } else if (!isEditing) { // If adding new and no media is selected
-                 ezraFormStatus.textContent = 'Pilih file media untuk konten baru!';
-                 ezraFormStatus.style.color = 'var(--danger)';
-                 return;
+            } else if (isEditing) {
+                 // If editing and no new media, send a flag or existing media URL
+                 // This depends on how your Worker handles media updates (e.g., send 'no_change' flag)
+                 // For now, if no new media, the worker should assume current media is kept.
+                 // You might need to adjust your Worker's logic based on this.
+                 formData.append('noMediaChange', 'true'); // Example flag
             }
 
             try {
                 const method = isEditing ? 'PUT' : 'POST';
-                const url = `${CLOUDFLARE_WORKER_URL}/ezra-content`; // Worker will handle ID in body for PUT
+                const url = `${CLOUDFLARE_WORKER_URL}/ezra-content`; 
 
                 const response = await fetch(url, {
                     method: method,
-                    // No 'Content-Type' header needed for FormData; browser sets it
                     body: formData,
                 });
 
