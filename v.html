@@ -11,1241 +11,2833 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.10/marked.min.js"></script>
     <style>
+        /* INLINE CSS STARTS HERE */
         :root {
             --primary: #8e44ad; --accent: #00a8ff; --success: #2ecc71;
             --danger: #e74c3c; --light: #ecf0f1; --dark: #1a1a2e;
-            --bg-main: #000000; /* Changed to black */
-            --bg-panel: rgba(0, 0, 0, 0.9); /* Changed to black with opacity */
-            --text-primary: #e0fbfc; --text-secondary: #98ded9;
-            --border-color: rgba(0, 168, 255, 0.3);
+            --bg-main: #16213e; --bg-panel: rgba(26, 2...;
         }
-        html[data-theme='light'] {
-            --primary: #3498db; --accent: #e67e22;
-            --bg-main: #000000; /* Changed to black */
-            --bg-panel: rgba(0, 0, 0, 0.9); /* Changed to black with opacity */
-            --text-primary: #2c3e50; --text-secondary: #7f8c8d;
-            --border-color: rgba(52, 152, 219, 0.4);
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-main);
+            color: var(--light);
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden; /* Prevent scrolling on main body */
         }
-        * { box-sizing: border-box; }
-        html, body {
-            width: 100%; height: 100%; margin: 0; padding: 0;
-            overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-main); color: var(--text-primary);
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        .main-container {
-            position: relative; z-index: 1; width: 100%; height: 100%;
-            transition: all 0.5s ease-in-out;
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
         }
-        .lock-screen {
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; gap: 15px; height: 100%;
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
         }
-        .hidden { display: none !important; }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 80px;
+            background-color: var(--dark);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--light);
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.7);
+        }
+
+        .nav-icons {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .nav-icon {
+            color: var(--light);
+            font-size: 1.7em;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .nav-icon.active {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .nav-icon .tooltip {
+            visibility: hidden;
+            background-color: var(--primary);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-icon:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .settings-icon {
+            color: var(--light);
+            font-size: 1.7em;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+            margin-top: auto;
+        }
+
+        .settings-icon:hover {
+            color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden; /* Hide overflow of panels */
+        }
+
         .panel {
-            position: fixed; background: var(--bg-panel); backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px); z-index: 1010;
-            box-shadow: 0 0 50px rgba(0,0,0,0.6);
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            display: flex; flex-direction: column;
-        }
-        #editor-panel {
-            top: 0; left: 0; width: 100%; height: 100%;
-            transform: translateX(-100%);
-        }
-        #editor-panel.active { transform: translateX(0); }
-        #music-panel {
-            bottom: 0; left: 0; width: 100%; height: auto;
-            max-height: 50vh; border-top: 1px solid var(--border-color);
-            transform: translateY(100%); padding: 15px;
-        }
-        #music-panel.active { transform: translateY(0); }
-        #contribution-panel {
-            top: 0; right: 0; width: 400px; max-width: 90vw; height: 100%;
-            transform: translateX(100%); padding: 20px;
-        }
-        #contribution-panel.active { transform: translateX(0); }
-        .panel-close-btn {
-            position: absolute; top: 15px; right: 15px; background: none; border: none;
-            color: var(--text-primary); font-size: 1.5rem; cursor: pointer; z-index: 5;
-        }
-        .fab-container { position: fixed; z-index: 1000; }
-        .fab {
-            background: var(--primary); color: white; width: 55px; height: 55px;
-            border-radius: 50%; border: none; cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 1.4rem; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-        }
-        .fab:hover { background: var(--accent); transform: scale(1.1); }
-        #fab-editor { top: 20px; left: 20px; }
-        #fab-music { bottom: 20px; left: 50%; transform: translateX(-50%); }
-        #fab-contribution { top: 20px; right: 20px; }
-        #fab-layout, #fab-theme { bottom: 20px; }
-        #fab-layout { left: 20px; }
-        #fab-theme { right: 20px; }
-        #editor-panel { padding: 0; }
-        .editor-toolbar { display: flex; gap: 5px; padding: 10px; background: rgba(0,0,0,0.2); flex-wrap: wrap; }
-        .editor-toolbar button, .editor-toolbar select { background: var(--primary); color: white; border:none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
-        .editor-main { display: flex; flex-grow: 1; height: calc(100% - 58px); }
-        .editor-code-area, .editor-preview-area { flex: 1; display: flex; flex-direction: column; }
-        .editor-panes { display: flex; flex-direction: column; flex-grow: 1; }
-        .editor-pane { display: flex; flex-direction: column; flex-grow: 1; }
-        .editor-pane label { background: #333; color: var(--accent); padding: 5px 10px; font-size: 0.8em; font-weight: bold;}
-        .editor-pane textarea { flex-grow: 1; background: #1e1e1e; color: #f8f8f2; border: none; resize: none; padding: 10px; font-family: 'Courier New', monospace; font-size: 14px; outline: none; }
-        #editor-preview { width: 100%; height: 100%; border: none; background: white; }
-        #video-player-widget {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999;
-            width: 150px;
-            height: 150px;
+            background-color: var(--bg-panel);
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-            border: 2px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s;
+            overflow-y: auto; /* Enable scrolling for panel content */
         }
-        #video-player-widget video {
+
+        .panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            font-size: 2em;
+            color: var(--primary);
+            text-shadow: 0 0 8px rgba(142, 68, 173, 0.5);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 8px 15px;
+            width: 300px;
+            max-width: 40%;
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1em;
+            outline: none;
+            width: 100%;
+            padding-right: 10px;
+        }
+
+        .search-bar i {
+            color: var(--light);
+            margin-right: 10px;
+        }
+
+        /* Dashboard Panel Specific */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            flex-grow: 1;
+        }
+
+        .dashboard-card {
+            background-color: var(--dark);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-header i {
+            font-size: 1.8em;
+            margin-right: 15px;
+            color: var(--accent);
+        }
+
+        .card-header h3 {
+            margin: 0;
+            color: var(--light);
+            font-size: 1.3em;
+        }
+
+        .card-content {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--success);
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .card-footer {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Code Editor Panel Specific */
+        .editor-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .editor-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .editor-controls button {
+            background-color: var(--primary);
+            color: var(--light);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .editor-controls button:hover {
+            background-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .editor-section-heading {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            border-bottom: 1px solid rgba(0, 168, 255, 0.3);
+            padding-bottom: 5px;
+        }
+
+        .code-editor {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            background-color: var(--dark);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(142, 68, 173, 0.3);
+        }
+        
+        /* Unified Editor Style */
+        .code-editor textarea {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%; /* Occupy full available height */
+            background-color: #282a36; /* Dracula Theme background */
+            color: #f8f8f2; /* Dracula Theme foreground */
+            border: none;
+            padding: 15px;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 1em;
+            line-height: 1.5;
+            outline: none;
+            resize: none; /* Disable manual resize */
+            box-sizing: border-box; /* Include padding in width/height */
+        }
+
+        .preview-frame {
+            width: 100%;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            flex-grow: 1;
+            background-color: var(--light);
+            margin-top: 20px;
+        }
+
+        .media-manager {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .media-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .media-item {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid var(--accent);
+        }
+
+        .media-item img, .media-item video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .video-controls {
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
+        .media-item audio {
+            width: 100%;
+            height: 100%;
             display: flex;
-            gap: 10px;
-            background: rgba(0,0,0,0.5);
-            padding: 5px;
-            border-radius: 5px;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--dark);
+            color: var(--light);
+            font-size: 0.7em;
+            text-align: center;
         }
-        .video-controls button {
-            background: none;
-            border: none;
+
+        .delete-media-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: var(--danger);
             color: white;
-            font-size: 1rem;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
         }
-        .social-links {
-            position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 15px; z-index: 999;
-        }
-        .social-links a { color: var(--text-primary); font-size: 1.5rem; transition: color 0.3s, transform 0.3s; }
-        .social-links a:hover { color: var(--accent); transform: scale(1.2); }
-        body.desktop-layout .main-container {
-            display: grid;
-            grid-template-columns: 350px 1fr 350px;
-            grid-template-rows: 1fr;
-            gap: 20px; padding: 20px; height: 100vh;
-        }
-        body.desktop-layout .panel {
-            position: static; transform: none !important;
-            height: auto; width: auto; max-height: none;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5); border: 1px solid var(--border-color);
-            border-radius: 15px;
-        }
-        body.desktop-layout .panel-close-btn,
-        body.desktop-layout .fab,
-        body.desktop-layout .social-links { display: none; }
-        body.desktop-layout .desktop-fab-bar {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: flex; gap: 10px;
-            background: var(--bg-panel); padding: 10px; border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+
+        /* Live Visitors Panel Specific */
+        .visitor-stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
         }
 
-        /* Styling for the new private user button */
-        #fab-private-user {
-            left: 20px; /* Position it on the left */
-            top: 50%;
-            transform: translateY(-50%); /* Center vertically */
-        }
-
-        /* Styling for the private user panel */
-        #private-user-panel {
-            top: 50%;
-            left: 50%;
-            width: 300px; /* Adjust width as needed */
-            max-width: 90vw;
-            height: auto; /* Adjust height based on content */
-            transform: translate(-50%, -50%) scale(0.8); /* Initially smaller and off-center */
-            opacity: 0;
-            pointer-events: none; /* Make it unclickable when not active */
-            border-radius: 15px;
-            padding: 10px; /* Add some padding to the panel */
-        }
-
-        #private-user-panel.active {
-            transform: translate(-50%, -50%) scale(1); /* Full size and centered when active */
-            opacity: 1;
-            pointer-events: all; /* Make it clickable when active */
-        }
-
-        /* Adjust desktop layout to hide the new FAB */
-        body.desktop-layout #fab-private-user {
-            display: none;
-        }
-
-        /* Ensure desktop panel style for consistency */
-        body.desktop-layout #private-user-panel {
-            position: static;
-            transform: none !important;
-            height: auto;
-            width: auto;
-            max-height: none;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            opacity: 1; /* Always visible in desktop layout if implemented as a static panel */
-            pointer-events: all;
-        }
-        /* Styling for the new Live Visitors FAB */
-        #fab-live-visitors {
-            bottom: 20px; /* Atur posisi sesuai keinginan, contoh di kanan bawah */
-            right: 90px; /* Agar tidak tumpang tindih dengan fab-theme */
-        }
-
-        /* Styling for the Live Visitors panel */
-        #live-visitors-panel {
-            top: 50%;
-            left: 50%;
-            width: 350px; /* Sesuaikan lebar */
-            max-width: 90vw;
-            height: 60vh; /* Sesuaikan tinggi */
-            transform: translate(-50%, -50%) scale(0.8); /* Awalnya lebih kecil dan tidak di tengah */
-            opacity: 0;
-            pointer-events: none; /* Tidak bisa diklik saat tidak aktif */
-            border-radius: 15px;
-            padding: 0; /* Padding sudah diatur di inner div */
-            display: flex; /* Untuk flexbox layout di dalamnya */
-            flex-direction: column;
-        }
-
-        #live-visitors-panel.active {
-            transform: translate(-50%, -50%) scale(1); /* Penuh dan di tengah saat aktif */
-            opacity: 1;
-            pointer-events: all; /* Bisa diklik saat aktif */
-        }
-
-        /* Adjust desktop layout to hide the new FAB */
-        body.desktop-layout #fab-live-visitors {
-            display: none;
-        }
-
-        /* Ensure desktop panel style for consistency */
-        body.desktop-layout #live-visitors-panel {
-            position: static;
-            transform: none !important;
-            height: auto;
-            width: auto;
-            max-height: none;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            opacity: 1; /* Selalu terlihat dalam tata letak desktop jika diimplementasikan sebagai panel statis */
-            pointer-events: all;
-        }
-
-        /* Styling for individual visitor list items */
-        #visitor-list li {
-            background: rgba(0, 168, 255, 0.1); /* Warna latar belakang item */
-            border: 1px solid rgba(0, 168, 255, 0.2);
+        .stat-box {
+            background-color: var(--dark);
+            padding: 15px 25px;
             border-radius: 8px;
-            margin-bottom: 10px;
-            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-width: 150px;
+        }
+
+        .stat-box h4 {
+            margin: 0 0 10px 0;
+            color: var(--text-secondary);
+            font-size: 1em;
+        }
+
+        .stat-box p {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        #live-visitor-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid rgba(142, 68, 173, 0.3);
+        }
+
+        #live-visitor-list li {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
             gap: 5px;
+        }
+
+        #live-visitor-list li:last-child {
+            border-bottom: none;
+        }
+
+        #live-visitor-list li strong {
+            color: var(--primary);
+        }
+
+        #live-visitor-list li span {
+            color: var(--light);
+        }
+
+        .refresh-info {
+            margin-top: 20px;
+            text-align: center;
             font-size: 0.9em;
-            color: var(--text-primary);
+            color: var(--text-secondary);
         }
 
-        #visitor-list li strong {
-            color: var(--accent); /* Warna untuk label */
+        /* Settings Panel Specific */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
 
-        #visitor-list li span {
-            word-break: break-all; /* Agar teks panjang tidak keluar dari container */
+        .settings-section {
+            background-color: var(--dark);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* --- START: CSS dari index (8).html, disesuaikan untuk panel Ezra --- */
-        #ezra-content-panel {
-            top: 0; left: 0; width: 100%; height: 100%;
-            transform: translateY(-100%); /* Start hidden from top */
+        .settings-section h3 {
+            color: var(--accent);
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 168, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
+            color: var(--light);
+            font-size: 1em;
+            margin-right: 15px;
+        }
+
+        .setting-item input[type="checkbox"] {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            -webkit-appearance: none;
+            background: var(--danger);
+            outline: none;
+            border-radius: 20px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="checkbox"]:checked {
+            background: var(--success);
+        }
+
+        .setting-item input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 20px;
+            top: 1px;
+            left: 1px;
+            background: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s ease;
+        }
+
+        .setting-item input[type="checkbox"]:checked::before {
+            left: 21px;
+        }
+
+        .setting-item select, .setting-item input[type="text"] {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--primary);
+            color: var(--light);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            outline: none;
+        }
+
+        /* Floating Action Buttons (FABs) */
+        .fab-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* Allow scrolling for content */
-            padding: 20px; /* Add padding to the panel itself */
+            gap: 15px;
+            z-index: 999;
         }
 
-        #ezra-content-panel.active {
-            transform: translateY(0); /* Slide in from top */
+        .fab {
+            background-color: var(--primary);
+            color: var(--light);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
 
-        /* Styles for the inner content of the Ezra panel, scoped to #ezra-inner-content */
-        #ezra-inner-content {
-            flex-grow: 1; /* Allow content to expand */
-            overflow-y: auto; /* Allow internal scrolling if content is long */
+        .fab:hover {
+            background-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .fab-text {
+            font-size: 0.8em;
+            margin-top: 5px;
+            color: var(--light);
+        }
+
+        /* Overlay for auth and private */
+        .auth-overlay, .private-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+        }
+
+        .auth-overlay.active, .private-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .auth-container, .private-container {
+            background-color: var(--bg-panel);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .auth-container h2, .private-container h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .auth-container input[type="password"], .private-container input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            background-color: var(--dark);
+            color: var(--light);
+            font-size: 1em;
+            outline: none;
+        }
+
+        .auth-container button, .private-container button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-container button:hover, .private-container button:hover {
+            background-color: var(--primary);
+        }
+
+        /* Alert Box Styling */
+        .alert-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .alert-box.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        /* Ezra Panel Specific Styles */
+        .ezra-panel-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        /* Add styles from index (8).html that are general and not conflicting */
+        /* These styles need to be carefully merged or considered if they override index (7).html base styles */
+        /* For simplicity, I'll assume that the styles from index (8).html's body are included.
+           Since it's a "hidden panel," its styles should primarily apply to elements within that panel.
+           I'll inline them here as a large block. */
+        /* General Body Styles */
+        body {
+            margin: 0;
             font-family: 'Space Mono', monospace; /* Futuristic font */
             color: #E0E0E0; /* Light gray for text on dark background */
-            background-color: #000005; /* Near black for deep space background, applied to inner content */
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="%2300FFFF"><circle cx="12" cy="12" r="2" opacity="0.8"/><path d="M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12" stroke="%2300FFFF" stroke-width="2"/></svg>') 12 12, auto; /* Custom futuristic cursor */
-        }
-
-        #ezra-inner-content .header {
-            text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(180deg, rgba(0,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
-            border-bottom: 1px solid rgba(0,255,255,0.2);
-            margin-bottom: 30px;
-        }
-        #ezra-inner-content .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-        }
-        #ezra-inner-content .header .tagline {
-            font-size: 1.2em;
-            color: #00FFFF; /* Cyan for emphasis */
-        }
-
-        #ezra-inner-content .glow-text {
-            text-shadow: 0 0 8px rgba(0,255,255,0.7), 0 0 20px rgba(0,255,255,0.5);
-            color: #E0E0E0;
-            transition: text-shadow 0.3s ease;
-        }
-        #ezra-inner-content .glow-text:hover {
-            text-shadow: 0 0 10px rgba(0,255,255,0.9), 0 0 30px rgba(0,255,255,0.7);
-        }
-
-        #ezra-inner-content .orb-section {
+            background-color: #000005; /* Near black for deep space background */
+            overflow: auto; /* Allow scrolling for the large content area */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="%2300FFFF"><circle cx="12" cy="12" r="2" opacity="0.8"/><path d="M12 0L12 6M0 12L6 12M12 18L12 24M18 12L24 12" stroke="%2300FFFF" stroke-width="2" opacity="0.6"/></svg>') 15 15, auto; /* Custom pointer */
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 50px;
-        }
-        #ezra-inner-content .orb-container {
-            width: 200px;
-            height: 200px;
-            perspective: 800px;
-            margin-bottom: 30px;
-        }
-        #ezra-inner-content .orb {
-            width: 100%;
-            height: 100%;
+            min-width: 2500px; /* Force a very wide content area */
+            min-height: 1800px; /* Force a very tall content area */
             position: relative;
-            transform-style: preserve-3d;
-            animation: rotateOrb 20s infinite linear;
         }
-        #ezra-inner-content .orb-inner {
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, #00FFFF, #00BFFF, #0000AA); /* Gradient for the orb */
-            border-radius: 50%;
-            box-shadow: 0 0 50px rgba(0,255,255,0.8), inset 0 0 20px rgba(255,255,255,0.5);
+        .particle {
+    position: absolute;
+    background: #00FFFF; /* Cyan */
+    border-radius: 50%;
+    animation: floatAndFade 15s infinite ease-in-out;
+    opacity: 0;
+}
+
+@keyframes floatAndFade {
+    0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+    25% { opacity: 0.8; }
+    50% { transform: translate(calc(var(--rand-x) * 1px), calc(var(--rand-y) * 1px)) scale(var(--rand-scale)); opacity: 0.6; }
+    75% { opacity: 0.4; }
+    100% { transform: translate(calc(var(--rand-x) * 2px), calc(var(--rand-y) * 2px)) scale(0); opacity: 0; }
+}
+
+        /* --- Cosmic Background (Fixed Stars) --- */
+        .cosmic-background {
+            position: fixed; /* Fixed to viewport */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -2; /* Deepest background */
+            background-color: #000005; /* Black */
+            filter: brightness(0.9);
+        }
+
+        .cosmic-background::before {
+            content: '';
             position: absolute;
-            transform: rotateX(20deg) rotateY(30deg); /* Initial tilt */
-            animation: pulseGlow 3s infinite alternate;
-        }
-        @keyframes rotateOrb {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-        @keyframes pulseGlow {
-            from { box-shadow: 0 0 50px rgba(0,255,255,0.8), inset 0 0 20px rgba(255,255,255,0.5); }
-            to { box-shadow: 0 0 70px rgba(0,255,255,1), inset 0 0 30px rgba(255,255,255,0.7); }
-        }
-
-        #ezra-inner-content .action-btn {
-            background-color: #00FFFF; /* Cyan */
-            color: #000005; /* Near black */
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            font-family: 'Space Mono', monospace;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,255,255,0.3);
-            margin: 10px;
-        }
-        #ezra-inner-content .action-btn:hover {
-            background-color: #00BFFF; /* Lighter cyan */
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,255,255,0.5);
-        }
-        #ezra-inner-content .action-btn.edit-btn i {
-            margin-right: 8px;
-        }
-
-        #ezra-inner-content .profile-section {
-            max-width: 800px;
-            margin: 0 auto 50px auto;
-            padding: 0 20px;
-        }
-        #ezra-inner-content .content-box {
-            background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent black */
-            border: 1px solid rgba(0,255,255,0.3);
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 0 25px rgba(0,255,255,0.2);
-            line-height: 1.8;
-            white-space: pre-wrap; /* Preserve formatting for loaded content */
-        }
-
-        #ezra-inner-content .contact-section {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        #ezra-inner-content .social-icons {
-            margin-top: 20px;
-        }
-        #ezra-inner-content .social-icon {
-            color: #00FFFF; /* Cyan */
-            font-size: 2.5em;
-            margin: 0 15px;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-        #ezra-inner-content .social-icon:hover {
-            color: #00BFFF; /* Lighter cyan */
-            transform: scale(1.2);
-        }
-
-        #ezra-inner-content .footer {
-            text-align: center;
-            padding: 30px 20px;
-            background: linear-gradient(0deg, rgba(0,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
-            border-top: 1px solid rgba(0,255,255,0.2);
-            font-size: 0.9em;
-            color: #999;
-        }
-
-        /* Editor Overlay Styles */
-        #ezra-inner-content .editor-overlay {
-            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
+            background: url('http://www.script-tutorials.com/demos/360/images/twinkling.png') repeat top center;
+            background-size: 1000px 1000px;
+            animation: moveStars 150s linear infinite;
+            opacity: 0.8;
+            z-index: 1;
+        }
+
+        .cosmic-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('http://www.script-tutorials.com/demos/360/images/stars.png') repeat top center;
+            background-size: 800px 800px;
+            animation: moveStars 200s linear infinite reverse;
+            opacity: 0.6;
+            z-index: 2;
+        }
+
+        @keyframes moveStars {
+            from { background-position: 0 0; }
+            to { background-position: -10000px 5000px; }
+        }
+
+        /* --- Authentication Overlay & Wormhole --- */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.98);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        #ezra-inner-content .editor-overlay.active {
+            z-index: 1000;
             opacity: 1;
-            pointer-events: all;
+            visibility: visible;
+            transition: opacity 0.5s ease;
         }
-        #ezra-inner-content .editor-modal {
-            background-color: #1a1a2e; /* Darker background for modal */
-            border: 1px solid #00FFFF;
-            border-radius: 10px;
-            padding: 30px;
-            width: 90%;
-            max-width: 700px;
-            box-shadow: 0 0 30px rgba(0,255,255,0.5);
-            transform: translateY(-20px);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        #ezra-inner-content .editor-overlay.active .editor-modal {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        #ezra-inner-content .editor-modal h2 {
+
+        .auth-container {
+            background: radial-gradient(circle at center, #1e0033, #0a001a);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), inset 0 0 20px rgba(138, 43, 226, 0.3);
             text-align: center;
-            color: #00FFFF;
+            width: 90%;
+            max-width: 450px;
+            color: #E0E0E0;
+            position: relative;
+            transform: scale(0.9);
+            opacity: 0;
+            animation: activatePortal 1s ease-out 0.2s forwards;
+            border: 2px solid #8A2BE2;
+        }
+
+        .auth-container h2 {
+            color: #E6E6FA;
+            font-size: 2.8em;
+            text-shadow: 0 0 15px #DA70D6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .auth-container p {
+            color: #C0C0C0;
+            font-size: 1.1em;
             margin-bottom: 25px;
         }
-        #ezra-inner-content .editor-modal textarea {
-            width: calc(100% - 20px); /* Adjust for padding */
-            height: 300px;
-            background-color: #0a0a1a; /* Even darker for textarea */
-            border: 1px solid rgba(0,255,255,0.4);
-            color: #E0E0E0;
-            padding: 10px;
-            font-family: 'Space Mono', monospace;
-            font-size: 1em;
-            resize: vertical;
-            margin-bottom: 20px;
-            border-radius: 5px;
+
+        .auth-input, .private-auth-input {
+            width: calc(100% - 24px);
+            padding: 14px;
+            margin-bottom: 25px;
+            border: 2px solid #8A2BE2;
+            border-radius: 8px;
+            font-size: 1.3em;
+            background-color: rgba(25, 0, 40, 0.7);
+            color: #DDA0DD;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .auth-input::placeholder, .private-auth-input::placeholder {
+            color: #B068D8;
+        }
+
+        .auth-input:focus, .private-auth-input:focus {
+            border-color: #DA70D6;
+            box-shadow: 0 0 15px rgba(218, 112, 214, 0.7), inset 0 0 10px rgba(218, 112, 214, 0.5);
             outline: none;
         }
-        #ezra-inner-content .editor-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-        }
-        #ezra-inner-content .editor-actions .action-btn {
-            margin: 0; /* Override margin from general .action-btn */
+
+        .auth-button {
+            background: linear-gradient(90deg, #DA70D6, #8A2BE2);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.5);
+            width: 100%;
         }
 
-        /* Responsive Adjustments for Ezra Panel */
-        @media (max-width: 768px) {
-            #ezra-inner-content .header h1 {
-                font-size: 2.5em;
+        .auth-button:hover {
+            background: linear-gradient(90deg, #8A2BE2, #DA70D6);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(138, 43, 226, 0.7);
+        }
+
+        /* Wormhole Animation */
+        #wormholeOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.8), rgba(0,0,0,0.95)); 
+            z-index: 1001; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .wormhole-effect {
+            position: absolute;
+            width: 100px; 
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(0, 255, 255, 0.5) 0%, rgba(0, 191, 255, 0.3) 50%, transparent 100%);
+            box-shadow: 0 0 80px rgba(0, 255, 255, 0.8);
+            transform: scale(0);
+            opacity: 0;
+            animation: none; 
+        }
+
+        @keyframes wormholeZoomIn {
+            0% { transform: scale(0) translateZ(0); opacity: 0; }
+            50% { transform: scale(1.5) translateZ(500px); opacity: 1; }
+            100% { transform: scale(3) translateZ(1000px); opacity: 0; } 
+        }
+
+        .wormhole-active #wormholeOverlay {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .wormhole-active .auth-overlay {
+            opacity: 0; 
+            pointer-events: none;
+        }
+
+        /* --- Main Content Area - The Cosmic Orb --- */
+        #cosmicOrbContainer {
+            position: relative; /* Allows positioning of elements inside */
+            width: 1200px; /* Fixed size for the orb "world" */
+            height: 1200px;
+            border-radius: 50%; /* Make it a perfect circle */
+            background: radial-gradient(circle at center, rgba(0, 0, 10, 0.7), rgba(0, 0, 0, 0.9)); /* Transparent center, darker edges */
+            box-shadow: 0 0 100px rgba(0, 255, 255, 0.5), inset 0 0 80px rgba(0, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Hide anything outside the orb */
+            z-index: 10;
+            opacity: 0; /* Hidden initially */
+            visibility: hidden;
+            transition: opacity 1s ease;
+            transform-origin: center center;
+            /* Allow zoom-out and scroll behavior */
+            will-change: transform; /* Hint for performance */
+        }
+
+        #cosmicOrbContainer.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Elements inside the orb */
+        .orb-element {
+            position: absolute;
+            background: rgba(10, 0, 30, 0.8); /* Dark purple-blue background */
+            border: 2px solid #8A2BE2;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4), inset 0 0 10px rgba(138, 43, 226, 0.2);
+            border-radius: 50%; /* All elements are circular */
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+            will-change: transform, box-shadow;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow: hidden; /* Ensure content stays within circle */
+        }
+
+        .orb-element:hover {
+            transform: scale(1.08); /* Slight enlargement */
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.4);
+            border-color: #00FFFF;
+            background: rgba(0, 5, 20, 0.9); /* Darker on hover */
+            z-index: 101; /* Bring forward */
+        }
+
+        /* Profile Orb (Central Object) */
+        #profile-orb {
+            width: 300px;
+            height: 300px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center it */
+            background: radial-gradient(circle at center, rgba(10, 0, 30, 0.95), rgba(0, 0, 10, 0.98));
+            border: 5px solid #00FFFF;
+            box-shadow: 0 0 60px rgba(0, 255, 255, 0.6), inset 0 0 30px rgba(0, 255, 255, 0.4);
+            padding: 0;
+            z-index: 100;
+        }
+
+        #profile-orb .profile-pic-container {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 4px solid #DA70D6;
+            box-shadow: 0 0 25px rgba(218, 112, 214, 0.8);
+            display: flex; /* For centering image */
+            justify-content: center;
+            align-items: center;
+        }
+        #profile-orb .profile-pic-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        #profile-orb h1 {
+            font-size: 2em;
+            margin: 0 0 5px 0;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        #profile-orb p {
+            font-size: 1em;
+            color: #C0C0C0;
+            margin: 0;
+            white-space: nowrap; /* Prevent line breaks for small text */
+        }
+
+        /* Social/Action Buttons - Arranged in a circle */
+        .action-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #FF6F61, #DE6262); 
+            color: white;
+            box-shadow: 0 5px 20px rgba(255, 111, 97, 0.5);
+            font-size: 0.9em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            text-align: center;
+            border: 2px solid #FF6F61;
+            padding: 0; /* No padding, width/height control size */
+        }
+
+        .action-button:hover {
+            background: linear-gradient(45deg, #DE6262, #FF6F61);
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(255, 111, 97, 0.7);
+            border-color: #FFA07A;
+        }
+        .action-button i {
+            margin-bottom: 5px;
+            font-size: 1.8em;
+        }
+        /* New button style for "Create New Galaxy" */
+        #btn-create-galaxy {
+            background: linear-gradient(45deg, #FFA07A, #FF6F61); /* Orange/Red gradient */
+            border: 2px solid #FFA07A;
+            box-shadow: 0 5px 20px rgba(255, 160, 122, 0.5);
+        }
+        #btn-create-galaxy:hover {
+            background: linear-gradient(45deg, #FF6F61, #FFA07A);
+            box-shadow: 0 8px 30px rgba(255, 160, 122, 0.7);
+            border-color: #FF8C00;
+        }
+
+
+        /* Stat Displays - Smaller circles orbiting the profile */
+        .stat-display {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(10, 0, 30, 0.7);
+            border: 2px solid #00FFFF;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8em;
+            cursor: default; /* Not clickable like buttons */
+            padding: 0;
+        }
+        .stat-display .count {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #92FE9D; /* Greenish */
+            text-shadow: 0 0 8px rgba(146, 254, 157, 0.7);
+            margin-bottom: 3px;
+        }
+        .stat-display .label {
+            color: #87CEEB; /* Light blue */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Highlights Section - Grouped as one element, then individual highlights inside */
+        #highlights-section {
+            width: 250px; /* Placeholder size, actual layout inside */
+            height: 250px;
+            background: rgba(0, 5, 20, 0.7);
+            border-radius: 50%;
+            border: 2px dashed rgba(0, 255, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+            position: absolute; /* Will be positioned relative to orb center */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .highlight-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, #2a004a, #0d002a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 3px solid #DA70D6;
+            box-shadow: 0 0 15px rgba(218, 112, 214, 0.6);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            z-index: 100;
+        }
+        .highlight-item:hover {
+            transform: scale(1.1);
+            border-color: #00FFFF;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+        }
+        .highlight-item img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .highlight-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #B0C4DE;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .highlight-item:hover .highlight-label {
+            opacity: 1;
+        }
+
+        /* Content View (Main Content) - A large, central "viewscreen" */
+        #content-view {
+            position: absolute;
+            width: 1000px; /* Fixed size, user can zoom/scroll */
+            height: 600px;
+            background: rgba(0, 0, 15, 0.9);
+            border: 3px solid #00FFFF;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.6), inset 0 0 30px rgba(0, 255, 255, 0.4);
+            border-radius: 20px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%); /* Centered within the orb */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 150; /* Above all other elements when active */
+        }
+
+        #content-view.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #content-view-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: rgba(0,0,30,0.7);
+            border-radius: 10px;
+            padding: 8px;
+        }
+
+        .content-tab-item {
+            padding: 12px 25px;
+            cursor: pointer;
+            color: #88AABB;
+            font-weight: 600;
+            transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+            border-radius: 8px;
+            margin: 0 5px;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .content-tab-item.active {
+            color: #00FFFF;
+            background-color: rgba(0, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .content-tab-item:hover:not(.active) {
+            color: #FFD700;
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+        .content-tab-item i { margin-right: 8px; }
+
+        #content-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columns for desktop */
+            gap: 15px;
+            overflow-y: auto; 
+            padding-right: 10px; 
+            flex-grow: 1; 
+        }
+        #content-grid::-webkit-scrollbar { width: 8px; }
+        #content-grid::-webkit-scrollbar-track { background: #0a001a; border-radius: 10px; }
+        #content-grid::-webkit-scrollbar-thumb { background-color: #00FFFF; border-radius: 10px; border: 2px solid #0a001a; }
+
+        .post-item {
+            width: 100%;
+            padding-bottom: 100%; /* For aspect ratio */
+            position: relative;
+            overflow: hidden;
+            background-color: #1a1a2e;
+            border-radius: 50%; /* Make post items circular */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 8px rgba(0, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .post-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4), inset 0 0 15px rgba(0, 255, 255, 0.2);
+            border-color: #00FFFF;
+        }
+
+        .post-item img,
+        .post-item video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 50%; /* Make media inside circular */
+        }
+        .post-item audio {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 50px; /* Adjust height for audio player */
+            background-color: rgba(0, 5, 20, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            padding: 5px;
+        }
+
+        #close-content-view {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 69, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 200; 
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
+        }
+        #close-content-view:hover {
+            background-color: rgba(255, 69, 0, 1);
+            transform: rotate(180deg) scale(1.1);
+        }
+
+
+        /* Story/Private Content Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(12px) brightness(0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: linear-gradient(160deg, #0f1f3a, #050f1a);
+            border: 4px solid #00FFFF;
+            box-shadow: 0 0 45px rgba(0, 255, 255, 0.8), inset 0 0 25px rgba(0, 255, 255, 0.4);
+            height: 90vh;
+            max-width: 700px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transform: scale(0.9);
+            opacity: 0;
+            animation: enterFromSpace 0.6s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        
+        .modal-content.large-content-modal {
+            max-width: 900px; /* Make it wider for upload form */
+            max-height: 95vh;
+        }
+
+
+        .story-media, .private-media, .upload-preview-media {
+            max-width: 95%;
+            max-height: calc(100% - 120px);
+            object-fit: contain;
+            display: block;
+            margin: auto;
+            border-radius: 10px; /* Still rounded rectangles for media in modals */
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .upload-preview-media.audio-preview {
+            max-height: 80px; /* For audio player height */
+            width: 95%;
+            margin-top: 15px;
+        }
+
+        .story-navigation-btn, .private-navigation-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 191, 255, 0.7);
+            color: white;
+            border: none;
+            padding: 15px 22px;
+            font-size: 1.8em;
+            cursor: pointer;
+            border-radius: 50%;
+            z-index: 10;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .story-navigation-btn:hover, .private-navigation-btn:hover {
+            background-color: rgba(0, 191, 255, 1);
+            transform: scale(1.15) rotate(10deg);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        }
+
+        #storyPrevBtn, #privatePrevBtn { left: 10px; }
+        #storyNextBtn, #privateNextBtn { right: 10px; }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+          right: 15px;
+            background: rgba(255, 69, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
+        }
+
+        .modal-close-btn:hover {
+            background-color: rgba(255, 69, 0, 1);
+            transform: rotate(180deg) scale(1.1);
+        }
+
+        .private-text-content {
+            padding: 35px;
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #C0C0C0;
+            text-align: center;
+            background: rgba(0, 0, 20, 0.7);
+            border-radius: 15px;
+            margin: 30px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-shadow: inset 0 0 25px rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            max-height: calc(100% - 60px); 
+            overflow-y: auto; 
+        }
+
+        /* --- Animations --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes activatePortal { /* For initial auth container */
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes enterFromSpace {
+            from { transform: scale(0.8) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Responsive considerations for a large fixed orb */
+        /* For smaller screens, the user will inherently need to zoom/scroll */
+        @media (max-width: 1400px) {
+            #cosmicOrbContainer {
+                width: 1000px;
+                height: 1000px;
             }
-            #ezra-inner-content .header .tagline {
-                font-size: 1em;
-            }
-            #ezra-inner-content .orb-container {
-                width: 150px;
-                height: 150px;
-            }
-            #ezra-inner-content .action-btn {
-                padding: 10px 20px;
-                font-size: 0.9em;
-            }
-            #ezra-inner-content .content-box {
-                padding: 20px;
-            }
-            #ezra-inner-content .social-icon {
-                font-size: 2em;
-                margin: 0 10px;
-            }
-            #ezra-inner-content .editor-modal {
-                padding: 20px;
-            }
-            #ezra-inner-content .editor-modal textarea {
+            #profile-orb {
+                width: 250px;
                 height: 250px;
             }
-            #ezra-inner-content .editor-actions {
-                justify-content: center;
+            #profile-orb .profile-pic-container {
+                width: 140px;
+                height: 140px;
             }
-        }
-        @media (max-width: 480px) {
-            #ezra-inner-content .header h1 {
-                font-size: 2em;
-            }
-            #ezra-inner-content .header .tagline {
-                font-size: 0.9em;
-            }
-            #ezra-inner-content .orb-container {
-                width: 120px;
-                height: 120px;
-            }
-            #ezra-inner-content .action-btn {
-                padding: 8px 15px;
+            .action-button {
+                width: 100px;
+                height: 100px;
                 font-size: 0.8em;
             }
-            #ezra-inner-content .content-box {
+            .action-button i {
+                font-size: 1.6em;
+            }
+            .stat-display {
+                width: 80px;
+                height: 80px;
+                font-size: 0.7em;
+            }
+            .stat-display .count {
+                font-size: 1.3em;
+            }
+            #highlights-section {
+                width: 220px;
+                height: 220px;
+                gap: 10px;
+            }
+            .highlight-item {
+                width: 70px;
+                height: 70px;
+            }
+            .highlight-item img {
+                width: 60px;
+                height: 60px;
+            }
+            #content-view {
+                width: 800px;
+                height: 500px;
                 padding: 15px;
             }
-            #ezra-inner-content .social-icon {
-                font-size: 1.8em;
-                margin: 0 8px;
+            #content-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-            #ezra-inner-content .editor-modal textarea {
-                height: 200px;
+            .content-tab-item {
+                padding: 10px 18px;
+                font-size: 0.9em;
             }
         }
-        /* --- END: CSS dari index (8).html, disesuaikan untuk panel Ezra --- */
 
-        /* FAB for Ezra Panel */
-        #fab-ezra-panel {
-            bottom: 20px; /* Adjust position as needed, e.g., next to live visitors or a new spot */
-            right: 160px; /* Example position */
+        @media (max-width: 900px) {
+            /* On very small screens, the orb will be larger than viewport, requiring more zoom/scroll */
+            #cosmicOrbContainer {
+                width: 800px;
+                height: 800px;
+            }
+            #profile-orb {
+                width: 200px;
+                height: 200px;
+            }
+            #profile-orb .profile-pic-container {
+                width: 100px;
+                height: 100px;
+            }
+            #profile-orb h1 {
+                font-size: 1.6em;
+            }
+            .action-button {
+                width: 90px;
+                height: 90px;
+                font-size: 0.75em;
+            }
+            .action-button i {
+                font-size: 1.5em;
+            }
+            .stat-display {
+                width: 70px;
+                height: 70px;
+                font-size: 0.65em;
+            }
+            .stat-display .count {
+                font-size: 1.2em;
+            }
+            #highlights-section {
+                width: 180px;
+                height: 180px;
+                gap: 8px;
+            }
+            .highlight-item {
+                width: 55px;
+                height: 55px;
+            }
+            .highlight-item img {
+                width: 48px;
+                height: 48px;
+            }
+            #content-view {
+                width: 90vw; /* Use viewport width here, still allows scroll/zoom */
+                height: 70vh;
+                max-width: 600px;
+                max-height: 500px;
+            }
+            #content-grid {
+                grid-template-columns: repeat(1, 1fr); /* Single column for mobile */
+            }
+        }
+
+        /* --- Editor Button --- */
+        #editorToggleBtn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #DA70D6, #8A2BE2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.5);
+            transition: all 0.3s ease;
+            z-index: 999; /* Ensure it's above other elements */
+            display: none; /* Hidden by default, shown after main auth */
+        }
+
+        #editorToggleBtn:hover {
+            background: linear-gradient(90deg, #8A2BE2, #DA70D6);
+            transform: translateX(-50%) translateY(-5px);
+            box-shadow: 0 8px 30px rgba(138, 43, 226, 0.7);
+        }
+
+        /* --- Editor Overlay --- */
+        #editorOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #editorOverlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .editor-modal-content {
+            background: radial-gradient(circle at center, #1e0033, #0a001a);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), inset 0 0 20px rgba(138, 43, 226, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+            color: #E0E0E0;
+            position: relative;
+            transform: scale(0.9);
+            animation: activatePortal 0.6s ease-out forwards;
+            border: 2px solid #8A2BE2;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .editor-modal-content h3 {
+            color: #E6E6FA;
+            font-size: 2em;
+            text-shadow: 0 0 10px #DA70D6;
+            margin-bottom: 20px;
+        }
+
+        .editor-section {
+            background: rgba(0, 0, 15, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: inset 0 0 10px rgba(138, 43, 226, 0.1);
+            text-align: left;
+        }
+
+        .editor-section label {
+            display: block;
+            margin-bottom: 8px;
+            color: #B0C4DE;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .editor-section input[type="text"],
+        .editor-section input[type="number"],
+        .editor-section input[type="file"],
+        .editor-section textarea,
+        .editor-section select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #00FFFF;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 50, 0.6);
+            color: #E0E0E0;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .editor-section input[type="file"] {
+            border: none;
+            padding: 0;
+        }
+
+        .editor-section input[type="text"]:focus,
+        .editor-section input[type="number"]:focus,
+        .editor-section textarea:focus,
+        .editor-section select:focus {
+            border-color: #DA70D6;
+            box-shadow: 0 0 10px rgba(218, 112, 214, 0.5);
+            outline: none;
+        }
+
+        .editor-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .editor-save-btn, .editor-add-btn {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .editor-save-btn:hover, .editor-add-btn:hover {
+            background: linear-gradient(90deg, #8BC34A, #4CAF50);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .editor-cancel-btn {
+            background: linear-gradient(90deg, #FF6F61, #DE6262);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
+        }
+
+        .editor-cancel-btn:hover {
+            background: linear-gradient(90deg, #DE6262, #FF6F61);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 111, 97, 0.6);
+        }
+
+        .editor-modal-content .modal-close-btn { /* Style for close button inside editor modal */
+            top: 10px;
+            right: 10px;
+            width: 35px;
+            height: 35px;
+            font-size: 1.5em;
+        }
+
+        /* Styles for media list in editor */
+        .media-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px dashed rgba(0, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .media-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #00FFFF;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        .media-item img, .media-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .media-item audio {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 30, 0.8);
+            border-radius: 50%; /* Keep circular container */
+            padding: 10px; /* Add padding for controls */
+        }
+        .media-item .delete-media-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        /* --- New Upload Modal Styles --- */
+        #uploadModalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 1005; /* Higher than editor overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #uploadModalOverlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .upload-modal-content {
+            background: radial-gradient(circle at center, #1e0033, #0a001a);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 600px; /* Adjust size as needed */
+            color: #E0E0E0;
+            position: relative;
+            transform: scale(0.9);
+            animation: activatePortal 0.6s ease-out forwards;
+            border: 2px solid #00FFFF;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .upload-modal-content h3 {
+            color: #00FFFF;
+            font-size: 2.2em;
+            text-shadow: 0 0 10px #00FFFF;
+            margin-bottom: 25px;
+        }
+
+        .upload-section {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .upload-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #B0C4DE;
+        }
+
+        .upload-section input[type="text"],
+        .upload-section select,
+        .upload-section input[type="file"] {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #00FFFF;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 30, 0.7);
+            color: #E0E0E0;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .upload-section input[type="file"] {
+            padding: 0; /* file input styling is tricky, remove default padding */
+            border: none;
+            background: none;
+        }
+        /* Custom file input styling */
+        .custom-file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            border: 1px solid #00FFFF;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 30, 0.7);
+            color: #E0E0E0;
+            padding: 10px;
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .custom-file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            font-size: 100px; /* Make it large enough to cover the wrapper */
+        }
+        .file-name-display {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #C0C0C0;
+        }
+        .custom-file-input-wrapper i {
+            margin-right: 10px;
+            color: #00FFFF;
+        }
+
+        .upload-section input[type="text"]:focus,
+        .upload-section select:focus {
+            border-color: #DA70D6;
+            box-shadow: 0 0 10px rgba(218, 112, 214, 0.5);
+            outline: none;
+        }
+
+        .upload-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        .upload-btn:hover {
+            background: linear-gradient(90deg, #8BC34A, #4CAF50);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .upload-cancel-btn {
+            background: linear-gradient(90deg, #FF6F61, #DE6262);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
+        }
+        .upload-cancel-btn:hover {
+            background: linear-gradient(90deg, #DE6262, #FF6F61);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 111, 97, 0.6);
+        }
+        /* END INLINE CSS */
+    </style>
+</head>
+<body>
+    <div id="authOverlay" class="auth-overlay active">
+        <div class="auth-container">
+            <h2>Enter Private Key</h2>
+            <input type="password" id="privateKeyInput" placeholder="Private Key">
+            <button id="submitKeyBtn">Submit</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DB</div>
+            <nav class="nav-icons">
+                <a href="#" class="nav-icon active" data-panel="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span class="tooltip">Dashboard</span>
+                </a>
+                <a href="#" class="nav-icon" data-panel="editor">
+                    <i class="fas fa-code"></i>
+                    <span class="tooltip">Code Editor</span>
+                </a>
+                <a href="#" class="nav-icon" data-panel="visitors">
+                    <i class="fas fa-users"></i>
+                    <span class="tooltip">Live Visitors</span>
+                </a>
+                <a href="#" class="nav-icon hidden" id="ezra-nav-icon" data-panel="ezra-panel">
+                    <i class="fas fa-globe"></i>
+                    <span class="tooltip">Cosmic Orb</span>
+                </a>
+            </nav>
+            <div class="settings-icon">
+                <i class="fas fa-cog" data-panel="settings"></i>
+                <span class="tooltip">Settings</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="dashboard-panel" class="panel active">
+                <div class="panel-header">
+                    <h2>Dashboard Overview</h2>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search...">
+                    </div>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Total Revenue</h3>
+                        </div>
+                        <div class="card-content">$85,400</div>
+                        <div class="card-footer">Up 12% from last month</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-users"></i>
+                            <h3>New Customers</h3>
+                        </div>
+                        <div class="card-content">1,250</div>
+                        <div class="card-footer">Up 8% from last month</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-box"></i>
+                            <h3>Products Sold</h3>
+                        </div>
+                        <div class="card-content">7,890</div>
+                        <div class="card-footer">Up 15% from last month</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-ticket-alt"></i>
+                            <h3>Support Tickets</h3>
+                        </div>
+                        <div class="card-content">45</div>
+                        <div class="card-footer">2 new this week</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="editor-panel" class="panel">
+                <div class="panel-header">
+                    <h2>Code Editor</h2>
+                    <div class="editor-controls">
+                        <button id="runCodeBtn"><i class="fas fa-play"></i> Run</button>
+                        <button id="saveCodeBtn"><i class="fas fa-save"></i> Save</button>
+                        <button id="loadCodeBtn"><i class="fas fa-folder-open"></i> Load</button>
+                        <button id="newDocBtn"><i class="fas fa-file"></i> New</button>
+                        <input type="file" id="uploadFileCode" accept=".html,.css,.js" style="display: none;">
+                        <button id="uploadBtn"><i class="fas fa-upload"></i> Upload File</button>
+                        <button id="addMediaBtn"><i class="fas fa-photo-video"></i> Add Media Link</button>
+                        <input type="file" id="uploadMediaFile" accept="image/*,video/*,audio/*" style="display: none;">
+                    </div>
+                </div>
+                <div class="editor-container">
+                    <div class="code-editor">
+                        <textarea id="unified-editor" spellcheck="false">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Document</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            color: #007bff;
         }
     </style>
 </head>
-<body class="">
-    <div class="main-container">
-        <div class="panel" id="contribution-panel-desktop" style="display: none;">
-             </div>
-    </div>
-    <div class="panel" id="editor-panel">
-        <button class="panel-close-btn" data-panel="editor-panel"><i class="fas fa-times"></i></button>
-        <div class="editor-toolbar">
-            <button id="editor-run"><i class="fas fa-play"></i> Run</button>
-            <button id="editor-save"><i class="fas fa-save"></i> Save</button>
-            <button id="editor-load"><i class="fas fa-folder-open"></i> Load</button>
-            <button id="editor-new"><i class="fas fa-file"></i> New</button>
-            <button id="editor-add-media"><i class="fas fa-photo-video"></i> Add Media</button>
-        </div>
-        <div class="editor-main">
-            <div class="editor-code-area">
-                <div class="editor-panes">
-                    <div class="editor-pane">
-                        <label for="html-editor">HTML</label>
-                        <textarea id="html-editor" spellcheck="false"></textarea>
+<body>
+    <h1>Hello, Editor!</h1>
+    <p>This is your live code editor.</p>
+    <script>
+        console.log("Welcome to the unified editor!");
+    </script>
+</body>
+</html>
+                        </textarea>
                     </div>
-                    <div class="editor-pane">
-                        <label for="css-editor">CSS</label>
-                        <textarea id="css-editor" spellcheck="false"></textarea>
-                    </div>
-                    <div class="editor-pane">
-                        <label for="js-editor">JAVASCRIPT</label>
-                        <textarea id="js-editor" spellcheck="false"></textarea>
-                    </div>
+                    <iframe id="preview-frame" class="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+                </div>
+                <div class="media-manager">
+                    <h3 class="editor-section-heading">Media Links for Editor</h3>
+                    <div class="media-list" id="editorMediaList">
+                        </div>
+                    <p style="font-size: 0.9em; color: var(--text-secondary);">
+                        Add media using the "Add Media Link" button above.
+                    </p>
                 </div>
             </div>
-            <div class="editor-preview-area">
-                 <iframe id="editor-preview"></iframe>
-            </div>
-        </div>
-    </div>
-    <div class="panel" id="music-panel">
-        <button class="panel-close-btn" data-panel="music-panel"><i class="fas fa-times"></i></button>
-        <h4>Now Playing</h4>
-        <div id="music-player-content">
-            <h5 id="song-title">Select a song</h5>
-            <audio id="audio-player" controls loop style="width: 100%;"></audio>
-            <div id="playlist" style="max-height: 20vh; overflow-y: auto; margin-top: 10px;"></div>
-        </div>
-    </div>
-    <div class="panel" id="contribution-panel">
-        <button class="panel-close-btn" data-panel="contribution-panel"><i class="fas fa-times"></i></button>
-        <div id="contribution-content" style="display: flex; flex-direction: column; height: 100%;">
-            <h3 style="margin-top:20px;">Leave a Message</h3>
-            <div id="contribution-display" style="flex-grow: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 15px;">
-                <p>Loading messages...</p>
-            </div>
-            <form id="contribution-form">
-                <textarea id="contribution-text" placeholder="Your message..." required style="width:100%; min-height: 80px; background:rgba(0,0,0,0.2); color:var(--text-primary); border:1px solid var(--border-color); border-radius:5px; padding:10px;"></textarea>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                    <input type="file" id="contribution-file" accept="image/*,video/*" style="color:var(--text-secondary);">
-                    <button type="submit" class="fab" style="position:static; width:45px; height:45px; font-size:1.1rem;"><i class="fas fa-paper-plane"></i></button>
+
+            <div id="visitors-panel" class="panel">
+                <div class="panel-header">
+                    <h2>Live Visitors</h2>
+                    <button id="refreshVisitorsBtn" class="editor-save-btn" style="background-color: var(--accent);"><i class="fas fa-sync-alt"></i> Refresh</button>
                 </div>
-                <p id="contribution-status" style="font-size:0.9em; text-align:center; margin-top:10px;"></p>
-            </form>
-        </div>
-    </div>
-    <div class="fab-container" id="fab-private-user">
-        <button class="fab" title="Private User"><i class="fas fa-user-secret"></i></button>
-    </div>
-    <div class="panel" id="private-user-panel">
-        <button class="panel-close-btn" data-panel="private-user-panel"><i class="fas fa-times"></i></button>
-        <div style="padding: 20px; text-align: center;">
-            <h3 style="margin-bottom: 15px; color: var(--accent);">Private User</h3>
-            <p style="margin-bottom: 20px;">Masuk sebagai siapa?</p>
-            <input type="text" id="private-user-input" placeholder="Masukkan nama Anda..." style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--text-primary); margin-bottom: 15px;">
-            <button id="private-user-submit" class="fab" style="position:static; width:auto; padding: 10px 20px; font-size:1rem;">Masuk</button>
-            <p id="private-user-message" style="margin-top: 15px; font-size: 0.9em;"></p>
-        </div>
-    </div>
-    <div class="fab-container" id="fab-live-visitors" style="display: none;">
-        <button class="fab" data-panel="live-visitors-panel" title="Live Visitors"><i class="fas fa-eye"></i></button>
-    </div>
-    <div class="panel" id="live-visitors-panel">
-        <button class="panel-close-btn" data-panel="live-visitors-panel"><i class="fas fa-times"></i></button>
-        <div style="padding: 20px; height: 100%; display: flex; flex-direction: column;">
-            <h3 style="margin-bottom: 15px; color: var(--accent); text-align: center;">Live Visitors</h3>
-            <div id="visitor-list-container" style="flex-grow: 1; overflow-y: auto; padding-right: 10px;">
-                <p style="text-align: center; color: var(--text-secondary);">Loading visitors...</p>
-                <ul id="visitor-list" style="list-style: none; padding: 0; margin: 0;">
+                <div class="visitor-stats">
+                    <div class="stat-box">
+                        <h4>Online Now</h4>
+                        <p id="onlineVisitorsCount">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Total Today</h4>
+                        <p id="totalVisitorsToday">0</p>
+                    </div>
+                    </div>
+                <h3 class="editor-section-heading">Visitor List</h3>
+                <ul id="visitorList">
+                    <li style="text-align: center; color: var(--text-secondary);">Loading visitors...</li>
                 </ul>
+                <p class="refresh-info">Last Updated: <span id="lastUpdatedTime">N/A</span></p>
             </div>
-            <div style="margin-top: 15px; text-align: center; font-size: 0.85em; color: var(--text-secondary);">
-                Last updated: <span id="last-updated-time">N/A</span>
-            </div>
-        </div>
-    </div>
 
-    <div class="fab-container" id="fab-ezra-panel" style="display: none;">
-        <button class="fab" data-panel="ezra-content-panel" title="Ezra's Portal"><i class="fas fa-dragon"></i></button>
-    </div>
-    <div class="panel" id="ezra-content-panel">
-        <button class="panel-close-btn" data-panel="ezra-content-panel"><i class="fas fa-times"></i></button>
-        <div id="ezra-inner-content">
-            <div id="editor-overlay" class="editor-overlay">
-                <div class="editor-modal">
-                    <h2>Edit Profile Content</h2>
-                    <textarea id="profile-content-editor"></textarea>
-                    <div class="editor-actions">
-                        <button id="save-content-btn" class="action-btn save-btn">Save Content</button>
-                        <button id="publish-changes-btn" class="action-btn publish-btn">Publish to Galaxy</button>
-                        <button id="close-editor-btn" class="action-btn close-btn">Close</button>
-                    </div>
+            <div id="settings-panel" class="panel">
+                <div class="panel-header">
+                    <h2>Settings</h2>
                 </div>
-            </div>
-
-            <div class="container" id="elvi-ezra-main-content">
-                <header class="header">
-                    <h1 class="glow-text">Elvi Ezra</h1>
-                    <p class="tagline">Cosmic Orb Master</p>
-                </header>
-
-                <section class="orb-section">
-                    <div class="orb-container">
-                        <div class="orb">
-                            <div class="orb-inner"></div>
+                <div class="settings-grid">
+                    <div class="settings-section">
+                        <h3>General Settings</h3>
+                        <div class="setting-item">
+                            <label for="darkModeToggle">Dark Mode</label>
+                            <input type="checkbox" id="darkModeToggle" checked>
+                        </div>
+                        <div class="setting-item">
+                            <label for="languageSelect">Language</label>
+                            <select id="languageSelect">
+                                <option value="en">English</option>
+                                <option value="id">Bahasa Indonesia</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="orb-actions">
-                        <button id="edit-profile-btn" class="action-btn edit-btn"><i class="fas fa-edit"></i> Edit Profile</button>
+                    <div class="settings-section">
+                        <h3>Security</h3>
+                        <div class="setting-item">
+                            <label for="changeKey">Change Private Key</label>
+                            <input type="text" id="changeKey" placeholder="New Key">
+                        </div>
+                        <div class="setting-item">
+                            <label for="enableMFA">Enable Two-Factor Auth</label>
+                            <input type="checkbox" id="enableMFA">
+                        </div>
                     </div>
-                </section>
+                </div>
+            </div>
 
-                <section class="profile-section">
-                    <div id="profile-content" class="content-box">
-                        <p>Loading cosmic data...</p>
-                    </div>
-                </section>
+            <div id="ezra-panel" class="panel">
+                <div class="panel-header">
+                    <h2>Elvi Ezra - Cosmic Orb</h2>
+                </div>
+                <div class="ezra-panel-content">
+                    <div class="cosmic-background"></div>
 
-                <section class="contact-section">
-                    <h2 class="glow-text">Connect with the Cosmos</h2>
-                    <div class="social-icons">
-                        <a href="#" onclick="openTikTok()" class="social-icon"><i class="fab fa-tiktok"></i></a>
-                        <a href="#" onclick="openInstagram()" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </section>
+    <div id="wormholeOverlay">
+        </div>
 
-                <footer class="footer">
-                    <p>&copy; 2024 Elvi Ezra. All rights reserved.</p>
-                </footer>
+    <div id="authOverlay" class="auth-overlay active">
+        <div class="auth-container">
+            <h2>Cosmic Access Initiated</h2>
+            <p>Enter the Stardust Key to proceed:</p>
+            <input type="password" id="secretAnswer" class="auth-input" placeholder="Stardust Key...">
+            <button id="authSubmit" class="auth-button">Unlock Galaxy</button>
+        </div>
+    </div>
+
+    <div id="cosmicOrbContainer">
+        <div id="profile-orb" class="orb-element">
+            <div class="profile-pic-container">
+                <img id="profilePic" src="" alt="Profile Picture">
+            </div>
+            <h1 id="profileUsername"></h1>
+            <p id="profileName" class="full-name"></p>
+        </div>
+
+        <button id="btn-follow" class="orb-element action-button"><i class="fas fa-satellite-dish"></i> Launch Mission</button>
+        <button id="btn-tiktok" class="orb-element action-button" onclick="openTikTok()"><i class="fab fa-tiktok"></i> TikTok Warp</button>
+        <button id="btn-instagram" class="orb-element action-button" onclick="openInstagram()"><i class="fab fa-instagram"></i> Insta-Nexus</button>
+
+        <button id="btn-create-galaxy" class="orb-element action-button">
+            <i class="fas fa-plus-circle"></i> Create New Galaxy
+        </button>
+
+        <div id="stat-followers" class="orb-element stat-display">
+            <span id="followerCount" class="count"></span>
+            <span class="label">Cosmic Beings</span>
+        </div>
+        <div id="stat-following" class="orb-element stat-display">
+            <span id="followingCount" class="count"></span>
+            <span class="label">Orbiting</span>
+        </div>
+
+        <div id="highlights-section" class="orb-element">
+            </div>
+
+        <div id="content-view">
+            <button id="close-content-view" class="modal-close-btn">&times;</button>
+            <div id="content-view-tabs">
+                <div class="content-tab-item active" data-tab="posts">
+                    <i class="fas fa-th"></i> Portfolios
+                </div>
+                <div class="content-tab-item" data-tab="reels">
+                    <i class="fas fa-video"></i> Stellar Logs
+                </div>
+                <div class="content-tab-item" data-tab="tagged">
+                    <i class="fas fa-tags"></i> Tagged Orbits
+                </div>
+            </div>
+            <div id="content-grid">
+                </div>
+        </div>
+
+    </div> <div id="storyModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="storyCloseBtn" class="modal-close-btn">&times;</button>
+            <img id="storyImage" class="story-media hidden" src="" alt="Story Image">
+            <video id="storyVideo" class="story-media hidden" src="" controls muted playsinline></video>
+            <button id="storyPrevBtn" class="story-navigation-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+            <button id="storyNextBtn" class="story-navigation-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div id="privateAuthModalOverlay" class="modal-overlay">
+        <div class="auth-container modal-content">
+            <button id="privateAuthCloseBtn" class="modal-close-btn">&times;</button>
+            <h3>Restricted Zone Access</h3>
+            <p>Enter the secret quantum password:</p>
+            <input type="password" id="privateAuthAnswer" class="auth-input private-auth-input" placeholder="Quantum Key...">
+            <button id="privateAuthSubmit" class="astro-button private-auth-submit-btn">Unlock Gate</button>
+        </div>
+    </div>
+
+    <div id="privateContentDisplayModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="privateCloseBtn" class="modal-close-btn">&times;</button>
+            <img id="privateImage" class="private-media hidden" src="" alt="Private Content Image">
+            <video id="privateVideo" class="private-media hidden" src="" controls muted playsinline></video>
+            <p id="privateText" class="private-text-content hidden"></p>
+            <audio id="privateAudio" class="private-media hidden" src="" controls></audio>
+            <button id="privatePrevBtn" class="private-navigation-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+            <button id="privateNextBtn" class="private-navigation-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <button id="editorToggleBtn">
+        <i class="fas fa-user-secret"></i> Admin Portal
+    </button>
+
+    <div id="editorOverlay" class="modal-overlay">
+        <div class="editor-modal-content">
+            <button id="editorCloseBtn" class="modal-close-btn">&times;</button>
+            <h3>Cosmic Editor Console</h3>
+
+            <div class="editor-section">
+                <h4>Profile Data</h4>
+                <label for="editProfilePic">Profile Picture URL:</label>
+                <input type="text" id="editProfilePic" placeholder="e.g., Advanced files Elvi/May 26, 2025 at 09.00 AM.png">
+                <label for="editUsername">Username:</label>
+                <input type="text" id="editUsername">
+                <label for="editFullName">Full Name:</label>
+                <input type="text" id="editFullName">
+                <label for="editBio">Bio:</label>
+                <textarea id="editBio" rows="3"></textarea>
+                <label for="editFollowersCount">Followers Count:</label>
+                <input type="text" id="editFollowersCount">
+                <label for="editFollowingCount">Following Count:</label>
+                <input type="number" id="editFollowingCount">
+                <button class="editor-save-btn" data-section="profile">Save Profile</button>
+            </div>
+
+            <div class="editor-section">
+                <h4>Posts</h4>
+                <div id="editorPostsList" class="media-list"></div>
+                <p style="margin-top:15px; color:#c0c0c0; font-size:0.9em;">(Use 'Create New Galaxy' button to add new posts/content.)</p>
+            </div>
+
+            <div class="editor-section">
+                <h4>Reels</h4>
+                <div id="editorReelsList" class="media-list"></div>
+                <label for="addReelType">Add New Reel Type:</label>
+                <select id="addReelType">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                </select>
+                <label for="addReelSrc">Add New Reel URL:</label>
+                <input type="text" id="addReelSrc" placeholder="e.g., Video Elvi/my_new_reel.mp4">
+                <button class="editor-add-btn" data-section="reels">Add Reel</button>
+            </div>
+
+            <div class="editor-section">
+                <h4>Tagged Content</h4>
+                <div id="editorTaggedList" class="media-list"></div>
+                <label for="addTaggedType">Add New Tagged Type:</label>
+                <select id="addTaggedType">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                </select>
+                <label for="addTaggedSrc">Add New Tagged URL:</label>
+                <input type="text" id="addTaggedSrc" placeholder="e.g., Advanced files Elvi/my_tagged_pic.png">
+                <button class="editor-add-btn" data-section="tagged">Add Tagged</button>
+            </div>
+
+            <div class="editor-section">
+                <h4>Highlights</h4>
+                <div id="editorHighlightsList" class="media-list"></div>
+                <label for="addHighlightLabel">New Highlight Label:</label>
+                <input type="text" id="addHighlightLabel" placeholder="e.g., New Adventures">
+                <label for="addHighlightIcon">New Highlight Icon URL:</label>
+                <input type="text" id="addHighlightIcon" placeholder="e.g., https://via.placeholder.com/60/FFD700">
+                <button class="editor-add-btn" data-section="highlights">Add Highlight</button>
+                <p style="margin-top:15px; color:#c0c0c0; font-size:0.9em;">(Click on a highlight above to edit its stories)</p>
+            </div>
+
+            <div class="editor-actions">
+                <button id="publishChangesBtn" class="editor-save-btn">Publish All Changes</button>
+                <button id="editorCancelBtn" class="editor-cancel-btn">Cancel</button>
             </div>
         </div>
     </div>
-    <div class="fab-container" id="fab-editor">
-        <button class="fab" data-panel="editor-panel" title="Code Editor"><i class="fas fa-code"></i></button>
-    </div>
-    <div class="fab-container" id="fab-music">
-        <button class="fab" data-panel="music-panel" title="Music Player"><i class="fas fa-music"></i></button>
-    </div>
-    <div class="fab-container" id="fab-contribution">
-        <button class="fab" data-panel="contribution-panel" title="Leave a Message"><i class="fas fa-feather-alt"></i></button>
-    </div>
-    <div class="fab-container" id="fab-layout">
-        <button class="fab" title="Toggle Layout"><i class="fas fa-layer-group"></i></button>
-    </div>
-    <div class="fab-container" id="fab-theme">
-        <button class="fab" title="Toggle Theme"><i class="fas fa-sun"></i></button>
-    </div>
-    <div class="desktop-fab-bar" style="display:none;">
-         <button class="fab" id="desktop-layout-toggle" title="Toggle Layout" style="position:static;"><i class="fas fa-mobile-alt"></i></button>
-         <button class="fab" id="desktop-theme-toggle" title="Toggle Theme" style="position:static;"><i class="fas fa-sun"></i></button>
-    </div>
-    <div id="video-player-widget">
-        <video id="widget-video" loop src="video.mp4"></video>
-        <div class="video-controls">
-            <button id="video-play-pause"><i class="fas fa-play"></i></button>
-            <button id="video-mute"><i class="fas fa-volume-up"></i></button>
+
+    <div id="uploadModalOverlay" class="modal-overlay">
+        <div class="upload-modal-content">
+            <button id="uploadCloseBtn" class="modal-close-btn">&times;</button>
+            <h3>Create New Galaxy</h3>
+
+            <div class="upload-section">
+                <label for="uploadContentType">Content Type:</label>
+                <select id="uploadContentType">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                    <option value="audio">Audio</option>
+                    <option value="text">Text (Private Content Only)</option>
+                </select>
+            </div>
+
+            <div class="upload-section">
+                <label for="uploadContentDestination">Destination:</label>
+                <select id="uploadContentDestination">
+                    <option value="posts">Portfolios (Public)</option>
+                    <option value="private">Forbidden Zone (Private)</option>
+                </select>
+            </div>
+
+            <div class="upload-section" id="uploadFileSection">
+                <label for="uploadFile">Upload File:</label>
+                <div class="custom-file-input-wrapper">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose File
+                    <span class="file-name-display" id="uploadFileName">No file chosen</span>
+                    <input type="file" id="uploadFile" accept="image/*,video/*,audio/*">
+                </div>
+                <div id="uploadPreview" style="margin-top: 15px;">
+                    </div>
+            </div>
+
+            <div class="upload-section hidden" id="uploadTextSection">
+                <label for="uploadTextContent">Text Content:</label>
+                <textarea id="uploadTextContent" rows="5" placeholder="Enter your private cosmic message here..."></textarea>
+            </div>
+            
+            <div class="upload-actions">
+                <button id="uploadSubmitBtn" class="upload-btn"><i class="fas fa-rocket"></i> Launch Content</button>
+                <button id="uploadCancelBtn" class="upload-cancel-btn">Cancel</button>
+            </div>
         </div>
     </div>
-    <div class="social-links">
-        <a href="https://wa.me/6283844959380" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://instagram.com/I_dont_care_now" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://alkitab.me/in-tb/Matius/5/13" target="_blank" title="Alkitab"><i class="fab fa-github"></i></a>
+    <div id="particles"></div>
+                </div>
+            </div>
+            </main>
     </div>
-<script>
-const CONTRIBUTIONS_WORKER_URL = 'https://contributions-workerjs.ezvvel.workers.dev/';
-const VISITOR_TRACKER_WORKER_URL = 'https://visitor-tracker-workerjs.ezvvel.workers.dev/';
-const LIVE_VISITORS_WORKER_URL = 'https://live-visitors.ezvvel.workers.dev/';
-const GITHUB_PROFILE_WORKER_URL = 'https://ezra-gh-profile-worker.ezvvel.workers.dev/'; // URL Cloudflare Worker untuk profil Ezra
 
-const REFRESH_INTERVAL_MS = 5000;
-let visitorRefreshInterval;
+    <div class="fab-container">
+        <div class="fab" id="fab-add-media">
+            <i class="fas fa-plus"></i>
+            <span class="fab-text">Add Media</span>
+        </div>
+        <div class="fab hidden" id="fab-ezra-panel">
+            <i class="fas fa-globe"></i>
+            <span class="fab-text">Cosmic Orb</span>
+        </div>
+        <div class="fab" id="fab-auth">
+            <i class="fas fa-key"></i>
+            <span class="fab-text">Auth</span>
+        </div>
+    </div>
 
-document.addEventListener('DOMContentLoaded', () => {
-    initPanelControls();
-    initLayoutAndThemeToggles();
-    initVideoPlayer();
-    initEditor();
-    initMusicPlayer();
-    
-    trackVisitor();
-    initPrivateUserAuth();
-    checkEzraLoginAndShowSpecialPanels(); // Memeriksa dan menampilkan panel khusus (Ezra & Live Visitors)
-});
+    <div id="alertBox" class="alert-box"></div>
 
-function initPanelControls() {
-    document.querySelectorAll('[data-panel]').forEach(button => {
-        button.addEventListener('click', () => {
-            const panelId = button.getAttribute('data-panel');
-            const panel = document.getElementById(panelId);
+    <script>
+        // INLINE JAVASCRIPT STARTS HERE
+        document.addEventListener('DOMContentLoaded', function() {
+            const privateKeyInput = document.getElementById('privateKeyInput');
+            const submitKeyBtn = document.getElementById('submitKeyBtn');
+            const authOverlay = document.getElementById('authOverlay');
+            const alertBox = document.getElementById('alertBox');
 
-            panel.classList.toggle('active');
+            const navIcons = document.querySelectorAll('.nav-icon');
+            const panels = document.querySelectorAll('.panel');
+            const settingsIcon = document.querySelector('.settings-icon i');
 
-            if (panelId === 'live-visitors-panel') {
-                if (panel.classList.contains('active')) {
-                    fetchLiveVisitors();
-                    visitorRefreshInterval = setInterval(fetchLiveVisitors, REFRESH_INTERVAL_MS);
-                } else {
-                    clearInterval(visitorRefreshInterval);
-                    const visitorList = document.getElementById('visitor-list');
-                    visitorList.innerHTML = '';
-                }
-            } else if (panelId === 'ezra-content-panel') {
-                if (panel.classList.contains('active')) {
-                    initEzraPanelContent(); // Panggil inisialisasi konten Ezra saat panel dibuka
-                }
-            }
+            // Editor elements
+            const runCodeBtn = document.getElementById('runCodeBtn');
+            const saveCodeBtn = document.getElementById('saveCodeBtn');
+            const loadCodeBtn = document.getElementById('loadCodeBtn');
+            const newDocBtn = document.getElementById('newDocBtn');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadFileCode = document.getElementById('uploadFileCode');
+            const addMediaBtn = document.getElementById('addMediaBtn');
+            const uploadMediaFile = document.getElementById('uploadMediaFile');
+            const editorMediaList = document.getElementById('editorMediaList');
+            const unifiedEditor = document.getElementById('unified-editor');
+            const previewFrame = document.getElementById('preview-frame');
 
-            document.querySelectorAll('.panel').forEach(otherPanel => {
-                if (otherPanel.id !== panelId) {
-                    otherPanel.classList.remove('active');
-                    if (otherPanel.id === 'live-visitors-panel') {
-                        clearInterval(visitorRefreshInterval);
-                        document.getElementById('visitor-list').innerHTML = '';
-                    }
-                }
-            });
-        });
-    });
+            // Live Visitors elements
+            const refreshVisitorsBtn = document.getElementById('refreshVisitorsBtn');
+            const onlineVisitorsCount = document.getElementById('onlineVisitorsCount');
+            const totalVisitorsToday = document.getElementById('totalVisitorsToday');
+            const visitorList = document.getElementById('visitorList');
+            const lastUpdatedTime = document.getElementById('lastUpdatedTime');
 
-    document.querySelectorAll('.panel-close-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const panelId = button.getAttribute('data-panel');
-            const panel = document.getElementById(panelId);
-            panel.classList.remove('active');
+            // Settings elements
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const languageSelect = document.getElementById('languageSelect');
+            const changeKeyInput = document.getElementById('changeKey');
+            const enableMFA = document.getElementById('enableMFA');
 
-            if (panelId === 'live-visitors-panel') {
-                clearInterval(visitorRefreshInterval);
-                const visitorList = document.getElementById('visitor-list');
-                visitorList.innerHTML = '';
-            }
-        });
-    });
-}
+            // FAB elements
+            const fabAddMedia = document.getElementById('fab-add-media');
+            const fabEzraPanel = document.getElementById('fab-ezra-panel');
+            const fabAuth = document.getElementById('fab-auth');
 
-function initPrivateUserAuth() {
-    const privateUserFab = document.querySelector('#fab-private-user .fab');
-    const privateUserPanel = document.getElementById('private-user-panel');
-    const privateUserInput = document.getElementById('private-user-input');
-    const privateUserSubmit = document.getElementById('private-user-submit');
-    const privateUserMessage = document.getElementById('private-user-message');
+            // Ezra Panel related elements (newly added)
+            const ezraNavIcon = document.getElementById('ezra-nav-icon');
 
-    privateUserFab.addEventListener('click', () => {
-        privateUserPanel.classList.toggle('active');
-        document.querySelectorAll('.panel').forEach(otherPanel => {
-            if (otherPanel.id !== 'private-user-panel') {
-                otherPanel.classList.remove('active');
-            }
-        });
-        privateUserInput.value = '';
-        privateUserMessage.textContent = '';
-    });
 
-    privateUserSubmit.addEventListener('click', async () => {
-        const username = privateUserInput.value.trim().toLowerCase();
-        if (username === '') {
-            privateUserMessage.style.color = 'var(--danger)';
-            privateUserMessage.textContent = 'Nama tidak boleh kosong!';
-            return;
+            let isAuthenticated = false; // Flag for authentication
+            const correctPrivateKey = 'elvi_ezra_access'; // Set your private key here
+            let mediaFiles = JSON.parse(localStorage.getItem('mediaFiles')) || [];
+            let currentContent = localStorage.getItem('unified_editor_content') || `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Document</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 20px;
         }
+        h1 {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello, Editor!</h1>
+    <p>This is your live code editor.</p>
+    <script>
+        console.log("Welcome to the unified editor!");
+    </script>
+</body>
+</html>`;
 
-        privateUserMessage.style.color = 'var(--text-secondary)';
-        privateUserMessage.textContent = 'Memeriksa user...';
-
-        try {
-            const response = await fetch('https://private-user-auth.ezvvel.workers.dev/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username: username })
-            });
-
-            const data = await response.json();
-
-            if (data.authenticated) {
-                privateUserMessage.style.color = 'var(--success)';
-                privateUserMessage.textContent = 'User terautentikasi! Mengarahkan...';
-                localStorage.setItem('isEzraLoggedIn', 'true');
-                checkEzraLoginAndShowSpecialPanels(); // Perbarui visibilitas setelah login
+            // --- Utility Functions ---
+            function showAlert(message, type = 'success') {
+                alertBox.textContent = message;
+                alertBox.className = `alert-box active ${type}`;
                 setTimeout(() => {
-                    privateUserPanel.classList.remove('active');
-                }, 1000);
-            } else {
-                privateUserMessage.style.color = 'var(--danger)';
-                privateUserMessage.textContent = 'User tidak ada';
-                localStorage.setItem('isEzraLoggedIn', 'false');
-                checkEzraLoginAndShowSpecialPanels(); // Perbarui visibilitas setelah gagal login
+                    alertBox.classList.remove('active');
+                }, 3000);
             }
-        } catch (error) {
-            console.error('Error during authentication:', error);
-            privateUserMessage.style.color = 'var(--danger)';
-            privateUserMessage.textContent = 'Terjadi kesalahan saat otentikasi.';
-            localStorage.setItem('isEzraLoggedIn', 'false');
-            checkEzraLoginAndShowSpecialPanels();
-        }
-    });
-}
 
-function initLayoutAndThemeToggles() {
-    const layoutBtn = document.querySelector('#fab-layout .fab');
-    const themeBtn = document.querySelector('#fab-theme .fab');
-    const desktopLayoutBtn = document.getElementById('desktop-layout-toggle');
-    const desktopThemeBtn = document.getElementById('desktop-theme-toggle');
-    const toggleLayout = () => document.body.classList.toggle('desktop-layout');
-    const toggleTheme = () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        document.querySelectorAll('#fab-theme i, #desktop-theme-toggle i').forEach(i => {
-            i.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        });
-    };
-    layoutBtn.addEventListener('click', toggleLayout);
-    desktopLayoutBtn.addEventListener('click', toggleLayout);
-    themeBtn.addEventListener('click', toggleTheme);
-    desktopThemeBtn.addEventListener('click', toggleTheme);
-}
-
-function initVideoPlayer() {
-    const video = document.getElementById('widget-video');
-    const playBtn = document.getElementById('video-play-pause');
-    const muteBtn = document.getElementById('video-mute');
-
-    playBtn.addEventListener('click', () => {
-        if (video.paused) {
-            video.play();
-            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        } else {
-            video.pause();
-            playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        }
-    });
-    muteBtn.addEventListener('click', () => {
-        video.muted = !video.muted;
-        muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
-    });
-}
-
-function initMusicPlayer() {
-    const player = document.getElementById('audio-player');
-    const playlistEl = document.getElementById('playlist');
-    const songTitleEl = document.getElementById('song-title');
-    const songs = [
-        { name: "Where We Are", url: "where-we-are.mp3" },
-        { name: "Wish You Were Here", url: "wish-you-were-here.mp3" },
-        { name: "ghost to you", url: "ghost-to-you.mp3" },
-    ];
-    songs.forEach((song, index) => {
-        const item = document.createElement('div');
-        item.textContent = song.name;
-        item.style.cursor = 'pointer';
-        item.style.padding = '8px';
-        item.onclick = () => {
-            player.src = song.url;
-            songTitleEl.textContent = song.name;
-            player.play();
-        };
-        playlistEl.appendChild(item);
-    });
-}
-
-function initEditor() {
-    const htmlEditor = document.getElementById('html-editor');
-    const cssEditor = document.getElementById('css-editor');
-    const jsEditor = document.getElementById('js-editor');
-    const previewFrame = document.getElementById('editor-preview');
-    const runCode = () => {
-        const source = `
-            <html>
-                <head><style>${cssEditor.value}</style></head>
-                <body>${htmlEditor.value}<script>${jsEditor.value}<\/script></body>
-            </html>
-        `;
-        previewFrame.srcdoc = source;
-    };
-    const saveCode = () => {
-        localStorage.setItem('editor_html', htmlEditor.value);
-        localStorage.setItem('editor_css', cssEditor.value);
-        localStorage.setItem('editor_js', jsEditor.value);
-        alert('Code saved!');
-    };
-    const loadCode = () => {
-        htmlEditor.value = localStorage.getItem('editor_html') || '';
-        cssEditor.value = localStorage.getItem('editor_css') || '';
-        jsEditor.value = localStorage.getItem('editor_js') || '';
-        runCode();
-    };
-    const newDoc = () => {
-        htmlEditor.value = '<h1>Hello World</h1>';
-        cssEditor.value = 'h1 { color: blue; }';
-        jsEditor.value = 'console.log("Hello from JS!");';
-        runCode();
-    };
-    document.getElementById('editor-run').addEventListener('click', runCode);
-    document.getElementById('editor-save').addEventListener('click', saveCode);
-    document.getElementById('editor-load').addEventListener('click', loadCode);
-    document.getElementById('editor-new').addEventListener('click', newDoc);
-    document.getElementById('editor-add-media').addEventListener('click', () => {
-        htmlEditor.value += '\n<img src="path/to/image.jpg" alt="image" width="100">';
-    });
-    loadCode();
-}
-
-async function fetchContributions() {
-    const display = document.getElementById('contribution-display');
-    display.innerHTML = `<p>Loading...</p>`;
-    try {
-        const response = await fetch(CONTRIBUTIONS_WORKER_URL);
-        const contributions = await response.json();
-        if (contributions && contributions.length > 0) {
-            display.innerHTML = contributions.reverse().map(c => {
-                let mediaHTML = '';
-                if(c.fileUrl) {
-                    if(c.fileType.startsWith('image/')) {
-                        mediaHTML = `<img src="${c.fileUrl}" style="max-width:100%; border-radius:5px; margin-top:10px;">`;
-                    } else if(c.fileType.startsWith('video/')) {
-                           mediaHTML = `<video src="${c.fileUrl}" controls style="max-width:100%; border-radius:5px; margin-top:10px;"></video>`;
-                    }
-                }
-                return `<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-bottom:10px;">
-                    <p style="margin:0;">${c.text}</p>${mediaHTML}
-                    <small style="color:var(--text-secondary);">${new Date(c.timestamp).toLocaleString()}</small>
-                </div>`;
-            }).join('');
-        } else {
-            display.innerHTML = `<p>Be the first to leave a message!</p>`;
-        }
-    } catch (e) {
-        display.innerHTML = `<p style="color:var(--danger);">Could not load contributions.</p>`;
-    }
-}
-
-document.getElementById('contribution-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const statusEl = document.getElementById('contribution-status');
-    statusEl.textContent = 'Uploading...';
-    const formData = new FormData();
-    formData.append('text', document.getElementById('contribution-text').value);
-    const fileInput = document.getElementById('contribution-file');
-    if (fileInput.files.length > 0) {
-        formData.append('file', fileInput.files[0]);
-    }
-    try {
-        const response = await fetch(CONTRIBUTIONS_WORKER_URL, { method: 'POST', body: formData });
-        if (!response.ok) throw new Error('Upload failed');
-        statusEl.textContent = 'Message sent! Thank you.';
-        e.target.reset();
-        fetchContributions();
-    } catch (err) {
-        statusEl.textContent = `Error: ${err.message}`;
-    }
-});
-
-function getBrowserId() {
-    let browserId = localStorage.getItem('unique_browser_id');
-    if (!browserId) {
-        browserId = 'browser_' + Math.random().toString(36).substr(2, 9) + Date.now();
-        localStorage.setItem('unique_browser_id', browserId);
-    }
-    return browserId;
-}
-
-async function trackVisitor() {
-    try {
-        const browserId = getBrowserId();
-        let ipAddress = 'unknown';
-
-        try {
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipResponse.json();
-            ipAddress = ipData.ip;
-        } catch (ipError) {
-            console.warn('Could not fetch IP address:', ipError);
-        }
-
-        const data = {
-            browserId: browserId,
-            ip: ipAddress,
-            userAgent: navigator.userAgent,
-            timestamp: new Date().toISOString()
-        };
-
-        fetch(VISITOR_TRACKER_WORKER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-            mode: 'no-cors'
-        }).catch(e => console.error("Error sending to general visitor tracker:", e));
-
-        fetch(LIVE_VISITORS_WORKER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        }).catch(e => console.error("Error sending to live visitors worker:", e));
-
-    } catch(e) {
-        console.error('Error in trackVisitor:', e);
-    }
-}
-
-// Fungsi untuk mengecek login Ezra dan menampilkan/menyembunyikan FAB serta Panel khusus
-function checkEzraLoginAndShowSpecialPanels() {
-    const isEzra = localStorage.getItem('isEzraLoggedIn');
-    const fabLiveVisitors = document.getElementById('fab-live-visitors');
-    const fabEzraPanel = document.getElementById('fab-ezra-panel');
-    
-    // Tampilkan/sembunyikan FAB Live Visitors
-    if (fabLiveVisitors) {
-        fabLiveVisitors.style.display = (isEzra === 'true') ? 'block' : 'none';
-    }
-    // Tampilkan/sembunyikan FAB Ezra Panel
-    if (fabEzraPanel) {
-        fabEzraPanel.style.display = (isEzra === 'true') ? 'block' : 'none';
-    }
-
-    // Pastikan panel Live Visitors dan Ezra tertutup jika bukan Ezra
-    if (isEzra !== 'true') {
-        const liveVisitorsPanel = document.getElementById('live-visitors-panel');
-        if (liveVisitorsPanel && liveVisitorsPanel.classList.contains('active')) {
-            liveVisitorsPanel.classList.remove('active');
-            clearInterval(visitorRefreshInterval);
-            document.getElementById('visitor-list').innerHTML = '';
-        }
-        const ezraContentPanel = document.getElementById('ezra-content-panel');
-        if (ezraContentPanel && ezraContentPanel.classList.contains('active')) {
-            ezraContentPanel.classList.remove('active');
-        }
-    }
-}
-
-async function fetchLiveVisitors() {
-    const visitorList = document.getElementById('visitor-list');
-    const lastUpdatedTime = document.getElementById('last-updated-time');
-    
-    if (!visitorList.innerHTML.trim() || visitorList.innerHTML.includes('Loading visitors...')) {
-        visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">Loading visitors...</li>';
-    }
-    
-    try {
-        const response = await fetch(LIVE_VISITORS_WORKER_URL + '?get_visitors=true');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const visitors = await response.json();
-
-        if (visitors && visitors.length > 0) {
-            visitorList.innerHTML = visitors.map(visitor => {
-                const timestamp = new Date(visitor.timestamp).toLocaleString('id-ID', {
-                    hour: '2-digit', minute: '2-digit', second: '2-digit',
-                    day: '2-digit', month: '2-digit', year: 'numeric'
+            function showPanel(panelId) {
+                panels.forEach(panel => {
+                    panel.classList.remove('active');
                 });
-                return `
-                    <li>
-                        <strong>ID:</strong> <span>${visitor.browserId.substring(0, 10)}...</span><br>
-                        <strong>IP:</strong> <span>${visitor.ip || 'N/A'}</span><br>
-                        <strong>Waktu:</strong> <span>${timestamp}</span>
-                    </li>
-                `;
-            }).join('');
-        } else {
-            visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">No visitors online.</li>';
-        }
-        lastUpdatedTime.textContent = new Date().toLocaleTimeString('id-ID');
+                document.getElementById(panelId).classList.add('active');
 
-    } catch (error) {
-        console.error('Error fetching live visitors:', error);
-        visitorList.innerHTML = '<li style="text-align: center; color: var(--danger);">Failed to load visitors.</li>';
-        lastUpdatedTime.textContent = 'Error';
-    }
-}
-
-// --- START: Fungsi untuk Inisialisasi Konten Panel Ezra (dari script index (8).html) ---
-function initEzraPanelContent() {
-    const profileContent = document.getElementById('ezra-inner-content').querySelector('#profile-content');
-    const editProfileBtn = document.getElementById('ezra-inner-content').querySelector('#edit-profile-btn');
-    const editorOverlay = document.getElementById('ezra-inner-content').querySelector('#editor-overlay');
-    const closeEditorBtn = document.getElementById('ezra-inner-content').querySelector('#close-editor-btn');
-    const profileContentEditor = document.getElementById('ezra-inner-content').querySelector('#profile-content-editor');
-    const saveContentBtn = document.getElementById('ezra-inner-content').querySelector('#save-content-btn');
-    const publishChangesBtn = document.getElementById('ezra-inner-content').querySelector('#publish-changes-btn');
-
-    // Pastikan elemen ditemukan sebelum menambahkan event listener
-    if (!profileContent || !editProfileBtn || !editorOverlay || !closeEditorBtn || !profileContentEditor || !saveContentBtn || !publishChangesBtn) {
-        console.error("Ezra panel elements not found. Skipping initialization.");
-        return;
-    }
-
-    async function fetchDataFromBackend() {
-        try {
-            const response = await fetch(GITHUB_PROFILE_WORKER_URL);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                navIcons.forEach(icon => icon.classList.remove('active'));
+                const correspondingNavIcon = document.querySelector(`.nav-icon[data-panel="${panelId}"]`);
+                if (correspondingNavIcon) {
+                    correspondingNavIcon.classList.add('active');
+                } else if (panelId === 'settings-panel') {
+                    settingsIcon.classList.add('active');
+                }
             }
-            const data = await response.text();
-            console.log('Fetched data:', data);
-            profileContent.innerHTML = marked.parse(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            profileContent.innerHTML = `<p style="color:red;">Failed to load profile content: ${error.message}. Please try again later or check worker URL.</p>`;
-        }
-    }
 
-    function loadProfileContent() {
-        const storedContent = localStorage.getItem('elvi_ezra_profile_content');
-        if (storedContent) {
-            profileContent.innerHTML = marked.parse(storedContent);
-            profileContentEditor.value = storedContent;
-        } else {
-            fetchDataFromBackend();
-        }
-    }
+            function updateMediaList() {
+                editorMediaList.innerHTML = '';
+                mediaFiles.forEach((file, index) => {
+                    const mediaItem = document.createElement('div');
+                    mediaItem.className = 'media-item';
+                    if (file.type.startsWith('image')) {
+                        mediaItem.innerHTML = `<img src="${file.url}" alt="Media">`;
+                    } else if (file.type.startsWith('video')) {
+                        mediaItem.innerHTML = `<video src="${file.url}" controls></video>`;
+                    } else if (file.type.startsWith('audio')) {
+                        mediaItem.innerHTML = `<audio controls src="${file.url}"></audio>`;
+                    }
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-media-btn';
+                    deleteBtn.innerHTML = '&times;';
+                    deleteBtn.onclick = () => deleteMedia(index);
+                    mediaItem.appendChild(deleteBtn);
+                    editorMediaList.appendChild(mediaItem);
+                });
+            }
 
-    editProfileBtn.addEventListener('click', () => {
-        profileContentEditor.value = profileContent.innerText;
-        editorOverlay.classList.add('active');
-    });
+            function deleteMedia(index) {
+                mediaFiles.splice(index, 1);
+                localStorage.setItem('mediaFiles', JSON.stringify(mediaFiles));
+                updateMediaList();
+                showAlert('Media deleted!', 'danger');
+            }
 
-    closeEditorBtn.addEventListener('click', () => {
-        editorOverlay.classList.remove('active');
-    });
-
-    function saveContentLocally() {
-        const newContent = profileContentEditor.value;
-        localStorage.setItem('elvi_ezra_profile_content', newContent);
-        profileContent.innerHTML = marked.parse(newContent);
-        alert('Content saved locally!');
-    }
-    saveContentBtn.addEventListener('click', saveContentLocally);
-
-    async function publishChangesToBackend() {
-        const newContent = profileContentEditor.value;
-        try {
-            const response = await fetch(GITHUB_PROFILE_WORKER_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain'
-                },
-                body: newContent
+            // --- Authentication ---
+            submitKeyBtn.addEventListener('click', function() {
+                if (privateKeyInput.value === correctPrivateKey) {
+                    isAuthenticated = true;
+                    authOverlay.classList.remove('active');
+                    showAlert('Access Granted!', 'success');
+                    checkEzraLoginAndShowVisitorsButton(); // Check and show Ezra button
+                    // Load saved settings (if any)
+                    loadSettings();
+                } else {
+                    showAlert('Invalid Key!', 'danger');
+                    privateKeyInput.value = '';
+                }
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            // --- Dashboard Panel (Example) ---
+            // No specific JS needed here beyond panel switching
+
+            // --- Code Editor Panel ---
+            function initEditor() {
+                unifiedEditor.value = currentContent;
+                runCode(); // Run initial code
             }
 
-            const result = await response.json();
-            console.log('Changes published to GitHub:', result);
-            alert('Changes successfully published to the galaxy!');
-            editorOverlay.classList.remove('active');
-            loadProfileContent();
-        } catch (error) {
-            console.error('Error publishing changes:', error);
-            alert(`Failed to publish changes: ${error.message}. Check Cloudflare Worker logs.`);
+            runCodeBtn.addEventListener('click', runCode);
+            function runCode() {
+                previewFrame.srcdoc = unifiedEditor.value;
+            }
+
+            saveCodeBtn.addEventListener('click', saveCode);
+            function saveCode() {
+                currentContent = unifiedEditor.value;
+                localStorage.setItem('unified_editor_content', currentContent);
+                showAlert('Code saved successfully!', 'success');
+            }
+
+            loadCodeBtn.addEventListener('click', loadCode);
+            function loadCode() {
+                currentContent = localStorage.getItem('unified_editor_content') || `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Document</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 20px;
         }
-    }
+        h1 {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello, Editor!</h1>
+    <p>This is your live code editor.</p>
+    <script>
+        console.log("Welcome to the unified editor!");
+    </script>
+</body>
+</html>`;
+                unifiedEditor.value = currentContent;
+                runCode();
+                showAlert('Code loaded!', 'success');
+            }
 
-    publishChangesBtn.addEventListener('click', publishChangesToBackend);
+            newDocBtn.addEventListener('click', newDoc);
+            function newDoc() {
+                unifiedEditor.value = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Document</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #e0f7fa;
+            color: #004d40;
+            padding: 20px;
+        }
+        h1 {
+            color: #00796b;
+        }
+    </style>
+</head>
+<body>
+    <h1>New HTML Document</h1>
+    <p>Start coding here!</p>
+    <script>
+        console.log("New document created!");
+    </script>
+</body>
+</html>`;
+                runCode();
+                showAlert('New document created!', 'success');
+            }
 
-    // Initial load for Ezra panel content
-    loadProfileContent();
-}
+            uploadBtn.addEventListener('click', () => uploadFileCode.click());
+            uploadFileCode.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        unifiedEditor.value = e.target.result;
+                        runCode();
+                        showAlert('File uploaded to editor!', 'success');
+                    };
+                    reader.readAsText(file);
+                }
+            });
 
-// Global functions (dari index (8).html)
-function openTikTok() {
-    window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
-}
+            addMediaBtn.addEventListener('click', () => uploadMediaFile.click());
+            uploadMediaFile.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const mediaUrl = e.target.result;
+                        const mediaType = file.type;
+                        let mediaTag = '';
+                        if (mediaType.startsWith('image')) {
+                            mediaTag = `<img src="${mediaUrl}" alt="image">`;
+                        } else if (mediaType.startsWith('video')) {
+                            mediaTag = `<video src="${mediaUrl}" controls></video>`;
+                        } else if (mediaType.startsWith('audio')) {
+                            mediaTag = `<audio src="${mediaUrl}" controls></audio>`;
+                        }
+                        unifiedEditor.value += `\n\n${mediaTag}\n`;
+                        mediaFiles.push({ url: mediaUrl, type: mediaType });
+                        localStorage.setItem('mediaFiles', JSON.stringify(mediaFiles));
+                        updateMediaList();
+                        runCode();
+                        showAlert('Media added to code and list!', 'success');
+                    };
+                    reader.readAsDataURL(file); // Use Data URL for local preview
+                }
+            });
 
-function openInstagram() {
-    window.open("https://www.instagram.com/elvizill/", "_blank");
-}
-// --- END: Fungsi untuk Inisialisasi Konten Panel Ezra ---
-</script>
+
+            // --- Live Visitors Panel ---
+            const apiUrl = 'YOUR_API_ENDPOINT_HERE'; // Placeholder for API endpoint
+
+            async function fetchLiveVisitors() {
+                try {
+                    const response = await fetch(`${apiUrl}/get_visitors?get_visitors=true`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const visitors = await response.json();
+
+                    if (visitors && visitors.length > 0) {
+                        visitorList.innerHTML = visitors.map(visitor => {
+                            const timestamp = new Date(visitor.timestamp).toLocaleString('id-ID', {
+                                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                                day: '2-digit', month: '2-digit', year: 'numeric'
+                            });
+                            return `
+                                <li>
+                                    <strong>ID:</strong> <span>${visitor.browserId.substring(0, 10)}...</span><br>
+                                    <strong>IP:</strong> <span>${visitor.ip || 'N/A'}</span><br>
+                                    <strong>Waktu:</strong> <span>${timestamp}</span>
+                                </li>
+                            `;
+                        }).join('');
+                    } else {
+                        visitorList.innerHTML = '<li style="text-align: center; color: var(--text-secondary);">No visitors online.</li>';
+                    }
+                    lastUpdatedTime.textContent = new Date().toLocaleTimeString('id-ID'); // Update waktu terakhir refresh
+
+                } catch (error) {
+                    console.error('Error fetching live visitors:', error);
+                    visitorList.innerHTML = '<li style="text-align: center; color: var(--danger);">Failed to load visitors.</li>';
+                    lastUpdatedTime.textContent = 'Error';
+                }
+            }
+
+            refreshVisitorsBtn.addEventListener('click', fetchLiveVisitors);
+
+            // --- Settings Panel ---
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            languageSelect.addEventListener('change', function() {
+                localStorage.setItem('language', this.value);
+                showAlert(`Language set to ${this.options[this.selectedIndex].text}`, 'info');
+                // Implement language change logic here if needed
+            });
+
+            changeKeyInput.addEventListener('change', function() {
+                // In a real app, this would involve backend update
+                showAlert('Private Key change functionality not implemented in this demo.', 'info');
+            });
+
+            enableMFA.addEventListener('change', function() {
+                // In a real app, this would involve backend update
+                showAlert('Two-Factor Auth functionality not implemented in this demo.', 'info');
+            });
+
+            function loadSettings() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    document.documentElement.setAttribute('data-theme', savedTheme);
+                    darkModeToggle.checked = (savedTheme === 'dark');
+                }
+
+                const savedLanguage = localStorage.getItem('language');
+                if (savedLanguage) {
+                    languageSelect.value = savedLanguage;
+                }
+            }
+
+            // --- FAB functionality ---
+            fabAddMedia.addEventListener('click', () => uploadMediaFile.click());
+            // fabAuth is handled by the initial authOverlay logic
+
+            // --- Panel Control Initialization ---
+            function initPanelControls() {
+                navIcons.forEach(icon => {
+                    icon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (isAuthenticated) {
+                            showPanel(this.dataset.panel);
+                        } else {
+                            showAlert('Please enter the Private Key first!', 'danger');
+                        }
+                    });
+                });
+
+                settingsIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (isAuthenticated) {
+                        showPanel(this.dataset.panel);
+                    } else {
+                        showAlert('Please enter the Private Key first!', 'danger');
+                    }
+                });
+
+                // Initial panel display after authentication
+                if (isAuthenticated) {
+                    showPanel('dashboard-panel');
+                }
+            }
+
+            // --- New Ezra Panel Logic ---
+            const ezraPanel = document.getElementById('ezra-panel');
+            function checkEzraLoginAndShowVisitorsButton() {
+                // Assuming "Elvi Ezra Access" is part of the private key logic
+                // If isAuthenticated is true, show the Ezra nav icon and FAB button
+                if (isAuthenticated) {
+                    ezraNavIcon.classList.remove('hidden');
+                    fabEzraPanel.classList.remove('hidden');
+                } else {
+                    ezraNavIcon.classList.add('hidden');
+                    fabEzraPanel.classList.add('hidden');
+                }
+            }
+
+            // Attach event listener for fab-ezra-panel
+            fabEzraPanel.addEventListener('click', function() {
+                if (isAuthenticated) {
+                    showPanel('ezra-panel');
+                } else {
+                    showAlert('Please enter the Private Key first to access Cosmic Orb!', 'danger');
+                }
+            });
+
+
+            // Initial calls
+            initEditor(); // Load default or saved code for the editor
+            updateMediaList(); // Populate media list
+            loadSettings(); // Apply saved settings
+            checkEzraLoginAndShowVisitorsButton(); // Check and show Ezra button on load if already authenticated (e.g., from refresh)
+
+            // If not authenticated, ensure auth overlay is active
+            if (!isAuthenticated) {
+                authOverlay.classList.add('active');
+            } else {
+                showPanel('dashboard-panel'); // Show dashboard if already authenticated
+            }
+
+            // Call fetchLiveVisitors periodically
+            // setInterval(fetchLiveVisitors, 30000); // Refresh every 30 seconds (adjust as needed)
+            // fetchLiveVisitors(); // Initial fetch
+        });
+
+        // Global functions (from index 8 for Ezra Panel)
+        // These functions need to be defined in the global scope if onclick attributes are used in the injected HTML
+        function openTikTok() {
+            window.open("https://vm.tiktok.com/ZShf4GMgT/", "_blank");
+        }
+
+        function openInstagram() {
+            window.open("https://www.instagram.com/elvizill/", "_blank");
+        }
+        // Placeholder for fetchDataFromBackend and loadProfileContent
+        function fetchDataFromBackend() {
+            console.log("fetchDataFromBackend called (placeholder)");
+            // Implement actual data fetching from backend for Ezra profile
+        }
+        function loadProfileContent() {
+            console.log("loadProfileContent called (placeholder)");
+            // Implement actual profile content loading for Ezra profile
+            // This would populate elements like profilePic, profileUsername, etc.
+            // Example:
+            document.getElementById('profilePic').src = 'https://via.placeholder.com/160/8A2BE2/FFFFFF?text=Elvi';
+            document.getElementById('profileUsername').textContent = 'ElviEzra';
+            document.getElementById('profileName').textContent = 'Elvi Ezra - Cosmic Explorer';
+            document.getElementById('followerCount').textContent = '999,999';
+            document.getElementById('followingCount').textContent = '123';
+        }
+        // Initialize Ezra profile content on load (after main DOMContentLoaded)
+        loadProfileContent(); // Keep this for now to ensure local data is loaded on refresh
+        // END INLINE JAVASCRIPT
+    </script>
 </body>
 </html>
